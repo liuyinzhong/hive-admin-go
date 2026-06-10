@@ -1,0 +1,2347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ApiCopilotDocuments">
+    <option name="documents">
+      <list>
+        <Document>
+          <option name="apifoxConfig">
+            <ApifoxConfig>
+              <option name="accessToken" value="afxp_1bf9abbkG6NB0mOwxgkxQRKoYiFvMPpbnC9A" />
+              <option name="projectId" value="8280529" />
+            </ApifoxConfig>
+          </option>
+          <option name="autoSyncEnabled" value="true" />
+          <option name="id" value="dca2ef12-7fcd-43d8-aa69-f6f431b843ba" />
+          <option name="lastSuccessTime" value="1779430837239" />
+          <option name="name" value="hive-admin" />
+          <option name="syncStatus" value="SUCCESS" />
+          <option name="type" value="Apifox" />
+          <content>{
+  &quot;openapi&quot;: &quot;3.0.1&quot;,
+  &quot;info&quot;: {
+    &quot;title&quot;: &quot;默认模块&quot;,
+    &quot;description&quot;: &quot;&quot;,
+    &quot;version&quot;: &quot;1.0.0&quot;
+  },
+  &quot;tags&quot;: [],
+  &quot;paths&quot;: {
+    &quot;/api/auth/login&quot;: {
+      &quot;post&quot;: {
+        &quot;summary&quot;: &quot;用户登录&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n验证用户名和密码，验证成功后返回JWT token\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/LoginRequest&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultLoginResponse&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/auth/profile&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取当前登录用户信息&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n根据请求头中的token获取当前登录用户的基本信息和关联的角色信息\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultUserInfoVO&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/auth/menus&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取当前用户的菜单&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n根据请求头中的token获取当前登录用户关联角色的所有菜单，构建树形结构后返回。不包含按钮\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultListMenuVO&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/auth/codes&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取用户权限码列表&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n获取当前登录用户所拥有的所有菜单权限码，用于前端权限控制\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultListString&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/auth/logout&quot;: {
+      &quot;post&quot;: {
+        &quot;summary&quot;: &quot;用户退出登录&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n清除用户的登录状态，完成退出操作\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/depts&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取部门树&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n获取系统中所有部门的树形结构，支持按部门名称筛选\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;name&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultListDeptVO&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;post&quot;: {
+        &quot;summary&quot;: &quot;创建部门&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n创建新的系统部门，包括部门名称、备注等信息\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/DeptVO&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;delete&quot;: {
+        &quot;summary&quot;: &quot;删除部门&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n删除指定的部门，支持批量删除，删除时会检查是否有子部门或用户绑定\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;type&quot;: &quot;array&quot;,
+                &quot;items&quot;: {
+                  &quot;type&quot;: &quot;string&quot;
+                },
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/depts/all&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取所有启用的部门&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n获取系统中所有状态为启用的部门列表，用于用户分配部门时选择\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultListDeptVO&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/depts/{deptId}&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取部门详情&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n根据部门ID获取部门的详细信息\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;deptId&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultDeptVO&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;put&quot;: {
+        &quot;summary&quot;: &quot;更新部门&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n更新指定部门的基本信息，包括部门名称、备注等\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;deptId&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/DeptVO&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/dicts&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取字典树&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n获取系统中所有字典的树形结构，支持按字典标题、字典值、字典类型、状态筛选\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;label&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;value&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;type&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;status&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;integer&quot;
+            }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultListDictVO&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;post&quot;: {
+        &quot;summary&quot;: &quot;创建字典&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n创建新的系统字典，包括字典标题、字典值、字典类型等信息\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/DictVO&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;delete&quot;: {
+        &quot;summary&quot;: &quot;删除字典&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n删除指定的字典，支持批量删除，删除时会检查是否有子字典\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;type&quot;: &quot;array&quot;,
+                &quot;items&quot;: {
+                  &quot;type&quot;: &quot;string&quot;
+                },
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/dicts/{id}&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取字典详情&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n根据字典ID获取字典的详细信息\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;id&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultDictVO&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;put&quot;: {
+        &quot;summary&quot;: &quot;更新字典&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n更新指定字典的基本信息，包括字典标题、字典值、字典类型等\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;id&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/DictVO&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/dicts/{id}/status&quot;: {
+      &quot;put&quot;: {
+        &quot;summary&quot;: &quot;更新字典状态&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n更新指定字典的状态，可以将字典设置为启用或禁用状态\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;id&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/DictStatusUpdateRequest&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/menus&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取菜单树&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n根据当前登录用户的角色权限，获取对应的菜单树结构\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;status&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;integer&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;name&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;path&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;type&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultListMenuVO&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;post&quot;: {
+        &quot;summary&quot;: &quot;创建菜单&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n创建新的系统菜单，包括菜单的基本信息、路由配置、权限配置等\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/MenuVO&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;delete&quot;: {
+        &quot;summary&quot;: &quot;删除菜单&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n删除指定的菜单，支持批量删除，删除时会检查是否有子菜单或角色引用\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;type&quot;: &quot;array&quot;,
+                &quot;items&quot;: {
+                  &quot;type&quot;: &quot;string&quot;
+                },
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/menus/name-exists&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;检查菜单名称是否存在&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n用于表单验证，检查菜单名称是否已被使用 true表示已存在，false表示不存在\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;name&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;id&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultBoolean&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/menus/path-exists&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;检查菜单路由路径是否存在&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n用于表单验证，检查菜单路由路径是否已被使用 true表示已存在，false表示不存在\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;path&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;id&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultBoolean&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/menus/{id}&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取菜单详情&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n根据菜单ID获取菜单的详细信息，包括菜单的基本信息、路由配置、元数据等\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;id&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultMenuVO&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;put&quot;: {
+        &quot;summary&quot;: &quot;更新菜单&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n更新指定菜单的基本信息、路由配置、权限配置等\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;id&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/MenuVO&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/users&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;查询用户列表（支持分页和排序）&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n根据条件查询用户列表，支持分页、用户名筛选、真实姓名筛选、状态筛选和多字段排序。\n注意：内置账户（is_sys=1）会被过滤掉，不会出现在查询结果中。\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;page&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;页码，从1开始，不传默认1&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;integer&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;pageSize&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;每页记录数，不传默认20&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;integer&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;username&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;用户名，支持模糊查询（可选）&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;realName&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;真实姓名，支持模糊查询（可选）&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;status&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;用户状态：0-禁用，1-启用（可选）&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;integer&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;sorts&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;排序参数，格式：field1,desc;field2,asc（可选），支持的字段：username、realName、createDate&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultPageResultVOUserInfoVO&quot;,
+                  &quot;description&quot;: &quot;分页结果，包含用户列表和总数&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;post&quot;: {
+        &quot;summary&quot;: &quot;创建用户&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n创建新的系统用户，初始化用户的基本信息和默认状态\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/UserCreateRequest&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;delete&quot;: {
+        &quot;summary&quot;: &quot;删除用户&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n删除指定的用户，支持批量删除，采用逻辑删除方式\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;type&quot;: &quot;array&quot;,
+                &quot;items&quot;: {
+                  &quot;type&quot;: &quot;string&quot;
+                },
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/users/all&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取所有有效用户列表&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n获取系统中所有未删除且未禁用的用户列表，不进行分页处理。\n用于下拉选择等场景。注意：内置账户（is_sys=1）会被过滤掉。\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;realName&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;真实姓名筛选条件（可选，支持模糊查询）&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultListUserInfoVO&quot;,
+                  &quot;description&quot;: &quot;有效用户列表&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/users/{userId}&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取用户详情&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n根据用户ID获取用户的详细信息，包括用户基本信息、关联的角色信息等\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;userId&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultUserInfoVO&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;put&quot;: {
+        &quot;summary&quot;: &quot;更新用户&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n更新指定用户的基本信息，包括用户名、真实姓名、邮箱等\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;userId&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/UserUpdateRequest&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/users/{userId}/status&quot;: {
+      &quot;put&quot;: {
+        &quot;summary&quot;: &quot;更新用户状态&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n更新指定用户的状态，可以将用户设置为启用或禁用状态\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;userId&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/UserStatusUpdateRequest&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/roles&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;查询角色列表（支持分页和排序）&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n根据条件查询角色列表，支持分页、角色名称筛选、状态筛选、备注筛选、时间范围筛选和多字段排序。\n不传分页参数时默认返回第一页，每页20条数据。\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;page&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;页码，从1开始，不传默认1&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;integer&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;pageSize&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;每页记录数，不传默认20&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;integer&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;name&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;角色名称，支持模糊查询（可选）&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;status&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;角色状态：0-禁用，1-启用（可选）&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;integer&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;remark&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;备注，支持模糊查询（可选）&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;startDate&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;创建时间起始日期，格式：yyyy-MM-dd（可选）&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;endDate&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;创建时间结束日期，格式：yyyy-MM-dd（可选）&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          },
+          {
+            &quot;name&quot;: &quot;sorts&quot;,
+            &quot;in&quot;: &quot;query&quot;,
+            &quot;description&quot;: &quot;排序参数，格式：field1,desc;field2,asc（可选），支持的字段：roleTitle、createDate&quot;,
+            &quot;required&quot;: false,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultPageResultVORoleVO&quot;,
+                  &quot;description&quot;: &quot;分页结果，包含角色列表和总数&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;post&quot;: {
+        &quot;summary&quot;: &quot;创建角色&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n创建新的系统角色，包括角色名称、备注、关联的菜单权限等信息\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/RoleVO&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;delete&quot;: {
+        &quot;summary&quot;: &quot;删除角色&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n删除指定的角色，支持批量删除，删除时会检查是否有用户绑定该角色\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;type&quot;: &quot;array&quot;,
+                &quot;items&quot;: {
+                  &quot;type&quot;: &quot;string&quot;
+                },
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/roles/all&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取所有启用的角色列表&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n获取系统中所有状态为启用的角色列表，用于下拉框选择\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultListRoleVO&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/roles/{roleId}&quot;: {
+      &quot;get&quot;: {
+        &quot;summary&quot;: &quot;获取角色详情&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n根据角色ID获取角色的详细信息，包括角色基本信息、关联的菜单权限列表等\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;roleId&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultRoleVO&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      },
+      &quot;put&quot;: {
+        &quot;summary&quot;: &quot;更新角色&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n更新指定角色的基本信息、备注、关联的菜单权限等\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;roleId&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/RoleVO&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    },
+    &quot;/api/system/roles/{roleId}/status&quot;: {
+      &quot;put&quot;: {
+        &quot;summary&quot;: &quot;更新角色状态&quot;,
+        &quot;deprecated&quot;: false,
+        &quot;description&quot;: &quot;&lt;p&gt;\n更新指定角色的状态，可以将角色设置为启用或禁用状态\n&lt;/p&gt;&quot;,
+        &quot;tags&quot;: [],
+        &quot;parameters&quot;: [
+          {
+            &quot;name&quot;: &quot;roleId&quot;,
+            &quot;in&quot;: &quot;path&quot;,
+            &quot;description&quot;: &quot;&quot;,
+            &quot;required&quot;: true,
+            &quot;schema&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            }
+          }
+        ],
+        &quot;requestBody&quot;: {
+          &quot;content&quot;: {
+            &quot;application/json&quot;: {
+              &quot;schema&quot;: {
+                &quot;$ref&quot;: &quot;#/components/schemas/RoleStatusUpdateRequest&quot;,
+                &quot;description&quot;: &quot;&quot;
+              }
+            }
+          }
+        },
+        &quot;responses&quot;: {
+          &quot;200&quot;: {
+            &quot;description&quot;: &quot;&quot;,
+            &quot;content&quot;: {
+              &quot;application/json&quot;: {
+                &quot;schema&quot;: {
+                  &quot;$ref&quot;: &quot;#/components/schemas/ResultVoid&quot;
+                }
+              }
+            }
+          }
+        },
+        &quot;security&quot;: []
+      }
+    }
+  },
+  &quot;components&quot;: {
+    &quot;schemas&quot;: {
+      &quot;LoginResponse&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;accessToken&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;访问令牌\n&lt;p&gt;\nJWT格式的访问令牌，用于后续请求的身份验证\n&lt;/p&gt;&quot;
+          }
+        }
+      },
+      &quot;ResultLoginResponse&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;$ref&quot;: &quot;#/components/schemas/LoginResponse&quot;,
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;LoginRequest&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;username&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;用户名\n&lt;p&gt;\n用户登录系统的用户名，用于身份验证\n&lt;/p&gt;&quot;
+          },
+          &quot;password&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;密码\n&lt;p&gt;\n用户登录密码，用于身份验证\n&lt;/p&gt;&quot;
+          }
+        },
+        &quot;required&quot;: [
+          &quot;username&quot;,
+          &quot;password&quot;
+        ]
+      },
+      &quot;UserInfoVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;userId&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;用户ID\n&lt;p&gt;\n用户的唯一标识ID，由系统自动生成。\n&lt;/p&gt;&quot;
+          },
+          &quot;avatar&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;头像\n&lt;p&gt;\n用户头像的URL地址，可选字段。\n&lt;/p&gt;&quot;
+          },
+          &quot;username&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;用户名\n&lt;p&gt;\n用户的登录账号，用于系统认证。\n&lt;/p&gt;&quot;
+          },
+          &quot;realName&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;真实姓名\n&lt;p&gt;\n用户的真实姓名或显示名称。\n&lt;/p&gt;&quot;
+          },
+          &quot;roleTitles&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            },
+            &quot;description&quot;: &quot;角色名称列表\n&lt;p&gt;\n用户拥有的角色名称集合，用于前端展示。\n&lt;/p&gt;&quot;
+          },
+          &quot;roleIds&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            },
+            &quot;description&quot;: &quot;角色ID列表\n&lt;p&gt;\n用户拥有的角色ID集合，用于权限校验。\n&lt;/p&gt;&quot;
+          },
+          &quot;desc&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;描述\n&lt;p&gt;\n用户的备注或描述信息。\n&lt;/p&gt;&quot;
+          },
+          &quot;email&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;邮箱\n&lt;p&gt;\n用户的电子邮箱地址。\n&lt;/p&gt;&quot;
+          },
+          &quot;homePath&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;首页路径\n&lt;p&gt;\n用户登录后的默认跳转路径。\n&lt;/p&gt;&quot;
+          },
+          &quot;deptTitles&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            },
+            &quot;description&quot;: &quot;部门名称列表\n&lt;p&gt;\n用户所属部门的名称集合，用于前端展示。\n&lt;/p&gt;&quot;
+          },
+          &quot;deptIds&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            },
+            &quot;description&quot;: &quot;部门ID列表\n&lt;p&gt;\n用户所属部门的ID集合。\n&lt;/p&gt;&quot;
+          },
+          &quot;status&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;状态\n&lt;p&gt;\n用户账号状态：0-禁用，1-启用。\n&lt;/p&gt;&quot;
+          },
+          &quot;createDate&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;创建时间\n&lt;p&gt;\n用户账号的创建时间。\n&lt;/p&gt;&quot;
+          },
+          &quot;updateDate&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;更新时间\n&lt;p&gt;\n用户信息的最后更新时间。\n&lt;/p&gt;&quot;
+          }
+        }
+      },
+      &quot;ResultUserInfoVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;$ref&quot;: &quot;#/components/schemas/UserInfoVO&quot;,
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;MenuMetaVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;activeIcon&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;激活图标\n&lt;p&gt;\n菜单激活状态下显示的图标。\n&lt;/p&gt;&quot;
+          },
+          &quot;activePath&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;激活路径\n&lt;p&gt;\n菜单激活时的路由路径。\n&lt;/p&gt;&quot;
+          },
+          &quot;affixTab&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;是否固定在标签\n&lt;p&gt;\n菜单是否固定在标签栏：false-不固定，true-固定。\n&lt;/p&gt;&quot;
+          },
+          &quot;affixTabOrder&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;固定标签页的排序\n&lt;p&gt;\n固定标签页在标签栏中的排序序号。\n&lt;/p&gt;&quot;
+          },
+          &quot;badge&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;徽章内容\n&lt;p&gt;\n菜单右上角的徽章显示内容。\n&lt;/p&gt;&quot;
+          },
+          &quot;badgeType&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;徽标类型\n&lt;p&gt;\n徽标的类型，如：dot（圆点）、normal（普通）等。\n&lt;/p&gt;&quot;
+          },
+          &quot;badgeVariants&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;徽标样式\n&lt;p&gt;\n徽标的样式变体，如：primary、success、warning、error等。\n&lt;/p&gt;&quot;
+          },
+          &quot;hideChildrenInMenu&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;是否隐藏子菜单\n&lt;p&gt;\n是否在菜单中隐藏子菜单：false-不隐藏，true-隐藏。\n&lt;/p&gt;&quot;
+          },
+          &quot;hideInBreadcrumb&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;是否在面包屑中隐藏\n&lt;p&gt;\n是否在面包屑导航中隐藏该菜单：false-不隐藏，true-隐藏。\n&lt;/p&gt;&quot;
+          },
+          &quot;hideInMenu&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;是否在菜单中隐藏\n&lt;p&gt;\n是否在菜单栏中隐藏该菜单：false-不隐藏，true-隐藏。\n&lt;/p&gt;&quot;
+          },
+          &quot;hideInTab&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;是否在标签栏中隐藏\n&lt;p&gt;\n是否在标签栏中隐藏该页面：false-不隐藏，true-隐藏。\n&lt;/p&gt;&quot;
+          },
+          &quot;icon&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;图标\n&lt;p&gt;\n菜单的图标标识，用于菜单栏显示。\n&lt;/p&gt;&quot;
+          },
+          &quot;iframeSrc&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;内嵌页面的iframe地址\n&lt;p&gt;\n如果菜单需要内嵌iframe页面，则填写iframe的src地址。\n&lt;/p&gt;&quot;
+          },
+          &quot;keepAlive&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;是否缓存标签页\n&lt;p&gt;\n访问该菜单后是否缓存页面状态：false-不缓存，true-缓存。\n&lt;/p&gt;&quot;
+          },
+          &quot;link&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;外链跳转路径\n&lt;p&gt;\n如果是外链菜单，则填写跳转的URL地址。\n&lt;/p&gt;&quot;
+          },
+          &quot;maxNumOfOpenTab&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;标签页最大打开数量\n&lt;p&gt;\n同名标签页的最大打开数量限制，仅在打开同名标签页时生效。\n&lt;/p&gt;&quot;
+          },
+          &quot;noBasicLayout&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;无基础布局\n&lt;p&gt;\n该页面是否不使用基础布局框架：false-使用，true-不使用。\n&lt;/p&gt;&quot;
+          },
+          &quot;openInNewWindow&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;在新窗口打开页面\n&lt;p&gt;\n点击菜单是否在新窗口打开页面：false-当前窗口，true-新窗口。\n&lt;/p&gt;&quot;
+          },
+          &quot;order&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;用于路由排序\n&lt;p&gt;\n菜单在路由中的排序权重，数值越小排序越靠前。\n&lt;/p&gt;&quot;
+          },
+          &quot;query&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;额外的路由参数\n&lt;p&gt;\n路由跳转时传递的额外查询参数，格式为 key=value&amp;key=value。\n&lt;/p&gt;&quot;
+          },
+          &quot;title&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;标题\n&lt;p&gt;\n菜单的显示标题，用于标签栏和页面标题显示。\n&lt;/p&gt;&quot;
+          },
+          &quot;domCached&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;是否缓存DOM元素\n&lt;p&gt;\n配置当前路由是否要将route对应dom元素缓存起来：false-不缓存，true-缓存。\n&lt;/p&gt;&quot;
+          },
+          &quot;menuVisibleWithForbidden&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;菜单可见但访问被禁止\n&lt;p&gt;\n菜单可以看到，但是访问权限会被重定向到403页面：false-正常权限，true-禁止访问。\n&lt;/p&gt;&quot;
+          }
+        }
+      },
+      &quot;MenuVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;菜单ID\n&lt;p&gt;\n菜单的唯一标识ID。\n&lt;/p&gt;&quot;
+          },
+          &quot;pid&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;父级菜单ID\n&lt;p&gt;\n父级菜单的唯一标识ID，用于构建菜单树形结构。顶级菜单为空字符串。\n&lt;/p&gt;&quot;
+          },
+          &quot;type&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;菜单类型\n&lt;p&gt;\n菜单类型标识，如：menu（菜单）、button（按钮）等。\n&lt;/p&gt;&quot;
+          },
+          &quot;authCode&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;权限标识\n&lt;p&gt;\n菜单的权限编码，用于前端权限控制和按钮级别的权限校验。\n&lt;/p&gt;&quot;
+          },
+          &quot;name&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;菜单名称\n&lt;p&gt;\n菜单的显示名称，用于前端菜单展示。\n&lt;/p&gt;&quot;
+          },
+          &quot;path&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;路由地址\n&lt;p&gt;\n菜单对应的路由路径或URL地址。\n&lt;/p&gt;&quot;
+          },
+          &quot;component&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;组件路径\n&lt;p&gt;\n前端组件的文件路径或组件名称，用于动态加载页面。\n&lt;/p&gt;&quot;
+          },
+          &quot;status&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;状态\n&lt;p&gt;\n菜单状态：1-启用，0-禁用。\n&lt;/p&gt;&quot;
+          },
+          &quot;meta&quot;: {
+            &quot;$ref&quot;: &quot;#/components/schemas/MenuMetaVO&quot;,
+            &quot;description&quot;: &quot;元数据\n&lt;p&gt;\n菜单的附加配置信息，包含图标、徽章、隐藏配置等。\n&lt;/p&gt;&quot;
+          },
+          &quot;creatorId&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;创建人ID\n&lt;p&gt;\n创建该菜单的用户ID。\n&lt;/p&gt;&quot;
+          },
+          &quot;creatorName&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;创建人姓名\n&lt;p&gt;\n创建该菜单的用户姓名。\n&lt;/p&gt;&quot;
+          },
+          &quot;createDate&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;创建时间\n&lt;p&gt;\n菜单的创建时间。\n&lt;/p&gt;&quot;
+          },
+          &quot;updateDate&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;修改时间\n&lt;p&gt;\n菜单的最后修改时间。\n&lt;/p&gt;&quot;
+          },
+          &quot;children&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;$ref&quot;: &quot;#/components/schemas/MenuVO&quot;,
+              &quot;description&quot;: &quot;菜单响应 VO\n&lt;p&gt;\n用于返回菜单树形结构的数据传输对象，包含菜单基本信息、元数据、子菜单等完整数据。\n&lt;/p&gt;&quot;
+            },
+            &quot;description&quot;: &quot;子菜单\n&lt;p&gt;\n当前菜单的子菜单列表，用于构建树形结构。如果为空则表示叶子节点。\n&lt;/p&gt;&quot;
+          }
+        }
+      },
+      &quot;ResultListMenuVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;$ref&quot;: &quot;#/components/schemas/MenuVO&quot;,
+              &quot;description&quot;: &quot;菜单响应 VO\n&lt;p&gt;\n用于返回菜单树形结构的数据传输对象，包含菜单基本信息、元数据、子菜单等完整数据。\n&lt;/p&gt;&quot;
+            },
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;ResultListString&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            },
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;ResultVoid&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;description&quot;: &quot;响应数据&quot;,
+            &quot;type&quot;: &quot;null&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;DeptVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;deptId&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;部门ID\n&lt;p&gt;\n部门的唯一标识ID。\n&lt;/p&gt;&quot;
+          },
+          &quot;pid&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;父部门ID\n&lt;p&gt;\n父级部门的唯一标识ID，用于构建部门树形结构。顶级部门为空字符串。\n&lt;/p&gt;&quot;
+          },
+          &quot;deptTitle&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;部门名称\n&lt;p&gt;\n部门的显示名称，用于前端展示。\n&lt;/p&gt;&quot;
+          },
+          &quot;status&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;状态\n&lt;p&gt;\n部门状态：0-禁用，1-启用。\n&lt;/p&gt;&quot;
+          },
+          &quot;createDate&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;创建时间\n&lt;p&gt;\n部门的创建时间。\n&lt;/p&gt;&quot;
+          },
+          &quot;remark&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;备注\n&lt;p&gt;\n部门的备注或描述信息。\n&lt;/p&gt;&quot;
+          },
+          &quot;children&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;$ref&quot;: &quot;#/components/schemas/DeptVO&quot;,
+              &quot;description&quot;: &quot;部门 VO\n&lt;p&gt;\n用于返回部门信息的数据传输对象，包含部门基本信息、树形结构等数据。\n&lt;/p&gt;&quot;
+            },
+            &quot;description&quot;: &quot;子部门\n&lt;p&gt;\n当前部门的子部门列表，用于构建树形结构。如果为空则表示叶子节点。\n&lt;/p&gt;&quot;
+          }
+        }
+      },
+      &quot;ResultListDeptVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;$ref&quot;: &quot;#/components/schemas/DeptVO&quot;,
+              &quot;description&quot;: &quot;部门 VO\n&lt;p&gt;\n用于返回部门信息的数据传输对象，包含部门基本信息、树形结构等数据。\n&lt;/p&gt;&quot;
+            },
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;ResultDeptVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;$ref&quot;: &quot;#/components/schemas/DeptVO&quot;,
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;DictVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;字典ID\n&lt;p&gt;\n字典条目的唯一标识ID。\n&lt;/p&gt;&quot;
+          },
+          &quot;pid&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;父字典ID\n&lt;p&gt;\n父级字典的唯一标识ID，用于构建字典树形结构。顶级字典为空字符串。\n&lt;/p&gt;&quot;
+          },
+          &quot;label&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;字典标题\n&lt;p&gt;\n字典条目的显示名称，用于前端展示和选择。\n&lt;/p&gt;&quot;
+          },
+          &quot;value&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;字典值\n&lt;p&gt;\n字典条目的实际值，用于数据存储和程序处理。\n&lt;/p&gt;&quot;
+          },
+          &quot;type&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;字典类型\n&lt;p&gt;\n字典类型标识，用于区分不同类别的字典数据。\n&lt;/p&gt;&quot;
+          },
+          &quot;remark&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;备注\n&lt;p&gt;\n字典条目的备注或描述信息。\n&lt;/p&gt;&quot;
+          },
+          &quot;color&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;主题色\n&lt;p&gt;\n字典条目关联的主题色配置，可用于前端样式定制。\n&lt;/p&gt;&quot;
+          },
+          &quot;status&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;状态\n&lt;p&gt;\n字典条目状态：0-禁用，1-启用。\n&lt;/p&gt;&quot;
+          },
+          &quot;createDate&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;创建时间\n&lt;p&gt;\n字典条目的创建时间。\n&lt;/p&gt;&quot;
+          },
+          &quot;updateDate&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;更新时间\n&lt;p&gt;\n字典条目的最后更新时间。\n&lt;/p&gt;&quot;
+          },
+          &quot;children&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;$ref&quot;: &quot;#/components/schemas/DictVO&quot;,
+              &quot;description&quot;: &quot;字典 VO\n&lt;p&gt;\n用于返回字典信息的数据传输对象，包含字典基本信息、键值对、子字典等数据。\n&lt;/p&gt;&quot;
+            },
+            &quot;description&quot;: &quot;子字典\n&lt;p&gt;\n当前字典的子字典列表，用于构建树形结构。如果为空则表示叶子节点。\n&lt;/p&gt;&quot;
+          }
+        }
+      },
+      &quot;ResultListDictVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;$ref&quot;: &quot;#/components/schemas/DictVO&quot;,
+              &quot;description&quot;: &quot;字典 VO\n&lt;p&gt;\n用于返回字典信息的数据传输对象，包含字典基本信息、键值对、子字典等数据。\n&lt;/p&gt;&quot;
+            },
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;ResultDictVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;$ref&quot;: &quot;#/components/schemas/DictVO&quot;,
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;DictStatusUpdateRequest&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;status&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;字典状态：0禁用，1启用&quot;
+          }
+        }
+      },
+      &quot;ResultBoolean&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;ResultMenuVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;$ref&quot;: &quot;#/components/schemas/MenuVO&quot;,
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;RoleVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;roleId&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;角色ID\n&lt;p&gt;\n角色的唯一标识ID。\n&lt;/p&gt;&quot;
+          },
+          &quot;roleTitle&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;角色名称\n&lt;p&gt;\n角色的显示名称，用于前端展示和权限分配。\n&lt;/p&gt;&quot;
+          },
+          &quot;status&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;状态\n&lt;p&gt;\n角色状态：0-禁用，1-启用。\n&lt;/p&gt;&quot;
+          },
+          &quot;remark&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;备注\n&lt;p&gt;\n角色的备注或描述信息。\n&lt;/p&gt;&quot;
+          },
+          &quot;createDate&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;创建时间\n&lt;p&gt;\n角色的创建时间。\n&lt;/p&gt;&quot;
+          },
+          &quot;permissions&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            },
+            &quot;description&quot;: &quot;菜单ID列表（权限）\n&lt;p&gt;\n角色拥有的菜单权限ID集合，用于定义角色的操作范围。\n&lt;/p&gt;&quot;
+          }
+        }
+      },
+      &quot;PageResultVORoleVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;$ref&quot;: &quot;#/components/schemas/RoleVO&quot;,
+              &quot;description&quot;: &quot;角色 VO\n&lt;p&gt;\n用于返回角色信息的数据传输对象，包含角色基本信息、权限菜单等数据。\n&lt;/p&gt;&quot;
+            },
+            &quot;description&quot;: &quot;数据列表\n&lt;p&gt;\n当前页的数据集合，包含指定范围内的数据项。\n&lt;/p&gt;&quot;
+          },
+          &quot;total&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;总数\n&lt;p&gt;\n查询条件匹配的数据总条数，用于前端分页计算。\n&lt;/p&gt;&quot;,
+            &quot;format&quot;: &quot;int64&quot;
+          }
+        }
+      },
+      &quot;ResultPageResultVORoleVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;$ref&quot;: &quot;#/components/schemas/PageResultVORoleVO&quot;,
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;ResultListRoleVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;$ref&quot;: &quot;#/components/schemas/RoleVO&quot;,
+              &quot;description&quot;: &quot;角色 VO\n&lt;p&gt;\n用于返回角色信息的数据传输对象，包含角色基本信息、权限菜单等数据。\n&lt;/p&gt;&quot;
+            },
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;ResultRoleVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;$ref&quot;: &quot;#/components/schemas/RoleVO&quot;,
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;RoleStatusUpdateRequest&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;status&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;角色状态：0禁用，1启用&quot;
+          }
+        }
+      },
+      &quot;PageResultVOUserInfoVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;items&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;$ref&quot;: &quot;#/components/schemas/UserInfoVO&quot;,
+              &quot;description&quot;: &quot;用户信息 VO\n&lt;p&gt;\n用于返回用户详细信息的数据传输对象，包含用户基本信息、角色、部门、状态等完整数据。\n&lt;/p&gt;&quot;
+            },
+            &quot;description&quot;: &quot;数据列表\n&lt;p&gt;\n当前页的数据集合，包含指定范围内的数据项。\n&lt;/p&gt;&quot;
+          },
+          &quot;total&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;总数\n&lt;p&gt;\n查询条件匹配的数据总条数，用于前端分页计算。\n&lt;/p&gt;&quot;,
+            &quot;format&quot;: &quot;int64&quot;
+          }
+        }
+      },
+      &quot;ResultPageResultVOUserInfoVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;$ref&quot;: &quot;#/components/schemas/PageResultVOUserInfoVO&quot;,
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;ResultListUserInfoVO&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;code&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;业务状态码&quot;
+          },
+          &quot;data&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;$ref&quot;: &quot;#/components/schemas/UserInfoVO&quot;,
+              &quot;description&quot;: &quot;用户信息 VO\n&lt;p&gt;\n用于返回用户详细信息的数据传输对象，包含用户基本信息、角色、部门、状态等完整数据。\n&lt;/p&gt;&quot;
+            },
+            &quot;description&quot;: &quot;响应数据&quot;
+          },
+          &quot;error&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {},
+            &quot;description&quot;: &quot;错误信息&quot;
+          },
+          &quot;message&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;提示信息&quot;
+          }
+        }
+      },
+      &quot;UserCreateRequest&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;username&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;用户名\n&lt;p&gt;\n用户的登录账号，用于系统认证，必填字段。\n&lt;/p&gt;&quot;
+          },
+          &quot;realName&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;真实姓名\n&lt;p&gt;\n用户的真实姓名或显示名称，必填字段。\n&lt;/p&gt;&quot;
+          },
+          &quot;password&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;密码\n&lt;p&gt;\n用户登录密码，必填字段。实际应用中应加密存储。\n&lt;/p&gt;&quot;
+          },
+          &quot;desc&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;描述\n&lt;p&gt;\n用户的备注或描述信息，可选字段。\n&lt;/p&gt;&quot;
+          },
+          &quot;deptIds&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            },
+            &quot;description&quot;: &quot;部门ID列表\n&lt;p&gt;\n用户所属的部门ID集合，支持多部门关联，可选字段。\n&lt;/p&gt;&quot;
+          },
+          &quot;roleIds&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            },
+            &quot;description&quot;: &quot;角色ID列表\n&lt;p&gt;\n用户拥有的角色ID集合，用于权限控制，必填字段。\n&lt;/p&gt;&quot;
+          }
+        },
+        &quot;required&quot;: [
+          &quot;username&quot;,
+          &quot;realName&quot;,
+          &quot;password&quot;,
+          &quot;roleIds&quot;
+        ]
+      },
+      &quot;UserUpdateRequest&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;username&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;用户名\n&lt;p&gt;\n用户的登录账号，用于系统认证，必填字段。\n&lt;/p&gt;&quot;
+          },
+          &quot;realName&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;真实姓名\n&lt;p&gt;\n用户的真实姓名或显示名称，必填字段。\n&lt;/p&gt;&quot;
+          },
+          &quot;desc&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;描述\n&lt;p&gt;\n用户的备注或描述信息，可选字段。\n&lt;/p&gt;&quot;
+          },
+          &quot;deptIds&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            },
+            &quot;description&quot;: &quot;部门ID列表\n&lt;p&gt;\n用户所属的部门ID集合，支持多部门关联，可选字段。\n&lt;/p&gt;&quot;
+          },
+          &quot;roleIds&quot;: {
+            &quot;type&quot;: &quot;array&quot;,
+            &quot;items&quot;: {
+              &quot;type&quot;: &quot;string&quot;
+            },
+            &quot;description&quot;: &quot;角色ID列表\n&lt;p&gt;\n用户拥有的角色ID集合，用于权限控制，必填字段。\n&lt;/p&gt;&quot;
+          }
+        },
+        &quot;required&quot;: [
+          &quot;username&quot;,
+          &quot;realName&quot;,
+          &quot;roleIds&quot;
+        ]
+      },
+      &quot;UserStatusUpdateRequest&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+          &quot;status&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;状态\n&lt;p&gt;\n用户账号状态：0-禁用，1-启用。必填字段。\n&lt;/p&gt;&quot;
+          }
+        },
+        &quot;required&quot;: [
+          &quot;status&quot;
+        ]
+      }
+    },
+    &quot;responses&quot;: {},
+    &quot;securitySchemes&quot;: {}
+  },
+  &quot;servers&quot;: [],
+  &quot;security&quot;: []
+}</content>
+        </Document>
+      </list>
+    </option>
+  </component>
+</project>

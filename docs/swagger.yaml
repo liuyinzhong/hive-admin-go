@@ -1,0 +1,4085 @@
+basePath: /api
+definitions:
+  models.ConfirmBugRequest:
+    properties:
+      bugConfirmStatus:
+        type: string
+      changeRichText:
+        type: string
+    required:
+    - bugConfirmStatus
+    type: object
+  models.CreateBugRequest:
+    properties:
+      bugEnv:
+        type: string
+      bugLevel:
+        type: string
+      bugRichText:
+        type: string
+      bugSource:
+        type: string
+      bugStatus:
+        type: string
+      bugTitle:
+        type: string
+      bugType:
+        type: string
+      bugUa:
+        type: string
+      moduleId:
+        type: string
+      projectId:
+        type: string
+      storyId:
+        type: string
+      userId:
+        type: string
+      versionId:
+        type: string
+    required:
+    - bugTitle
+    - projectId
+    - userId
+    type: object
+  models.CreateChangeHistoryRequest:
+    properties:
+      businessId:
+        type: string
+      businessType:
+        type: string
+      changeBehavior:
+        type: string
+      changeRichText:
+        type: string
+    required:
+    - businessId
+    - businessType
+    - changeBehavior
+    type: object
+  models.CreateDeptRequest:
+    properties:
+      deptTitle:
+        type: string
+      pid:
+        type: string
+      remark:
+        type: string
+      status:
+        type: integer
+    required:
+    - deptTitle
+    type: object
+  models.CreateDictRequest:
+    properties:
+      color:
+        type: string
+      label:
+        type: string
+      pid:
+        type: string
+      remark:
+        type: string
+      status:
+        type: integer
+      type:
+        type: string
+      value:
+        type: string
+    required:
+    - label
+    - type
+    type: object
+  models.CreateMenuRequest:
+    properties:
+      authCode:
+        type: string
+      component:
+        type: string
+      meta:
+        $ref: '#/definitions/models.MenuMeta'
+      name:
+        type: string
+      path:
+        type: string
+      pid:
+        type: string
+      status:
+        type: integer
+      type:
+        type: string
+    required:
+    - meta
+    - name
+    - type
+    type: object
+  models.CreateModuleRequest:
+    properties:
+      moduleTitle:
+        type: string
+      projectId:
+        type: string
+      sort:
+        type: integer
+    required:
+    - moduleTitle
+    - projectId
+    type: object
+  models.CreateNodeItemRequest:
+    properties:
+      label:
+        description: 节点名称
+        example: 需求提交
+        type: string
+      nodeType:
+        description: 节点类型 0=开始 1=办理 2=审批 3=结束
+        enum:
+        - 0
+        - 1
+        - 2
+        - 3
+        example: 0
+        type: integer
+      remark:
+        description: 备注
+        example: 流程开始节点
+        type: string
+      sort:
+        description: 节点顺序
+        example: 1
+        type: integer
+      userId:
+        description: 负责人id
+        example: UUID
+        type: string
+      value:
+        description: 节点值
+        example: "0"
+        type: string
+    type: object
+  models.CreateNodeRequest:
+    properties:
+      businessId:
+        type: string
+      businessType:
+        type: string
+      label:
+        type: string
+      nodeType:
+        type: integer
+      remark:
+        type: string
+      sort:
+        type: integer
+      userId:
+        type: string
+      value:
+        type: string
+    required:
+    - businessId
+    - label
+    - userId
+    - value
+    type: object
+  models.CreateProjectRequest:
+    properties:
+      description:
+        type: string
+      projectLogo:
+        type: string
+      projectTitle:
+        type: string
+    required:
+    - projectTitle
+    type: object
+  models.CreateRoleRequest:
+    properties:
+      permissions:
+        items:
+          type: string
+        type: array
+      remark:
+        type: string
+      roleTitle:
+        type: string
+      status:
+        type: integer
+    required:
+    - roleTitle
+    type: object
+  models.CreateStoryRequest:
+    properties:
+      businessType:
+        description: 业务类型,关联dev_node表business_type
+        example: "0"
+        type: string
+      fileIds:
+        description: 附件id数组
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
+      moduleId:
+        description: 关联模块id
+        example: UUID
+        type: string
+      nodes:
+        description: 节点信息,新增需求时创建对应节点
+        items:
+          $ref: '#/definitions/models.CreateNodeItemRequest'
+        type: array
+      projectId:
+        description: 关联项目id
+        example: UUID
+        type: string
+      source:
+        description: 需求来源,字典STORY_SOURCE值
+        example: "0"
+        type: string
+      storyLevel:
+        description: 需求优先级,字典STORY_LEVEL值
+        example: "0"
+        type: string
+      storyRichText:
+        description: 需求描述,富文本格式
+        example: 需求描述
+        type: string
+      storyStatus:
+        description: 需求状态,字典STORY_STATUS值
+        example: "0"
+        type: string
+      storyTitle:
+        description: 需求标题
+        example: 需求标题
+        type: string
+      storyType:
+        description: 需求类型,字典STORY_TYPE值
+        example: "0"
+        type: string
+      userIds:
+        description: 参与人员id数组
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
+      versionId:
+        description: 关联版本id
+        example: UUID
+        type: string
+    required:
+    - moduleId
+    - projectId
+    - storyTitle
+    - storyType
+    - versionId
+    type: object
+  models.CreateTaskRequest:
+    properties:
+      endDate:
+        type: string
+      moduleId:
+        type: string
+      planHours:
+        type: number
+      projectId:
+        type: string
+      startDate:
+        type: string
+      storyId:
+        type: string
+      taskRichText:
+        type: string
+      taskStatus:
+        type: string
+      taskTitle:
+        type: string
+      taskType:
+        type: string
+      userId:
+        type: string
+      versionId:
+        type: string
+    required:
+    - endDate
+    - planHours
+    - projectId
+    - startDate
+    - taskTitle
+    - userId
+    type: object
+  models.CreateUserRequest:
+    properties:
+      deptIds:
+        items:
+          type: string
+        type: array
+      desc:
+        type: string
+      password:
+        type: string
+      realName:
+        type: string
+      roleIds:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
+    required:
+    - password
+    - realName
+    - username
+    type: object
+  models.CreateVersionRequest:
+    properties:
+      endDate:
+        type: string
+      projectId:
+        type: string
+      releaseStatus:
+        type: string
+      remark:
+        type: string
+      startDate:
+        type: string
+      version:
+        type: string
+      versionType:
+        type: string
+    type: object
+  models.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  models.MenuMeta:
+    properties:
+      activeIcon:
+        type: string
+      activePath:
+        type: string
+      affixTab:
+        type: boolean
+      affixTabOrder:
+        type: integer
+      badge:
+        type: string
+      badgeType:
+        type: string
+      badgeVariants:
+        type: string
+      domCached:
+        type: boolean
+      hideChildrenInMenu:
+        type: boolean
+      hideInBreadcrumb:
+        type: boolean
+      hideInMenu:
+        type: boolean
+      hideInTab:
+        type: boolean
+      icon:
+        type: string
+      iframeSrc:
+        type: string
+      keepAlive:
+        type: boolean
+      link:
+        type: string
+      maxNumOfOpenTab:
+        type: integer
+      menuVisibleWithForbidden:
+        type: boolean
+      noBasicLayout:
+        type: boolean
+      openInNewWindow:
+        type: boolean
+      order:
+        type: integer
+      query:
+        type: string
+      title:
+        type: string
+    type: object
+  models.NodeApproveRequest:
+    properties:
+      result:
+        type: integer
+      resultRichText:
+        type: string
+    required:
+    - result
+    type: object
+  models.UpdateBugFieldRequest:
+    properties:
+      key:
+        type: string
+      value: {}
+    required:
+    - key
+    type: object
+  models.UpdateBugNextRequest:
+    properties:
+      bugStatus:
+        type: string
+      changeRichText:
+        type: string
+    required:
+    - bugStatus
+    type: object
+  models.UpdateBugRequest:
+    properties:
+      bugEnv:
+        type: string
+      bugLevel:
+        type: string
+      bugRichText:
+        type: string
+      bugSource:
+        type: string
+      bugStatus:
+        type: string
+      bugTitle:
+        type: string
+      bugType:
+        type: string
+      bugUa:
+        type: string
+      moduleId:
+        type: string
+      projectId:
+        type: string
+      storyId:
+        type: string
+      userId:
+        type: string
+      versionId:
+        type: string
+    required:
+    - bugTitle
+    - projectId
+    - userId
+    type: object
+  models.UpdateDeptRequest:
+    properties:
+      deptTitle:
+        type: string
+      pid:
+        type: string
+      remark:
+        type: string
+      status:
+        type: integer
+    required:
+    - deptTitle
+    type: object
+  models.UpdateDictRequest:
+    properties:
+      color:
+        type: string
+      label:
+        type: string
+      pid:
+        type: string
+      remark:
+        type: string
+      status:
+        type: integer
+      type:
+        type: string
+      value:
+        type: string
+    required:
+    - label
+    - type
+    type: object
+  models.UpdateMenuRequest:
+    properties:
+      authCode:
+        type: string
+      component:
+        type: string
+      meta:
+        $ref: '#/definitions/models.MenuMeta'
+      name:
+        type: string
+      path:
+        type: string
+      pid:
+        type: string
+      status:
+        type: integer
+      type:
+        type: string
+    required:
+    - meta
+    - name
+    - type
+    type: object
+  models.UpdateModuleRequest:
+    properties:
+      moduleTitle:
+        type: string
+      sort:
+        type: integer
+    required:
+    - moduleTitle
+    type: object
+  models.UpdateProjectRequest:
+    properties:
+      description:
+        type: string
+      projectLogo:
+        type: string
+      projectTitle:
+        type: string
+    required:
+    - projectTitle
+    type: object
+  models.UpdateRoleRequest:
+    properties:
+      permissions:
+        items:
+          type: string
+        type: array
+      remark:
+        type: string
+      roleTitle:
+        type: string
+      status:
+        type: integer
+    required:
+    - roleTitle
+    type: object
+  models.UpdateStoryFieldRequest:
+    properties:
+      key:
+        type: string
+      value: {}
+    required:
+    - key
+    type: object
+  models.UpdateStoryNextRequest:
+    properties:
+      changeRichText:
+        type: string
+      storyStatus:
+        type: string
+    required:
+    - storyStatus
+    type: object
+  models.UpdateStoryRequest:
+    properties:
+      fileIds:
+        items:
+          type: string
+        type: array
+      moduleId:
+        type: string
+      projectId:
+        type: string
+      source:
+        type: string
+      storyLevel:
+        type: string
+      storyRichText:
+        type: string
+      storyStatus:
+        type: string
+      storyTitle:
+        type: string
+      storyType:
+        type: string
+      userIds:
+        items:
+          type: string
+        type: array
+      versionId:
+        type: string
+    required:
+    - moduleId
+    - projectId
+    - storyTitle
+    - storyType
+    - versionId
+    type: object
+  models.UpdateTaskFieldRequest:
+    properties:
+      key:
+        type: string
+      value: {}
+    required:
+    - key
+    type: object
+  models.UpdateTaskNextRequest:
+    properties:
+      changeRichText:
+        type: string
+      taskStatus:
+        type: string
+    required:
+    - taskStatus
+    type: object
+  models.UpdateTaskRequest:
+    properties:
+      endDate:
+        type: string
+      moduleId:
+        type: string
+      planHours:
+        type: number
+      projectId:
+        type: string
+      startDate:
+        type: string
+      storyId:
+        type: string
+      taskRichText:
+        type: string
+      taskStatus:
+        type: string
+      taskTitle:
+        type: string
+      taskType:
+        type: string
+      userId:
+        type: string
+      versionId:
+        type: string
+    required:
+    - endDate
+    - planHours
+    - projectId
+    - startDate
+    - taskTitle
+    - userId
+    type: object
+  models.UpdateUserRequest:
+    properties:
+      deptIds:
+        items:
+          type: string
+        type: array
+      desc:
+        type: string
+      realName:
+        type: string
+      roleIds:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
+    required:
+    - realName
+    - username
+    type: object
+  models.UpdateVersionNextRequest:
+    properties:
+      changeRichText:
+        type: string
+      releaseStatus:
+        type: string
+    type: object
+  models.UpdateVersionRequest:
+    properties:
+      endDate:
+        type: string
+      projectId:
+        type: string
+      releaseStatus:
+        type: string
+      remark:
+        type: string
+      startDate:
+        type: string
+      version:
+        type: string
+      versionType:
+        type: string
+    type: object
+host: localhost:9191
+info:
+  contact: {}
+  description: Hive Admin Go 后端 API 接口文档
+  title: Hive Admin API
+  version: "1.0"
+paths:
+  /auth/codes:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前登录用户的权限码列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 用户未登录
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户权限码
+      tags:
+      - 认证管理
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户通过用户名和密码登录
+      parameters:
+      - description: 登录请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 用户名或密码错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 用户登录
+      tags:
+      - 认证管理
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: 用户登出系统
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登出成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 用户未登录
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 用户登出
+      tags:
+      - 认证管理
+  /auth/menus:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前登录用户的菜单权限
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 用户未登录
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户菜单
+      tags:
+      - 认证管理
+  /auth/profile:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前登录用户的信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 用户未登录
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户信息
+      tags:
+      - 认证管理
+  /dev/bugs:
+    delete:
+      consumes:
+      - application/json
+      description: 批量删除缺陷
+      parameters:
+      - description: 缺陷ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除缺陷
+      tags:
+      - 开发管理-缺陷管理
+    get:
+      consumes:
+      - application/json
+      description: 分页获取缺陷列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 缺陷编号
+        in: query
+        name: bugNum
+        type: integer
+      - description: 缺陷标题
+        in: query
+        name: bugTitle
+        type: string
+      - description: 项目ID
+        in: query
+        name: projectId
+        type: string
+      - description: 版本ID
+        in: query
+        name: versionId
+        type: string
+      - description: 模块ID
+        in: query
+        name: moduleId
+        type: string
+      - description: 缺陷状态，支持多选：1,2
+        in: query
+        name: bugStatus
+        type: string
+      - description: 需求ID
+        in: query
+        name: storyId
+        type: string
+      - description: 排序参数
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取缺陷列表
+      tags:
+      - 开发管理-缺陷管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新缺陷
+      parameters:
+      - description: 缺陷信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateBugRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建缺陷
+      tags:
+      - 开发管理-缺陷管理
+  /dev/bugs/{bugId}:
+    put:
+      consumes:
+      - application/json
+      description: 更新缺陷信息
+      parameters:
+      - description: 缺陷ID
+        in: path
+        name: bugId
+        required: true
+        type: string
+      - description: 缺陷信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateBugRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新缺陷
+      tags:
+      - 开发管理-缺陷管理
+  /dev/bugs/{bugId}/confirm:
+    put:
+      consumes:
+      - application/json
+      description: 确认缺陷并更新缺陷状态
+      parameters:
+      - description: 缺陷ID
+        in: path
+        name: bugId
+        required: true
+        type: string
+      - description: 缺陷确认信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ConfirmBugRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 确认成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 确认缺陷
+      tags:
+      - 开发管理-缺陷管理
+  /dev/bugs/{bugId}/field:
+    put:
+      consumes:
+      - application/json
+      description: 更新缺陷的单个字段
+      parameters:
+      - description: 缺陷ID
+        in: path
+        name: bugId
+        required: true
+        type: string
+      - description: 字段信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateBugFieldRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新缺陷字段
+      tags:
+      - 开发管理-缺陷管理
+  /dev/bugs/{bugId}/next:
+    put:
+      consumes:
+      - application/json
+      description: 更新缺陷状态
+      parameters:
+      - description: 缺陷ID
+        in: path
+        name: bugId
+        required: true
+        type: string
+      - description: 缺陷信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateBugNextRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 缺陷流转状态
+      tags:
+      - 开发管理-缺陷管理
+  /dev/bugs/{bugNum}:
+    get:
+      consumes:
+      - application/json
+      description: 根据缺陷编号获取缺陷详情
+      parameters:
+      - description: 缺陷编号
+        in: path
+        name: bugNum
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取缺陷详情
+      tags:
+      - 开发管理-缺陷管理
+  /dev/bugs/all:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有缺陷（不分页）
+      parameters:
+      - description: 缺陷编号
+        in: query
+        name: bugNum
+        type: integer
+      - description: 缺陷标题
+        in: query
+        name: bugTitle
+        type: string
+      - description: 项目ID
+        in: query
+        name: projectId
+        type: string
+      - description: 版本ID
+        in: query
+        name: versionId
+        type: string
+      - description: 模块ID
+        in: query
+        name: moduleId
+        type: string
+      - description: 缺陷状态
+        in: query
+        name: bugStatus
+        type: integer
+      - description: 需求ID
+        in: query
+        name: storyId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有缺陷
+      tags:
+      - 开发管理-缺陷管理
+  /dev/bugs/batch:
+    post:
+      consumes:
+      - application/json
+      description: 批量创建缺陷
+      parameters:
+      - description: 缺陷信息列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/models.CreateBugRequest'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 批量创建缺陷
+      tags:
+      - 开发管理-缺陷管理
+  /dev/changeHistory:
+    get:
+      consumes:
+      - application/json
+      description: 根据业务ID获取变更记录
+      parameters:
+      - description: 业务ID
+        in: query
+        name: businessId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取变更记录
+      tags:
+      - 开发管理-变更记录
+    post:
+      consumes:
+      - application/json
+      description: 创建新的变更记录或评论
+      parameters:
+      - description: 变更记录信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateChangeHistoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建变更记录
+      tags:
+      - 开发管理-变更记录
+  /dev/modules:
+    delete:
+      consumes:
+      - application/json
+      description: 批量删除模块
+      parameters:
+      - description: 模块ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除模块
+      tags:
+      - 开发管理-模块管理
+    get:
+      consumes:
+      - application/json
+      description: 获取所有模块（不分页），可根据项目ID筛选
+      parameters:
+      - description: 项目ID
+        in: query
+        name: projectId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取模块列表
+      tags:
+      - 开发管理-模块管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新模块
+      parameters:
+      - description: 模块信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateModuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建模块
+      tags:
+      - 开发管理-模块管理
+  /dev/modules/{moduleId}:
+    get:
+      consumes:
+      - application/json
+      description: 根据模块ID获取模块详情
+      parameters:
+      - description: 模块ID
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取模块详情
+      tags:
+      - 开发管理-模块管理
+    put:
+      consumes:
+      - application/json
+      description: 更新模块信息
+      parameters:
+      - description: 模块ID
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      - description: 模块信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateModuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新模块
+      tags:
+      - 开发管理-模块管理
+  /dev/nodes:
+    delete:
+      consumes:
+      - application/json
+      description: 批量删除节点
+      parameters:
+      - description: 节点ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除节点
+      tags:
+      - 开发管理-节点管理
+    get:
+      consumes:
+      - application/json
+      description: 获取所有节点（不分页），可根据业务ID筛选
+      parameters:
+      - description: 业务ID
+        in: query
+        name: businessId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取节点列表
+      tags:
+      - 开发管理-节点管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新节点
+      parameters:
+      - description: 节点信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateNodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建节点
+      tags:
+      - 开发管理-节点管理
+  /dev/nodes/{nodeId}/approve:
+    put:
+      consumes:
+      - application/json
+      description: 对审批类型的节点进行审批
+      parameters:
+      - description: 节点ID
+        in: path
+        name: nodeId
+        required: true
+        type: string
+      - description: 审批信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.NodeApproveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 审批成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 节点审批
+      tags:
+      - 开发管理-节点管理
+  /dev/nodes/{nodeId}/next:
+    put:
+      consumes:
+      - application/json
+      description: 将当前节点流转到下一个节点
+      parameters:
+      - description: 节点ID
+        in: path
+        name: nodeId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 流转成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 节点流转
+      tags:
+      - 开发管理-节点管理
+  /dev/projects:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有项目（不分页）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取项目列表
+      tags:
+      - 开发管理-项目管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新项目
+      parameters:
+      - description: 项目信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建项目
+      tags:
+      - 开发管理-项目管理
+  /dev/projects/{projectId}:
+    get:
+      consumes:
+      - application/json
+      description: 根据项目ID获取项目详情
+      parameters:
+      - description: 项目ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取项目详情
+      tags:
+      - 开发管理-项目管理
+    put:
+      consumes:
+      - application/json
+      description: 更新项目信息
+      parameters:
+      - description: 项目ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: 项目信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新项目
+      tags:
+      - 开发管理-项目管理
+  /dev/storys:
+    delete:
+      consumes:
+      - application/json
+      description: 批量删除需求
+      parameters:
+      - description: 需求ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除需求
+      tags:
+      - 开发管理-需求管理
+    get:
+      consumes:
+      - application/json
+      description: 分页获取需求列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 需求编号
+        in: query
+        name: storyNum
+        type: integer
+      - description: 需求标题
+        in: query
+        name: storyTitle
+        type: string
+      - description: 项目ID
+        in: query
+        name: projectId
+        type: string
+      - description: 版本ID
+        in: query
+        name: versionId
+        type: string
+      - description: 模块ID
+        in: query
+        name: moduleId
+        type: string
+      - description: 需求状态，支持多选：1,2
+        in: query
+        name: storyStatus
+        type: string
+      - description: 排序参数
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取需求列表
+      tags:
+      - 开发管理-需求管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新需求，可选传入nodes参数创建关联节点
+      parameters:
+      - description: 需求信息，nodes为节点数组，可选
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateStoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建需求
+      tags:
+      - 开发管理-需求管理
+  /dev/storys/{storyId}:
+    put:
+      consumes:
+      - application/json
+      description: 更新需求信息
+      parameters:
+      - description: 需求ID
+        in: path
+        name: storyId
+        required: true
+        type: string
+      - description: 需求信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateStoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新需求
+      tags:
+      - 开发管理-需求管理
+  /dev/storys/{storyId}/field:
+    put:
+      consumes:
+      - application/json
+      description: 更新需求的单个字段
+      parameters:
+      - description: 需求ID
+        in: path
+        name: storyId
+        required: true
+        type: string
+      - description: 字段信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateStoryFieldRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新需求字段
+      tags:
+      - 开发管理-需求管理
+  /dev/storys/{storyId}/next:
+    put:
+      consumes:
+      - application/json
+      description: 更新需求状态
+      parameters:
+      - description: 需求ID
+        in: path
+        name: storyId
+        required: true
+        type: string
+      - description: 需求信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateStoryNextRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 需求流转状态
+      tags:
+      - 开发管理-需求管理
+  /dev/storys/{storyNum}:
+    get:
+      consumes:
+      - application/json
+      description: 根据需求编号获取需求详情
+      parameters:
+      - description: 需求编号
+        in: path
+        name: storyNum
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取需求详情
+      tags:
+      - 开发管理-需求管理
+  /dev/storys/all:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有需求（不分页）
+      parameters:
+      - description: 需求编号
+        in: query
+        name: storyNum
+        type: integer
+      - description: 需求标题
+        in: query
+        name: storyTitle
+        type: string
+      - description: 项目ID
+        in: query
+        name: projectId
+        type: string
+      - description: 版本ID
+        in: query
+        name: versionId
+        type: string
+      - description: 模块ID
+        in: query
+        name: moduleId
+        type: string
+      - description: 需求状态
+        in: query
+        name: storyStatus
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有需求
+      tags:
+      - 开发管理-需求管理
+  /dev/storys/batch:
+    post:
+      consumes:
+      - application/json
+      description: 批量创建需求
+      parameters:
+      - description: 需求信息列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/models.CreateStoryRequest'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 批量创建需求
+      tags:
+      - 开发管理-需求管理
+  /dev/tasks:
+    delete:
+      consumes:
+      - application/json
+      description: 批量删除任务
+      parameters:
+      - description: 任务ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除任务
+      tags:
+      - 开发管理-任务管理
+    get:
+      consumes:
+      - application/json
+      description: 分页获取任务列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 任务编号
+        in: query
+        name: taskNum
+        type: integer
+      - description: 任务标题
+        in: query
+        name: taskTitle
+        type: string
+      - description: 项目ID
+        in: query
+        name: projectId
+        type: string
+      - description: 版本ID
+        in: query
+        name: versionId
+        type: string
+      - description: 任务状态，支持多选：1,2
+        in: query
+        name: taskStatus
+        type: string
+      - description: 需求ID
+        in: query
+        name: storyId
+        type: string
+      - description: 排序参数 排序时仅支持：taskTitle、taskStatus、startDate、endDate 的排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取任务列表
+      tags:
+      - 开发管理-任务管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新任务
+      parameters:
+      - description: 任务信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建任务
+      tags:
+      - 开发管理-任务管理
+  /dev/tasks/{taskId}:
+    put:
+      consumes:
+      - application/json
+      description: 更新任务信息
+      parameters:
+      - description: 任务ID
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: 任务信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新任务
+      tags:
+      - 开发管理-任务管理
+  /dev/tasks/{taskId}/field:
+    put:
+      consumes:
+      - application/json
+      description: 更新任务的单个字段，仅可修改：userId、taskType、startDate、endDate
+      parameters:
+      - description: 任务ID
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: 字段信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateTaskFieldRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新任务字段
+      tags:
+      - 开发管理-任务管理
+  /dev/tasks/{taskId}/next:
+    put:
+      consumes:
+      - application/json
+      description: 更新任务状态
+      parameters:
+      - description: 任务ID
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: 任务信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateTaskNextRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 任务流转状态
+      tags:
+      - 开发管理-任务管理
+  /dev/tasks/{taskNum}:
+    get:
+      consumes:
+      - application/json
+      description: 根据任务编号获取任务详情
+      parameters:
+      - description: 任务编号
+        in: path
+        name: taskNum
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取任务详情
+      tags:
+      - 开发管理-任务管理
+  /dev/tasks/all:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有任务（不分页）
+      parameters:
+      - description: 任务编号
+        in: query
+        name: taskNum
+        type: integer
+      - description: 任务标题
+        in: query
+        name: taskTitle
+        type: string
+      - description: 项目ID
+        in: query
+        name: projectId
+        type: string
+      - description: 版本ID
+        in: query
+        name: versionId
+        type: string
+      - description: 任务状态
+        in: query
+        name: taskStatus
+        type: integer
+      - description: 需求ID
+        in: query
+        name: storyId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有任务
+      tags:
+      - 开发管理-任务管理
+  /dev/tasks/batch:
+    post:
+      consumes:
+      - application/json
+      description: 批量创建任务
+      parameters:
+      - description: 任务信息列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/models.CreateTaskRequest'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 批量创建任务
+      tags:
+      - 开发管理-任务管理
+  /dev/versions:
+    delete:
+      consumes:
+      - application/json
+      description: 批量删除版本
+      parameters:
+      - description: 版本ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除版本
+      tags:
+      - 开发管理-版本管理
+    get:
+      consumes:
+      - application/json
+      description: 分页获取版本列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 版本号
+        in: query
+        name: version
+        type: string
+      - description: 项目ID
+        in: query
+        name: projectId
+        type: string
+      - description: 发布状态
+        in: query
+        name: releaseStatus
+        type: integer
+      - description: 排序参数
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取版本列表
+      tags:
+      - 开发管理-版本管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新版本
+      parameters:
+      - description: 版本信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateVersionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建版本
+      tags:
+      - 开发管理-版本管理
+  /dev/versions/{versionId}:
+    get:
+      consumes:
+      - application/json
+      description: 根据版本ID获取版本详情
+      parameters:
+      - description: 版本ID
+        in: path
+        name: versionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取版本详情
+      tags:
+      - 开发管理-版本管理
+    put:
+      consumes:
+      - application/json
+      description: 更新版本信息
+      parameters:
+      - description: 版本ID
+        in: path
+        name: versionId
+        required: true
+        type: string
+      - description: 版本信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateVersionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新版本
+      tags:
+      - 开发管理-版本管理
+  /dev/versions/{versionId}/next:
+    put:
+      consumes:
+      - application/json
+      description: 更新版本状态并记录变更历史
+      parameters:
+      - description: 版本ID
+        in: path
+        name: versionId
+        required: true
+        type: string
+      - description: 版本状态更新信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateVersionNextRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 版本流转状态
+      tags:
+      - 开发管理-版本管理
+  /dev/versions/all:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有版本（不分页）
+      parameters:
+      - description: 版本号
+        in: query
+        name: version
+        type: string
+      - description: 项目ID
+        in: query
+        name: projectId
+        type: string
+      - description: 发布状态
+        in: query
+        name: releaseStatus
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有版本
+      tags:
+      - 开发管理-版本管理
+  /dev/versions/getLastVersion:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定项目下按版本号排序后的最大版本号
+      parameters:
+      - description: 项目ID
+        in: query
+        name: projectId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取最新版本号
+      tags:
+      - 开发管理-版本管理
+  /system/depts:
+    delete:
+      consumes:
+      - application/json
+      description: 批量删除部门
+      parameters:
+      - description: 部门ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除部门
+      tags:
+      - 系统管理-部门管理
+    get:
+      consumes:
+      - application/json
+      description: 获取部门树结构
+      parameters:
+      - description: 状态
+        in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取部门树
+      tags:
+      - 系统管理-部门管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新部门
+      parameters:
+      - description: 部门信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateDeptRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建部门
+      tags:
+      - 系统管理-部门管理
+  /system/depts/{deptId}:
+    get:
+      consumes:
+      - application/json
+      description: 根据部门ID获取部门详情
+      parameters:
+      - description: 部门ID
+        in: path
+        name: deptId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取部门详情
+      tags:
+      - 系统管理-部门管理
+    put:
+      consumes:
+      - application/json
+      description: 更新部门信息
+      parameters:
+      - description: 部门ID
+        in: path
+        name: deptId
+        required: true
+        type: string
+      - description: 部门信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateDeptRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新部门
+      tags:
+      - 系统管理-部门管理
+  /system/depts/all:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有部门（不分页）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有部门
+      tags:
+      - 系统管理-部门管理
+  /system/dicts:
+    delete:
+      consumes:
+      - application/json
+      description: 批量删除字典
+      parameters:
+      - description: 字典ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除字典
+      tags:
+      - 系统管理-字典管理
+    get:
+      consumes:
+      - application/json
+      description: 获取字典树结构
+      parameters:
+      - description: 排序参数 排序时仅支持：label、type、value
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取字典树
+      tags:
+      - 系统管理-字典管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新字典
+      parameters:
+      - description: 字典信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateDictRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建字典
+      tags:
+      - 系统管理-字典管理
+  /system/dicts/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 根据字典ID获取字典详情
+      parameters:
+      - description: 字典ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取字典详情
+      tags:
+      - 系统管理-字典管理
+    put:
+      consumes:
+      - application/json
+      description: 更新字典信息
+      parameters:
+      - description: 字典ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 字典信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateDictRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新字典
+      tags:
+      - 系统管理-字典管理
+  /system/dicts/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: 更新字典启用/禁用状态
+      parameters:
+      - description: 字典ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新字典状态
+      tags:
+      - 系统管理-字典管理
+  /system/files:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取文件列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 原始文件名
+        in: query
+        name: originalName
+        type: string
+      - description: MIME类型
+        in: query
+        name: type
+        type: string
+      - description: 文件扩展名
+        in: query
+        name: fileExt
+        type: string
+      - description: 排序参数
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取文件列表
+      tags:
+      - 系统管理-文件管理
+  /system/menus:
+    delete:
+      consumes:
+      - application/json
+      description: 批量删除菜单
+      parameters:
+      - description: 菜单ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除菜单
+      tags:
+      - 系统管理-菜单管理
+    get:
+      consumes:
+      - application/json
+      description: 获取菜单树结构
+      parameters:
+      - description: 状态
+        in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取菜单树
+      tags:
+      - 系统管理-菜单管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新菜单
+      parameters:
+      - description: 菜单信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMenuRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建菜单
+      tags:
+      - 系统管理-菜单管理
+  /system/menus/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 根据菜单ID获取菜单详情
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取菜单详情
+      tags:
+      - 系统管理-菜单管理
+    put:
+      consumes:
+      - application/json
+      description: 更新菜单信息
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 菜单信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateMenuRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新菜单
+      tags:
+      - 系统管理-菜单管理
+  /system/menus/name-exists:
+    get:
+      consumes:
+      - application/json
+      description: 检查菜单名称是否已存在
+      parameters:
+      - description: 菜单名称
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: 排除的菜单ID
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 检查结果
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 检查菜单名称是否存在
+      tags:
+      - 系统管理-菜单管理
+  /system/menus/path-exists:
+    get:
+      consumes:
+      - application/json
+      description: 检查菜单路径是否已存在
+      parameters:
+      - description: 菜单路径
+        in: query
+        name: path
+        required: true
+        type: string
+      - description: 排除的菜单ID
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 检查结果
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 检查菜单路径是否存在
+      tags:
+      - 系统管理-菜单管理
+  /system/roles:
+    delete:
+      consumes:
+      - application/json
+      description: 批量删除角色
+      parameters:
+      - description: 角色ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除角色
+      tags:
+      - 系统管理-角色管理
+    get:
+      consumes:
+      - application/json
+      description: 分页获取角色列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 角色名称
+        in: query
+        name: roleName
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取角色列表
+      tags:
+      - 系统管理-角色管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新角色
+      parameters:
+      - description: 角色信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建角色
+      tags:
+      - 系统管理-角色管理
+  /system/roles/{roleId}:
+    get:
+      consumes:
+      - application/json
+      description: 根据角色ID获取角色详情
+      parameters:
+      - description: 角色ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取角色详情
+      tags:
+      - 系统管理-角色管理
+    put:
+      consumes:
+      - application/json
+      description: 更新角色信息
+      parameters:
+      - description: 角色ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      - description: 角色信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新角色
+      tags:
+      - 系统管理-角色管理
+  /system/roles/{roleId}/status:
+    put:
+      consumes:
+      - application/json
+      description: 更新角色启用/禁用状态
+      parameters:
+      - description: 角色ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新角色状态
+      tags:
+      - 系统管理-角色管理
+  /system/roles/all:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有角色（不分页）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有角色
+      tags:
+      - 系统管理-角色管理
+  /system/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传文件到系统文件表
+      parameters:
+      - description: 文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 上传成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 上传文件
+      tags:
+      - 系统管理-文件管理
+  /system/users:
+    delete:
+      consumes:
+      - application/json
+      description: 批量删除用户
+      parameters:
+      - description: 用户ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除用户
+      tags:
+      - 系统管理-用户管理
+    get:
+      consumes:
+      - application/json
+      description: 分页获取用户列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 用户姓名
+        in: query
+        name: realName
+        type: string
+      - description: 用户名
+        in: query
+        name: username
+        type: string
+      - description: 手机号
+        in: query
+        name: phone
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户列表
+      tags:
+      - 系统管理-用户管理
+    post:
+      consumes:
+      - application/json
+      description: 创建新用户
+      parameters:
+      - description: 用户信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建用户
+      tags:
+      - 系统管理-用户管理
+  /system/users/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: 根据用户ID获取用户详情
+      parameters:
+      - description: 用户ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户详情
+      tags:
+      - 系统管理-用户管理
+    put:
+      consumes:
+      - application/json
+      description: 更新用户信息
+      parameters:
+      - description: 用户ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: 用户信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新用户
+      tags:
+      - 系统管理-用户管理
+  /system/users/{userId}/status:
+    put:
+      consumes:
+      - application/json
+      description: 更新用户启用/禁用状态
+      parameters:
+      - description: 用户ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新用户状态
+      tags:
+      - 系统管理-用户管理
+  /system/users/all:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有用户（不分页）
+      parameters:
+      - description: 用户姓名
+        in: query
+        name: realName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有用户
+      tags:
+      - 系统管理-用户管理
+schemes:
+- http
+- https
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
