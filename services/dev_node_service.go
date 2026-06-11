@@ -25,9 +25,27 @@ func GetAllNodes(businessID string) ([]*models.NodeResponse, error) {
 		return nil, err
 	}
 
+	userIDMap := make(map[string]string)
+	userIDs := make([]string, 0)
+	for _, node := range nodes {
+		if node.UserID != "" {
+			userIDs = append(userIDs, node.UserID)
+		}
+	}
+	if len(userIDs) > 0 {
+		var users []models.SysUser
+		database.DB.Where("user_id IN ?", userIDs).Find(&users)
+		for _, u := range users {
+			if u.RealName != nil {
+				userIDMap[u.UserID] = *u.RealName
+			}
+		}
+	}
+
 	var responses []*models.NodeResponse
 	for _, node := range nodes {
-		responses = append(responses, models.DevNodeToNodeResponse(node))
+		realName := userIDMap[node.UserID]
+		responses = append(responses, models.DevNodeToNodeResponse(node, realName))
 	}
 
 	return responses, nil

@@ -113,6 +113,8 @@ businessId=
 要求：
 
 1. nodeType=0 或者 nodeType=3的数据不可删除
+2. current=true的节点不可删除
+3. sort 小于 current=true的节点不可删除
 
 请求参数示例(body)：
 

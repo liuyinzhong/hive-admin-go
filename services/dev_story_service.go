@@ -401,6 +401,29 @@ func buildSingleStoryResponse(story *models.DevStory) *models.StoryResponse {
 		bugList = bugs
 	}
 
+	nodes := make([]models.NodeResponse, 0)
+	var nodeList []models.DevNode
+	database.DB.Where("business_id = ?", story.StoryID).Order("sort ASC").Find(&nodeList)
+	nodeUserIDs := make([]string, 0)
+	nodeUserMap := make(map[string]string)
+	for _, n := range nodeList {
+		if n.UserID != "" {
+			nodeUserIDs = append(nodeUserIDs, n.UserID)
+		}
+	}
+	if len(nodeUserIDs) > 0 {
+		var nodeUsers []models.SysUser
+		database.DB.Where("user_id IN ?", nodeUserIDs).Find(&nodeUsers)
+		for _, u := range nodeUsers {
+			if u.RealName != nil {
+				nodeUserMap[u.UserID] = *u.RealName
+			}
+		}
+	}
+	for _, n := range nodeList {
+		nodes = append(nodes, *models.DevNodeToNodeResponse(n, nodeUserMap[n.UserID]))
+	}
+
 	return &models.StoryResponse{
 		StoryID:       &story.StoryID,
 		StoryTitle:    story.StoryTitle,
@@ -426,6 +449,7 @@ func buildSingleStoryResponse(story *models.DevStory) *models.StoryResponse {
 		FileList:      fileList,
 		TaskList:      taskList,
 		BugList:       bugList,
+		Nodes:         nodes,
 	}
 }
 

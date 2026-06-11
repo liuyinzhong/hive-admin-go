@@ -382,6 +382,7 @@ type StoryResponse struct {
 	FileList      []FileResponse  `json:"fileList"`
 	TaskList      []TaskResponse  `json:"taskList"`
 	BugList       []BugResponse   `json:"bugList"`
+	Nodes         []NodeResponse  `json:"nodes"`
 }
 
 type FileResponse struct {
@@ -527,28 +528,28 @@ type UpdateVersionNextRequest struct {
 }
 
 type CreateNodeItemRequest struct {
-	Label    string  `json:"label" example:"需求提交"`       // 节点名称
-	Value    string  `json:"value" example:"0"`           // 节点值
-	Sort     int     `json:"sort" example:"1"`            // 节点顺序
-	UserID   string  `json:"userId" example:"UUID"`       // 负责人id
+	Label    string  `json:"label" example:"需求提交"`                 // 节点名称
+	Value    string  `json:"value" example:"0"`                    // 节点值
+	Sort     int     `json:"sort" example:"1"`                     // 节点顺序
+	UserID   string  `json:"userId" example:"UUID"`                // 负责人id
 	NodeType int     `json:"nodeType" enums:"0,1,2,3" example:"0"` // 节点类型 0=开始 1=办理 2=审批 3=结束
-	Remark   *string `json:"remark" example:"流程开始节点"`   // 备注
+	Remark   *string `json:"remark" example:"流程开始节点"`              // 备注
 }
 
 type CreateStoryRequest struct {
-	StoryStatus   string                  `json:"storyStatus" example:"0"`           // 需求状态,字典STORY_STATUS值
-	StoryType     string                  `json:"storyType" binding:"required" example:"0"` // 需求类型,字典STORY_TYPE值
-	StoryLevel    string                  `json:"storyLevel" example:"0"`            // 需求优先级,字典STORY_LEVEL值
-	Source        string                  `json:"source" example:"0"`                // 需求来源,字典STORY_SOURCE值
+	StoryStatus   string                  `json:"storyStatus" example:"0"`                      // 需求状态,字典STORY_STATUS值
+	StoryType     string                  `json:"storyType" binding:"required" example:"0"`     // 需求类型,字典STORY_TYPE值
+	StoryLevel    string                  `json:"storyLevel" example:"0"`                       // 需求优先级,字典STORY_LEVEL值
+	Source        string                  `json:"source" example:"0"`                           // 需求来源,字典STORY_SOURCE值
 	StoryTitle    *string                 `json:"storyTitle" binding:"required" example:"需求标题"` // 需求标题
-	StoryRichText *string                 `json:"storyRichText" example:"需求描述"`     // 需求描述,富文本格式
-	UserIDs       []string                `json:"userIds" example:"[\"UUID\"]"`      // 参与人员id数组
-	ProjectID     string                  `json:"projectId" binding:"required" example:"UUID"`   // 关联项目id
+	StoryRichText *string                 `json:"storyRichText" example:"需求描述"`                 // 需求描述,富文本格式
+	UserIDs       []string                `json:"userIds" example:"[\"UUID\"]"`                 // 参与人员id数组
+	ProjectID     string                  `json:"projectId" binding:"required" example:"UUID"`  // 关联项目id
 	VersionID     *string                 `json:"versionId" binding:"required" example:"UUID"`  // 关联版本id
 	ModuleID      *string                 `json:"moduleId" binding:"required" example:"UUID"`   // 关联模块id
-	FileIDs       []string                `json:"fileIds" example:"[\"UUID\"]"`      // 附件id数组
-	BusinessType  string                  `json:"businessType" example:"0"`           // 业务类型,关联dev_node表business_type
-	Nodes         []CreateNodeItemRequest `json:"nodes"`                             // 节点信息,新增需求时创建对应节点
+	FileIDs       []string                `json:"fileIds" example:"[\"UUID\"]"`                 // 附件id数组
+	BusinessType  string                  `json:"businessType" example:"0"`                     // 业务类型,关联dev_node表business_type
+	Nodes         []CreateNodeItemRequest `json:"nodes"`                                        // 节点信息,新增需求时创建对应节点
 }
 
 type UpdateStoryRequest struct {
@@ -672,6 +673,7 @@ type NodeResponse struct {
 	Value          string  `json:"value"`
 	Sort           int     `json:"sort"`
 	UserID         string  `json:"userId"`
+	RealName       string  `json:"realName"`
 	Current        bool    `json:"current"`
 	NodeType       int     `json:"nodeType"`
 	Result         int     `json:"result"`
@@ -700,13 +702,14 @@ type NodeApproveRequest struct {
 	ResultRichText string `json:"resultRichText"`
 }
 
-func DevNodeToNodeResponse(node DevNode) *NodeResponse {
+func DevNodeToNodeResponse(node DevNode, realName string) *NodeResponse {
 	return &NodeResponse{
 		NodeID:         node.NodeID,
 		Label:          node.Label,
 		Value:          node.Value,
 		Sort:           node.Sort,
 		UserID:         node.UserID,
+		RealName:       realName,
 		Current:        node.Current == 1,
 		NodeType:       node.NodeType,
 		Result:         node.Result,
