@@ -81,6 +81,7 @@ func (s *MenuService) CreateMenu(req models.CreateMenuRequest) error {
 		AuthCode:                req.AuthCode,
 		Icon:                    req.Meta.Icon,
 		ActiveIcon:              req.Meta.ActiveIcon,
+		ActivePath:              req.Meta.ActivePath,
 		KeepAlive:               btoi(req.Meta.KeepAlive),
 		HideInMenu:              btoi(req.Meta.HideInMenu),
 		HideInTab:               btoi(req.Meta.HideInTab),
@@ -89,7 +90,6 @@ func (s *MenuService) CreateMenu(req models.CreateMenuRequest) error {
 		Badge:                   req.Meta.Badge,
 		BadgeType:               req.Meta.BadgeType,
 		BadgeVariants:           req.Meta.BadgeVariants,
-		ActivePath:              req.Meta.ActivePath,
 		AffixTab:                btoi(req.Meta.AffixTab),
 		AffixTabOrder:           req.Meta.AffixTabOrder,
 		MaxNumOfOpenTab:         req.Meta.MaxNumOfOpenTab,
@@ -99,6 +99,9 @@ func (s *MenuService) CreateMenu(req models.CreateMenuRequest) error {
 		Query:                   req.Meta.Query,
 		MenuVisibleWithForbidden: btoi(req.Meta.MenuVisibleWithForbidden),
 		Order:                   req.Meta.Order,
+		Title:                   req.Meta.Title,
+		Link:                    req.Meta.Link,
+		IframeSrc:               req.Meta.IframeSrc,
 		Status:                  req.Status,
 		CreateDate:              &now,
 		UpdateDate:              &now,
@@ -134,6 +137,7 @@ func (s *MenuService) UpdateMenu(id string, req models.UpdateMenuRequest) error 
 	menu.AuthCode = req.AuthCode
 	menu.Icon = req.Meta.Icon
 	menu.ActiveIcon = req.Meta.ActiveIcon
+	menu.ActivePath = req.Meta.ActivePath
 	menu.KeepAlive = btoi(req.Meta.KeepAlive)
 	menu.HideInMenu = btoi(req.Meta.HideInMenu)
 	menu.HideInTab = btoi(req.Meta.HideInTab)
@@ -142,7 +146,6 @@ func (s *MenuService) UpdateMenu(id string, req models.UpdateMenuRequest) error 
 	menu.Badge = req.Meta.Badge
 	menu.BadgeType = req.Meta.BadgeType
 	menu.BadgeVariants = req.Meta.BadgeVariants
-	menu.ActivePath = req.Meta.ActivePath
 	menu.AffixTab = btoi(req.Meta.AffixTab)
 	menu.AffixTabOrder = req.Meta.AffixTabOrder
 	menu.MaxNumOfOpenTab = req.Meta.MaxNumOfOpenTab
@@ -152,6 +155,9 @@ func (s *MenuService) UpdateMenu(id string, req models.UpdateMenuRequest) error 
 	menu.Query = req.Meta.Query
 	menu.MenuVisibleWithForbidden = btoi(req.Meta.MenuVisibleWithForbidden)
 	menu.Order = req.Meta.Order
+	menu.Title = req.Meta.Title
+	menu.Link = req.Meta.Link
+	menu.IframeSrc = req.Meta.IframeSrc
 	menu.Status = req.Status
 	menu.UpdateDate = &now
 	
@@ -165,13 +171,7 @@ func (s *MenuService) DeleteMenus(ids []string) error {
 		if childrenCount > 0 {
 			return errors.New("菜单存在子菜单，不能删除")
 		}
-		
-		var roleMenuCount int64
-		database.DB.Model(&models.SysRoleMenu{}).Where("menu_id = ? AND del_flag = 0", id).Count(&roleMenuCount)
-		if roleMenuCount > 0 {
-			return errors.New("菜单已被角色关联，不能删除")
-		}
-		
+
 		var menu models.SysMenu
 		err := database.DB.Where("id = ? AND del_flag = 0", id).First(&menu).Error
 		if err != nil {

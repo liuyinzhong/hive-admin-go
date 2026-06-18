@@ -159,12 +159,6 @@ func (s *RoleService) UpdateRoleStatus(roleId string, status int) error {
 
 func (s *RoleService) DeleteRoles(roleIds []string) error {
 	for _, roleId := range roleIds {
-		var userCount int64
-		database.DB.Model(&models.SysUserRole{}).Where("role_id = ? AND del_flag = 0", roleId).Count(&userCount)
-		if userCount > 0 {
-			return errors.New("角色已被用户关联，不能删除")
-		}
-		
 		var role models.SysRole
 		err := database.DB.Where("role_id = ? AND del_flag = 0", roleId).First(&role).Error
 		if err != nil {

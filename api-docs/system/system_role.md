@@ -179,7 +179,6 @@ roleId
 
 要求：
 
-1. 禁止删除有绑定用户的角色
 2. 逻辑删除 del_flag=1
 3. 清理 sys_user_role 关联表数据
 4. 清理 sys_role_menu 关联表数据

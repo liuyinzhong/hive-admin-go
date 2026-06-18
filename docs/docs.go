@@ -4821,6 +4821,12 @@ const docTemplate = `{
                         "description": "状态",
                         "name": "status",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "部门ID，查询该部门及子部门的用户",
+                        "name": "deptId",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -5630,6 +5636,9 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
+                "phone": {
+                    "type": "string"
+                },
                 "realName": {
                     "type": "string"
                 },
@@ -6152,6 +6161,9 @@ const docTemplate = `{
                     }
                 },
                 "desc": {
+                    "type": "string"
+                },
+                "phone": {
                     "type": "string"
                 },
                 "realName": {

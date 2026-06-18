@@ -16,7 +16,7 @@ func NewUserService() *UserService {
 
 func (s *UserService) GetUserList(req models.UserListRequest) (*utils.PageResult, error) {
 	query := database.DB.Model(&models.SysUser{}).Where("del_flag = 0 AND is_sys = 0")
-	
+
 	if req.Username != "" {
 		query = query.Where("username LIKE ?", "%"+req.Username+"%")
 	}
@@ -26,25 +26,48 @@ func (s *UserService) GetUserList(req models.UserListRequest) (*utils.PageResult
 	if req.Status != nil {
 		query = query.Where("status = ?", *req.Status)
 	}
-	
+	if req.Phone != "" {
+		query = query.Where("phone LIKE ?", "%"+req.Phone+"%")
+	}
+	if req.DeptId != "" {
+		deptIds := s.getDeptAndChildren(req.DeptId)
+		var userIds []string
+		database.DB.Model(&models.SysUserDept{}).Where("dept_id IN ? AND del_flag = 0", deptIds).Pluck("user_id", &userIds)
+		if len(userIds) > 0 {
+			query = query.Where("user_id IN ?", userIds)
+		} else {
+			query = query.Where("1 = 0")
+		}
+	}
+
 	sorts, _ := utils.ParseSortParams(req.Sorts)
 	query = utils.ApplySorting(query, sorts, "create_date desc")
-	
+
 	var users []models.SysUser
 	pageResult, err := utils.Paginate(query, req.Page, req.PageSize, &users)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	resultItems := make([]*models.ProfileResponse, 0)
 	for _, user := range users {
 		roleTitles, roleIds := s.getUserRoles(user.UserID)
 		deptTitles, deptIds := s.getUserDepts(user.UserID)
 		resultItems = append(resultItems, models.SysUserToProfileResponse(user, roleTitles, roleIds, deptTitles, deptIds))
 	}
-	
+
 	pageResult.Items = resultItems
 	return pageResult, nil
+}
+
+func (s *UserService) getDeptAndChildren(deptId string) []string {
+	ids := []string{deptId}
+	var children []models.SysDept
+	database.DB.Where("pid = ? AND del_flag = 0", deptId).Find(&children)
+	for _, child := range children {
+		ids = append(ids, s.getDeptAndChildren(child.DeptID)...)
+	}
+	return ids
 }
 
 func (s *UserService) GetAllUsers(realName string) ([]*models.ProfileResponse, error) {
@@ -82,6 +105,7 @@ func (s *UserService) CreateUser(req models.CreateUserRequest) error {
 		UserID:    utils.GenerateUUID(),
 		Username:  &req.Username,
 		RealName:  &req.RealName,
+		Phone:     req.Phone,
 		Password:  &req.Password,
 		Desc:      req.Desc,
 		Status:    1,
@@ -135,6 +159,7 @@ func (s *UserService) UpdateUser(userId string, req models.UpdateUserRequest) er
 	now := time.Now()
 	user.Username = &req.Username
 	user.RealName = &req.RealName
+	user.Phone = req.Phone
 	user.Desc = req.Desc
 	user.UpdateDate = &now
 	

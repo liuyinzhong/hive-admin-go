@@ -319,6 +319,8 @@ definitions:
         type: string
       password:
         type: string
+      phone:
+        type: string
       realName:
         type: string
       roleIds:
@@ -668,6 +670,8 @@ definitions:
           type: string
         type: array
       desc:
+        type: string
+      phone:
         type: string
       realName:
         type: string
@@ -3879,6 +3883,10 @@ paths:
         in: query
         name: status
         type: integer
+      - description: 部门ID，查询该部门及子部门的用户
+        in: query
+        name: deptId
+        type: string
       produces:
       - application/json
       responses:

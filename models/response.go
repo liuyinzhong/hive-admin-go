@@ -25,6 +25,7 @@ type ProfileResponse struct {
 	Avatar     *string  `json:"avatar"`
 	Username   string   `json:"username"`
 	RealName   string   `json:"realName"`
+	Phone      *string  `json:"phone"`
 	RoleTitles []string `json:"roleTitles"`
 	RoleIds    []string `json:"roleIds"`
 	Desc       *string  `json:"desc"`
@@ -85,8 +86,10 @@ type UserListRequest struct {
 	PageSize int    `form:"pageSize"`
 	Username string `form:"username"`
 	RealName string `form:"realName"`
+	Phone    string `form:"phone"`
 	Status   *int   `form:"status"`
 	Sorts    string `form:"sorts"`
+	DeptId   string `form:"deptId"`
 }
 
 type FileListRequest struct {
@@ -102,6 +105,7 @@ type CreateUserRequest struct {
 	Username string   `json:"username" binding:"required"`
 	RealName string   `json:"realName" binding:"required"`
 	Password string   `json:"password" binding:"required"`
+	Phone    *string  `json:"phone"`
 	Desc     *string  `json:"desc"`
 	DeptIds  []string `json:"deptIds"`
 	RoleIds  []string `json:"roleIds"`
@@ -110,6 +114,7 @@ type CreateUserRequest struct {
 type UpdateUserRequest struct {
 	Username string   `json:"username" binding:"required"`
 	RealName string   `json:"realName" binding:"required"`
+	Phone    *string  `json:"phone"`
 	Desc     *string  `json:"desc"`
 	DeptIds  []string `json:"deptIds"`
 	RoleIds  []string `json:"roleIds"`
@@ -294,6 +299,7 @@ func SysUserToProfileResponse(user SysUser, roleTitles, roleIds, deptTitles, dep
 		Avatar:     user.Avatar,
 		Username:   username,
 		RealName:   realName,
+		Phone:      user.Phone,
 		RoleTitles: roleTitles,
 		RoleIds:    roleIds,
 		Desc:       user.Desc,
