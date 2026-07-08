@@ -28,7 +28,7 @@ import (
 // @Param bugStatus query string false "缺陷状态，支持多选：1,2"
 // @Param storyId query string false "需求ID"
 // @Param sorts query string false "排序参数"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.BugResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/bugs [get]
 func (dc *DevController) GetBugs(c *gin.Context) {
@@ -86,7 +86,7 @@ func (dc *DevController) GetBugs(c *gin.Context) {
 // @Param moduleId query string false "模块ID"
 // @Param bugStatus query int false "缺陷状态"
 // @Param storyId query string false "需求ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.BugResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/bugs/all [get]
 func (dc *DevController) GetAllBugs(c *gin.Context) {
@@ -125,7 +125,7 @@ func (dc *DevController) GetAllBugs(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param bugNum path int true "缺陷编号"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=models.BugResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/bugs/{bugNum} [get]
@@ -152,7 +152,7 @@ func (dc *DevController) GetBug(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateBugRequest true "缺陷信息"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/bugs [post]
@@ -181,7 +181,7 @@ func (dc *DevController) CreateBug(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param bugId path string true "缺陷ID"
 // @Param request body models.ConfirmBugRequest true "缺陷确认信息"
-// @Success 200 {object} map[string]interface{} "确认成功"
+// @Success 200 {object} models.Response "确认成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/bugs/{bugId}/confirm [put]
@@ -211,7 +211,7 @@ func (dc *DevController) ConfirmBug(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []models.CreateBugRequest true "缺陷信息列表"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/bugs/batch [post]
@@ -240,7 +240,7 @@ func (dc *DevController) CreateBugs(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param bugId path string true "缺陷ID"
 // @Param request body models.UpdateBugRequest true "缺陷信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/bugs/{bugId} [put]
@@ -271,7 +271,7 @@ func (dc *DevController) UpdateBug(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param bugId path string true "缺陷ID"
 // @Param request body models.UpdateBugFieldRequest true "字段信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/bugs/{bugId}/field [put]
@@ -302,7 +302,7 @@ func (dc *DevController) UpdateBugField(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param bugId path string true "缺陷ID"
 // @Param request body models.UpdateBugNextRequest true "缺陷信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/bugs/{bugId}/next [put]
@@ -332,7 +332,7 @@ func (dc *DevController) UpdateBugNext(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []string true "缺陷ID列表"
-// @Success 200 {object} map[string]interface{} "删除成功"
+// @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/bugs [delete]

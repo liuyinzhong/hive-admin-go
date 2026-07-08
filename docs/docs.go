@@ -37,8 +37,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -79,8 +93,19 @@ const docTemplate = `{
                     "200": {
                         "description": "登录成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.LoginResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -115,8 +140,7 @@ const docTemplate = `{
                     "200": {
                         "description": "登出成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "401": {
@@ -151,8 +175,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.MenuTreeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -187,8 +225,19 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProfileResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -285,8 +334,34 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.BugResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -330,8 +405,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -385,8 +459,7 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -472,8 +545,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.BugResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -522,8 +609,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -583,8 +669,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -644,8 +729,7 @@ const docTemplate = `{
                     "200": {
                         "description": "确认成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -705,8 +789,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -766,8 +849,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -818,8 +900,19 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.BugResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -870,8 +963,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ChangeHistoryResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -922,8 +1029,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -973,8 +1079,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ModuleResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -1018,8 +1138,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -1073,8 +1192,7 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -1125,8 +1243,19 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ModuleResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -1184,8 +1313,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -1235,8 +1363,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.NodeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -1280,8 +1422,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -1335,8 +1476,7 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -1396,8 +1536,7 @@ const docTemplate = `{
                     "200": {
                         "description": "审批成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -1448,8 +1587,7 @@ const docTemplate = `{
                     "200": {
                         "description": "流转成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -1491,8 +1629,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ProjectResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -1536,8 +1688,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -1588,8 +1739,19 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProjectResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -1647,8 +1809,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -1746,8 +1907,34 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.StoryResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -1791,8 +1978,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -1846,8 +2032,7 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -1927,8 +2112,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.StoryResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -1977,8 +2176,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -2038,8 +2236,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -2099,8 +2296,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -2160,8 +2356,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -2212,8 +2407,19 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.StoryResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -2311,8 +2517,34 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.TaskResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -2356,8 +2588,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -2411,8 +2642,7 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -2492,8 +2722,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.TaskResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -2542,8 +2786,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -2603,8 +2846,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -2664,8 +2906,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -2725,8 +2966,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -2777,8 +3017,19 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.TaskResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -2858,8 +3109,34 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.VersionResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -2903,8 +3180,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -2958,8 +3234,7 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -3021,8 +3296,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.VersionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -3066,8 +3355,19 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.VersionResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -3111,8 +3411,19 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.VersionResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -3170,8 +3481,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -3231,8 +3541,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -3282,8 +3591,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.DeptTreeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -3327,8 +3650,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -3382,8 +3704,7 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -3425,8 +3746,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.DeptTreeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -3470,8 +3805,19 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.DeptTreeResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -3529,8 +3875,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -3580,8 +3925,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.DictTreeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -3625,8 +3984,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -3680,8 +4038,7 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -3732,8 +4089,19 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.DictTreeResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -3791,8 +4159,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -3855,8 +4222,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -3909,25 +4275,25 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "原始文件名",
+                        "description": "原始文件名(模糊搜索)",
                         "name": "originalName",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "MIME类型",
+                        "description": "MIME类型(精确匹配)",
                         "name": "type",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "文件扩展名",
+                        "description": "文件扩展名(精确匹配，如 .jpg)",
                         "name": "fileExt",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "排序参数",
+                        "description": "排序参数(如 createDate,desc;size,asc)",
                         "name": "sorts",
                         "in": "query"
                     }
@@ -3936,8 +4302,34 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.FileResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -3987,8 +4379,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.MenuTreeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -4032,8 +4438,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -4087,8 +4492,7 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -4145,8 +4549,19 @@ const docTemplate = `{
                     "200": {
                         "description": "检查结果",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -4203,8 +4618,19 @@ const docTemplate = `{
                     "200": {
                         "description": "检查结果",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -4255,8 +4681,19 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.MenuTreeResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -4314,8 +4751,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -4383,8 +4819,34 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.RoleSimpleResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -4428,8 +4890,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -4483,8 +4944,7 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -4526,8 +4986,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.RoleSimpleResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -4571,8 +5045,19 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.RoleDetailResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -4630,8 +5115,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -4694,8 +5178,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -4746,8 +5229,19 @@ const docTemplate = `{
                     "200": {
                         "description": "上传成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.FileResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -4833,8 +5327,34 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ProfileResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -4878,8 +5398,7 @@ const docTemplate = `{
                     "200": {
                         "description": "创建成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -4933,8 +5452,7 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -4984,8 +5502,22 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ProfileResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
@@ -5029,8 +5561,19 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProfileResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -5088,8 +5631,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -5152,8 +5694,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -5175,6 +5716,196 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.BugResponse": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "指派人头像",
+                    "type": "string",
+                    "example": "https://xxx/avatar.jpg"
+                },
+                "bugConfirmStatus": {
+                    "description": "缺陷确认状态",
+                    "type": "string",
+                    "example": "0"
+                },
+                "bugEnv": {
+                    "description": "缺陷环境",
+                    "type": "string",
+                    "example": "0"
+                },
+                "bugId": {
+                    "description": "缺陷ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "bugLevel": {
+                    "description": "缺陷等级",
+                    "type": "string",
+                    "example": "0"
+                },
+                "bugNum": {
+                    "description": "缺陷编号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "bugRichText": {
+                    "description": "缺陷描述(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e缺陷描述\u003c/p\u003e"
+                },
+                "bugSource": {
+                    "description": "缺陷来源",
+                    "type": "string",
+                    "example": "0"
+                },
+                "bugStatus": {
+                    "description": "缺陷状态",
+                    "type": "string",
+                    "example": "0"
+                },
+                "bugTitle": {
+                    "description": "缺陷标题",
+                    "type": "string",
+                    "example": "缺陷标题"
+                },
+                "bugType": {
+                    "description": "缺陷类型",
+                    "type": "string",
+                    "example": "0"
+                },
+                "bugUa": {
+                    "description": "用户代理",
+                    "type": "string",
+                    "example": "Mozilla/5.0"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "creatorId": {
+                    "description": "创建人ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "creatorName": {
+                    "description": "创建人姓名",
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "moduleId": {
+                    "description": "关联模块ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "moduleTitle": {
+                    "description": "关联模块标题",
+                    "type": "string",
+                    "example": "模块名称"
+                },
+                "projectId": {
+                    "description": "关联项目ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "projectTitle": {
+                    "description": "关联项目标题",
+                    "type": "string",
+                    "example": "crudelis"
+                },
+                "realName": {
+                    "description": "指派人姓名",
+                    "type": "string",
+                    "example": "张三"
+                },
+                "storyId": {
+                    "description": "关联需求ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "storyTitle": {
+                    "description": "关联需求标题",
+                    "type": "string",
+                    "example": "需求标题"
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "userId": {
+                    "description": "指派人ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "version": {
+                    "description": "关联版本号",
+                    "type": "string",
+                    "example": "v1.0.0"
+                },
+                "versionId": {
+                    "description": "关联版本ID",
+                    "type": "string",
+                    "example": "UUID"
+                }
+            }
+        },
+        "models.ChangeHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "businessId": {
+                    "description": "业务ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "businessType": {
+                    "description": "业务类型",
+                    "type": "string",
+                    "example": "0"
+                },
+                "changeBehavior": {
+                    "description": "变更行为",
+                    "type": "string",
+                    "example": "0"
+                },
+                "changeId": {
+                    "description": "变更记录ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "changeRichText": {
+                    "description": "变更详情(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e变更详情\u003c/p\u003e"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "creatorId": {
+                    "description": "创建人ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "creatorName": {
+                    "description": "创建人姓名",
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "extendJson": {
+                    "description": "扩展JSON",
+                    "type": "string",
+                    "example": "{\"key\":\"value\"}"
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                }
+            }
+        },
         "models.ConfirmBugRequest": {
             "type": "object",
             "required": [
@@ -5182,10 +5913,14 @@ const docTemplate = `{
             ],
             "properties": {
                 "bugConfirmStatus": {
-                    "type": "string"
+                    "description": "缺陷确认状态",
+                    "type": "string",
+                    "example": "0"
                 },
                 "changeRichText": {
-                    "type": "string"
+                    "description": "确认说明(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e确认说明\u003c/p\u003e"
                 }
             }
         },
@@ -5198,43 +5933,69 @@ const docTemplate = `{
             ],
             "properties": {
                 "bugEnv": {
-                    "type": "string"
+                    "description": "缺陷环境",
+                    "type": "string",
+                    "example": "0"
                 },
                 "bugLevel": {
-                    "type": "string"
+                    "description": "缺陷等级",
+                    "type": "string",
+                    "example": "0"
                 },
                 "bugRichText": {
-                    "type": "string"
+                    "description": "缺陷描述(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e缺陷描述\u003c/p\u003e"
                 },
                 "bugSource": {
-                    "type": "string"
+                    "description": "缺陷来源",
+                    "type": "string",
+                    "example": "0"
                 },
                 "bugStatus": {
-                    "type": "string"
+                    "description": "缺陷状态",
+                    "type": "string",
+                    "example": "0"
                 },
                 "bugTitle": {
-                    "type": "string"
+                    "description": "缺陷标题",
+                    "type": "string",
+                    "example": "缺陷标题"
                 },
                 "bugType": {
-                    "type": "string"
+                    "description": "缺陷类型",
+                    "type": "string",
+                    "example": "0"
                 },
                 "bugUa": {
-                    "type": "string"
+                    "description": "用户代理",
+                    "type": "string",
+                    "example": "Mozilla/5.0"
                 },
                 "moduleId": {
-                    "type": "string"
+                    "description": "关联模块ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "projectId": {
-                    "type": "string"
+                    "description": "关联项目ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "storyId": {
-                    "type": "string"
+                    "description": "关联需求ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "userId": {
-                    "type": "string"
+                    "description": "指派人ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "versionId": {
-                    "type": "string"
+                    "description": "关联版本ID",
+                    "type": "string",
+                    "example": "UUID"
                 }
             }
         },
@@ -5247,16 +6008,24 @@ const docTemplate = `{
             ],
             "properties": {
                 "businessId": {
-                    "type": "string"
+                    "description": "业务ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "businessType": {
-                    "type": "string"
+                    "description": "业务类型",
+                    "type": "string",
+                    "example": "0"
                 },
                 "changeBehavior": {
-                    "type": "string"
+                    "description": "变更行为",
+                    "type": "string",
+                    "example": "0"
                 },
                 "changeRichText": {
-                    "type": "string"
+                    "description": "变更详情(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e变更详情\u003c/p\u003e"
                 }
             }
         },
@@ -5267,16 +6036,24 @@ const docTemplate = `{
             ],
             "properties": {
                 "deptTitle": {
-                    "type": "string"
+                    "description": "部门名称",
+                    "type": "string",
+                    "example": "技术部"
                 },
                 "pid": {
-                    "type": "string"
+                    "description": "父级部门ID，空表示顶级部门",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "技术部门"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -5288,25 +6065,39 @@ const docTemplate = `{
             ],
             "properties": {
                 "color": {
-                    "type": "string"
+                    "description": "主题色",
+                    "type": "string",
+                    "example": "#2db7f5"
                 },
                 "label": {
-                    "type": "string"
+                    "description": "字典标题",
+                    "type": "string",
+                    "example": "功能需求"
                 },
                 "pid": {
-                    "type": "string"
+                    "description": "父级字典ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "需求类型"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
                 },
                 "type": {
-                    "type": "string"
+                    "description": "字典类型",
+                    "type": "string",
+                    "example": "STORY_TYPE"
                 },
                 "value": {
-                    "type": "string"
+                    "description": "字典值",
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -5319,28 +6110,47 @@ const docTemplate = `{
             ],
             "properties": {
                 "authCode": {
-                    "type": "string"
+                    "description": "权限标识",
+                    "type": "string",
+                    "example": "sys:analytics"
                 },
                 "component": {
-                    "type": "string"
+                    "description": "页面组件路径",
+                    "type": "string",
+                    "example": "/dashboard/analytics/index"
                 },
                 "meta": {
-                    "$ref": "#/definitions/models.MenuMeta"
+                    "description": "菜单元数据",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.MenuMeta"
+                        }
+                    ]
                 },
                 "name": {
-                    "type": "string"
+                    "description": "菜单名称",
+                    "type": "string",
+                    "example": "Analytics"
                 },
                 "path": {
-                    "type": "string"
+                    "description": "路由地址",
+                    "type": "string",
+                    "example": "/analytics"
                 },
                 "pid": {
-                    "type": "string"
+                    "description": "上级菜单ID，空表示顶级菜单",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
                 },
                 "type": {
-                    "type": "string"
+                    "description": "菜单类型 catalog=目录 menu=菜单",
+                    "type": "string",
+                    "example": "menu"
                 }
             }
         },
@@ -5352,13 +6162,19 @@ const docTemplate = `{
             ],
             "properties": {
                 "moduleTitle": {
-                    "type": "string"
+                    "description": "模块标题",
+                    "type": "string",
+                    "example": "模块名称"
                 },
                 "projectId": {
-                    "type": "string"
+                    "description": "关联项目ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "sort": {
-                    "type": "integer"
+                    "description": "排序",
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -5413,28 +6229,44 @@ const docTemplate = `{
             ],
             "properties": {
                 "businessId": {
-                    "type": "string"
+                    "description": "业务ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "businessType": {
-                    "type": "string"
+                    "description": "业务类型",
+                    "type": "string",
+                    "example": "0"
                 },
                 "label": {
-                    "type": "string"
+                    "description": "节点名称",
+                    "type": "string",
+                    "example": "需求提交"
                 },
                 "nodeType": {
-                    "type": "integer"
+                    "description": "节点类型 0=开始 1=办理 2=审批 3=结束",
+                    "type": "integer",
+                    "example": 1
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "节点备注"
                 },
                 "sort": {
-                    "type": "integer"
+                    "description": "节点顺序",
+                    "type": "integer",
+                    "example": 1
                 },
                 "userId": {
-                    "type": "string"
+                    "description": "负责人ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "value": {
-                    "type": "string"
+                    "description": "节点值",
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -5445,13 +6277,19 @@ const docTemplate = `{
             ],
             "properties": {
                 "description": {
-                    "type": "string"
+                    "description": "项目描述",
+                    "type": "string",
+                    "example": "项目描述"
                 },
                 "projectLogo": {
-                    "type": "string"
+                    "description": "项目Logo",
+                    "type": "string",
+                    "example": "https://xxx/logo.png"
                 },
                 "projectTitle": {
-                    "type": "string"
+                    "description": "项目标题",
+                    "type": "string",
+                    "example": "crudelis"
                 }
             }
         },
@@ -5462,19 +6300,29 @@ const docTemplate = `{
             ],
             "properties": {
                 "permissions": {
+                    "description": "菜单id数组",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "编辑角色"
                 },
                 "roleTitle": {
-                    "type": "string"
+                    "description": "角色名称",
+                    "type": "string",
+                    "example": "编辑员"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -5579,40 +6427,64 @@ const docTemplate = `{
             ],
             "properties": {
                 "endDate": {
-                    "type": "string"
+                    "description": "结束日期",
+                    "type": "string",
+                    "example": "2024-12-31"
                 },
                 "moduleId": {
-                    "type": "string"
+                    "description": "关联模块ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "planHours": {
-                    "type": "number"
+                    "description": "计划工时",
+                    "type": "number",
+                    "example": 8
                 },
                 "projectId": {
-                    "type": "string"
+                    "description": "关联项目ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "startDate": {
-                    "type": "string"
+                    "description": "开始日期",
+                    "type": "string",
+                    "example": "2024-01-01"
                 },
                 "storyId": {
-                    "type": "string"
+                    "description": "关联需求ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "taskRichText": {
-                    "type": "string"
+                    "description": "任务描述(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e任务描述\u003c/p\u003e"
                 },
                 "taskStatus": {
-                    "type": "string"
+                    "description": "任务状态",
+                    "type": "string",
+                    "example": "0"
                 },
                 "taskTitle": {
-                    "type": "string"
+                    "description": "任务标题",
+                    "type": "string",
+                    "example": "任务标题"
                 },
                 "taskType": {
-                    "type": "string"
+                    "description": "任务类型",
+                    "type": "string",
+                    "example": "0"
                 },
                 "userId": {
-                    "type": "string"
+                    "description": "负责人ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "versionId": {
-                    "type": "string"
+                    "description": "关联版本ID",
+                    "type": "string",
+                    "example": "UUID"
                 }
             }
         },
@@ -5625,31 +6497,49 @@ const docTemplate = `{
             ],
             "properties": {
                 "deptIds": {
+                    "description": "部门id数组",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
                 },
                 "desc": {
-                    "type": "string"
+                    "description": "描述",
+                    "type": "string",
+                    "example": "普通用户"
                 },
                 "password": {
-                    "type": "string"
+                    "description": "密码",
+                    "type": "string",
+                    "example": "123456"
                 },
                 "phone": {
-                    "type": "string"
+                    "description": "手机号",
+                    "type": "string",
+                    "example": "13800138000"
                 },
                 "realName": {
-                    "type": "string"
+                    "description": "真实姓名",
+                    "type": "string",
+                    "example": "新用户"
                 },
                 "roleIds": {
+                    "description": "角色id数组",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
                 },
                 "username": {
-                    "type": "string"
+                    "description": "登录用户名",
+                    "type": "string",
+                    "example": "newuser"
                 }
             }
         },
@@ -5657,25 +6547,218 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "endDate": {
-                    "type": "string"
+                    "description": "结束日期",
+                    "type": "string",
+                    "example": "2024-12-31"
                 },
                 "projectId": {
-                    "type": "string"
+                    "description": "关联项目ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "releaseStatus": {
-                    "type": "string"
+                    "description": "发布状态",
+                    "type": "string",
+                    "example": "0"
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "版本备注"
                 },
                 "startDate": {
-                    "type": "string"
+                    "description": "开始日期",
+                    "type": "string",
+                    "example": "2024-01-01"
                 },
                 "version": {
-                    "type": "string"
+                    "description": "版本号",
+                    "type": "string",
+                    "example": "v1.0.0"
                 },
                 "versionType": {
-                    "type": "string"
+                    "description": "版本类型",
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "models.DeptTreeResponse": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "description": "子部门",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DeptTreeResponse"
+                    }
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "deptId": {
+                    "description": "部门ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "deptTitle": {
+                    "description": "部门名称",
+                    "type": "string",
+                    "example": "技术部"
+                },
+                "pid": {
+                    "description": "父级部门ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "技术部门"
+                },
+                "status": {
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "models.DictTreeResponse": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "description": "子字典",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DictTreeResponse"
+                    }
+                },
+                "color": {
+                    "description": "主题色",
+                    "type": "string",
+                    "example": "#2db7f5"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "id": {
+                    "description": "字典ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "label": {
+                    "description": "字典标题",
+                    "type": "string",
+                    "example": "功能需求"
+                },
+                "pid": {
+                    "description": "父级字典ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "需求类型"
+                },
+                "status": {
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                },
+                "type": {
+                    "description": "字典类型",
+                    "type": "string",
+                    "example": "STORY_TYPE"
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "value": {
+                    "description": "字典值",
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "models.FileResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "description": "创建日期",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "creatorId": {
+                    "description": "创建人id",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "creatorName": {
+                    "description": "创建人姓名",
+                    "type": "string",
+                    "example": "创建人姓名"
+                },
+                "fileExt": {
+                    "description": "文件扩展名",
+                    "type": "string",
+                    "example": ".jpg"
+                },
+                "fileId": {
+                    "description": "文件ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "fullPath": {
+                    "description": "完整路径",
+                    "type": "string",
+                    "example": "/uploads/abc.jpg"
+                },
+                "name": {
+                    "description": "存储文件名(UUID重命名)",
+                    "type": "string",
+                    "example": "abc.jpg"
+                },
+                "originalName": {
+                    "description": "原始文件名",
+                    "type": "string",
+                    "example": "原始文件名.jpg"
+                },
+                "path": {
+                    "description": "文件存储路径(不含文件名)",
+                    "type": "string",
+                    "example": "/uploads/"
+                },
+                "size": {
+                    "description": "文件大小(字节)",
+                    "type": "integer",
+                    "example": 102400
+                },
+                "thumbnailPath": {
+                    "description": "缩略图路径(图片专用)",
+                    "type": "string",
+                    "example": "/uploads/thumb"
+                },
+                "thumbnailUrl": {
+                    "description": "缩略图URL(图片专用)",
+                    "type": "string",
+                    "example": "/uploads/thumb/abc.jpg"
+                },
+                "type": {
+                    "description": "MIME类型",
+                    "type": "string",
+                    "example": "image/jpeg"
+                },
+                "url": {
+                    "description": "文件访问URL",
+                    "type": "string",
+                    "example": "/uploads/abc.jpg"
                 }
             }
         },
@@ -5687,10 +6770,24 @@ const docTemplate = `{
             ],
             "properties": {
                 "password": {
-                    "type": "string"
+                    "description": "登录密码",
+                    "type": "string",
+                    "example": "123456"
                 },
                 "username": {
-                    "type": "string"
+                    "description": "登录用户名",
+                    "type": "string",
+                    "example": "admin"
+                }
+            }
+        },
+        "models.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "description": "JWT访问令牌",
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIs..."
                 }
             }
         },
@@ -5698,73 +6795,239 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "activeIcon": {
-                    "type": "string"
+                    "description": "激活图标",
+                    "type": "string",
+                    "example": "lucide:home"
                 },
                 "activePath": {
-                    "type": "string"
+                    "description": "激活路径",
+                    "type": "string",
+                    "example": "/dashboard"
                 },
                 "affixTab": {
-                    "type": "boolean"
+                    "description": "固定在标签页 0=否 1=是",
+                    "type": "boolean",
+                    "example": false
                 },
                 "affixTabOrder": {
-                    "type": "integer"
+                    "description": "固定标签页的排序",
+                    "type": "integer",
+                    "example": 0
                 },
                 "badge": {
-                    "type": "string"
+                    "description": "徽章内容",
+                    "type": "string",
+                    "example": "new"
                 },
                 "badgeType": {
-                    "type": "string"
+                    "description": "徽标类型",
+                    "type": "string",
+                    "example": "dot"
                 },
                 "badgeVariants": {
-                    "type": "string"
+                    "description": "徽标样式",
+                    "type": "string",
+                    "example": "destructive"
                 },
                 "domCached": {
-                    "type": "boolean"
+                    "description": "缓存DOM 0=否 1=是",
+                    "type": "boolean",
+                    "example": false
                 },
                 "hideChildrenInMenu": {
-                    "type": "boolean"
+                    "description": "隐藏子菜单 0=否 1=是",
+                    "type": "boolean",
+                    "example": false
                 },
                 "hideInBreadcrumb": {
-                    "type": "boolean"
+                    "description": "在面包屑中隐藏 0=否 1=是",
+                    "type": "boolean",
+                    "example": false
                 },
                 "hideInMenu": {
-                    "type": "boolean"
+                    "description": "在菜单中隐藏 0=否 1=是",
+                    "type": "boolean",
+                    "example": false
                 },
                 "hideInTab": {
-                    "type": "boolean"
+                    "description": "在标签栏中隐藏 0=否 1=是",
+                    "type": "boolean",
+                    "example": false
                 },
                 "icon": {
-                    "type": "string"
+                    "description": "图标",
+                    "type": "string",
+                    "example": "lucide:home"
                 },
                 "iframeSrc": {
-                    "type": "string"
+                    "description": "内嵌页面的iframe地址",
+                    "type": "string",
+                    "example": "https://example.com"
                 },
                 "keepAlive": {
-                    "type": "boolean"
+                    "description": "缓存标签页 0=否 1=是",
+                    "type": "boolean",
+                    "example": false
                 },
                 "link": {
-                    "type": "string"
+                    "description": "外链跳转路径",
+                    "type": "string",
+                    "example": "https://example.com"
                 },
                 "maxNumOfOpenTab": {
-                    "type": "integer"
+                    "description": "标签页最大打开数量",
+                    "type": "integer",
+                    "example": -1
                 },
                 "menuVisibleWithForbidden": {
-                    "type": "boolean"
+                    "description": "菜单可见但访问受限 0=否 1=是",
+                    "type": "boolean",
+                    "example": false
                 },
                 "noBasicLayout": {
-                    "type": "boolean"
+                    "description": "无基础布局 0=否 1=是",
+                    "type": "boolean",
+                    "example": false
                 },
                 "openInNewWindow": {
-                    "type": "boolean"
+                    "description": "在新窗口打开 0=否 1=是",
+                    "type": "boolean",
+                    "example": false
                 },
                 "order": {
-                    "type": "integer"
+                    "description": "排序",
+                    "type": "integer",
+                    "example": 0
                 },
                 "query": {
-                    "type": "string"
+                    "description": "额外的路由参数",
+                    "type": "string",
+                    "example": "id=1"
                 },
                 "title": {
-                    "type": "string"
+                    "description": "页面标题",
+                    "type": "string",
+                    "example": "page.dashboard.analytics"
+                }
+            }
+        },
+        "models.MenuTreeResponse": {
+            "type": "object",
+            "properties": {
+                "authCode": {
+                    "description": "权限标识",
+                    "type": "string",
+                    "example": "sys:analytics"
+                },
+                "children": {
+                    "description": "子菜单",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MenuTreeResponse"
+                    }
+                },
+                "component": {
+                    "description": "页面组件路径",
+                    "type": "string",
+                    "example": "/dashboard/analytics/index"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "creatorId": {
+                    "description": "创建人id",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "creatorName": {
+                    "description": "创建人姓名",
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "id": {
+                    "description": "菜单ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "meta": {
+                    "description": "菜单元数据",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.MenuMeta"
+                        }
+                    ]
+                },
+                "name": {
+                    "description": "菜单名称",
+                    "type": "string",
+                    "example": "Analytics"
+                },
+                "path": {
+                    "description": "路由地址",
+                    "type": "string",
+                    "example": "/analytics"
+                },
+                "pid": {
+                    "description": "上级菜单ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "status": {
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                },
+                "type": {
+                    "description": "菜单类型 catalog=目录 menu=菜单",
+                    "type": "string",
+                    "example": "menu"
+                },
+                "updateDate": {
+                    "description": "修改时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                }
+            }
+        },
+        "models.ModuleResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "moduleId": {
+                    "description": "模块ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "moduleTitle": {
+                    "description": "模块标题",
+                    "type": "string",
+                    "example": "模块名称"
+                },
+                "projectId": {
+                    "description": "关联项目ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "projectTitle": {
+                    "description": "关联项目标题",
+                    "type": "string",
+                    "example": "crudelis"
+                },
+                "sort": {
+                    "description": "排序",
+                    "type": "integer",
+                    "example": 1
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
                 }
             }
         },
@@ -5775,24 +7038,597 @@ const docTemplate = `{
             ],
             "properties": {
                 "result": {
-                    "type": "integer"
+                    "description": "审批结果 0=驳回 1=通过",
+                    "type": "integer",
+                    "example": 1
                 },
                 "resultRichText": {
-                    "type": "string"
+                    "description": "审批意见(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e审批意见\u003c/p\u003e"
+                }
+            }
+        },
+        "models.NodeResponse": {
+            "type": "object",
+            "properties": {
+                "businessId": {
+                    "description": "业务ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "businessType": {
+                    "description": "业务类型",
+                    "type": "string",
+                    "example": "0"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "current": {
+                    "description": "是否为当前节点",
+                    "type": "boolean",
+                    "example": false
+                },
+                "endDate": {
+                    "description": "结束时间",
+                    "type": "string",
+                    "example": "2024-12-31 12:00:00"
+                },
+                "label": {
+                    "description": "节点名称",
+                    "type": "string",
+                    "example": "需求提交"
+                },
+                "nodeId": {
+                    "description": "节点ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "nodeType": {
+                    "description": "节点类型 0=开始 1=办理 2=审批 3=结束",
+                    "type": "integer",
+                    "example": 1
+                },
+                "realName": {
+                    "description": "负责人姓名",
+                    "type": "string",
+                    "example": "张三"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "节点备注"
+                },
+                "result": {
+                    "description": "处理结果",
+                    "type": "integer",
+                    "example": 0
+                },
+                "resultRichText": {
+                    "description": "处理结果(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e审批意见\u003c/p\u003e"
+                },
+                "sort": {
+                    "description": "节点顺序",
+                    "type": "integer",
+                    "example": 1
+                },
+                "startDate": {
+                    "description": "开始时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "userId": {
+                    "description": "负责人ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "value": {
+                    "description": "节点值",
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "models.ProfileResponse": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "用户头像URL",
+                    "type": "string",
+                    "example": "https://xxx/avatar.jpg"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "deptIds": {
+                    "description": "部门id数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "deptTitles": {
+                    "description": "部门名称数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "desc": {
+                    "description": "用户描述",
+                    "type": "string",
+                    "example": "超级管理员"
+                },
+                "email": {
+                    "description": "邮箱",
+                    "type": "string",
+                    "example": "admin@example.com"
+                },
+                "homePath": {
+                    "description": "首页路径",
+                    "type": "string",
+                    "example": "/dashboard/analytics"
+                },
+                "phone": {
+                    "description": "手机号",
+                    "type": "string",
+                    "example": "13800138000"
+                },
+                "realName": {
+                    "description": "真实姓名",
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "roleIds": {
+                    "description": "角色id数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "roleTitles": {
+                    "description": "角色名称数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "status": {
+                    "description": "用户状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "username": {
+                    "description": "登录用户名",
+                    "type": "string",
+                    "example": "admin"
+                }
+            }
+        },
+        "models.ProjectResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "description": {
+                    "description": "项目描述",
+                    "type": "string",
+                    "example": "项目描述"
+                },
+                "projectId": {
+                    "description": "项目ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "projectLogo": {
+                    "description": "项目Logo",
+                    "type": "string",
+                    "example": "https://xxx/logo.png"
+                },
+                "projectTitle": {
+                    "description": "项目标题",
+                    "type": "string",
+                    "example": "crudelis"
+                }
+            }
+        },
+        "models.Response": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "状态码 0=成功 -1=失败",
+                    "type": "integer",
+                    "example": 0
+                },
+                "data": {
+                    "description": "响应数据"
+                },
+                "error": {
+                    "description": "错误信息"
+                },
+                "message": {
+                    "description": "提示信息",
+                    "type": "string",
+                    "example": "ok"
+                }
+            }
+        },
+        "models.RoleDetailResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "permissions": {
+                    "description": "菜单id数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "超级管理员"
+                },
+                "roleId": {
+                    "description": "角色ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "roleTitle": {
+                    "description": "角色名称",
+                    "type": "string",
+                    "example": "SuperAdmin"
+                },
+                "status": {
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "models.RoleSimpleResponse": {
+            "type": "object",
+            "properties": {
+                "roleId": {
+                    "description": "角色ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "roleTitle": {
+                    "description": "角色名称",
+                    "type": "string",
+                    "example": "SuperAdmin"
+                },
+                "status": {
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "models.StoryResponse": {
+            "type": "object",
+            "properties": {
+                "bugList": {
+                    "description": "关联缺陷列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.BugResponse"
+                    }
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "creatorId": {
+                    "description": "创建人ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "creatorName": {
+                    "description": "创建人姓名",
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "fileIds": {
+                    "description": "附件ID数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "fileList": {
+                    "description": "附件列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.FileResponse"
+                    }
+                },
+                "moduleId": {
+                    "description": "关联模块ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "moduleTitle": {
+                    "description": "关联模块标题",
+                    "type": "string",
+                    "example": "模块名称"
+                },
+                "nodes": {
+                    "description": "节点列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.NodeResponse"
+                    }
+                },
+                "projectId": {
+                    "description": "关联项目ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "projectTitle": {
+                    "description": "关联项目标题",
+                    "type": "string",
+                    "example": "crudelis"
+                },
+                "source": {
+                    "description": "需求来源",
+                    "type": "string",
+                    "example": "0"
+                },
+                "storyId": {
+                    "description": "需求ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "storyLevel": {
+                    "description": "需求优先级",
+                    "type": "string",
+                    "example": "0"
+                },
+                "storyNum": {
+                    "description": "需求编号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "storyRichText": {
+                    "description": "需求描述(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e需求描述\u003c/p\u003e"
+                },
+                "storyStatus": {
+                    "description": "需求状态",
+                    "type": "string",
+                    "example": "0"
+                },
+                "storyTitle": {
+                    "description": "需求标题",
+                    "type": "string",
+                    "example": "需求标题"
+                },
+                "storyType": {
+                    "description": "需求类型",
+                    "type": "string",
+                    "example": "0"
+                },
+                "taskList": {
+                    "description": "关联任务列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TaskResponse"
+                    }
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "userIds": {
+                    "description": "参与人员ID数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "userList": {
+                    "description": "参与人员列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.StoryUserItem"
+                    }
+                },
+                "version": {
+                    "description": "关联版本号",
+                    "type": "string",
+                    "example": "v1.0.0"
+                },
+                "versionId": {
+                    "description": "关联版本ID",
+                    "type": "string",
+                    "example": "UUID"
+                }
+            }
+        },
+        "models.StoryUserItem": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "用户头像",
+                    "type": "string",
+                    "example": "https://xxx/avatar.jpg"
+                },
+                "realName": {
+                    "description": "真实姓名",
+                    "type": "string",
+                    "example": "张三"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                }
+            }
+        },
+        "models.TaskResponse": {
+            "type": "object",
+            "properties": {
+                "actualHours": {
+                    "description": "实际工时",
+                    "type": "number",
+                    "example": 6
+                },
+                "avatar": {
+                    "description": "负责人头像",
+                    "type": "string",
+                    "example": "https://xxx/avatar.jpg"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "creatorId": {
+                    "description": "创建人ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "creatorName": {
+                    "description": "创建人姓名",
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "endDate": {
+                    "description": "结束日期",
+                    "type": "string",
+                    "example": "2024-12-31"
+                },
+                "moduleId": {
+                    "description": "关联模块ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "moduleTitle": {
+                    "description": "关联模块标题",
+                    "type": "string",
+                    "example": "模块名称"
+                },
+                "percent": {
+                    "description": "任务进度百分比",
+                    "type": "integer",
+                    "example": 50
+                },
+                "planHours": {
+                    "description": "计划工时",
+                    "type": "number",
+                    "example": 8
+                },
+                "projectId": {
+                    "description": "关联项目ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "projectTitle": {
+                    "description": "关联项目标题",
+                    "type": "string",
+                    "example": "crudelis"
+                },
+                "realName": {
+                    "description": "负责人姓名",
+                    "type": "string",
+                    "example": "张三"
+                },
+                "startDate": {
+                    "description": "开始日期",
+                    "type": "string",
+                    "example": "2024-01-01"
+                },
+                "storyId": {
+                    "description": "关联需求ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "storyTitle": {
+                    "description": "关联需求标题",
+                    "type": "string",
+                    "example": "需求标题"
+                },
+                "taskId": {
+                    "description": "任务ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "taskNum": {
+                    "description": "任务编号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "taskRichText": {
+                    "description": "任务描述(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e任务描述\u003c/p\u003e"
+                },
+                "taskStatus": {
+                    "description": "任务状态",
+                    "type": "string",
+                    "example": "0"
+                },
+                "taskTitle": {
+                    "description": "任务标题",
+                    "type": "string",
+                    "example": "任务标题"
+                },
+                "taskType": {
+                    "description": "任务类型",
+                    "type": "string",
+                    "example": "0"
+                },
+                "userId": {
+                    "description": "负责人ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "version": {
+                    "description": "关联版本号",
+                    "type": "string",
+                    "example": "v1.0.0"
+                },
+                "versionId": {
+                    "description": "关联版本ID",
+                    "type": "string",
+                    "example": "UUID"
                 }
             }
         },
         "models.UpdateBugFieldRequest": {
-            "type": "object",
-            "required": [
-                "key"
-            ],
-            "properties": {
-                "key": {
-                    "type": "string"
-                },
-                "value": {}
-            }
+            "type": "object"
         },
         "models.UpdateBugNextRequest": {
             "type": "object",
@@ -5801,10 +7637,14 @@ const docTemplate = `{
             ],
             "properties": {
                 "bugStatus": {
-                    "type": "string"
+                    "description": "缺陷状态",
+                    "type": "string",
+                    "example": "0"
                 },
                 "changeRichText": {
-                    "type": "string"
+                    "description": "流转说明(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e流转说明\u003c/p\u003e"
                 }
             }
         },
@@ -5817,43 +7657,69 @@ const docTemplate = `{
             ],
             "properties": {
                 "bugEnv": {
-                    "type": "string"
+                    "description": "缺陷环境",
+                    "type": "string",
+                    "example": "0"
                 },
                 "bugLevel": {
-                    "type": "string"
+                    "description": "缺陷等级",
+                    "type": "string",
+                    "example": "0"
                 },
                 "bugRichText": {
-                    "type": "string"
+                    "description": "缺陷描述(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e缺陷描述\u003c/p\u003e"
                 },
                 "bugSource": {
-                    "type": "string"
+                    "description": "缺陷来源",
+                    "type": "string",
+                    "example": "0"
                 },
                 "bugStatus": {
-                    "type": "string"
+                    "description": "缺陷状态",
+                    "type": "string",
+                    "example": "0"
                 },
                 "bugTitle": {
-                    "type": "string"
+                    "description": "缺陷标题",
+                    "type": "string",
+                    "example": "缺陷标题"
                 },
                 "bugType": {
-                    "type": "string"
+                    "description": "缺陷类型",
+                    "type": "string",
+                    "example": "0"
                 },
                 "bugUa": {
-                    "type": "string"
+                    "description": "用户代理",
+                    "type": "string",
+                    "example": "Mozilla/5.0"
                 },
                 "moduleId": {
-                    "type": "string"
+                    "description": "关联模块ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "projectId": {
-                    "type": "string"
+                    "description": "关联项目ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "storyId": {
-                    "type": "string"
+                    "description": "关联需求ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "userId": {
-                    "type": "string"
+                    "description": "指派人ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "versionId": {
-                    "type": "string"
+                    "description": "关联版本ID",
+                    "type": "string",
+                    "example": "UUID"
                 }
             }
         },
@@ -5864,16 +7730,24 @@ const docTemplate = `{
             ],
             "properties": {
                 "deptTitle": {
-                    "type": "string"
+                    "description": "部门名称",
+                    "type": "string",
+                    "example": "技术部"
                 },
                 "pid": {
-                    "type": "string"
+                    "description": "父级部门ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "技术部门"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -5885,25 +7759,39 @@ const docTemplate = `{
             ],
             "properties": {
                 "color": {
-                    "type": "string"
+                    "description": "主题色",
+                    "type": "string",
+                    "example": "#2db7f5"
                 },
                 "label": {
-                    "type": "string"
+                    "description": "字典标题",
+                    "type": "string",
+                    "example": "功能需求"
                 },
                 "pid": {
-                    "type": "string"
+                    "description": "父级字典ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "需求类型"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
                 },
                 "type": {
-                    "type": "string"
+                    "description": "字典类型",
+                    "type": "string",
+                    "example": "STORY_TYPE"
                 },
                 "value": {
-                    "type": "string"
+                    "description": "字典值",
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -5916,28 +7804,47 @@ const docTemplate = `{
             ],
             "properties": {
                 "authCode": {
-                    "type": "string"
+                    "description": "权限标识",
+                    "type": "string",
+                    "example": "sys:analytics"
                 },
                 "component": {
-                    "type": "string"
+                    "description": "页面组件路径",
+                    "type": "string",
+                    "example": "/dashboard/analytics/index"
                 },
                 "meta": {
-                    "$ref": "#/definitions/models.MenuMeta"
+                    "description": "菜单元数据",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.MenuMeta"
+                        }
+                    ]
                 },
                 "name": {
-                    "type": "string"
+                    "description": "菜单名称",
+                    "type": "string",
+                    "example": "Analytics"
                 },
                 "path": {
-                    "type": "string"
+                    "description": "路由地址",
+                    "type": "string",
+                    "example": "/analytics"
                 },
                 "pid": {
-                    "type": "string"
+                    "description": "上级菜单ID，空表示顶级菜单",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
                 },
                 "type": {
-                    "type": "string"
+                    "description": "菜单类型 catalog=目录 menu=菜单",
+                    "type": "string",
+                    "example": "menu"
                 }
             }
         },
@@ -5948,10 +7855,14 @@ const docTemplate = `{
             ],
             "properties": {
                 "moduleTitle": {
-                    "type": "string"
+                    "description": "模块标题",
+                    "type": "string",
+                    "example": "模块名称"
                 },
                 "sort": {
-                    "type": "integer"
+                    "description": "排序",
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -5962,13 +7873,19 @@ const docTemplate = `{
             ],
             "properties": {
                 "description": {
-                    "type": "string"
+                    "description": "项目描述",
+                    "type": "string",
+                    "example": "项目描述"
                 },
                 "projectLogo": {
-                    "type": "string"
+                    "description": "项目Logo",
+                    "type": "string",
+                    "example": "https://xxx/logo.png"
                 },
                 "projectTitle": {
-                    "type": "string"
+                    "description": "项目标题",
+                    "type": "string",
+                    "example": "crudelis"
                 }
             }
         },
@@ -5979,33 +7896,34 @@ const docTemplate = `{
             ],
             "properties": {
                 "permissions": {
+                    "description": "菜单id数组",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "编辑角色"
                 },
                 "roleTitle": {
-                    "type": "string"
+                    "description": "角色名称",
+                    "type": "string",
+                    "example": "编辑员"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
         "models.UpdateStoryFieldRequest": {
-            "type": "object",
-            "required": [
-                "key"
-            ],
-            "properties": {
-                "key": {
-                    "type": "string"
-                },
-                "value": {}
-            }
+            "type": "object"
         },
         "models.UpdateStoryNextRequest": {
             "type": "object",
@@ -6014,10 +7932,14 @@ const docTemplate = `{
             ],
             "properties": {
                 "changeRichText": {
-                    "type": "string"
+                    "description": "流转说明(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e流转说明\u003c/p\u003e"
                 },
                 "storyStatus": {
-                    "type": "string"
+                    "description": "需求状态",
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -6032,57 +7954,68 @@ const docTemplate = `{
             ],
             "properties": {
                 "fileIds": {
+                    "description": "附件ID数组",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "moduleId": {
-                    "type": "string"
+                    "description": "关联模块ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "projectId": {
-                    "type": "string"
+                    "description": "关联项目ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "source": {
-                    "type": "string"
+                    "description": "需求来源",
+                    "type": "string",
+                    "example": "0"
                 },
                 "storyLevel": {
-                    "type": "string"
+                    "description": "需求优先级",
+                    "type": "string",
+                    "example": "0"
                 },
                 "storyRichText": {
-                    "type": "string"
+                    "description": "需求描述(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e需求描述\u003c/p\u003e"
                 },
                 "storyStatus": {
-                    "type": "string"
+                    "description": "需求状态",
+                    "type": "string",
+                    "example": "0"
                 },
                 "storyTitle": {
-                    "type": "string"
+                    "description": "需求标题",
+                    "type": "string",
+                    "example": "需求标题"
                 },
                 "storyType": {
-                    "type": "string"
+                    "description": "需求类型",
+                    "type": "string",
+                    "example": "0"
                 },
                 "userIds": {
+                    "description": "参与人员ID数组",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "versionId": {
-                    "type": "string"
+                    "description": "关联版本ID",
+                    "type": "string",
+                    "example": "UUID"
                 }
             }
         },
         "models.UpdateTaskFieldRequest": {
-            "type": "object",
-            "required": [
-                "key"
-            ],
-            "properties": {
-                "key": {
-                    "type": "string"
-                },
-                "value": {}
-            }
+            "type": "object"
         },
         "models.UpdateTaskNextRequest": {
             "type": "object",
@@ -6091,10 +8024,14 @@ const docTemplate = `{
             ],
             "properties": {
                 "changeRichText": {
-                    "type": "string"
+                    "description": "流转说明(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e流转说明\u003c/p\u003e"
                 },
                 "taskStatus": {
-                    "type": "string"
+                    "description": "任务状态",
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -6110,40 +8047,64 @@ const docTemplate = `{
             ],
             "properties": {
                 "endDate": {
-                    "type": "string"
+                    "description": "结束日期",
+                    "type": "string",
+                    "example": "2024-12-31"
                 },
                 "moduleId": {
-                    "type": "string"
+                    "description": "关联模块ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "planHours": {
-                    "type": "number"
+                    "description": "计划工时",
+                    "type": "number",
+                    "example": 8
                 },
                 "projectId": {
-                    "type": "string"
+                    "description": "关联项目ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "startDate": {
-                    "type": "string"
+                    "description": "开始日期",
+                    "type": "string",
+                    "example": "2024-01-01"
                 },
                 "storyId": {
-                    "type": "string"
+                    "description": "关联需求ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "taskRichText": {
-                    "type": "string"
+                    "description": "任务描述(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e任务描述\u003c/p\u003e"
                 },
                 "taskStatus": {
-                    "type": "string"
+                    "description": "任务状态",
+                    "type": "string",
+                    "example": "0"
                 },
                 "taskTitle": {
-                    "type": "string"
+                    "description": "任务标题",
+                    "type": "string",
+                    "example": "任务标题"
                 },
                 "taskType": {
-                    "type": "string"
+                    "description": "任务类型",
+                    "type": "string",
+                    "example": "0"
                 },
                 "userId": {
-                    "type": "string"
+                    "description": "负责人ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "versionId": {
-                    "type": "string"
+                    "description": "关联版本ID",
+                    "type": "string",
+                    "example": "UUID"
                 }
             }
         },
@@ -6155,28 +8116,44 @@ const docTemplate = `{
             ],
             "properties": {
                 "deptIds": {
+                    "description": "部门id数组",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
                 },
                 "desc": {
-                    "type": "string"
+                    "description": "描述",
+                    "type": "string",
+                    "example": "普通用户"
                 },
                 "phone": {
-                    "type": "string"
+                    "description": "手机号",
+                    "type": "string",
+                    "example": "13800138000"
                 },
                 "realName": {
-                    "type": "string"
+                    "description": "真实姓名",
+                    "type": "string",
+                    "example": "新用户"
                 },
                 "roleIds": {
+                    "description": "角色id数组",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
                 },
                 "username": {
-                    "type": "string"
+                    "description": "登录用户名",
+                    "type": "string",
+                    "example": "newuser"
                 }
             }
         },
@@ -6184,10 +8161,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "changeRichText": {
-                    "type": "string"
+                    "description": "变更详情(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e变更详情\u003c/p\u003e"
                 },
                 "releaseStatus": {
-                    "type": "string"
+                    "description": "发布状态",
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -6195,25 +8176,128 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "endDate": {
-                    "type": "string"
+                    "description": "结束日期",
+                    "type": "string",
+                    "example": "2024-12-31"
                 },
                 "projectId": {
-                    "type": "string"
+                    "description": "关联项目ID",
+                    "type": "string",
+                    "example": "UUID"
                 },
                 "releaseStatus": {
-                    "type": "string"
+                    "description": "发布状态",
+                    "type": "string",
+                    "example": "0"
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "版本备注"
                 },
                 "startDate": {
-                    "type": "string"
+                    "description": "开始日期",
+                    "type": "string",
+                    "example": "2024-01-01"
                 },
                 "version": {
-                    "type": "string"
+                    "description": "版本号",
+                    "type": "string",
+                    "example": "v1.0.0"
                 },
                 "versionType": {
-                    "type": "string"
+                    "description": "版本类型",
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "models.VersionResponse": {
+            "type": "object",
+            "properties": {
+                "changeLog": {
+                    "description": "更新日志",
+                    "type": "string",
+                    "example": "更新日志文本"
+                },
+                "changeLogRichText": {
+                    "description": "更新日志(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e更新日志\u003c/p\u003e"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "creatorId": {
+                    "description": "创建人ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "creatorName": {
+                    "description": "创建人姓名",
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "endDate": {
+                    "description": "结束日期",
+                    "type": "string",
+                    "example": "2024-12-31"
+                },
+                "projectId": {
+                    "description": "关联项目ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "projectTitle": {
+                    "description": "关联项目标题",
+                    "type": "string",
+                    "example": "crudelis"
+                },
+                "releaseDate": {
+                    "description": "发布日期",
+                    "type": "string",
+                    "example": "2024-06-30"
+                },
+                "releaseStatus": {
+                    "description": "发布状态",
+                    "type": "string",
+                    "example": "0"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "版本备注"
+                },
+                "startDate": {
+                    "description": "开始日期",
+                    "type": "string",
+                    "example": "2024-01-01"
+                },
+                "version": {
+                    "description": "版本号",
+                    "type": "string",
+                    "example": "v1.0.0"
+                },
+                "versionId": {
+                    "description": "版本ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "versionType": {
+                    "description": "版本类型",
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "utils.PageResult": {
+            "type": "object",
+            "properties": {
+                "items": {},
+                "total": {
+                    "type": "integer"
                 }
             }
         }

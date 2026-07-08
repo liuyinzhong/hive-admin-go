@@ -16,7 +16,7 @@ import (
 // @Produce json
 // @Security ApiKeyAuth
 // @Param sorts query string false "排序参数 排序时仅支持：label、type、value"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.DictTreeResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/dicts [get]
 func (ctrl *SystemController) GetDictTree(c *gin.Context) {
@@ -43,7 +43,7 @@ func (ctrl *SystemController) GetDictTree(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateDictRequest true "字典信息"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/dicts [post]
@@ -70,7 +70,7 @@ func (ctrl *SystemController) CreateDict(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param id path string true "字典ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=models.DictTreeResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/dicts/{id} [get]
@@ -99,7 +99,7 @@ func (ctrl *SystemController) GetDictDetail(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param id path string true "字典ID"
 // @Param request body models.UpdateDictRequest true "字典信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/dicts/{id} [put]
@@ -133,7 +133,7 @@ func (ctrl *SystemController) UpdateDict(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param id path string true "字典ID"
 // @Param request body map[string]int true "状态"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/dicts/{id}/status [put]
@@ -166,7 +166,7 @@ func (ctrl *SystemController) UpdateDictStatus(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []string true "字典ID列表"
-// @Success 200 {object} map[string]interface{} "删除成功"
+// @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/dicts [delete]

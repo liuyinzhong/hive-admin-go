@@ -16,7 +16,7 @@ import (
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.ProjectResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/projects [get]
 func (dc *DevController) GetProjects(c *gin.Context) {
@@ -36,7 +36,7 @@ func (dc *DevController) GetProjects(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param projectId path string true "项目ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=models.ProjectResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/projects/{projectId} [get]
@@ -58,7 +58,7 @@ func (dc *DevController) GetProject(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateProjectRequest true "项目信息"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/projects [post]
@@ -87,7 +87,7 @@ func (dc *DevController) CreateProject(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param projectId path string true "项目ID"
 // @Param request body models.UpdateProjectRequest true "项目信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/projects/{projectId} [put]

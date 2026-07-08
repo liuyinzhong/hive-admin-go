@@ -22,7 +22,7 @@ import (
 // @Param phone query string false "手机号"
 // @Param status query int false "状态"
 // @Param deptId query string false "部门ID，查询该部门及子部门的用户"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.ProfileResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/users [get]
 func (ctrl *SystemController) GetUserList(c *gin.Context) {
@@ -49,7 +49,7 @@ func (ctrl *SystemController) GetUserList(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param realName query string false "用户姓名"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.ProfileResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/users/all [get]
 func (ctrl *SystemController) GetAllUsers(c *gin.Context) {
@@ -72,7 +72,7 @@ func (ctrl *SystemController) GetAllUsers(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateUserRequest true "用户信息"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/users [post]
@@ -99,7 +99,7 @@ func (ctrl *SystemController) CreateUser(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param userId path string true "用户ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=models.ProfileResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/users/{userId} [get]
@@ -128,7 +128,7 @@ func (ctrl *SystemController) GetUserDetail(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param userId path string true "用户ID"
 // @Param request body models.UpdateUserRequest true "用户信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/users/{userId} [put]
@@ -162,7 +162,7 @@ func (ctrl *SystemController) UpdateUser(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param userId path string true "用户ID"
 // @Param request body map[string]int true "状态"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/users/{userId}/status [put]
@@ -195,7 +195,7 @@ func (ctrl *SystemController) UpdateUserStatus(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []string true "用户ID列表"
-// @Success 200 {object} map[string]interface{} "删除成功"
+// @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/users [delete]

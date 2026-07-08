@@ -17,7 +17,7 @@ import (
 // @Produce json
 // @Security ApiKeyAuth
 // @Param projectId query string false "项目ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.ModuleResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/modules [get]
 func (dc *DevController) GetModules(c *gin.Context) {
@@ -43,7 +43,7 @@ func (dc *DevController) GetModules(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param moduleId path string true "模块ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=models.ModuleResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/modules/{moduleId} [get]
@@ -65,7 +65,7 @@ func (dc *DevController) GetModule(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateModuleRequest true "模块信息"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/modules [post]
@@ -94,7 +94,7 @@ func (dc *DevController) CreateModule(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param moduleId path string true "模块ID"
 // @Param request body models.UpdateModuleRequest true "模块信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/modules/{moduleId} [put]
@@ -123,7 +123,7 @@ func (dc *DevController) UpdateModule(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []string true "模块ID列表"
-// @Success 200 {object} map[string]interface{} "删除成功"
+// @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/modules [delete]

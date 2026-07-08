@@ -27,7 +27,7 @@ import (
 // @Param taskStatus query string false "任务状态，支持多选：1,2"
 // @Param storyId query string false "需求ID"
 // @Param sorts query string false "排序参数 排序时仅支持：taskTitle、taskStatus、startDate、endDate 的排序"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.TaskResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/tasks [get]
 func (dc *DevController) GetTasks(c *gin.Context) {
@@ -83,7 +83,7 @@ func (dc *DevController) GetTasks(c *gin.Context) {
 // @Param versionId query string false "版本ID"
 // @Param taskStatus query int false "任务状态"
 // @Param storyId query string false "需求ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.TaskResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/tasks/all [get]
 func (dc *DevController) GetAllTasks(c *gin.Context) {
@@ -121,7 +121,7 @@ func (dc *DevController) GetAllTasks(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param taskNum path int true "任务编号"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=models.TaskResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/tasks/{taskNum} [get]
@@ -148,7 +148,7 @@ func (dc *DevController) GetTask(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateTaskRequest true "任务信息"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/tasks [post]
@@ -176,7 +176,7 @@ func (dc *DevController) CreateTask(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []models.CreateTaskRequest true "任务信息列表"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/tasks/batch [post]
@@ -205,7 +205,7 @@ func (dc *DevController) CreateTasks(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param taskId path string true "任务ID"
 // @Param request body models.UpdateTaskRequest true "任务信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/tasks/{taskId} [put]
@@ -236,7 +236,7 @@ func (dc *DevController) UpdateTask(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param taskId path string true "任务ID"
 // @Param request body models.UpdateTaskFieldRequest true "字段信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/tasks/{taskId}/field [put]
@@ -267,7 +267,7 @@ func (dc *DevController) UpdateTaskField(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param taskId path string true "任务ID"
 // @Param request body models.UpdateTaskNextRequest true "任务信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/tasks/{taskId}/next [put]
@@ -297,7 +297,7 @@ func (dc *DevController) UpdateTaskNext(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []string true "任务ID列表"
-// @Success 200 {object} map[string]interface{} "删除成功"
+// @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/tasks [delete]

@@ -5,265 +5,265 @@ import (
 )
 
 type Response struct {
-	Code    int         `json:"code"`
-	Data    interface{} `json:"data"`
-	Error   interface{} `json:"error"`
-	Message string      `json:"message"`
+	Code    int         `json:"code" example:"0"`                            // 状态码 0=成功 -1=失败
+	Data    interface{} `json:"data"`                                        // 响应数据
+	Error   interface{} `json:"error"`                                       // 错误信息
+	Message string      `json:"message" example:"ok"`                        // 提示信息
 }
 
 type LoginRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Username string `json:"username" binding:"required" example:"admin"`     // 登录用户名
+	Password string `json:"password" binding:"required" example:"123456"`    // 登录密码
 }
 
 type LoginResponse struct {
-	AccessToken string `json:"accessToken"`
+	AccessToken string `json:"accessToken" example:"eyJhbGciOiJIUzI1NiIs..."`  // JWT访问令牌
 }
 
 type ProfileResponse struct {
-	UserId     string   `json:"userId"`
-	Avatar     *string  `json:"avatar"`
-	Username   string   `json:"username"`
-	RealName   string   `json:"realName"`
-	Phone      *string  `json:"phone"`
-	RoleTitles []string `json:"roleTitles"`
-	RoleIds    []string `json:"roleIds"`
-	Desc       *string  `json:"desc"`
-	Email      *string  `json:"email"`
-	HomePath   *string  `json:"homePath"`
-	DeptTitles []string `json:"deptTitles"`
-	DeptIds    []string `json:"deptIds"`
-	Status     int      `json:"status"`
-	CreateDate *string  `json:"createDate"`
-	UpdateDate *string  `json:"updateDate"`
+	UserId     string   `json:"userId" example:"UUID"`                       // 用户ID
+	Avatar     *string  `json:"avatar" example:"https://xxx/avatar.jpg"`    // 用户头像URL
+	Username   string   `json:"username" example:"admin"`                    // 登录用户名
+	RealName   string   `json:"realName" example:"管理员"`                     // 真实姓名
+	Phone      *string  `json:"phone" example:"13800138000"`                // 手机号
+	RoleTitles []string `json:"roleTitles"`                                  // 角色名称数组
+	RoleIds    []string `json:"roleIds"`                                     // 角色id数组
+	Desc       *string  `json:"desc" example:"超级管理员"`                      // 用户描述
+	Email      *string  `json:"email" example:"admin@example.com"`          // 邮箱
+	HomePath   *string  `json:"homePath" example:"/dashboard/analytics"`    // 首页路径
+	DeptTitles []string `json:"deptTitles"`                                  // 部门名称数组
+	DeptIds    []string `json:"deptIds"`                                     // 部门id数组
+	Status     int      `json:"status" example:"1"`                          // 用户状态 0=禁用 1=启用
+	CreateDate *string  `json:"createDate" example:"2024-01-01 12:00:00"`   // 创建时间
+	UpdateDate *string  `json:"updateDate" example:"2024-01-01 12:00:00"`   // 更新时间
 }
 
 type MenuMeta struct {
-	ActiveIcon               *string `json:"activeIcon"`
-	ActivePath               *string `json:"activePath"`
-	AffixTab                 bool    `json:"affixTab"`
-	AffixTabOrder            int     `json:"affixTabOrder"`
-	Badge                    *string `json:"badge"`
-	BadgeType                *string `json:"badgeType"`
-	BadgeVariants            *string `json:"badgeVariants"`
-	HideChildrenInMenu       bool    `json:"hideChildrenInMenu"`
-	HideInBreadcrumb         bool    `json:"hideInBreadcrumb"`
-	HideInMenu               bool    `json:"hideInMenu"`
-	HideInTab                bool    `json:"hideInTab"`
-	Icon                     *string `json:"icon"`
-	IframeSrc                *string `json:"iframeSrc"`
-	KeepAlive                bool    `json:"keepAlive"`
-	Link                     *string `json:"link"`
-	MaxNumOfOpenTab          int     `json:"maxNumOfOpenTab"`
-	NoBasicLayout            bool    `json:"noBasicLayout"`
-	OpenInNewWindow          bool    `json:"openInNewWindow"`
-	Order                    *int    `json:"order"`
-	Query                    *string `json:"query"`
-	Title                    string  `json:"title"`
-	DomCached                bool    `json:"domCached"`
-	MenuVisibleWithForbidden bool    `json:"menuVisibleWithForbidden"`
+	ActiveIcon               *string `json:"activeIcon" example:"lucide:home"`          // 激活图标
+	ActivePath               *string `json:"activePath" example:"/dashboard"`            // 激活路径
+	AffixTab                 bool    `json:"affixTab" example:"false"`                   // 固定在标签页 0=否 1=是
+	AffixTabOrder            int     `json:"affixTabOrder" example:"0"`                  // 固定标签页的排序
+	Badge                    *string `json:"badge" example:"new"`                         // 徽章内容
+	BadgeType                *string `json:"badgeType" example:"dot"`                    // 徽标类型
+	BadgeVariants            *string `json:"badgeVariants" example:"destructive"`        // 徽标样式
+	HideChildrenInMenu       bool    `json:"hideChildrenInMenu" example:"false"`         // 隐藏子菜单 0=否 1=是
+	HideInBreadcrumb         bool    `json:"hideInBreadcrumb" example:"false"`           // 在面包屑中隐藏 0=否 1=是
+	HideInMenu               bool    `json:"hideInMenu" example:"false"`                 // 在菜单中隐藏 0=否 1=是
+	HideInTab                bool    `json:"hideInTab" example:"false"`                  // 在标签栏中隐藏 0=否 1=是
+	Icon                     *string `json:"icon" example:"lucide:home"`                 // 图标
+	IframeSrc                *string `json:"iframeSrc" example:"https://example.com"`   // 内嵌页面的iframe地址
+	KeepAlive                bool    `json:"keepAlive" example:"false"`                  // 缓存标签页 0=否 1=是
+	Link                     *string `json:"link" example:"https://example.com"`        // 外链跳转路径
+	MaxNumOfOpenTab          int     `json:"maxNumOfOpenTab" example:"-1"`              // 标签页最大打开数量
+	NoBasicLayout            bool    `json:"noBasicLayout" example:"false"`             // 无基础布局 0=否 1=是
+	OpenInNewWindow          bool    `json:"openInNewWindow" example:"false"`           // 在新窗口打开 0=否 1=是
+	Order                    *int    `json:"order" example:"0"`                          // 排序
+	Query                    *string `json:"query" example:"id=1"`                      // 额外的路由参数
+	Title                    string  `json:"title" example:"page.dashboard.analytics"`   // 页面标题
+	DomCached                bool    `json:"domCached" example:"false"`                 // 缓存DOM 0=否 1=是
+	MenuVisibleWithForbidden bool    `json:"menuVisibleWithForbidden" example:"false"`  // 菜单可见但访问受限 0=否 1=是
 }
 
 type MenuTreeResponse struct {
-	ID          string              `json:"id"`
-	Pid         *string             `json:"pid"`
-	Type        string              `json:"type"`
-	AuthCode    *string             `json:"authCode"`
-	Children    []*MenuTreeResponse `json:"children"`
-	Component   *string             `json:"component"`
-	Meta        MenuMeta            `json:"meta"`
-	Name        string              `json:"name"`
-	Path        *string             `json:"path"`
-	CreatorId   *string             `json:"creatorId"`
-	CreatorName *string             `json:"creatorName"`
-	CreateDate  *string             `json:"createDate"`
-	UpdateDate  *string             `json:"updateDate"`
-	Status      int                 `json:"status"`
+	ID          string              `json:"id" example:"UUID"`                           // 菜单ID
+	Pid         *string             `json:"pid" example:"UUID"`                          // 上级菜单ID
+	Type        string              `json:"type" example:"menu"`                          // 菜单类型 catalog=目录 menu=菜单
+	AuthCode    *string             `json:"authCode" example:"sys:analytics"`            // 权限标识
+	Children    []*MenuTreeResponse `json:"children"`                                    // 子菜单
+	Component   *string             `json:"component" example:"/dashboard/analytics/index"` // 页面组件路径
+	Meta        MenuMeta            `json:"meta"`                                        // 菜单元数据
+	Name        string              `json:"name" example:"Analytics"`                    // 菜单名称
+	Path        *string             `json:"path" example:"/analytics"`                   // 路由地址
+	CreatorId   *string             `json:"creatorId" example:"UUID"`                    // 创建人id
+	CreatorName *string             `json:"creatorName" example:"管理员"`                  // 创建人姓名
+	CreateDate  *string             `json:"createDate" example:"2024-01-01 12:00:00"`   // 创建时间
+	UpdateDate  *string             `json:"updateDate" example:"2024-01-01 12:00:00"`   // 修改时间
+	Status      int                 `json:"status" example:"1"`                          // 状态 0=禁用 1=启用
 }
 
 type UserListRequest struct {
-	Page     int    `form:"page"`
-	PageSize int    `form:"pageSize"`
-	Username string `form:"username"`
-	RealName string `form:"realName"`
-	Phone    string `form:"phone"`
-	Status   *int   `form:"status"`
-	Sorts    string `form:"sorts"`
-	DeptId   string `form:"deptId"`
+	Page     int    `form:"page" example:"1"`                          // 页码
+	PageSize int    `form:"pageSize" example:"20"`                     // 每页大小
+	Username string `form:"username" example:"admin"`                  // 用户名，模糊搜索
+	RealName string `form:"realName" example:"管理员"`                  // 真实姓名，模糊搜索
+	Phone    string `form:"phone" example:"13800138000"`              // 手机号，模糊搜索
+	Status   *int   `form:"status" example:"1"`                        // 状态 0=禁用 1=启用
+	Sorts    string `form:"sorts" example:"createDate,desc"`          // 排序参数
+	DeptId   string `form:"deptId" example:"UUID"`                    // 部门ID，查询该部门及子部门的用户
 }
 
 type FileListRequest struct {
-	Page         int    `form:"page"`
-	PageSize     int    `form:"pageSize"`
-	OriginalName string `form:"originalName"`
-	Type         string `form:"type"`
-	FileExt      string `form:"fileExt"`
-	Sorts        string `form:"sorts"`
+	Page         int    `form:"page" example:"1"`                          // 页码
+	PageSize     int    `form:"pageSize" example:"20"`                     // 每页大小
+	OriginalName string `form:"originalName" example:"文件名"`              // 原始文件名，模糊搜索
+	Type         string `form:"type" example:"image/jpeg"`                  // MIME类型，精确匹配
+	FileExt      string `form:"fileExt" example:".jpg"`                    // 文件扩展名，精确匹配
+	Sorts        string `form:"sorts" example:"createDate,desc;size,asc"` // 排序参数
 }
 
 type CreateUserRequest struct {
-	Username string   `json:"username" binding:"required"`
-	RealName string   `json:"realName" binding:"required"`
-	Password string   `json:"password" binding:"required"`
-	Phone    *string  `json:"phone"`
-	Desc     *string  `json:"desc"`
-	DeptIds  []string `json:"deptIds"`
-	RoleIds  []string `json:"roleIds"`
+	Username string   `json:"username" binding:"required" example:"newuser"`    // 登录用户名
+	RealName string   `json:"realName" binding:"required" example:"新用户"`     // 真实姓名
+	Password string   `json:"password" binding:"required" example:"123456"`     // 密码
+	Phone    *string  `json:"phone" example:"13800138000"`                       // 手机号
+	Desc     *string  `json:"desc" example:"普通用户"`                             // 描述
+	DeptIds  []string `json:"deptIds" example:"[\"UUID\"]"`                     // 部门id数组
+	RoleIds  []string `json:"roleIds" example:"[\"UUID\"]"`                     // 角色id数组
 }
 
 type UpdateUserRequest struct {
-	Username string   `json:"username" binding:"required"`
-	RealName string   `json:"realName" binding:"required"`
-	Phone    *string  `json:"phone"`
-	Desc     *string  `json:"desc"`
-	DeptIds  []string `json:"deptIds"`
-	RoleIds  []string `json:"roleIds"`
+	Username string   `json:"username" binding:"required" example:"newuser"`    // 登录用户名
+	RealName string   `json:"realName" binding:"required" example:"新用户"`     // 真实姓名
+	Phone    *string  `json:"phone" example:"13800138000"`                       // 手机号
+	Desc     *string  `json:"desc" example:"普通用户"`                             // 描述
+	DeptIds  []string `json:"deptIds" example:"[\"UUID\"]"`                     // 部门id数组
+	RoleIds  []string `json:"roleIds" example:"[\"UUID\"]"`                     // 角色id数组
 }
 
 type UpdateUserStatusRequest struct {
-	Status int `json:"status"`
+	Status int `json:"status" example:"1"` // 状态 0=禁用 1=启用
 }
 
 type MenuListRequest struct {
-	Name   string `form:"name"`
-	Path   string `form:"path"`
-	Type   string `form:"type"`
-	Status *int   `form:"status"`
+	Name   string `form:"name" example:"Analytics"`                               // 菜单名称，模糊搜索
+	Path   string `form:"path" example:"/analytics"`                              // 路由路径，模糊搜索
+	Type   string `form:"type" example:""`                                         // 菜单类型
+	Status *int   `form:"status" example:"1"`                                      // 状态 0=禁用 1=启用
 }
 
 type CreateMenuRequest struct {
-	Pid       *string  `json:"pid"`
-	Type      string   `json:"type" binding:"required"`
-	AuthCode  *string  `json:"authCode"`
-	Component *string  `json:"component"`
-	Name      string   `json:"name" binding:"required"`
-	Path      *string  `json:"path"`
-	Meta      MenuMeta `json:"meta" binding:"required"`
-	Status    int      `json:"status"`
+	Pid       *string  `json:"pid" example:"UUID"`                                    // 上级菜单ID，空表示顶级菜单
+	Type      string   `json:"type" binding:"required" example:"menu"`               // 菜单类型 catalog=目录 menu=菜单
+	AuthCode  *string  `json:"authCode" example:"sys:analytics"`                     // 权限标识
+	Component *string  `json:"component" example:"/dashboard/analytics/index"`      // 页面组件路径
+	Name      string   `json:"name" binding:"required" example:"Analytics"`          // 菜单名称
+	Path      *string  `json:"path" example:"/analytics"`                            // 路由地址
+	Meta      MenuMeta `json:"meta" binding:"required"`                              // 菜单元数据
+	Status    int      `json:"status" example:"1"`                                    // 状态 0=禁用 1=启用
 }
 
 type UpdateMenuRequest struct {
-	Pid       *string  `json:"pid"`
-	Type      string   `json:"type" binding:"required"`
-	AuthCode  *string  `json:"authCode"`
-	Component *string  `json:"component"`
-	Name      string   `json:"name" binding:"required"`
-	Path      *string  `json:"path"`
-	Meta      MenuMeta `json:"meta" binding:"required"`
-	Status    int      `json:"status"`
+	Pid       *string  `json:"pid" example:"UUID"`                                    // 上级菜单ID，空表示顶级菜单
+	Type      string   `json:"type" binding:"required" example:"menu"`               // 菜单类型 catalog=目录 menu=菜单
+	AuthCode  *string  `json:"authCode" example:"sys:analytics"`                     // 权限标识
+	Component *string  `json:"component" example:"/dashboard/analytics/index"`      // 页面组件路径
+	Name      string   `json:"name" binding:"required" example:"Analytics"`          // 菜单名称
+	Path      *string  `json:"path" example:"/analytics"`                            // 路由地址
+	Meta      MenuMeta `json:"meta" binding:"required"`                              // 菜单元数据
+	Status    int      `json:"status" example:"1"`                                    // 状态 0=禁用 1=启用
 }
 
 type RoleListRequest struct {
-	Page      int    `form:"page"`
-	PageSize  int    `form:"pageSize"`
-	RoleTitle string `form:"roleTitle"`
-	Status    *int   `form:"status"`
-	Remark    string `form:"remark"`
-	StartDate string `form:"startDate"`
-	EndDate   string `form:"endDate"`
-	Sorts     string `form:"sorts"`
+	Page      int    `form:"page" example:"1"`                                    // 页码
+	PageSize  int    `form:"pageSize" example:"20"`                               // 每页大小
+	RoleTitle string `form:"roleTitle" example:"管理员"`                            // 角色名称，模糊搜索
+	Status    *int   `form:"status" example:"1"`                                    // 状态 0=禁用 1=启用
+	Remark    string `form:"remark" example:"备注"`                                 // 备注，模糊搜索
+	StartDate string `form:"startDate" example:"2024-01-01"`                      // 创建日期起始
+	EndDate   string `form:"endDate" example:"2024-12-31"`                        // 创建日期截止
+	Sorts     string `form:"sorts" example:"createDate,desc"`                    // 排序参数
 }
 
 type CreateRoleRequest struct {
-	RoleTitle   string   `json:"roleTitle" binding:"required"`
-	Status      int      `json:"status"`
-	Remark      *string  `json:"remark"`
-	Permissions []string `json:"permissions"`
+	RoleTitle   string   `json:"roleTitle" binding:"required" example:"编辑员"`    // 角色名称
+	Status      int      `json:"status" example:"1"`                              // 状态 0=禁用 1=启用
+	Remark      *string  `json:"remark" example:"编辑角色"`                          // 备注
+	Permissions []string `json:"permissions" example:"[\"UUID\"]"`                 // 菜单id数组
 }
 
 type UpdateRoleRequest struct {
-	RoleTitle   string   `json:"roleTitle" binding:"required"`
-	Status      int      `json:"status"`
-	Remark      *string  `json:"remark"`
-	Permissions []string `json:"permissions"`
+	RoleTitle   string   `json:"roleTitle" binding:"required" example:"编辑员"`    // 角色名称
+	Status      int      `json:"status" example:"1"`                              // 状态 0=禁用 1=启用
+	Remark      *string  `json:"remark" example:"编辑角色"`                          // 备注
+	Permissions []string `json:"permissions" example:"[\"UUID\"]"`                 // 菜单id数组
 }
 
 type RoleDetailResponse struct {
-	RoleId      string   `json:"roleId"`
-	RoleTitle   string   `json:"roleTitle"`
-	Status      int      `json:"status"`
-	CreateDate  *string  `json:"createDate"`
-	Remark      *string  `json:"remark"`
-	Permissions []string `json:"permissions"`
+	RoleId      string   `json:"roleId" example:"UUID"`                           // 角色ID
+	RoleTitle   string   `json:"roleTitle" example:"SuperAdmin"`                  // 角色名称
+	Status      int      `json:"status" example:"1"`                              // 状态 0=禁用 1=启用
+	CreateDate  *string  `json:"createDate" example:"2024-01-01 12:00:00"`       // 创建时间
+	Remark      *string  `json:"remark" example:"超级管理员"`                       // 备注
+	Permissions []string `json:"permissions" example:"[\"UUID\"]"`                 // 菜单id数组
 }
 
 type RoleSimpleResponse struct {
-	RoleId    string `json:"roleId"`
-	RoleTitle string `json:"roleTitle"`
-	Status    int    `json:"status"`
+	RoleId    string `json:"roleId" example:"UUID"`          // 角色ID
+	RoleTitle string `json:"roleTitle" example:"SuperAdmin"` // 角色名称
+	Status    int    `json:"status" example:"1"`             // 状态 0=禁用 1=启用
 }
 
 type UpdateStatusRequest struct {
-	Status int `json:"status"`
+	Status int `json:"status" example:"1"` // 状态 0=禁用 1=启用
 }
 
 type DeptListRequest struct {
-	DeptTitle string `form:"deptTitle"`
+	DeptTitle string `form:"deptTitle" example:"技术部"` // 部门名称，模糊搜索
 }
 
 type DeptTreeResponse struct {
-	DeptId     string              `json:"deptId"`
-	Pid        *string             `json:"pid"`
-	DeptTitle  string              `json:"deptTitle"`
-	Status     int                 `json:"status"`
-	CreateDate *string             `json:"createDate"`
-	Remark     *string             `json:"remark"`
-	Children   []*DeptTreeResponse `json:"children"`
+	DeptId     string              `json:"deptId" example:"UUID"`                      // 部门ID
+	Pid        *string             `json:"pid" example:"UUID"`                         // 父级部门ID
+	DeptTitle  string              `json:"deptTitle" example:"技术部"`                  // 部门名称
+	Status     int                 `json:"status" example:"1"`                         // 状态 0=禁用 1=启用
+	CreateDate *string             `json:"createDate" example:"2024-01-01 12:00:00"`  // 创建时间
+	Remark     *string             `json:"remark" example:"技术部门"`                    // 备注
+	Children   []*DeptTreeResponse `json:"children"`                                   // 子部门
 }
 
 type CreateDeptRequest struct {
-	Pid       *string `json:"pid"`
-	DeptTitle string  `json:"deptTitle" binding:"required"`
-	Status    int     `json:"status"`
-	Remark    *string `json:"remark"`
+	Pid       *string `json:"pid" example:"UUID"`               // 父级部门ID，空表示顶级部门
+	DeptTitle string  `json:"deptTitle" binding:"required" example:"技术部"`  // 部门名称
+	Status    int     `json:"status" example:"1"`               // 状态 0=禁用 1=启用
+	Remark    *string `json:"remark" example:"技术部门"`           // 备注
 }
 
 type UpdateDeptRequest struct {
-	Pid       *string `json:"pid"`
-	DeptTitle string  `json:"deptTitle" binding:"required"`
-	Status    int     `json:"status"`
-	Remark    *string `json:"remark"`
+	Pid       *string `json:"pid" example:"UUID"`               // 父级部门ID
+	DeptTitle string  `json:"deptTitle" binding:"required" example:"技术部"`  // 部门名称
+	Status    int     `json:"status" example:"1"`               // 状态 0=禁用 1=启用
+	Remark    *string `json:"remark" example:"技术部门"`           // 备注
 }
 
 type DictListRequest struct {
-	Label string `form:"label"`
-	Value string `form:"value"`
-	Type  string `form:"type"`
-	Sorts string `form:"sorts"`
+	Label string `form:"label" example:"需求类型"`                       // 字典标题，模糊搜索
+	Value string `form:"value" example:"0"`                            // 字典值
+	Type  string `form:"type" example:"STORY_TYPE"`                    // 字典类型
+	Sorts string `form:"sorts" example:"createDate,desc"`             // 排序参数
 }
 
 type DictTreeResponse struct {
-	ID         string              `json:"id"`
-	Pid        *string             `json:"pid"`
-	Label      string              `json:"label"`
-	Value      *string             `json:"value"`
-	Type       string              `json:"type"`
-	Remark     *string             `json:"remark"`
-	Color      *string             `json:"color"`
-	Status     int                 `json:"status"`
-	CreateDate *string             `json:"createDate"`
-	UpdateDate *string             `json:"updateDate"`
-	Children   []*DictTreeResponse `json:"children"`
+	ID         string              `json:"id" example:"UUID"`                          // 字典ID
+	Pid        *string             `json:"pid" example:"UUID"`                         // 父级字典ID
+	Label      string              `json:"label" example:"功能需求"`                     // 字典标题
+	Value      *string             `json:"value" example:"0"`                          // 字典值
+	Type       string              `json:"type" example:"STORY_TYPE"`                  // 字典类型
+	Remark     *string             `json:"remark" example:"需求类型"`                    // 备注
+	Color      *string             `json:"color" example:"#2db7f5"`                    // 主题色
+	Status     int                 `json:"status" example:"1"`                         // 状态 0=禁用 1=启用
+	CreateDate *string             `json:"createDate" example:"2024-01-01 12:00:00"`  // 创建时间
+	UpdateDate *string             `json:"updateDate" example:"2024-01-01 12:00:00"`  // 更新时间
+	Children   []*DictTreeResponse `json:"children"`                                   // 子字典
 }
 
 type CreateDictRequest struct {
-	Pid    *string `json:"pid"`
-	Type   string  `json:"type" binding:"required"`
-	Label  string  `json:"label" binding:"required"`
-	Value  *string `json:"value"`
-	Color  *string `json:"color"`
-	Status int     `json:"status"`
-	Remark *string `json:"remark"`
+	Pid    *string `json:"pid" example:"UUID"`                       // 父级字典ID
+	Type   string  `json:"type" binding:"required" example:"STORY_TYPE"`  // 字典类型
+	Label  string  `json:"label" binding:"required" example:"功能需求"`   // 字典标题
+	Value  *string `json:"value" example:"0"`                        // 字典值
+	Color  *string `json:"color" example:"#2db7f5"`                  // 主题色
+	Status int     `json:"status" example:"1"`                       // 状态 0=禁用 1=启用
+	Remark *string `json:"remark" example:"需求类型"`                   // 备注
 }
 
 type UpdateDictRequest struct {
-	Pid    *string `json:"pid"`
-	Type   string  `json:"type" binding:"required"`
-	Label  string  `json:"label" binding:"required"`
-	Value  *string `json:"value"`
-	Color  *string `json:"color"`
-	Status int     `json:"status"`
-	Remark *string `json:"remark"`
+	Pid    *string `json:"pid" example:"UUID"`                       // 父级字典ID
+	Type   string  `json:"type" binding:"required" example:"STORY_TYPE"`  // 字典类型
+	Label  string  `json:"label" binding:"required" example:"功能需求"`   // 字典标题
+	Value  *string `json:"value" example:"0"`                        // 字典值
+	Color  *string `json:"color" example:"#2db7f5"`                  // 主题色
+	Status int     `json:"status" example:"1"`                       // 状态 0=禁用 1=启用
+	Remark *string `json:"remark" example:"需求类型"`                   // 备注
 }
 
 func NewSuccessResponse(data interface{}) Response {
@@ -322,215 +322,215 @@ func TimeToStringPtr(t *time.Time) *string {
 }
 
 type ProjectResponse struct {
-	ProjectID    *string `json:"projectId"`
-	ProjectTitle *string `json:"projectTitle"`
-	ProjectLogo  *string `json:"projectLogo"`
-	Description  *string `json:"description"`
-	CreateDate   *string `json:"createDate"`
+	ProjectID    *string `json:"projectId" example:"UUID"`                          // 项目ID
+	ProjectTitle *string `json:"projectTitle" example:"crudelis"`                   // 项目标题
+	ProjectLogo  *string `json:"projectLogo" example:"https://xxx/logo.png"`        // 项目Logo
+	Description  *string `json:"description" example:"项目描述"`                       // 项目描述
+	CreateDate   *string `json:"createDate" example:"2024-01-01 12:00:00"`          // 创建时间
 }
 
 type ModuleResponse struct {
-	ModuleID     *string `json:"moduleId"`
-	ModuleTitle  *string `json:"moduleTitle"`
-	ProjectID    *string `json:"projectId"`
-	ProjectTitle *string `json:"projectTitle"`
-	Sort         int     `json:"sort"`
-	UpdateDate   *string `json:"updateDate"`
-	CreateDate   *string `json:"createDate"`
+	ModuleID     *string `json:"moduleId" example:"UUID"`                          // 模块ID
+	ModuleTitle  *string `json:"moduleTitle" example:"模块名称"`                      // 模块标题
+	ProjectID    *string `json:"projectId" example:"UUID"`                         // 关联项目ID
+	ProjectTitle *string `json:"projectTitle" example:"crudelis"`                  // 关联项目标题
+	Sort         int     `json:"sort" example:"1"`                                 // 排序
+	UpdateDate   *string `json:"updateDate" example:"2024-01-01 12:00:00"`         // 更新时间
+	CreateDate   *string `json:"createDate" example:"2024-01-01 12:00:00"`         // 创建时间
 }
 
 type VersionResponse struct {
-	VersionID         *string `json:"versionId"`
-	Version           *string `json:"version"`
-	VersionType       string  `json:"versionType"`
-	Remark            *string `json:"remark"`
-	CreatorID         *string `json:"creatorId"`
-	CreatorName       *string `json:"creatorName"`
-	CreateDate        *string `json:"createDate"`
-	EndDate           *string `json:"endDate"`
-	StartDate         *string `json:"startDate"`
-	ProjectID         *string `json:"projectId"`
-	ProjectTitle      *string `json:"projectTitle"`
-	ReleaseStatus     string  `json:"releaseStatus"`
-	ReleaseDate       *string `json:"releaseDate"`
-	ChangeLogRichText *string `json:"changeLogRichText"`
-	ChangeLog         *string `json:"changeLog"`
+	VersionID         *string `json:"versionId" example:"UUID"`                                 // 版本ID
+	Version           *string `json:"version" example:"v1.0.0"`                                 // 版本号
+	VersionType       string  `json:"versionType" example:"0"`                                  // 版本类型
+	Remark            *string `json:"remark" example:"版本备注"`                                   // 备注
+	CreatorID         *string `json:"creatorId" example:"UUID"`                                 // 创建人ID
+	CreatorName       *string `json:"creatorName" example:"管理员"`                               // 创建人姓名
+	CreateDate        *string `json:"createDate" example:"2024-01-01 12:00:00"`                 // 创建时间
+	EndDate           *string `json:"endDate" example:"2024-12-31"`                             // 结束日期
+	StartDate         *string `json:"startDate" example:"2024-01-01"`                           // 开始日期
+	ProjectID         *string `json:"projectId" example:"UUID"`                                 // 关联项目ID
+	ProjectTitle      *string `json:"projectTitle" example:"crudelis"`                          // 关联项目标题
+	ReleaseStatus     string  `json:"releaseStatus" example:"0"`                                // 发布状态
+	ReleaseDate       *string `json:"releaseDate" example:"2024-06-30"`                         // 发布日期
+	ChangeLogRichText *string `json:"changeLogRichText" example:"<p>更新日志</p>"`                  // 更新日志(富文本)
+	ChangeLog         *string `json:"changeLog" example:"更新日志文本"`                              // 更新日志
 }
 
 type StoryUserItem struct {
-	UserID   *string `json:"userId"`
-	Avatar   *string `json:"avatar"`
-	RealName *string `json:"realName"`
+	UserID   *string `json:"userId" example:"UUID"`             // 用户ID
+	Avatar   *string `json:"avatar" example:"https://xxx/avatar.jpg"` // 用户头像
+	RealName *string `json:"realName" example:"张三"`             // 真实姓名
 }
 
 type StoryResponse struct {
-	StoryID       *string         `json:"storyId"`
-	StoryTitle    *string         `json:"storyTitle"`
-	StoryNum      int             `json:"storyNum"`
-	CreatorName   *string         `json:"creatorName"`
-	CreatorID     *string         `json:"creatorId"`
-	StoryType     string          `json:"storyType"`
-	StoryStatus   string          `json:"storyStatus"`
-	StoryLevel    string          `json:"storyLevel"`
-	VersionID     *string         `json:"versionId"`
-	Version       *string         `json:"version"`
-	ProjectID     *string         `json:"projectId"`
-	ProjectTitle  *string         `json:"projectTitle"`
-	ModuleID      *string         `json:"moduleId"`
-	ModuleTitle   *string         `json:"moduleTitle"`
-	Source        string          `json:"source"`
-	UpdateDate    *string         `json:"updateDate"`
-	CreateDate    *string         `json:"createDate"`
-	UserList      []StoryUserItem `json:"userList"`
-	UserIDs       []string        `json:"userIds"`
-	StoryRichText *string         `json:"storyRichText"`
-	FileIDs       []string        `json:"fileIds"`
-	FileList      []FileResponse  `json:"fileList"`
-	TaskList      []TaskResponse  `json:"taskList"`
-	BugList       []BugResponse   `json:"bugList"`
-	Nodes         []NodeResponse  `json:"nodes"`
+	StoryID       *string         `json:"storyId" example:"UUID"`                          // 需求ID
+	StoryTitle    *string         `json:"storyTitle" example:"需求标题"`                      // 需求标题
+	StoryNum      int             `json:"storyNum" example:"1"`                            // 需求编号
+	CreatorName   *string         `json:"creatorName" example:"管理员"`                      // 创建人姓名
+	CreatorID     *string         `json:"creatorId" example:"UUID"`                        // 创建人ID
+	StoryType     string          `json:"storyType" example:"0"`                           // 需求类型
+	StoryStatus   string          `json:"storyStatus" example:"0"`                         // 需求状态
+	StoryLevel    string          `json:"storyLevel" example:"0"`                          // 需求优先级
+	VersionID     *string         `json:"versionId" example:"UUID"`                        // 关联版本ID
+	Version       *string         `json:"version" example:"v1.0.0"`                        // 关联版本号
+	ProjectID     *string         `json:"projectId" example:"UUID"`                        // 关联项目ID
+	ProjectTitle  *string         `json:"projectTitle" example:"crudelis"`                 // 关联项目标题
+	ModuleID      *string         `json:"moduleId" example:"UUID"`                         // 关联模块ID
+	ModuleTitle   *string         `json:"moduleTitle" example:"模块名称"`                     // 关联模块标题
+	Source        string          `json:"source" example:"0"`                              // 需求来源
+	UpdateDate    *string         `json:"updateDate" example:"2024-01-01 12:00:00"`        // 更新时间
+	CreateDate    *string         `json:"createDate" example:"2024-01-01 12:00:00"`        // 创建时间
+	UserList      []StoryUserItem `json:"userList"`                                        // 参与人员列表
+	UserIDs       []string        `json:"userIds"`                                         // 参与人员ID数组
+	StoryRichText *string         `json:"storyRichText" example:"<p>需求描述</p>"`             // 需求描述(富文本)
+	FileIDs       []string        `json:"fileIds"`                                         // 附件ID数组
+	FileList      []FileResponse  `json:"fileList"`                                        // 附件列表
+	TaskList      []TaskResponse  `json:"taskList"`                                        // 关联任务列表
+	BugList       []BugResponse   `json:"bugList"`                                         // 关联缺陷列表
+	Nodes         []NodeResponse  `json:"nodes"`                                           // 节点列表
 }
 
 type FileResponse struct {
-	FileID        *string `json:"fileId"`
-	URL           *string `json:"url"`
-	Name          *string `json:"name"`
-	Type          *string `json:"type"`
-	Size          int64   `json:"size"`
-	FileExt       *string `json:"fileExt"`
-	OriginalName  *string `json:"originalName"`
-	Path          *string `json:"path"`
-	FullPath      *string `json:"fullPath"`
-	ThumbnailPath *string `json:"thumbnailPath"`
-	ThumbnailURL  *string `json:"thumbnailUrl"`
-	CreatorID     *string `json:"creatorId"`
-	CreatorName   *string `json:"creatorName"`
-	CreateDate    *string `json:"createDate"`
+	FileID        *string `json:"fileId" example:"UUID"`                                // 文件ID
+	URL           *string `json:"url" example:"/uploads/abc.jpg"`                       // 文件访问URL
+	Name          *string `json:"name" example:"abc.jpg"`                               // 存储文件名(UUID重命名)
+	Type          *string `json:"type" example:"image/jpeg"`                            // MIME类型
+	Size          int64   `json:"size" example:"102400"`                                // 文件大小(字节)
+	FileExt       *string `json:"fileExt" example:".jpg"`                               // 文件扩展名
+	OriginalName  *string `json:"originalName" example:"原始文件名.jpg"`                   // 原始文件名
+	Path          *string `json:"path" example:"/uploads/"`                             // 文件存储路径(不含文件名)
+	FullPath      *string `json:"fullPath" example:"/uploads/abc.jpg"`                  // 完整路径
+	ThumbnailPath *string `json:"thumbnailPath" example:"/uploads/thumb"`               // 缩略图路径(图片专用)
+	ThumbnailURL  *string `json:"thumbnailUrl" example:"/uploads/thumb/abc.jpg"`        // 缩略图URL(图片专用)
+	CreatorID     *string `json:"creatorId" example:"UUID"`                             // 创建人id
+	CreatorName   *string `json:"creatorName" example:"创建人姓名"`                        // 创建人姓名
+	CreateDate    *string `json:"createDate" example:"2024-01-01 12:00:00"`             // 创建日期
 }
 
 type TaskResponse struct {
-	TaskID       *string `json:"taskId"`
-	StoryID      *string `json:"storyId"`
-	StoryTitle   *string `json:"storyTitle"`
-	ModuleID     *string `json:"moduleId"`
-	ModuleTitle  *string `json:"moduleTitle"`
-	VersionID    *string `json:"versionId"`
-	Version      *string `json:"version"`
-	ProjectID    *string `json:"projectId"`
-	ProjectTitle *string `json:"projectTitle"`
-	TaskTitle    *string `json:"taskTitle"`
-	TaskNum      int     `json:"taskNum"`
-	TaskStatus   string  `json:"taskStatus"`
-	TaskType     string  `json:"taskType"`
-	PlanHours    float64 `json:"planHours"`
-	ActualHours  float64 `json:"actualHours"`
-	EndDate      *string `json:"endDate"`
-	StartDate    *string `json:"startDate"`
-	CreateDate   *string `json:"createDate"`
-	CreatorID    *string `json:"creatorId"`
-	CreatorName  *string `json:"creatorName"`
-	UserID       *string `json:"userId"`
-	RealName     *string `json:"realName"`
-	Avatar       *string `json:"avatar"`
-	Percent      int     `json:"percent"`
-	TaskRichText *string `json:"taskRichText"`
+	TaskID       *string `json:"taskId" example:"UUID"`                          // 任务ID
+	StoryID      *string `json:"storyId" example:"UUID"`                         // 关联需求ID
+	StoryTitle   *string `json:"storyTitle" example:"需求标题"`                     // 关联需求标题
+	ModuleID     *string `json:"moduleId" example:"UUID"`                        // 关联模块ID
+	ModuleTitle  *string `json:"moduleTitle" example:"模块名称"`                    // 关联模块标题
+	VersionID    *string `json:"versionId" example:"UUID"`                       // 关联版本ID
+	Version      *string `json:"version" example:"v1.0.0"`                       // 关联版本号
+	ProjectID    *string `json:"projectId" example:"UUID"`                       // 关联项目ID
+	ProjectTitle *string `json:"projectTitle" example:"crudelis"`                // 关联项目标题
+	TaskTitle    *string `json:"taskTitle" example:"任务标题"`                       // 任务标题
+	TaskNum      int     `json:"taskNum" example:"1"`                            // 任务编号
+	TaskStatus   string  `json:"taskStatus" example:"0"`                         // 任务状态
+	TaskType     string  `json:"taskType" example:"0"`                           // 任务类型
+	PlanHours    float64 `json:"planHours" example:"8"`                          // 计划工时
+	ActualHours  float64 `json:"actualHours" example:"6"`                        // 实际工时
+	EndDate      *string `json:"endDate" example:"2024-12-31"`                   // 结束日期
+	StartDate    *string `json:"startDate" example:"2024-01-01"`                 // 开始日期
+	CreateDate   *string `json:"createDate" example:"2024-01-01 12:00:00"`       // 创建时间
+	CreatorID    *string `json:"creatorId" example:"UUID"`                       // 创建人ID
+	CreatorName  *string `json:"creatorName" example:"管理员"`                     // 创建人姓名
+	UserID       *string `json:"userId" example:"UUID"`                          // 负责人ID
+	RealName     *string `json:"realName" example:"张三"`                          // 负责人姓名
+	Avatar       *string `json:"avatar" example:"https://xxx/avatar.jpg"`        // 负责人头像
+	Percent      int     `json:"percent" example:"50"`                           // 任务进度百分比
+	TaskRichText *string `json:"taskRichText" example:"<p>任务描述</p>"`             // 任务描述(富文本)
 }
 
 type BugResponse struct {
-	BugID            *string `json:"bugId"`
-	BugTitle         *string `json:"bugTitle"`
-	BugNum           int     `json:"bugNum"`
-	BugStatus        string  `json:"bugStatus"`
-	BugConfirmStatus string  `json:"bugConfirmStatus"`
-	BugLevel         string  `json:"bugLevel"`
-	BugSource        string  `json:"bugSource"`
-	BugType          string  `json:"bugType"`
-	BugEnv           string  `json:"bugEnv"`
-	BugUa            *string `json:"bugUa"`
-	UserID           *string `json:"userId"`
-	Avatar           *string `json:"avatar"`
-	RealName         *string `json:"realName"`
-	CreatorName      *string `json:"creatorName"`
-	CreatorID        *string `json:"creatorId"`
-	VersionID        *string `json:"versionId"`
-	Version          *string `json:"version"`
-	ModuleID         *string `json:"moduleId"`
-	ModuleTitle      *string `json:"moduleTitle"`
-	ProjectID        *string `json:"projectId"`
-	ProjectTitle     *string `json:"projectTitle"`
-	StoryID          *string `json:"storyId"`
-	StoryTitle       *string `json:"storyTitle"`
-	UpdateDate       *string `json:"updateDate"`
-	CreateDate       *string `json:"createDate"`
-	BugRichText      *string `json:"bugRichText"`
+	BugID            *string `json:"bugId" example:"UUID"`                          // 缺陷ID
+	BugTitle         *string `json:"bugTitle" example:"缺陷标题"`                      // 缺陷标题
+	BugNum           int     `json:"bugNum" example:"1"`                            // 缺陷编号
+	BugStatus        string  `json:"bugStatus" example:"0"`                         // 缺陷状态
+	BugConfirmStatus string  `json:"bugConfirmStatus" example:"0"`                  // 缺陷确认状态
+	BugLevel         string  `json:"bugLevel" example:"0"`                          // 缺陷等级
+	BugSource        string  `json:"bugSource" example:"0"`                         // 缺陷来源
+	BugType          string  `json:"bugType" example:"0"`                           // 缺陷类型
+	BugEnv           string  `json:"bugEnv" example:"0"`                            // 缺陷环境
+	BugUa            *string `json:"bugUa" example:"Mozilla/5.0"`                   // 用户代理
+	UserID           *string `json:"userId" example:"UUID"`                         // 指派人ID
+	Avatar           *string `json:"avatar" example:"https://xxx/avatar.jpg"`       // 指派人头像
+	RealName         *string `json:"realName" example:"张三"`                         // 指派人姓名
+	CreatorName      *string `json:"creatorName" example:"管理员"`                    // 创建人姓名
+	CreatorID        *string `json:"creatorId" example:"UUID"`                      // 创建人ID
+	VersionID        *string `json:"versionId" example:"UUID"`                      // 关联版本ID
+	Version          *string `json:"version" example:"v1.0.0"`                      // 关联版本号
+	ModuleID         *string `json:"moduleId" example:"UUID"`                       // 关联模块ID
+	ModuleTitle      *string `json:"moduleTitle" example:"模块名称"`                   // 关联模块标题
+	ProjectID        *string `json:"projectId" example:"UUID"`                      // 关联项目ID
+	ProjectTitle     *string `json:"projectTitle" example:"crudelis"`               // 关联项目标题
+	StoryID          *string `json:"storyId" example:"UUID"`                        // 关联需求ID
+	StoryTitle       *string `json:"storyTitle" example:"需求标题"`                    // 关联需求标题
+	UpdateDate       *string `json:"updateDate" example:"2024-01-01 12:00:00"`      // 更新时间
+	CreateDate       *string `json:"createDate" example:"2024-01-01 12:00:00"`      // 创建时间
+	BugRichText      *string `json:"bugRichText" example:"<p>缺陷描述</p>"`             // 缺陷描述(富文本)
 }
 
 type ChangeHistoryResponse struct {
-	ChangeID       *string `json:"changeId"`
-	ChangeBehavior string  `json:"changeBehavior"`
-	ChangeRichText *string `json:"changeRichText"`
-	CreatorID      *string `json:"creatorId"`
-	CreatorName    *string `json:"creatorName"`
-	BusinessID     *string `json:"businessId"`
-	BusinessType   string  `json:"businessType"`
-	ExtendJson     *string `json:"extendJson"`
-	CreateDate     *string `json:"createDate"`
-	UpdateDate     *string `json:"updateDate"`
+	ChangeID       *string `json:"changeId" example:"UUID"`                          // 变更记录ID
+	ChangeBehavior string  `json:"changeBehavior" example:"0"`                       // 变更行为
+	ChangeRichText *string `json:"changeRichText" example:"<p>变更详情</p>"`             // 变更详情(富文本)
+	CreatorID      *string `json:"creatorId" example:"UUID"`                         // 创建人ID
+	CreatorName    *string `json:"creatorName" example:"管理员"`                       // 创建人姓名
+	BusinessID     *string `json:"businessId" example:"UUID"`                        // 业务ID
+	BusinessType   string  `json:"businessType" example:"0"`                         // 业务类型
+	ExtendJson     *string `json:"extendJson" example:"{\"key\":\"value\"}"`         // 扩展JSON
+	CreateDate     *string `json:"createDate" example:"2024-01-01 12:00:00"`         // 创建时间
+	UpdateDate     *string `json:"updateDate" example:"2024-01-01 12:00:00"`         // 更新时间
 }
 
 type CreateChangeHistoryRequest struct {
-	BusinessID     string `json:"businessId" binding:"required"`
-	BusinessType   string `json:"businessType" binding:"required"`
-	ChangeBehavior string `json:"changeBehavior" binding:"required"`
-	ChangeRichText string `json:"changeRichText"`
+	BusinessID     string `json:"businessId" binding:"required" example:"UUID"`          // 业务ID
+	BusinessType   string `json:"businessType" binding:"required" example:"0"`           // 业务类型
+	ChangeBehavior string `json:"changeBehavior" binding:"required" example:"0"`         // 变更行为
+	ChangeRichText string `json:"changeRichText" example:"<p>变更详情</p>"`                  // 变更详情(富文本)
 }
 
 type CreateProjectRequest struct {
-	ProjectTitle *string `json:"projectTitle" binding:"required"`
-	Description  *string `json:"description"`
-	ProjectLogo  *string `json:"projectLogo"`
+	ProjectTitle *string `json:"projectTitle" binding:"required" example:"crudelis"`       // 项目标题
+	Description  *string `json:"description" example:"项目描述"`                               // 项目描述
+	ProjectLogo  *string `json:"projectLogo" example:"https://xxx/logo.png"`               // 项目Logo
 }
 
 type UpdateProjectRequest struct {
-	ProjectTitle *string `json:"projectTitle" binding:"required"`
-	Description  *string `json:"description"`
-	ProjectLogo  *string `json:"projectLogo"`
+	ProjectTitle *string `json:"projectTitle" binding:"required" example:"crudelis"`       // 项目标题
+	Description  *string `json:"description" example:"项目描述"`                               // 项目描述
+	ProjectLogo  *string `json:"projectLogo" example:"https://xxx/logo.png"`               // 项目Logo
 }
 
 type CreateModuleRequest struct {
-	Sort        int     `json:"sort"`
-	ModuleTitle *string `json:"moduleTitle" binding:"required"`
-	ProjectID   string  `json:"projectId" binding:"required"`
+	Sort        int     `json:"sort" example:"1"`                                     // 排序
+	ModuleTitle *string `json:"moduleTitle" binding:"required" example:"模块名称"`         // 模块标题
+	ProjectID   string  `json:"projectId" binding:"required" example:"UUID"`           // 关联项目ID
 }
 
 type UpdateModuleRequest struct {
-	Sort        int     `json:"sort"`
-	ModuleTitle *string `json:"moduleTitle" binding:"required"`
+	Sort        int     `json:"sort" example:"1"`                                     // 排序
+	ModuleTitle *string `json:"moduleTitle" binding:"required" example:"模块名称"`         // 模块标题
 }
 
 type CreateVersionRequest struct {
-	Version       *string `json:"version"`
-	VersionType   string  `json:"versionType"`
-	ReleaseStatus string  `json:"releaseStatus"`
-	ProjectID     string  `json:"projectId"`
-	Remark        *string `json:"remark"`
-	EndDate       *string `json:"endDate"`
-	StartDate     *string `json:"startDate"`
+	Version       *string `json:"version" example:"v1.0.0"`                         // 版本号
+	VersionType   string  `json:"versionType" example:"0"`                          // 版本类型
+	ReleaseStatus string  `json:"releaseStatus" example:"0"`                        // 发布状态
+	ProjectID     string  `json:"projectId" example:"UUID"`                         // 关联项目ID
+	Remark        *string `json:"remark" example:"版本备注"`                            // 备注
+	EndDate       *string `json:"endDate" example:"2024-12-31"`                     // 结束日期
+	StartDate     *string `json:"startDate" example:"2024-01-01"`                   // 开始日期
 }
 
 type UpdateVersionRequest struct {
-	Version       *string `json:"version"`
-	VersionType   string  `json:"versionType"`
-	ReleaseStatus string  `json:"releaseStatus"`
-	ProjectID     string  `json:"projectId"`
-	Remark        *string `json:"remark"`
-	EndDate       *string `json:"endDate"`
-	StartDate     *string `json:"startDate"`
+	Version       *string `json:"version" example:"v1.0.0"`                         // 版本号
+	VersionType   string  `json:"versionType" example:"0"`                          // 版本类型
+	ReleaseStatus string  `json:"releaseStatus" example:"0"`                        // 发布状态
+	ProjectID     string  `json:"projectId" example:"UUID"`                         // 关联项目ID
+	Remark        *string `json:"remark" example:"版本备注"`                            // 备注
+	EndDate       *string `json:"endDate" example:"2024-12-31"`                     // 结束日期
+	StartDate     *string `json:"startDate" example:"2024-01-01"`                   // 开始日期
 }
 
 type UpdateVersionNextRequest struct {
-	ReleaseStatus  string `json:"releaseStatus"`
-	ChangeRichText string `json:"changeRichText"`
+	ReleaseStatus  string `json:"releaseStatus" example:"0"`                       // 发布状态
+	ChangeRichText string `json:"changeRichText" example:"<p>变更详情</p>"`            // 变更详情(富文本)
 }
 
 type CreateNodeItemRequest struct {
@@ -559,153 +559,153 @@ type CreateStoryRequest struct {
 }
 
 type UpdateStoryRequest struct {
-	StoryStatus   string   `json:"storyStatus"`
-	StoryType     string   `json:"storyType" binding:"required"`
-	StoryLevel    string   `json:"storyLevel"`
-	Source        string   `json:"source"`
-	StoryTitle    *string  `json:"storyTitle" binding:"required"`
-	StoryRichText *string  `json:"storyRichText"`
-	UserIDs       []string `json:"userIds"`
-	ProjectID     string   `json:"projectId" binding:"required"`
-	VersionID     *string  `json:"versionId" binding:"required"`
-	ModuleID      *string  `json:"moduleId" binding:"required"`
-	FileIDs       []string `json:"fileIds"`
+	StoryStatus   string   `json:"storyStatus" example:"0"`                          // 需求状态
+	StoryType     string   `json:"storyType" binding:"required" example:"0"`         // 需求类型
+	StoryLevel    string   `json:"storyLevel" example:"0"`                           // 需求优先级
+	Source        string   `json:"source" example:"0"`                               // 需求来源
+	StoryTitle    *string  `json:"storyTitle" binding:"required" example:"需求标题"`     // 需求标题
+	StoryRichText *string  `json:"storyRichText" example:"<p>需求描述</p>"`              // 需求描述(富文本)
+	UserIDs       []string `json:"userIds"`                                           // 参与人员ID数组
+	ProjectID     string   `json:"projectId" binding:"required" example:"UUID"`       // 关联项目ID
+	VersionID     *string  `json:"versionId" binding:"required" example:"UUID"`       // 关联版本ID
+	ModuleID      *string  `json:"moduleId" binding:"required" example:"UUID"`        // 关联模块ID
+	FileIDs       []string `json:"fileIds"`                                            // 附件ID数组
 }
 
 type UpdateStoryFieldRequest struct {
-	Key   string      `json:"key" binding:"required"`
-	Value interface{} `json:"value"`
+	Key   string      `json:"key" binding:"required" example:"storyStatus"`        // 要更新的字段名
+	Value interface{} `json:"value" example:"0"`                                   // 要更新的字段值
 }
 
 type UpdateStoryNextRequest struct {
-	StoryStatus    string `json:"storyStatus" binding:"required"`
-	ChangeRichText string `json:"changeRichText"`
+	StoryStatus    string `json:"storyStatus" binding:"required" example:"0"`          // 需求状态
+	ChangeRichText string `json:"changeRichText" example:"<p>流转说明</p>"`                // 流转说明(富文本)
 }
 
 type CreateTaskRequest struct {
-	PlanHours    float64 `json:"planHours" binding:"required"`
-	TaskStatus   string  `json:"taskStatus"`
-	TaskType     string  `json:"taskType"`
-	TaskTitle    *string `json:"taskTitle" binding:"required"`
-	ProjectID    string  `json:"projectId" binding:"required"`
-	TaskRichText *string `json:"taskRichText"`
-	VersionID    *string `json:"versionId"`
-	ModuleID     *string `json:"moduleId"`
-	StoryID      *string `json:"storyId"`
-	UserID       *string `json:"userId" binding:"required"`
-	EndDate      *string `json:"endDate" binding:"required"`
-	StartDate    *string `json:"startDate" binding:"required"`
+	PlanHours    float64 `json:"planHours" binding:"required" example:"8"`               // 计划工时
+	TaskStatus   string  `json:"taskStatus" example:"0"`                                 // 任务状态
+	TaskType     string  `json:"taskType" example:"0"`                                   // 任务类型
+	TaskTitle    *string `json:"taskTitle" binding:"required" example:"任务标题"`            // 任务标题
+	ProjectID    string  `json:"projectId" binding:"required" example:"UUID"`            // 关联项目ID
+	TaskRichText *string `json:"taskRichText" example:"<p>任务描述</p>"`                     // 任务描述(富文本)
+	VersionID    *string `json:"versionId" example:"UUID"`                               // 关联版本ID
+	ModuleID     *string `json:"moduleId" example:"UUID"`                                // 关联模块ID
+	StoryID      *string `json:"storyId" example:"UUID"`                                 // 关联需求ID
+	UserID       *string `json:"userId" binding:"required" example:"UUID"`               // 负责人ID
+	EndDate      *string `json:"endDate" binding:"required" example:"2024-12-31"`        // 结束日期
+	StartDate    *string `json:"startDate" binding:"required" example:"2024-01-01"`      // 开始日期
 }
 
 type UpdateTaskRequest struct {
-	PlanHours    float64 `json:"planHours" binding:"required"`
-	TaskStatus   string  `json:"taskStatus"`
-	TaskType     string  `json:"taskType"`
-	TaskTitle    *string `json:"taskTitle" binding:"required"`
-	ProjectID    string  `json:"projectId" binding:"required"`
-	TaskRichText *string `json:"taskRichText"`
-	VersionID    *string `json:"versionId"`
-	ModuleID     *string `json:"moduleId"`
-	StoryID      *string `json:"storyId"`
-	UserID       *string `json:"userId" binding:"required"`
-	EndDate      *string `json:"endDate" binding:"required"`
-	StartDate    *string `json:"startDate" binding:"required"`
+	PlanHours    float64 `json:"planHours" binding:"required" example:"8"`               // 计划工时
+	TaskStatus   string  `json:"taskStatus" example:"0"`                                 // 任务状态
+	TaskType     string  `json:"taskType" example:"0"`                                   // 任务类型
+	TaskTitle    *string `json:"taskTitle" binding:"required" example:"任务标题"`            // 任务标题
+	ProjectID    string  `json:"projectId" binding:"required" example:"UUID"`            // 关联项目ID
+	TaskRichText *string `json:"taskRichText" example:"<p>任务描述</p>"`                     // 任务描述(富文本)
+	VersionID    *string `json:"versionId" example:"UUID"`                               // 关联版本ID
+	ModuleID     *string `json:"moduleId" example:"UUID"`                                // 关联模块ID
+	StoryID      *string `json:"storyId" example:"UUID"`                                 // 关联需求ID
+	UserID       *string `json:"userId" binding:"required" example:"UUID"`               // 负责人ID
+	EndDate      *string `json:"endDate" binding:"required" example:"2024-12-31"`        // 结束日期
+	StartDate    *string `json:"startDate" binding:"required" example:"2024-01-01"`      // 开始日期
 }
 
 type UpdateTaskFieldRequest struct {
-	Key   string      `json:"key" binding:"required"`
-	Value interface{} `json:"value"`
+	Key   string      `json:"key" binding:"required" example:"taskStatus"`              // 要更新的字段名
+	Value interface{} `json:"value" example:"0"`                                        // 要更新的字段值
 }
 
 type UpdateTaskNextRequest struct {
-	TaskStatus     string `json:"taskStatus" binding:"required"`
-	ChangeRichText string `json:"changeRichText"`
+	TaskStatus     string `json:"taskStatus" binding:"required" example:"0"`             // 任务状态
+	ChangeRichText string `json:"changeRichText" example:"<p>流转说明</p>"`                  // 流转说明(富文本)
 }
 
 type CreateBugRequest struct {
-	BugLevel    string  `json:"bugLevel"`
-	BugEnv      string  `json:"bugEnv"`
-	BugStatus   string  `json:"bugStatus"`
-	BugSource   string  `json:"bugSource"`
-	BugType     string  `json:"bugType"`
-	BugUa       *string `json:"bugUa"`
-	BugTitle    *string `json:"bugTitle" binding:"required"`
-	ProjectID   string  `json:"projectId" binding:"required"`
-	BugRichText *string `json:"bugRichText"`
-	VersionID   *string `json:"versionId"`
-	ModuleID    *string `json:"moduleId"`
-	StoryID     *string `json:"storyId"`
-	UserID      *string `json:"userId" binding:"required"`
+	BugLevel    string  `json:"bugLevel" example:"0"`                                    // 缺陷等级
+	BugEnv      string  `json:"bugEnv" example:"0"`                                     // 缺陷环境
+	BugStatus   string  `json:"bugStatus" example:"0"`                                  // 缺陷状态
+	BugSource   string  `json:"bugSource" example:"0"`                                  // 缺陷来源
+	BugType     string  `json:"bugType" example:"0"`                                    // 缺陷类型
+	BugUa       *string `json:"bugUa" example:"Mozilla/5.0"`                            // 用户代理
+	BugTitle    *string `json:"bugTitle" binding:"required" example:"缺陷标题"`             // 缺陷标题
+	ProjectID   string  `json:"projectId" binding:"required" example:"UUID"`            // 关联项目ID
+	BugRichText *string `json:"bugRichText" example:"<p>缺陷描述</p>"`                      // 缺陷描述(富文本)
+	VersionID   *string `json:"versionId" example:"UUID"`                               // 关联版本ID
+	ModuleID    *string `json:"moduleId" example:"UUID"`                                // 关联模块ID
+	StoryID     *string `json:"storyId" example:"UUID"`                                 // 关联需求ID
+	UserID      *string `json:"userId" binding:"required" example:"UUID"`               // 指派人ID
 }
 
 type UpdateBugRequest struct {
-	BugLevel    string  `json:"bugLevel"`
-	BugEnv      string  `json:"bugEnv"`
-	BugStatus   string  `json:"bugStatus"`
-	BugSource   string  `json:"bugSource"`
-	BugType     string  `json:"bugType"`
-	BugUa       *string `json:"bugUa"`
-	BugTitle    *string `json:"bugTitle" binding:"required"`
-	ProjectID   string  `json:"projectId" binding:"required"`
-	BugRichText *string `json:"bugRichText"`
-	VersionID   *string `json:"versionId"`
-	ModuleID    *string `json:"moduleId"`
-	StoryID     *string `json:"storyId"`
-	UserID      *string `json:"userId" binding:"required"`
+	BugLevel    string  `json:"bugLevel" example:"0"`                                    // 缺陷等级
+	BugEnv      string  `json:"bugEnv" example:"0"`                                     // 缺陷环境
+	BugStatus   string  `json:"bugStatus" example:"0"`                                  // 缺陷状态
+	BugSource   string  `json:"bugSource" example:"0"`                                  // 缺陷来源
+	BugType     string  `json:"bugType" example:"0"`                                    // 缺陷类型
+	BugUa       *string `json:"bugUa" example:"Mozilla/5.0"`                            // 用户代理
+	BugTitle    *string `json:"bugTitle" binding:"required" example:"缺陷标题"`             // 缺陷标题
+	ProjectID   string  `json:"projectId" binding:"required" example:"UUID"`            // 关联项目ID
+	BugRichText *string `json:"bugRichText" example:"<p>缺陷描述</p>"`                      // 缺陷描述(富文本)
+	VersionID   *string `json:"versionId" example:"UUID"`                               // 关联版本ID
+	ModuleID    *string `json:"moduleId" example:"UUID"`                                // 关联模块ID
+	StoryID     *string `json:"storyId" example:"UUID"`                                 // 关联需求ID
+	UserID      *string `json:"userId" binding:"required" example:"UUID"`               // 指派人ID
 }
 
 type UpdateBugFieldRequest struct {
-	Key   string      `json:"key" binding:"required"`
-	Value interface{} `json:"value"`
+	Key   string      `json:"key" binding:"required" example:"bugStatus"`               // 要更新的字段名
+	Value interface{} `json:"value" example:"0"`                                         // 要更新的字段值
 }
 
 type UpdateBugNextRequest struct {
-	BugStatus      string `json:"bugStatus" binding:"required"`
-	ChangeRichText string `json:"changeRichText"`
+	BugStatus      string `json:"bugStatus" binding:"required" example:"0"`              // 缺陷状态
+	ChangeRichText string `json:"changeRichText" example:"<p>流转说明</p>"`                  // 流转说明(富文本)
 }
 
 type ConfirmBugRequest struct {
-	BugConfirmStatus string `json:"bugConfirmStatus" binding:"required"`
-	ChangeRichText   string `json:"changeRichText"`
+	BugConfirmStatus string `json:"bugConfirmStatus" binding:"required" example:"0"`     // 缺陷确认状态
+	ChangeRichText   string `json:"changeRichText" example:"<p>确认说明</p>"`                // 确认说明(富文本)
 }
 
 type NodeListRequest struct {
-	BusinessID string `form:"businessId"`
+	BusinessID string `form:"businessId" example:"UUID"`                             // 业务ID
 }
 
 type NodeResponse struct {
-	NodeID         string  `json:"nodeId"`
-	Label          string  `json:"label"`
-	Value          string  `json:"value"`
-	Sort           int     `json:"sort"`
-	UserID         string  `json:"userId"`
-	RealName       string  `json:"realName"`
-	Current        bool    `json:"current"`
-	NodeType       int     `json:"nodeType"`
-	Result         int     `json:"result"`
-	Remark         *string `json:"remark"`
-	ResultRichText *string `json:"resultRichText"`
-	BusinessType   *string `json:"businessType"`
-	BusinessID     string  `json:"businessId"`
-	StartDate      *string `json:"startDate"`
-	EndDate        *string `json:"endDate"`
-	CreateDate     *string `json:"createDate"`
+	NodeID         string  `json:"nodeId" example:"UUID"`                                // 节点ID
+	Label          string  `json:"label" example:"需求提交"`                                 // 节点名称
+	Value          string  `json:"value" example:"0"`                                    // 节点值
+	Sort           int     `json:"sort" example:"1"`                                     // 节点顺序
+	UserID         string  `json:"userId" example:"UUID"`                                // 负责人ID
+	RealName       string  `json:"realName" example:"张三"`                                // 负责人姓名
+	Current        bool    `json:"current" example:"false"`                              // 是否为当前节点
+	NodeType       int     `json:"nodeType" example:"1"`                                 // 节点类型 0=开始 1=办理 2=审批 3=结束
+	Result         int     `json:"result" example:"0"`                                   // 处理结果
+	Remark         *string `json:"remark" example:"节点备注"`                                // 备注
+	ResultRichText *string `json:"resultRichText" example:"<p>审批意见</p>"`                 // 处理结果(富文本)
+	BusinessType   *string `json:"businessType" example:"0"`                             // 业务类型
+	BusinessID     string  `json:"businessId" example:"UUID"`                            // 业务ID
+	StartDate      *string `json:"startDate" example:"2024-01-01 12:00:00"`             // 开始时间
+	EndDate        *string `json:"endDate" example:"2024-12-31 12:00:00"`               // 结束时间
+	CreateDate     *string `json:"createDate" example:"2024-01-01 12:00:00"`            // 创建时间
 }
 
 type CreateNodeRequest struct {
-	Label        string  `json:"label" binding:"required"`
-	Value        string  `json:"value" binding:"required"`
-	Sort         int     `json:"sort"`
-	UserID       string  `json:"userId" binding:"required"`
-	NodeType     int     `json:"nodeType"`
-	Remark       *string `json:"remark"`
-	BusinessType string  `json:"businessType"`
-	BusinessID   string  `json:"businessId" binding:"required"`
+	Label        string  `json:"label" binding:"required" example:"需求提交"`               // 节点名称
+	Value        string  `json:"value" binding:"required" example:"0"`                  // 节点值
+	Sort         int     `json:"sort" example:"1"`                                      // 节点顺序
+	UserID       string  `json:"userId" binding:"required" example:"UUID"`             // 负责人ID
+	NodeType     int     `json:"nodeType" example:"1"`                                  // 节点类型 0=开始 1=办理 2=审批 3=结束
+	Remark       *string `json:"remark" example:"节点备注"`                                 // 备注
+	BusinessType string  `json:"businessType" example:"0"`                              // 业务类型
+	BusinessID   string  `json:"businessId" binding:"required" example:"UUID"`         // 业务ID
 }
 
 type NodeApproveRequest struct {
-	Result         int    `json:"result" binding:"required"`
-	ResultRichText string `json:"resultRichText"`
+	Result         int    `json:"result" binding:"required" example:"1"`                // 审批结果 0=驳回 1=通过
+	ResultRichText string `json:"resultRichText" example:"<p>审批意见</p>"`                 // 审批意见(富文本)
 }
 
 func DevNodeToNodeResponse(node DevNode, realName string) *NodeResponse {

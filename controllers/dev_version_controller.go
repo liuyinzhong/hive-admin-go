@@ -23,7 +23,7 @@ import (
 // @Param projectId query string false "项目ID"
 // @Param releaseStatus query int false "发布状态"
 // @Param sorts query string false "排序参数"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.VersionResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/versions [get]
 func (dc *DevController) GetVersions(c *gin.Context) {
@@ -60,7 +60,7 @@ func (dc *DevController) GetVersions(c *gin.Context) {
 // @Param version query string false "版本号"
 // @Param projectId query string false "项目ID"
 // @Param releaseStatus query int false "发布状态"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.VersionResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/versions/all [get]
 func (dc *DevController) GetAllVersions(c *gin.Context) {
@@ -91,7 +91,7 @@ func (dc *DevController) GetAllVersions(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param versionId path string true "版本ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=models.VersionResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/versions/{versionId} [get]
@@ -113,7 +113,7 @@ func (dc *DevController) GetVersion(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param projectId query string true "项目ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=models.VersionResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/versions/getLastVersion [get]
 func (dc *DevController) GetLatestVersion(c *gin.Context) {
@@ -139,7 +139,7 @@ func (dc *DevController) GetLatestVersion(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateVersionRequest true "版本信息"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/versions [post]
@@ -177,7 +177,7 @@ func (dc *DevController) CreateVersion(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param versionId path string true "版本ID"
 // @Param request body models.UpdateVersionRequest true "版本信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/versions/{versionId} [put]
@@ -217,7 +217,7 @@ func (dc *DevController) UpdateVersion(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param versionId path string true "版本ID"
 // @Param request body models.UpdateVersionNextRequest true "版本状态更新信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/versions/{versionId}/next [put]
@@ -247,7 +247,7 @@ func (dc *DevController) UpdateVersionNext(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []string true "版本ID列表"
-// @Success 200 {object} map[string]interface{} "删除成功"
+// @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/versions [delete]

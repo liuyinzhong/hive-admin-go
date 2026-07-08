@@ -17,7 +17,7 @@ import (
 // @Produce json
 // @Security ApiKeyAuth
 // @Param businessId query string false "业务ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.NodeResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/nodes [get]
 func (dc *DevController) GetNodes(c *gin.Context) {
@@ -39,7 +39,7 @@ func (dc *DevController) GetNodes(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateNodeRequest true "节点信息"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/nodes [post]
@@ -66,7 +66,7 @@ func (dc *DevController) CreateNode(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []string true "节点ID列表"
-// @Success 200 {object} map[string]interface{} "删除成功"
+// @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/nodes [delete]
@@ -94,7 +94,7 @@ func (dc *DevController) DeleteNodes(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param nodeId path string true "节点ID"
 // @Param request body models.NodeApproveRequest true "审批信息"
-// @Success 200 {object} map[string]interface{} "审批成功"
+// @Success 200 {object} models.Response "审批成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/nodes/{nodeId}/approve [put]
@@ -123,7 +123,7 @@ func (dc *DevController) ApproveNode(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param nodeId path string true "节点ID"
-// @Success 200 {object} map[string]interface{} "流转成功"
+// @Success 200 {object} models.Response "流转成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/nodes/{nodeId}/next [put]

@@ -16,7 +16,7 @@ import (
 // @Produce json
 // @Security ApiKeyAuth
 // @Param file formData file true "文件"
-// @Success 200 {object} map[string]interface{} "上传成功"
+// @Success 200 {object} models.Response{data=models.FileResponse} "上传成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/upload [post]
@@ -45,11 +45,11 @@ func (ctrl *SystemController) UploadFile(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param page query int false "页码"
 // @Param pageSize query int false "每页大小"
-// @Param originalName query string false "原始文件名"
-// @Param type query string false "MIME类型"
-// @Param fileExt query string false "文件扩展名"
-// @Param sorts query string false "排序参数"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Param originalName query string false "原始文件名(模糊搜索)"
+// @Param type query string false "MIME类型(精确匹配)"
+// @Param fileExt query string false "文件扩展名(精确匹配，如 .jpg)"
+// @Param sorts query string false "排序参数(如 createDate,desc;size,asc)"
+// @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.FileResponse}} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/files [get]

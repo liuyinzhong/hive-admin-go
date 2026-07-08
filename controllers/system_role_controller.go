@@ -19,7 +19,7 @@ import (
 // @Param pageSize query int false "每页大小"
 // @Param roleName query string false "角色名称"
 // @Param status query int false "状态"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.RoleSimpleResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/roles [get]
 func (ctrl *SystemController) GetRoleList(c *gin.Context) {
@@ -45,7 +45,7 @@ func (ctrl *SystemController) GetRoleList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.RoleSimpleResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/roles/all [get]
 func (ctrl *SystemController) GetAllRoles(c *gin.Context) {
@@ -66,7 +66,7 @@ func (ctrl *SystemController) GetAllRoles(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateRoleRequest true "角色信息"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/roles [post]
@@ -93,7 +93,7 @@ func (ctrl *SystemController) CreateRole(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param roleId path string true "角色ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=models.RoleDetailResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/roles/{roleId} [get]
@@ -122,7 +122,7 @@ func (ctrl *SystemController) GetRoleDetail(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param roleId path string true "角色ID"
 // @Param request body models.UpdateRoleRequest true "角色信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/roles/{roleId} [put]
@@ -156,7 +156,7 @@ func (ctrl *SystemController) UpdateRole(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param roleId path string true "角色ID"
 // @Param request body map[string]int true "状态"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/roles/{roleId}/status [put]
@@ -189,7 +189,7 @@ func (ctrl *SystemController) UpdateRoleStatus(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []string true "角色ID列表"
-// @Success 200 {object} map[string]interface{} "删除成功"
+// @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/roles [delete]

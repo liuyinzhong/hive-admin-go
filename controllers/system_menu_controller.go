@@ -16,7 +16,7 @@ import (
 // @Produce json
 // @Security ApiKeyAuth
 // @Param status query int false "状态"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.MenuTreeResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/menus [get]
 func (ctrl *SystemController) GetMenuTree(c *gin.Context) {
@@ -44,7 +44,7 @@ func (ctrl *SystemController) GetMenuTree(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param name query string true "菜单名称"
 // @Param id query string false "排除的菜单ID"
-// @Success 200 {object} map[string]interface{} "检查结果"
+// @Success 200 {object} models.Response{data=bool} "检查结果"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/menus/name-exists [get]
@@ -75,7 +75,7 @@ func (ctrl *SystemController) CheckMenuNameExists(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param path query string true "菜单路径"
 // @Param id query string false "排除的菜单ID"
-// @Success 200 {object} map[string]interface{} "检查结果"
+// @Success 200 {object} models.Response{data=bool} "检查结果"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/menus/path-exists [get]
@@ -105,7 +105,7 @@ func (ctrl *SystemController) CheckMenuPathExists(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateMenuRequest true "菜单信息"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/menus [post]
@@ -132,7 +132,7 @@ func (ctrl *SystemController) CreateMenu(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param id path string true "菜单ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=models.MenuTreeResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/menus/{id} [get]
@@ -161,7 +161,7 @@ func (ctrl *SystemController) GetMenuDetail(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param id path string true "菜单ID"
 // @Param request body models.UpdateMenuRequest true "菜单信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/menus/{id} [put]
@@ -194,7 +194,7 @@ func (ctrl *SystemController) UpdateMenu(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []string true "菜单ID列表"
-// @Success 200 {object} map[string]interface{} "删除成功"
+// @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/menus [delete]

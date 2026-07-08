@@ -25,7 +25,7 @@ func NewAuthController() *AuthController {
 // @Accept json
 // @Produce json
 // @Param request body models.LoginRequest true "登录请求参数"
-// @Success 200 {object} map[string]interface{} "登录成功"
+// @Success 200 {object} models.Response{data=models.LoginResponse} "登录成功"
 // @Failure 401 {object} map[string]interface{} "用户名或密码错误"
 // @Router /auth/login [post]
 func (ctrl *AuthController) Login(c *gin.Context) {
@@ -53,7 +53,7 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=models.ProfileResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "用户未登录"
 // @Router /auth/profile [get]
 func (ctrl *AuthController) GetProfile(c *gin.Context) {
@@ -79,7 +79,7 @@ func (ctrl *AuthController) GetProfile(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.MenuTreeResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "用户未登录"
 // @Router /auth/menus [get]
 func (ctrl *AuthController) GetMenus(c *gin.Context) {
@@ -105,7 +105,7 @@ func (ctrl *AuthController) GetMenus(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]string} "获取成功"
 // @Failure 401 {object} map[string]interface{} "用户未登录"
 // @Router /auth/codes [get]
 func (ctrl *AuthController) GetAuthCodes(c *gin.Context) {
@@ -131,7 +131,7 @@ func (ctrl *AuthController) GetAuthCodes(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "登出成功"
+// @Success 200 {object} models.Response "登出成功"
 // @Failure 401 {object} map[string]interface{} "用户未登录"
 // @Router /auth/logout [post]
 func (ctrl *AuthController) Logout(c *gin.Context) {

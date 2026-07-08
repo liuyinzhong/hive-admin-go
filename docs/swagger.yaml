@@ -1,10 +1,164 @@
 basePath: /api
 definitions:
+  models.BugResponse:
+    properties:
+      avatar:
+        description: 指派人头像
+        example: https://xxx/avatar.jpg
+        type: string
+      bugConfirmStatus:
+        description: 缺陷确认状态
+        example: "0"
+        type: string
+      bugEnv:
+        description: 缺陷环境
+        example: "0"
+        type: string
+      bugId:
+        description: 缺陷ID
+        example: UUID
+        type: string
+      bugLevel:
+        description: 缺陷等级
+        example: "0"
+        type: string
+      bugNum:
+        description: 缺陷编号
+        example: 1
+        type: integer
+      bugRichText:
+        description: 缺陷描述(富文本)
+        example: <p>缺陷描述</p>
+        type: string
+      bugSource:
+        description: 缺陷来源
+        example: "0"
+        type: string
+      bugStatus:
+        description: 缺陷状态
+        example: "0"
+        type: string
+      bugTitle:
+        description: 缺陷标题
+        example: 缺陷标题
+        type: string
+      bugType:
+        description: 缺陷类型
+        example: "0"
+        type: string
+      bugUa:
+        description: 用户代理
+        example: Mozilla/5.0
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      creatorId:
+        description: 创建人ID
+        example: UUID
+        type: string
+      creatorName:
+        description: 创建人姓名
+        example: 管理员
+        type: string
+      moduleId:
+        description: 关联模块ID
+        example: UUID
+        type: string
+      moduleTitle:
+        description: 关联模块标题
+        example: 模块名称
+        type: string
+      projectId:
+        description: 关联项目ID
+        example: UUID
+        type: string
+      projectTitle:
+        description: 关联项目标题
+        example: crudelis
+        type: string
+      realName:
+        description: 指派人姓名
+        example: 张三
+        type: string
+      storyId:
+        description: 关联需求ID
+        example: UUID
+        type: string
+      storyTitle:
+        description: 关联需求标题
+        example: 需求标题
+        type: string
+      updateDate:
+        description: 更新时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      userId:
+        description: 指派人ID
+        example: UUID
+        type: string
+      version:
+        description: 关联版本号
+        example: v1.0.0
+        type: string
+      versionId:
+        description: 关联版本ID
+        example: UUID
+        type: string
+    type: object
+  models.ChangeHistoryResponse:
+    properties:
+      businessId:
+        description: 业务ID
+        example: UUID
+        type: string
+      businessType:
+        description: 业务类型
+        example: "0"
+        type: string
+      changeBehavior:
+        description: 变更行为
+        example: "0"
+        type: string
+      changeId:
+        description: 变更记录ID
+        example: UUID
+        type: string
+      changeRichText:
+        description: 变更详情(富文本)
+        example: <p>变更详情</p>
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      creatorId:
+        description: 创建人ID
+        example: UUID
+        type: string
+      creatorName:
+        description: 创建人姓名
+        example: 管理员
+        type: string
+      extendJson:
+        description: 扩展JSON
+        example: '{"key":"value"}'
+        type: string
+      updateDate:
+        description: 更新时间
+        example: "2024-01-01 12:00:00"
+        type: string
+    type: object
   models.ConfirmBugRequest:
     properties:
       bugConfirmStatus:
+        description: 缺陷确认状态
+        example: "0"
         type: string
       changeRichText:
+        description: 确认说明(富文本)
+        example: <p>确认说明</p>
         type: string
     required:
     - bugConfirmStatus
@@ -12,30 +166,56 @@ definitions:
   models.CreateBugRequest:
     properties:
       bugEnv:
+        description: 缺陷环境
+        example: "0"
         type: string
       bugLevel:
+        description: 缺陷等级
+        example: "0"
         type: string
       bugRichText:
+        description: 缺陷描述(富文本)
+        example: <p>缺陷描述</p>
         type: string
       bugSource:
+        description: 缺陷来源
+        example: "0"
         type: string
       bugStatus:
+        description: 缺陷状态
+        example: "0"
         type: string
       bugTitle:
+        description: 缺陷标题
+        example: 缺陷标题
         type: string
       bugType:
+        description: 缺陷类型
+        example: "0"
         type: string
       bugUa:
+        description: 用户代理
+        example: Mozilla/5.0
         type: string
       moduleId:
+        description: 关联模块ID
+        example: UUID
         type: string
       projectId:
+        description: 关联项目ID
+        example: UUID
         type: string
       storyId:
+        description: 关联需求ID
+        example: UUID
         type: string
       userId:
+        description: 指派人ID
+        example: UUID
         type: string
       versionId:
+        description: 关联版本ID
+        example: UUID
         type: string
     required:
     - bugTitle
@@ -45,12 +225,20 @@ definitions:
   models.CreateChangeHistoryRequest:
     properties:
       businessId:
+        description: 业务ID
+        example: UUID
         type: string
       businessType:
+        description: 业务类型
+        example: "0"
         type: string
       changeBehavior:
+        description: 变更行为
+        example: "0"
         type: string
       changeRichText:
+        description: 变更详情(富文本)
+        example: <p>变更详情</p>
         type: string
     required:
     - businessId
@@ -60,12 +248,20 @@ definitions:
   models.CreateDeptRequest:
     properties:
       deptTitle:
+        description: 部门名称
+        example: 技术部
         type: string
       pid:
+        description: 父级部门ID，空表示顶级部门
+        example: UUID
         type: string
       remark:
+        description: 备注
+        example: 技术部门
         type: string
       status:
+        description: 状态 0=禁用 1=启用
+        example: 1
         type: integer
     required:
     - deptTitle
@@ -73,18 +269,32 @@ definitions:
   models.CreateDictRequest:
     properties:
       color:
+        description: 主题色
+        example: '#2db7f5'
         type: string
       label:
+        description: 字典标题
+        example: 功能需求
         type: string
       pid:
+        description: 父级字典ID
+        example: UUID
         type: string
       remark:
+        description: 备注
+        example: 需求类型
         type: string
       status:
+        description: 状态 0=禁用 1=启用
+        example: 1
         type: integer
       type:
+        description: 字典类型
+        example: STORY_TYPE
         type: string
       value:
+        description: 字典值
+        example: "0"
         type: string
     required:
     - label
@@ -93,20 +303,36 @@ definitions:
   models.CreateMenuRequest:
     properties:
       authCode:
+        description: 权限标识
+        example: sys:analytics
         type: string
       component:
+        description: 页面组件路径
+        example: /dashboard/analytics/index
         type: string
       meta:
-        $ref: '#/definitions/models.MenuMeta'
+        allOf:
+        - $ref: '#/definitions/models.MenuMeta'
+        description: 菜单元数据
       name:
+        description: 菜单名称
+        example: Analytics
         type: string
       path:
+        description: 路由地址
+        example: /analytics
         type: string
       pid:
+        description: 上级菜单ID，空表示顶级菜单
+        example: UUID
         type: string
       status:
+        description: 状态 0=禁用 1=启用
+        example: 1
         type: integer
       type:
+        description: 菜单类型 catalog=目录 menu=菜单
+        example: menu
         type: string
     required:
     - meta
@@ -116,10 +342,16 @@ definitions:
   models.CreateModuleRequest:
     properties:
       moduleTitle:
+        description: 模块标题
+        example: 模块名称
         type: string
       projectId:
+        description: 关联项目ID
+        example: UUID
         type: string
       sort:
+        description: 排序
+        example: 1
         type: integer
     required:
     - moduleTitle
@@ -160,20 +392,36 @@ definitions:
   models.CreateNodeRequest:
     properties:
       businessId:
+        description: 业务ID
+        example: UUID
         type: string
       businessType:
+        description: 业务类型
+        example: "0"
         type: string
       label:
+        description: 节点名称
+        example: 需求提交
         type: string
       nodeType:
+        description: 节点类型 0=开始 1=办理 2=审批 3=结束
+        example: 1
         type: integer
       remark:
+        description: 备注
+        example: 节点备注
         type: string
       sort:
+        description: 节点顺序
+        example: 1
         type: integer
       userId:
+        description: 负责人ID
+        example: UUID
         type: string
       value:
+        description: 节点值
+        example: "0"
         type: string
     required:
     - businessId
@@ -184,10 +432,16 @@ definitions:
   models.CreateProjectRequest:
     properties:
       description:
+        description: 项目描述
+        example: 项目描述
         type: string
       projectLogo:
+        description: 项目Logo
+        example: https://xxx/logo.png
         type: string
       projectTitle:
+        description: 项目标题
+        example: crudelis
         type: string
     required:
     - projectTitle
@@ -195,14 +449,23 @@ definitions:
   models.CreateRoleRequest:
     properties:
       permissions:
+        description: 菜单id数组
+        example:
+        - '["UUID"]'
         items:
           type: string
         type: array
       remark:
+        description: 备注
+        example: 编辑角色
         type: string
       roleTitle:
+        description: 角色名称
+        example: 编辑员
         type: string
       status:
+        description: 状态 0=禁用 1=启用
+        example: 1
         type: integer
     required:
     - roleTitle
@@ -278,28 +541,52 @@ definitions:
   models.CreateTaskRequest:
     properties:
       endDate:
+        description: 结束日期
+        example: "2024-12-31"
         type: string
       moduleId:
+        description: 关联模块ID
+        example: UUID
         type: string
       planHours:
+        description: 计划工时
+        example: 8
         type: number
       projectId:
+        description: 关联项目ID
+        example: UUID
         type: string
       startDate:
+        description: 开始日期
+        example: "2024-01-01"
         type: string
       storyId:
+        description: 关联需求ID
+        example: UUID
         type: string
       taskRichText:
+        description: 任务描述(富文本)
+        example: <p>任务描述</p>
         type: string
       taskStatus:
+        description: 任务状态
+        example: "0"
         type: string
       taskTitle:
+        description: 任务标题
+        example: 任务标题
         type: string
       taskType:
+        description: 任务类型
+        example: "0"
         type: string
       userId:
+        description: 负责人ID
+        example: UUID
         type: string
       versionId:
+        description: 关联版本ID
+        example: UUID
         type: string
     required:
     - endDate
@@ -312,22 +599,38 @@ definitions:
   models.CreateUserRequest:
     properties:
       deptIds:
+        description: 部门id数组
+        example:
+        - '["UUID"]'
         items:
           type: string
         type: array
       desc:
+        description: 描述
+        example: 普通用户
         type: string
       password:
+        description: 密码
+        example: "123456"
         type: string
       phone:
+        description: 手机号
+        example: "13800138000"
         type: string
       realName:
+        description: 真实姓名
+        example: 新用户
         type: string
       roleIds:
+        description: 角色id数组
+        example:
+        - '["UUID"]'
         items:
           type: string
         type: array
       username:
+        description: 登录用户名
+        example: newuser
         type: string
     required:
     - password
@@ -337,101 +640,849 @@ definitions:
   models.CreateVersionRequest:
     properties:
       endDate:
+        description: 结束日期
+        example: "2024-12-31"
         type: string
       projectId:
+        description: 关联项目ID
+        example: UUID
         type: string
       releaseStatus:
+        description: 发布状态
+        example: "0"
         type: string
       remark:
+        description: 备注
+        example: 版本备注
         type: string
       startDate:
+        description: 开始日期
+        example: "2024-01-01"
         type: string
       version:
+        description: 版本号
+        example: v1.0.0
         type: string
       versionType:
+        description: 版本类型
+        example: "0"
+        type: string
+    type: object
+  models.DeptTreeResponse:
+    properties:
+      children:
+        description: 子部门
+        items:
+          $ref: '#/definitions/models.DeptTreeResponse'
+        type: array
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      deptId:
+        description: 部门ID
+        example: UUID
+        type: string
+      deptTitle:
+        description: 部门名称
+        example: 技术部
+        type: string
+      pid:
+        description: 父级部门ID
+        example: UUID
+        type: string
+      remark:
+        description: 备注
+        example: 技术部门
+        type: string
+      status:
+        description: 状态 0=禁用 1=启用
+        example: 1
+        type: integer
+    type: object
+  models.DictTreeResponse:
+    properties:
+      children:
+        description: 子字典
+        items:
+          $ref: '#/definitions/models.DictTreeResponse'
+        type: array
+      color:
+        description: 主题色
+        example: '#2db7f5'
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      id:
+        description: 字典ID
+        example: UUID
+        type: string
+      label:
+        description: 字典标题
+        example: 功能需求
+        type: string
+      pid:
+        description: 父级字典ID
+        example: UUID
+        type: string
+      remark:
+        description: 备注
+        example: 需求类型
+        type: string
+      status:
+        description: 状态 0=禁用 1=启用
+        example: 1
+        type: integer
+      type:
+        description: 字典类型
+        example: STORY_TYPE
+        type: string
+      updateDate:
+        description: 更新时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      value:
+        description: 字典值
+        example: "0"
+        type: string
+    type: object
+  models.FileResponse:
+    properties:
+      createDate:
+        description: 创建日期
+        example: "2024-01-01 12:00:00"
+        type: string
+      creatorId:
+        description: 创建人id
+        example: UUID
+        type: string
+      creatorName:
+        description: 创建人姓名
+        example: 创建人姓名
+        type: string
+      fileExt:
+        description: 文件扩展名
+        example: .jpg
+        type: string
+      fileId:
+        description: 文件ID
+        example: UUID
+        type: string
+      fullPath:
+        description: 完整路径
+        example: /uploads/abc.jpg
+        type: string
+      name:
+        description: 存储文件名(UUID重命名)
+        example: abc.jpg
+        type: string
+      originalName:
+        description: 原始文件名
+        example: 原始文件名.jpg
+        type: string
+      path:
+        description: 文件存储路径(不含文件名)
+        example: /uploads/
+        type: string
+      size:
+        description: 文件大小(字节)
+        example: 102400
+        type: integer
+      thumbnailPath:
+        description: 缩略图路径(图片专用)
+        example: /uploads/thumb
+        type: string
+      thumbnailUrl:
+        description: 缩略图URL(图片专用)
+        example: /uploads/thumb/abc.jpg
+        type: string
+      type:
+        description: MIME类型
+        example: image/jpeg
+        type: string
+      url:
+        description: 文件访问URL
+        example: /uploads/abc.jpg
         type: string
     type: object
   models.LoginRequest:
     properties:
       password:
+        description: 登录密码
+        example: "123456"
         type: string
       username:
+        description: 登录用户名
+        example: admin
         type: string
     required:
     - password
     - username
     type: object
+  models.LoginResponse:
+    properties:
+      accessToken:
+        description: JWT访问令牌
+        example: eyJhbGciOiJIUzI1NiIs...
+        type: string
+    type: object
   models.MenuMeta:
     properties:
       activeIcon:
+        description: 激活图标
+        example: lucide:home
         type: string
       activePath:
+        description: 激活路径
+        example: /dashboard
         type: string
       affixTab:
+        description: 固定在标签页 0=否 1=是
+        example: false
         type: boolean
       affixTabOrder:
+        description: 固定标签页的排序
+        example: 0
         type: integer
       badge:
+        description: 徽章内容
+        example: new
         type: string
       badgeType:
+        description: 徽标类型
+        example: dot
         type: string
       badgeVariants:
+        description: 徽标样式
+        example: destructive
         type: string
       domCached:
+        description: 缓存DOM 0=否 1=是
+        example: false
         type: boolean
       hideChildrenInMenu:
+        description: 隐藏子菜单 0=否 1=是
+        example: false
         type: boolean
       hideInBreadcrumb:
+        description: 在面包屑中隐藏 0=否 1=是
+        example: false
         type: boolean
       hideInMenu:
+        description: 在菜单中隐藏 0=否 1=是
+        example: false
         type: boolean
       hideInTab:
+        description: 在标签栏中隐藏 0=否 1=是
+        example: false
         type: boolean
       icon:
+        description: 图标
+        example: lucide:home
         type: string
       iframeSrc:
+        description: 内嵌页面的iframe地址
+        example: https://example.com
         type: string
       keepAlive:
+        description: 缓存标签页 0=否 1=是
+        example: false
         type: boolean
       link:
+        description: 外链跳转路径
+        example: https://example.com
         type: string
       maxNumOfOpenTab:
+        description: 标签页最大打开数量
+        example: -1
         type: integer
       menuVisibleWithForbidden:
+        description: 菜单可见但访问受限 0=否 1=是
+        example: false
         type: boolean
       noBasicLayout:
+        description: 无基础布局 0=否 1=是
+        example: false
         type: boolean
       openInNewWindow:
+        description: 在新窗口打开 0=否 1=是
+        example: false
         type: boolean
       order:
+        description: 排序
+        example: 0
         type: integer
       query:
+        description: 额外的路由参数
+        example: id=1
         type: string
       title:
+        description: 页面标题
+        example: page.dashboard.analytics
+        type: string
+    type: object
+  models.MenuTreeResponse:
+    properties:
+      authCode:
+        description: 权限标识
+        example: sys:analytics
+        type: string
+      children:
+        description: 子菜单
+        items:
+          $ref: '#/definitions/models.MenuTreeResponse'
+        type: array
+      component:
+        description: 页面组件路径
+        example: /dashboard/analytics/index
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      creatorId:
+        description: 创建人id
+        example: UUID
+        type: string
+      creatorName:
+        description: 创建人姓名
+        example: 管理员
+        type: string
+      id:
+        description: 菜单ID
+        example: UUID
+        type: string
+      meta:
+        allOf:
+        - $ref: '#/definitions/models.MenuMeta'
+        description: 菜单元数据
+      name:
+        description: 菜单名称
+        example: Analytics
+        type: string
+      path:
+        description: 路由地址
+        example: /analytics
+        type: string
+      pid:
+        description: 上级菜单ID
+        example: UUID
+        type: string
+      status:
+        description: 状态 0=禁用 1=启用
+        example: 1
+        type: integer
+      type:
+        description: 菜单类型 catalog=目录 menu=菜单
+        example: menu
+        type: string
+      updateDate:
+        description: 修改时间
+        example: "2024-01-01 12:00:00"
+        type: string
+    type: object
+  models.ModuleResponse:
+    properties:
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      moduleId:
+        description: 模块ID
+        example: UUID
+        type: string
+      moduleTitle:
+        description: 模块标题
+        example: 模块名称
+        type: string
+      projectId:
+        description: 关联项目ID
+        example: UUID
+        type: string
+      projectTitle:
+        description: 关联项目标题
+        example: crudelis
+        type: string
+      sort:
+        description: 排序
+        example: 1
+        type: integer
+      updateDate:
+        description: 更新时间
+        example: "2024-01-01 12:00:00"
         type: string
     type: object
   models.NodeApproveRequest:
     properties:
       result:
+        description: 审批结果 0=驳回 1=通过
+        example: 1
         type: integer
       resultRichText:
+        description: 审批意见(富文本)
+        example: <p>审批意见</p>
         type: string
     required:
     - result
     type: object
-  models.UpdateBugFieldRequest:
+  models.NodeResponse:
     properties:
-      key:
+      businessId:
+        description: 业务ID
+        example: UUID
         type: string
-      value: {}
-    required:
-    - key
+      businessType:
+        description: 业务类型
+        example: "0"
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      current:
+        description: 是否为当前节点
+        example: false
+        type: boolean
+      endDate:
+        description: 结束时间
+        example: "2024-12-31 12:00:00"
+        type: string
+      label:
+        description: 节点名称
+        example: 需求提交
+        type: string
+      nodeId:
+        description: 节点ID
+        example: UUID
+        type: string
+      nodeType:
+        description: 节点类型 0=开始 1=办理 2=审批 3=结束
+        example: 1
+        type: integer
+      realName:
+        description: 负责人姓名
+        example: 张三
+        type: string
+      remark:
+        description: 备注
+        example: 节点备注
+        type: string
+      result:
+        description: 处理结果
+        example: 0
+        type: integer
+      resultRichText:
+        description: 处理结果(富文本)
+        example: <p>审批意见</p>
+        type: string
+      sort:
+        description: 节点顺序
+        example: 1
+        type: integer
+      startDate:
+        description: 开始时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      userId:
+        description: 负责人ID
+        example: UUID
+        type: string
+      value:
+        description: 节点值
+        example: "0"
+        type: string
+    type: object
+  models.ProfileResponse:
+    properties:
+      avatar:
+        description: 用户头像URL
+        example: https://xxx/avatar.jpg
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      deptIds:
+        description: 部门id数组
+        items:
+          type: string
+        type: array
+      deptTitles:
+        description: 部门名称数组
+        items:
+          type: string
+        type: array
+      desc:
+        description: 用户描述
+        example: 超级管理员
+        type: string
+      email:
+        description: 邮箱
+        example: admin@example.com
+        type: string
+      homePath:
+        description: 首页路径
+        example: /dashboard/analytics
+        type: string
+      phone:
+        description: 手机号
+        example: "13800138000"
+        type: string
+      realName:
+        description: 真实姓名
+        example: 管理员
+        type: string
+      roleIds:
+        description: 角色id数组
+        items:
+          type: string
+        type: array
+      roleTitles:
+        description: 角色名称数组
+        items:
+          type: string
+        type: array
+      status:
+        description: 用户状态 0=禁用 1=启用
+        example: 1
+        type: integer
+      updateDate:
+        description: 更新时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      userId:
+        description: 用户ID
+        example: UUID
+        type: string
+      username:
+        description: 登录用户名
+        example: admin
+        type: string
+    type: object
+  models.ProjectResponse:
+    properties:
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      description:
+        description: 项目描述
+        example: 项目描述
+        type: string
+      projectId:
+        description: 项目ID
+        example: UUID
+        type: string
+      projectLogo:
+        description: 项目Logo
+        example: https://xxx/logo.png
+        type: string
+      projectTitle:
+        description: 项目标题
+        example: crudelis
+        type: string
+    type: object
+  models.Response:
+    properties:
+      code:
+        description: 状态码 0=成功 -1=失败
+        example: 0
+        type: integer
+      data:
+        description: 响应数据
+      error:
+        description: 错误信息
+      message:
+        description: 提示信息
+        example: ok
+        type: string
+    type: object
+  models.RoleDetailResponse:
+    properties:
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      permissions:
+        description: 菜单id数组
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
+      remark:
+        description: 备注
+        example: 超级管理员
+        type: string
+      roleId:
+        description: 角色ID
+        example: UUID
+        type: string
+      roleTitle:
+        description: 角色名称
+        example: SuperAdmin
+        type: string
+      status:
+        description: 状态 0=禁用 1=启用
+        example: 1
+        type: integer
+    type: object
+  models.RoleSimpleResponse:
+    properties:
+      roleId:
+        description: 角色ID
+        example: UUID
+        type: string
+      roleTitle:
+        description: 角色名称
+        example: SuperAdmin
+        type: string
+      status:
+        description: 状态 0=禁用 1=启用
+        example: 1
+        type: integer
+    type: object
+  models.StoryResponse:
+    properties:
+      bugList:
+        description: 关联缺陷列表
+        items:
+          $ref: '#/definitions/models.BugResponse'
+        type: array
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      creatorId:
+        description: 创建人ID
+        example: UUID
+        type: string
+      creatorName:
+        description: 创建人姓名
+        example: 管理员
+        type: string
+      fileIds:
+        description: 附件ID数组
+        items:
+          type: string
+        type: array
+      fileList:
+        description: 附件列表
+        items:
+          $ref: '#/definitions/models.FileResponse'
+        type: array
+      moduleId:
+        description: 关联模块ID
+        example: UUID
+        type: string
+      moduleTitle:
+        description: 关联模块标题
+        example: 模块名称
+        type: string
+      nodes:
+        description: 节点列表
+        items:
+          $ref: '#/definitions/models.NodeResponse'
+        type: array
+      projectId:
+        description: 关联项目ID
+        example: UUID
+        type: string
+      projectTitle:
+        description: 关联项目标题
+        example: crudelis
+        type: string
+      source:
+        description: 需求来源
+        example: "0"
+        type: string
+      storyId:
+        description: 需求ID
+        example: UUID
+        type: string
+      storyLevel:
+        description: 需求优先级
+        example: "0"
+        type: string
+      storyNum:
+        description: 需求编号
+        example: 1
+        type: integer
+      storyRichText:
+        description: 需求描述(富文本)
+        example: <p>需求描述</p>
+        type: string
+      storyStatus:
+        description: 需求状态
+        example: "0"
+        type: string
+      storyTitle:
+        description: 需求标题
+        example: 需求标题
+        type: string
+      storyType:
+        description: 需求类型
+        example: "0"
+        type: string
+      taskList:
+        description: 关联任务列表
+        items:
+          $ref: '#/definitions/models.TaskResponse'
+        type: array
+      updateDate:
+        description: 更新时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      userIds:
+        description: 参与人员ID数组
+        items:
+          type: string
+        type: array
+      userList:
+        description: 参与人员列表
+        items:
+          $ref: '#/definitions/models.StoryUserItem'
+        type: array
+      version:
+        description: 关联版本号
+        example: v1.0.0
+        type: string
+      versionId:
+        description: 关联版本ID
+        example: UUID
+        type: string
+    type: object
+  models.StoryUserItem:
+    properties:
+      avatar:
+        description: 用户头像
+        example: https://xxx/avatar.jpg
+        type: string
+      realName:
+        description: 真实姓名
+        example: 张三
+        type: string
+      userId:
+        description: 用户ID
+        example: UUID
+        type: string
+    type: object
+  models.TaskResponse:
+    properties:
+      actualHours:
+        description: 实际工时
+        example: 6
+        type: number
+      avatar:
+        description: 负责人头像
+        example: https://xxx/avatar.jpg
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      creatorId:
+        description: 创建人ID
+        example: UUID
+        type: string
+      creatorName:
+        description: 创建人姓名
+        example: 管理员
+        type: string
+      endDate:
+        description: 结束日期
+        example: "2024-12-31"
+        type: string
+      moduleId:
+        description: 关联模块ID
+        example: UUID
+        type: string
+      moduleTitle:
+        description: 关联模块标题
+        example: 模块名称
+        type: string
+      percent:
+        description: 任务进度百分比
+        example: 50
+        type: integer
+      planHours:
+        description: 计划工时
+        example: 8
+        type: number
+      projectId:
+        description: 关联项目ID
+        example: UUID
+        type: string
+      projectTitle:
+        description: 关联项目标题
+        example: crudelis
+        type: string
+      realName:
+        description: 负责人姓名
+        example: 张三
+        type: string
+      startDate:
+        description: 开始日期
+        example: "2024-01-01"
+        type: string
+      storyId:
+        description: 关联需求ID
+        example: UUID
+        type: string
+      storyTitle:
+        description: 关联需求标题
+        example: 需求标题
+        type: string
+      taskId:
+        description: 任务ID
+        example: UUID
+        type: string
+      taskNum:
+        description: 任务编号
+        example: 1
+        type: integer
+      taskRichText:
+        description: 任务描述(富文本)
+        example: <p>任务描述</p>
+        type: string
+      taskStatus:
+        description: 任务状态
+        example: "0"
+        type: string
+      taskTitle:
+        description: 任务标题
+        example: 任务标题
+        type: string
+      taskType:
+        description: 任务类型
+        example: "0"
+        type: string
+      userId:
+        description: 负责人ID
+        example: UUID
+        type: string
+      version:
+        description: 关联版本号
+        example: v1.0.0
+        type: string
+      versionId:
+        description: 关联版本ID
+        example: UUID
+        type: string
+    type: object
+  models.UpdateBugFieldRequest:
     type: object
   models.UpdateBugNextRequest:
     properties:
       bugStatus:
+        description: 缺陷状态
+        example: "0"
         type: string
       changeRichText:
+        description: 流转说明(富文本)
+        example: <p>流转说明</p>
         type: string
     required:
     - bugStatus
@@ -439,30 +1490,56 @@ definitions:
   models.UpdateBugRequest:
     properties:
       bugEnv:
+        description: 缺陷环境
+        example: "0"
         type: string
       bugLevel:
+        description: 缺陷等级
+        example: "0"
         type: string
       bugRichText:
+        description: 缺陷描述(富文本)
+        example: <p>缺陷描述</p>
         type: string
       bugSource:
+        description: 缺陷来源
+        example: "0"
         type: string
       bugStatus:
+        description: 缺陷状态
+        example: "0"
         type: string
       bugTitle:
+        description: 缺陷标题
+        example: 缺陷标题
         type: string
       bugType:
+        description: 缺陷类型
+        example: "0"
         type: string
       bugUa:
+        description: 用户代理
+        example: Mozilla/5.0
         type: string
       moduleId:
+        description: 关联模块ID
+        example: UUID
         type: string
       projectId:
+        description: 关联项目ID
+        example: UUID
         type: string
       storyId:
+        description: 关联需求ID
+        example: UUID
         type: string
       userId:
+        description: 指派人ID
+        example: UUID
         type: string
       versionId:
+        description: 关联版本ID
+        example: UUID
         type: string
     required:
     - bugTitle
@@ -472,12 +1549,20 @@ definitions:
   models.UpdateDeptRequest:
     properties:
       deptTitle:
+        description: 部门名称
+        example: 技术部
         type: string
       pid:
+        description: 父级部门ID
+        example: UUID
         type: string
       remark:
+        description: 备注
+        example: 技术部门
         type: string
       status:
+        description: 状态 0=禁用 1=启用
+        example: 1
         type: integer
     required:
     - deptTitle
@@ -485,18 +1570,32 @@ definitions:
   models.UpdateDictRequest:
     properties:
       color:
+        description: 主题色
+        example: '#2db7f5'
         type: string
       label:
+        description: 字典标题
+        example: 功能需求
         type: string
       pid:
+        description: 父级字典ID
+        example: UUID
         type: string
       remark:
+        description: 备注
+        example: 需求类型
         type: string
       status:
+        description: 状态 0=禁用 1=启用
+        example: 1
         type: integer
       type:
+        description: 字典类型
+        example: STORY_TYPE
         type: string
       value:
+        description: 字典值
+        example: "0"
         type: string
     required:
     - label
@@ -505,20 +1604,36 @@ definitions:
   models.UpdateMenuRequest:
     properties:
       authCode:
+        description: 权限标识
+        example: sys:analytics
         type: string
       component:
+        description: 页面组件路径
+        example: /dashboard/analytics/index
         type: string
       meta:
-        $ref: '#/definitions/models.MenuMeta'
+        allOf:
+        - $ref: '#/definitions/models.MenuMeta'
+        description: 菜单元数据
       name:
+        description: 菜单名称
+        example: Analytics
         type: string
       path:
+        description: 路由地址
+        example: /analytics
         type: string
       pid:
+        description: 上级菜单ID，空表示顶级菜单
+        example: UUID
         type: string
       status:
+        description: 状态 0=禁用 1=启用
+        example: 1
         type: integer
       type:
+        description: 菜单类型 catalog=目录 menu=菜单
+        example: menu
         type: string
     required:
     - meta
@@ -528,8 +1643,12 @@ definitions:
   models.UpdateModuleRequest:
     properties:
       moduleTitle:
+        description: 模块标题
+        example: 模块名称
         type: string
       sort:
+        description: 排序
+        example: 1
         type: integer
     required:
     - moduleTitle
@@ -537,10 +1656,16 @@ definitions:
   models.UpdateProjectRequest:
     properties:
       description:
+        description: 项目描述
+        example: 项目描述
         type: string
       projectLogo:
+        description: 项目Logo
+        example: https://xxx/logo.png
         type: string
       projectTitle:
+        description: 项目标题
+        example: crudelis
         type: string
     required:
     - projectTitle
@@ -548,31 +1673,38 @@ definitions:
   models.UpdateRoleRequest:
     properties:
       permissions:
+        description: 菜单id数组
+        example:
+        - '["UUID"]'
         items:
           type: string
         type: array
       remark:
+        description: 备注
+        example: 编辑角色
         type: string
       roleTitle:
+        description: 角色名称
+        example: 编辑员
         type: string
       status:
+        description: 状态 0=禁用 1=启用
+        example: 1
         type: integer
     required:
     - roleTitle
     type: object
   models.UpdateStoryFieldRequest:
-    properties:
-      key:
-        type: string
-      value: {}
-    required:
-    - key
     type: object
   models.UpdateStoryNextRequest:
     properties:
       changeRichText:
+        description: 流转说明(富文本)
+        example: <p>流转说明</p>
         type: string
       storyStatus:
+        description: 需求状态
+        example: "0"
         type: string
     required:
     - storyStatus
@@ -580,30 +1712,50 @@ definitions:
   models.UpdateStoryRequest:
     properties:
       fileIds:
+        description: 附件ID数组
         items:
           type: string
         type: array
       moduleId:
+        description: 关联模块ID
+        example: UUID
         type: string
       projectId:
+        description: 关联项目ID
+        example: UUID
         type: string
       source:
+        description: 需求来源
+        example: "0"
         type: string
       storyLevel:
+        description: 需求优先级
+        example: "0"
         type: string
       storyRichText:
+        description: 需求描述(富文本)
+        example: <p>需求描述</p>
         type: string
       storyStatus:
+        description: 需求状态
+        example: "0"
         type: string
       storyTitle:
+        description: 需求标题
+        example: 需求标题
         type: string
       storyType:
+        description: 需求类型
+        example: "0"
         type: string
       userIds:
+        description: 参与人员ID数组
         items:
           type: string
         type: array
       versionId:
+        description: 关联版本ID
+        example: UUID
         type: string
     required:
     - moduleId
@@ -613,18 +1765,16 @@ definitions:
     - versionId
     type: object
   models.UpdateTaskFieldRequest:
-    properties:
-      key:
-        type: string
-      value: {}
-    required:
-    - key
     type: object
   models.UpdateTaskNextRequest:
     properties:
       changeRichText:
+        description: 流转说明(富文本)
+        example: <p>流转说明</p>
         type: string
       taskStatus:
+        description: 任务状态
+        example: "0"
         type: string
     required:
     - taskStatus
@@ -632,28 +1782,52 @@ definitions:
   models.UpdateTaskRequest:
     properties:
       endDate:
+        description: 结束日期
+        example: "2024-12-31"
         type: string
       moduleId:
+        description: 关联模块ID
+        example: UUID
         type: string
       planHours:
+        description: 计划工时
+        example: 8
         type: number
       projectId:
+        description: 关联项目ID
+        example: UUID
         type: string
       startDate:
+        description: 开始日期
+        example: "2024-01-01"
         type: string
       storyId:
+        description: 关联需求ID
+        example: UUID
         type: string
       taskRichText:
+        description: 任务描述(富文本)
+        example: <p>任务描述</p>
         type: string
       taskStatus:
+        description: 任务状态
+        example: "0"
         type: string
       taskTitle:
+        description: 任务标题
+        example: 任务标题
         type: string
       taskType:
+        description: 任务类型
+        example: "0"
         type: string
       userId:
+        description: 负责人ID
+        example: UUID
         type: string
       versionId:
+        description: 关联版本ID
+        example: UUID
         type: string
     required:
     - endDate
@@ -666,20 +1840,34 @@ definitions:
   models.UpdateUserRequest:
     properties:
       deptIds:
+        description: 部门id数组
+        example:
+        - '["UUID"]'
         items:
           type: string
         type: array
       desc:
+        description: 描述
+        example: 普通用户
         type: string
       phone:
+        description: 手机号
+        example: "13800138000"
         type: string
       realName:
+        description: 真实姓名
+        example: 新用户
         type: string
       roleIds:
+        description: 角色id数组
+        example:
+        - '["UUID"]'
         items:
           type: string
         type: array
       username:
+        description: 登录用户名
+        example: newuser
         type: string
     required:
     - realName
@@ -688,26 +1876,113 @@ definitions:
   models.UpdateVersionNextRequest:
     properties:
       changeRichText:
+        description: 变更详情(富文本)
+        example: <p>变更详情</p>
         type: string
       releaseStatus:
+        description: 发布状态
+        example: "0"
         type: string
     type: object
   models.UpdateVersionRequest:
     properties:
       endDate:
+        description: 结束日期
+        example: "2024-12-31"
         type: string
       projectId:
+        description: 关联项目ID
+        example: UUID
         type: string
       releaseStatus:
+        description: 发布状态
+        example: "0"
         type: string
       remark:
+        description: 备注
+        example: 版本备注
         type: string
       startDate:
+        description: 开始日期
+        example: "2024-01-01"
         type: string
       version:
+        description: 版本号
+        example: v1.0.0
         type: string
       versionType:
+        description: 版本类型
+        example: "0"
         type: string
+    type: object
+  models.VersionResponse:
+    properties:
+      changeLog:
+        description: 更新日志
+        example: 更新日志文本
+        type: string
+      changeLogRichText:
+        description: 更新日志(富文本)
+        example: <p>更新日志</p>
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      creatorId:
+        description: 创建人ID
+        example: UUID
+        type: string
+      creatorName:
+        description: 创建人姓名
+        example: 管理员
+        type: string
+      endDate:
+        description: 结束日期
+        example: "2024-12-31"
+        type: string
+      projectId:
+        description: 关联项目ID
+        example: UUID
+        type: string
+      projectTitle:
+        description: 关联项目标题
+        example: crudelis
+        type: string
+      releaseDate:
+        description: 发布日期
+        example: "2024-06-30"
+        type: string
+      releaseStatus:
+        description: 发布状态
+        example: "0"
+        type: string
+      remark:
+        description: 备注
+        example: 版本备注
+        type: string
+      startDate:
+        description: 开始日期
+        example: "2024-01-01"
+        type: string
+      version:
+        description: 版本号
+        example: v1.0.0
+        type: string
+      versionId:
+        description: 版本ID
+        example: UUID
+        type: string
+      versionType:
+        description: 版本类型
+        example: "0"
+        type: string
+    type: object
+  utils.PageResult:
+    properties:
+      items: {}
+      total:
+        type: integer
     type: object
 host: localhost:9191
 info:
@@ -727,8 +2002,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    type: string
+                  type: array
+              type: object
         "401":
           description: 用户未登录
           schema:
@@ -757,8 +2038,12 @@ paths:
         "200":
           description: 登录成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.LoginResponse'
+              type: object
         "401":
           description: 用户名或密码错误
           schema:
@@ -778,8 +2063,7 @@ paths:
         "200":
           description: 登出成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "401":
           description: 用户未登录
           schema:
@@ -801,8 +2085,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.MenuTreeResponse'
+                  type: array
+              type: object
         "401":
           description: 用户未登录
           schema:
@@ -824,8 +2114,12 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProfileResponse'
+              type: object
         "401":
           description: 用户未登录
           schema:
@@ -856,8 +2150,7 @@ paths:
         "200":
           description: 删除成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -924,8 +2217,19 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.BugResponse'
+                        type: array
+                    type: object
+              type: object
         "401":
           description: 未授权
           schema:
@@ -953,8 +2257,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -993,8 +2296,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1033,8 +2335,7 @@ paths:
         "200":
           description: 确认成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1073,8 +2374,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1113,8 +2413,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1147,8 +2446,12 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.BugResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1204,8 +2507,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.BugResponse'
+                  type: array
+              type: object
         "401":
           description: 未授权
           schema:
@@ -1236,8 +2545,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1270,8 +2578,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ChangeHistoryResponse'
+                  type: array
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1304,8 +2618,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1341,8 +2654,7 @@ paths:
         "200":
           description: 删除成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1373,8 +2685,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ModuleResponse'
+                  type: array
+              type: object
         "401":
           description: 未授权
           schema:
@@ -1402,8 +2720,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1436,8 +2753,12 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ModuleResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1475,8 +2796,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1512,8 +2832,7 @@ paths:
         "200":
           description: 删除成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1544,8 +2863,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.NodeResponse'
+                  type: array
+              type: object
         "401":
           description: 未授权
           schema:
@@ -1573,8 +2898,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1613,8 +2937,7 @@ paths:
         "200":
           description: 审批成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1647,8 +2970,7 @@ paths:
         "200":
           description: 流转成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1675,8 +2997,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ProjectResponse'
+                  type: array
+              type: object
         "401":
           description: 未授权
           schema:
@@ -1704,8 +3032,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1738,8 +3065,12 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProjectResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1777,8 +3108,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1814,8 +3144,7 @@ paths:
         "200":
           description: 删除成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1878,8 +3207,19 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.StoryResponse'
+                        type: array
+                    type: object
+              type: object
         "401":
           description: 未授权
           schema:
@@ -1907,8 +3247,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1947,8 +3286,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -1987,8 +3325,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2027,8 +3364,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2061,8 +3397,12 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.StoryResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2114,8 +3454,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.StoryResponse'
+                  type: array
+              type: object
         "401":
           description: 未授权
           schema:
@@ -2146,8 +3492,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2183,8 +3528,7 @@ paths:
         "200":
           description: 删除成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2247,8 +3591,19 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.TaskResponse'
+                        type: array
+                    type: object
+              type: object
         "401":
           description: 未授权
           schema:
@@ -2276,8 +3631,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2316,8 +3670,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2356,8 +3709,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2396,8 +3748,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2430,8 +3781,12 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TaskResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2483,8 +3838,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.TaskResponse'
+                  type: array
+              type: object
         "401":
           description: 未授权
           schema:
@@ -2515,8 +3876,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2552,8 +3912,7 @@ paths:
         "200":
           description: 删除成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2604,8 +3963,19 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.VersionResponse'
+                        type: array
+                    type: object
+              type: object
         "401":
           description: 未授权
           schema:
@@ -2633,8 +4003,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2667,8 +4036,12 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.VersionResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2706,8 +4079,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2746,8 +4118,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2787,8 +4158,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.VersionResponse'
+                  type: array
+              type: object
         "401":
           description: 未授权
           schema:
@@ -2816,8 +4193,12 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.VersionResponse'
+              type: object
         "401":
           description: 未授权
           schema:
@@ -2848,8 +4229,7 @@ paths:
         "200":
           description: 删除成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2880,8 +4260,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.DeptTreeResponse'
+                  type: array
+              type: object
         "401":
           description: 未授权
           schema:
@@ -2909,8 +4295,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -2943,8 +4328,12 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DeptTreeResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2982,8 +4371,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3010,8 +4398,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.DeptTreeResponse'
+                  type: array
+              type: object
         "401":
           description: 未授权
           schema:
@@ -3042,8 +4436,7 @@ paths:
         "200":
           description: 删除成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3074,8 +4467,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.DictTreeResponse'
+                  type: array
+              type: object
         "401":
           description: 未授权
           schema:
@@ -3103,8 +4502,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3137,8 +4535,12 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DictTreeResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3176,8 +4578,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3218,8 +4619,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3249,19 +4649,19 @@ paths:
         in: query
         name: pageSize
         type: integer
-      - description: 原始文件名
+      - description: 原始文件名(模糊搜索)
         in: query
         name: originalName
         type: string
-      - description: MIME类型
+      - description: MIME类型(精确匹配)
         in: query
         name: type
         type: string
-      - description: 文件扩展名
+      - description: 文件扩展名(精确匹配，如 .jpg)
         in: query
         name: fileExt
         type: string
-      - description: 排序参数
+      - description: 排序参数(如 createDate,desc;size,asc)
         in: query
         name: sorts
         type: string
@@ -3271,8 +4671,19 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.FileResponse'
+                        type: array
+                    type: object
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3308,8 +4719,7 @@ paths:
         "200":
           description: 删除成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3340,8 +4750,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.MenuTreeResponse'
+                  type: array
+              type: object
         "401":
           description: 未授权
           schema:
@@ -3369,8 +4785,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3403,8 +4818,12 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.MenuTreeResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3442,8 +4861,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3480,8 +4898,12 @@ paths:
         "200":
           description: 检查结果
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3518,8 +4940,12 @@ paths:
         "200":
           description: 检查结果
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  type: boolean
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3555,8 +4981,7 @@ paths:
         "200":
           description: 删除成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3599,8 +5024,19 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.RoleSimpleResponse'
+                        type: array
+                    type: object
+              type: object
         "401":
           description: 未授权
           schema:
@@ -3628,8 +5064,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3662,8 +5097,12 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RoleDetailResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3701,8 +5140,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3743,8 +5181,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3771,8 +5208,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.RoleSimpleResponse'
+                  type: array
+              type: object
         "401":
           description: 未授权
           schema:
@@ -3800,8 +5243,12 @@ paths:
         "200":
           description: 上传成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.FileResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3837,8 +5284,7 @@ paths:
         "200":
           description: 删除成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3893,8 +5339,19 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ProfileResponse'
+                        type: array
+                    type: object
+              type: object
         "401":
           description: 未授权
           schema:
@@ -3922,8 +5379,7 @@ paths:
         "200":
           description: 创建成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -3956,8 +5412,12 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProfileResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3995,8 +5455,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -4037,8 +5496,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
         "400":
           description: 参数错误
           schema:
@@ -4070,8 +5528,14 @@ paths:
         "200":
           description: 获取成功
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ProfileResponse'
+                  type: array
+              type: object
         "401":
           description: 未授权
           schema:

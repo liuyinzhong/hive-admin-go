@@ -16,7 +16,7 @@ import (
 // @Produce json
 // @Security ApiKeyAuth
 // @Param status query int false "状态"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.DeptTreeResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/depts [get]
 func (ctrl *SystemController) GetDeptTree(c *gin.Context) {
@@ -42,7 +42,7 @@ func (ctrl *SystemController) GetDeptTree(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.DeptTreeResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/depts/all [get]
 func (ctrl *SystemController) GetAllDepts(c *gin.Context) {
@@ -63,7 +63,7 @@ func (ctrl *SystemController) GetAllDepts(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateDeptRequest true "部门信息"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/depts [post]
@@ -90,7 +90,7 @@ func (ctrl *SystemController) CreateDept(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param deptId path string true "部门ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=models.DeptTreeResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/depts/{deptId} [get]
@@ -119,7 +119,7 @@ func (ctrl *SystemController) GetDeptDetail(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param deptId path string true "部门ID"
 // @Param request body models.UpdateDeptRequest true "部门信息"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/depts/{deptId} [put]
@@ -152,7 +152,7 @@ func (ctrl *SystemController) UpdateDept(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []string true "部门ID列表"
-// @Success 200 {object} map[string]interface{} "删除成功"
+// @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /system/depts [delete]

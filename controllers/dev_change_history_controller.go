@@ -17,7 +17,7 @@ import (
 // @Produce json
 // @Security ApiKeyAuth
 // @Param businessId query string true "业务ID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} models.Response{data=[]models.ChangeHistoryResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/changeHistory [get]
@@ -44,7 +44,7 @@ func (dc *DevController) GetChangeHistory(c *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateChangeHistoryRequest true "变更记录信息"
-// @Success 200 {object} map[string]interface{} "创建成功"
+// @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Router /dev/changeHistory [post]
