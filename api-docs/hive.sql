@@ -11,7 +11,7 @@
  Target Server Version : 80043 (8.0.43)
  File Encoding         : 65001
 
- Date: 29/05/2026 11:33:07
+ Date: 13/07/2026 10:22:02
 */
 
 SET NAMES utf8mb4;
@@ -44,7 +44,7 @@ CREATE TABLE `dev_bug`  (
   `del_flag` tinyint NULL DEFAULT 0 COMMENT '逻辑删除 0:正常 1:删除',
   PRIMARY KEY (`bug_id`) USING BTREE,
   UNIQUE INDEX `index_0`(`bug_num` DESC) USING BTREE COMMENT 'bug_num;bug编号唯一索引'
-) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '缺陷bug表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '缺陷bug表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for dev_change_history
@@ -77,29 +77,6 @@ CREATE TABLE `dev_module`  (
   `del_flag` tinyint NULL DEFAULT 0 COMMENT '逻辑删除 0:正常 1:删除',
   PRIMARY KEY (`module_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '项目模块表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for dev_node
--- ----------------------------
-DROP TABLE IF EXISTS `dev_node`;
-CREATE TABLE `dev_node`  (
-  `node_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '主键id',
-  `label` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '节点名称',
-  `value` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '节点值',
-  `sort` int NULL DEFAULT 0 COMMENT '节点顺序',
-  `user_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '负责人id',
-  `current` tinyint NULL DEFAULT 0 COMMENT '是否当前节点 0=否 1=是',
-  `node_type` tinyint NULL DEFAULT 0 COMMENT '节点类型 0=开始 1=办理 2=审批 3=结束',
-  `result` tinyint NULL DEFAULT 0 COMMENT '审核结果 0=待审批 1=通过 2=拒绝',
-  `remark` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
-  `result_rich_text` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '审核内容',
-  `business_type` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '关联业务类型',
-  `business_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '关联业务ID',
-  `start_date` datetime NULL DEFAULT NULL COMMENT '开始时间',
-  `end_date` datetime NULL DEFAULT NULL COMMENT '结束时间',
-  `create_date` datetime NULL DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`node_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '需求节点表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for dev_project
@@ -140,7 +117,7 @@ CREATE TABLE `dev_story`  (
   `user_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '参与人员ids，逗号分隔',
   PRIMARY KEY (`story_id`) USING BTREE,
   UNIQUE INDEX `index_0`(`story_num` DESC) USING BTREE COMMENT 'story_num;需求编号唯一索引'
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '需求表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 20 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '需求表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for dev_task
@@ -168,7 +145,7 @@ CREATE TABLE `dev_task`  (
   `del_flag` tinyint NULL DEFAULT 0 COMMENT '逻辑删除 0:正常  1:删除',
   PRIMARY KEY (`task_id`) USING BTREE,
   UNIQUE INDEX `index_0`(`task_num` DESC) USING BTREE COMMENT '任务编号唯一索引'
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '任务表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '任务表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for dev_version
@@ -278,7 +255,7 @@ CREATE TABLE `sys_menu`  (
   `link` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '外链跳转路径',
   `iframe_src` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '内嵌页面的 iframe 地址',
   `order` tinyint NULL DEFAULT 0 COMMENT '用于路由->菜单排序',
-  `max_num_of_open_tab` tinyint NULL DEFAULT -1 COMMENT '标签页最大打开数量(仅在打开同名标签页时生效)',
+  `max_num_of_open_tab` tinyint NULL DEFAULT NULL COMMENT '标签页最大打开数量(仅在打开同名标签页时生效)',
   `affix_tab_order` tinyint NULL DEFAULT 0 COMMENT '固定标签页的排序',
   `no_basic_layout` tinyint NULL DEFAULT 0 COMMENT '无基础布局，0=否 1=是',
   `open_in_new_window` tinyint NULL DEFAULT 0 COMMENT '在新窗口打开页面 0=否 1=是',
@@ -333,8 +310,8 @@ CREATE TABLE `sys_user`  (
   `real_name` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '真实姓名',
   `desc` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '描述',
   `email` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '用户邮箱',
-  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '手机号',
   `password` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '加密后的密码',
+  `phone` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '11位手机号',
   `home_path` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '用户自定义首页路径',
   `status` tinyint NULL DEFAULT 1 COMMENT '状态0=禁用,1=启用',
   `create_date` datetime NULL DEFAULT NULL COMMENT '创建日期',

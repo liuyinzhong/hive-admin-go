@@ -357,78 +357,6 @@ definitions:
     - moduleTitle
     - projectId
     type: object
-  models.CreateNodeItemRequest:
-    properties:
-      label:
-        description: 节点名称
-        example: 需求提交
-        type: string
-      nodeType:
-        description: 节点类型 0=开始 1=办理 2=审批 3=结束
-        enum:
-        - 0
-        - 1
-        - 2
-        - 3
-        example: 0
-        type: integer
-      remark:
-        description: 备注
-        example: 流程开始节点
-        type: string
-      sort:
-        description: 节点顺序
-        example: 1
-        type: integer
-      userId:
-        description: 负责人id
-        example: UUID
-        type: string
-      value:
-        description: 节点值
-        example: "0"
-        type: string
-    type: object
-  models.CreateNodeRequest:
-    properties:
-      businessId:
-        description: 业务ID
-        example: UUID
-        type: string
-      businessType:
-        description: 业务类型
-        example: "0"
-        type: string
-      label:
-        description: 节点名称
-        example: 需求提交
-        type: string
-      nodeType:
-        description: 节点类型 0=开始 1=办理 2=审批 3=结束
-        example: 1
-        type: integer
-      remark:
-        description: 备注
-        example: 节点备注
-        type: string
-      sort:
-        description: 节点顺序
-        example: 1
-        type: integer
-      userId:
-        description: 负责人ID
-        example: UUID
-        type: string
-      value:
-        description: 节点值
-        example: "0"
-        type: string
-    required:
-    - businessId
-    - label
-    - userId
-    - value
-    type: object
   models.CreateProjectRequest:
     properties:
       description:
@@ -472,10 +400,6 @@ definitions:
     type: object
   models.CreateStoryRequest:
     properties:
-      businessType:
-        description: 业务类型,关联dev_node表business_type
-        example: "0"
-        type: string
       fileIds:
         description: 附件id数组
         example:
@@ -487,11 +411,6 @@ definitions:
         description: 关联模块id
         example: UUID
         type: string
-      nodes:
-        description: 节点信息,新增需求时创建对应节点
-        items:
-          $ref: '#/definitions/models.CreateNodeItemRequest'
-        type: array
       projectId:
         description: 关联项目id
         example: UUID
@@ -667,6 +586,32 @@ definitions:
         description: 版本类型
         example: "0"
         type: string
+    type: object
+  models.CreateWorkflowDefinitionRequest:
+    properties:
+      category:
+        description: 流程分类
+        example: dev
+        type: string
+      definitionKey:
+        description: 流程标识，系统内唯一
+        example: story_approval
+        type: string
+      definitionName:
+        description: 流程名称
+        example: 需求审批流程
+        type: string
+      flowData:
+        description: LogicFlow画布JSON
+        example: '{"nodes":[],"edges":[]}'
+        type: string
+      remark:
+        description: 备注
+        example: 流程说明
+        type: string
+    required:
+    - definitionKey
+    - definitionName
     type: object
   models.DeptTreeResponse:
     properties:
@@ -1014,86 +959,6 @@ definitions:
         example: "2024-01-01 12:00:00"
         type: string
     type: object
-  models.NodeApproveRequest:
-    properties:
-      result:
-        description: 审批结果 0=驳回 1=通过
-        example: 1
-        type: integer
-      resultRichText:
-        description: 审批意见(富文本)
-        example: <p>审批意见</p>
-        type: string
-    required:
-    - result
-    type: object
-  models.NodeResponse:
-    properties:
-      businessId:
-        description: 业务ID
-        example: UUID
-        type: string
-      businessType:
-        description: 业务类型
-        example: "0"
-        type: string
-      createDate:
-        description: 创建时间
-        example: "2024-01-01 12:00:00"
-        type: string
-      current:
-        description: 是否为当前节点
-        example: false
-        type: boolean
-      endDate:
-        description: 结束时间
-        example: "2024-12-31 12:00:00"
-        type: string
-      label:
-        description: 节点名称
-        example: 需求提交
-        type: string
-      nodeId:
-        description: 节点ID
-        example: UUID
-        type: string
-      nodeType:
-        description: 节点类型 0=开始 1=办理 2=审批 3=结束
-        example: 1
-        type: integer
-      realName:
-        description: 负责人姓名
-        example: 张三
-        type: string
-      remark:
-        description: 备注
-        example: 节点备注
-        type: string
-      result:
-        description: 处理结果
-        example: 0
-        type: integer
-      resultRichText:
-        description: 处理结果(富文本)
-        example: <p>审批意见</p>
-        type: string
-      sort:
-        description: 节点顺序
-        example: 1
-        type: integer
-      startDate:
-        description: 开始时间
-        example: "2024-01-01 12:00:00"
-        type: string
-      userId:
-        description: 负责人ID
-        example: UUID
-        type: string
-      value:
-        description: 节点值
-        example: "0"
-        type: string
-    type: object
   models.ProfileResponse:
     properties:
       avatar:
@@ -1281,11 +1146,6 @@ definitions:
         description: 关联模块标题
         example: 模块名称
         type: string
-      nodes:
-        description: 节点列表
-        items:
-          $ref: '#/definitions/models.NodeResponse'
-        type: array
       projectId:
         description: 关联项目ID
         example: UUID
@@ -1915,6 +1775,50 @@ definitions:
         example: "0"
         type: string
     type: object
+  models.UpdateWorkflowCanvasRequest:
+    properties:
+      flowData:
+        description: LogicFlow画布JSON
+        example: '{"nodes":[],"edges":[]}'
+        type: string
+    required:
+    - flowData
+    type: object
+  models.UpdateWorkflowDefinitionRequest:
+    properties:
+      category:
+        description: 流程分类
+        example: dev
+        type: string
+      definitionKey:
+        description: 流程标识，系统内唯一
+        example: story_approval
+        type: string
+      definitionName:
+        description: 流程名称
+        example: 需求审批流程
+        type: string
+      flowData:
+        description: LogicFlow画布JSON
+        example: '{"nodes":[],"edges":[]}'
+        type: string
+      remark:
+        description: 备注
+        example: 流程说明
+        type: string
+    required:
+    - definitionKey
+    - definitionName
+    type: object
+  models.UpdateWorkflowStatusRequest:
+    properties:
+      status:
+        description: 流程状态：0草稿 1已发布 2已停用
+        example: "2"
+        type: string
+    required:
+    - status
+    type: object
   models.VersionResponse:
     properties:
       changeLog:
@@ -1978,7 +1882,64 @@ definitions:
         example: "0"
         type: string
     type: object
+  models.WorkflowDefinitionResponse:
+    properties:
+      category:
+        description: 流程分类
+        example: dev
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2026-05-18 15:30:26"
+        type: string
+      creatorId:
+        description: 创建人ID
+        example: UUID
+        type: string
+      creatorName:
+        description: 创建人姓名
+        example: 管理员
+        type: string
+      definitionId:
+        description: 流程定义ID
+        example: UUID
+        type: string
+      definitionKey:
+        description: 流程标识
+        example: story_approval
+        type: string
+      definitionName:
+        description: 流程名称
+        example: 需求审批流程
+        type: string
+      flowData:
+        description: LogicFlow画布JSON
+        example: '{"nodes":[],"edges":[]}'
+        type: string
+      remark:
+        description: 备注
+        example: 流程说明
+        type: string
+      status:
+        description: 流程状态：0草稿 1已发布 2已停用
+        example: "0"
+        type: string
+      updateDate:
+        description: 更新时间
+        example: "2026-05-18 15:30:26"
+        type: string
+      version:
+        description: 发布版本号
+        example: 1
+        type: integer
+    type: object
   utils.PageResult:
+    properties:
+      items: {}
+      total:
+        type: integer
+    type: object
+  utils.PaginationResponse:
     properties:
       items: {}
       total:
@@ -2812,180 +2773,6 @@ paths:
       summary: 更新模块
       tags:
       - 开发管理-模块管理
-  /dev/nodes:
-    delete:
-      consumes:
-      - application/json
-      description: 批量删除节点
-      parameters:
-      - description: 节点ID列表
-        in: body
-        name: request
-        required: true
-        schema:
-          items:
-            type: string
-          type: array
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 删除成功
-          schema:
-            $ref: '#/definitions/models.Response'
-        "400":
-          description: 参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: 删除节点
-      tags:
-      - 开发管理-节点管理
-    get:
-      consumes:
-      - application/json
-      description: 获取所有节点（不分页），可根据业务ID筛选
-      parameters:
-      - description: 业务ID
-        in: query
-        name: businessId
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 获取成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/models.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/models.NodeResponse'
-                  type: array
-              type: object
-        "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: 获取节点列表
-      tags:
-      - 开发管理-节点管理
-    post:
-      consumes:
-      - application/json
-      description: 创建新节点
-      parameters:
-      - description: 节点信息
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateNodeRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 创建成功
-          schema:
-            $ref: '#/definitions/models.Response'
-        "400":
-          description: 参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: 创建节点
-      tags:
-      - 开发管理-节点管理
-  /dev/nodes/{nodeId}/approve:
-    put:
-      consumes:
-      - application/json
-      description: 对审批类型的节点进行审批
-      parameters:
-      - description: 节点ID
-        in: path
-        name: nodeId
-        required: true
-        type: string
-      - description: 审批信息
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/models.NodeApproveRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 审批成功
-          schema:
-            $ref: '#/definitions/models.Response'
-        "400":
-          description: 参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: 节点审批
-      tags:
-      - 开发管理-节点管理
-  /dev/nodes/{nodeId}/next:
-    put:
-      consumes:
-      - application/json
-      description: 将当前节点流转到下一个节点
-      parameters:
-      - description: 节点ID
-        in: path
-        name: nodeId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 流转成功
-          schema:
-            $ref: '#/definitions/models.Response'
-        "400":
-          description: 参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: 节点流转
-      tags:
-      - 开发管理-节点管理
   /dev/projects:
     get:
       consumes:
@@ -3233,9 +3020,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建新需求，可选传入nodes参数创建关联节点
+      description: 创建新需求
       parameters:
-      - description: 需求信息，nodes为节点数组，可选
+      - description: 需求信息
         in: body
         name: request
         required: true
@@ -5546,6 +5333,366 @@ paths:
       summary: 获取所有用户
       tags:
       - 系统管理-用户管理
+  /workflow/definitions:
+    delete:
+      consumes:
+      - application/json
+      description: 批量删除流程定义
+      parameters:
+      - description: 流程定义ID数组
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除流程定义
+      tags:
+      - 流程管理-流程定义
+    get:
+      consumes:
+      - application/json
+      description: 分页获取流程定义列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 流程标识
+        in: query
+        name: definitionKey
+        type: string
+      - description: 流程名称
+        in: query
+        name: definitionName
+        type: string
+      - description: 流程分类
+        in: query
+        name: category
+        type: string
+      - description: 流程状态，支持多选：0,1,2
+        in: query
+        name: status
+        type: string
+      - description: 排序参数，支持：definitionKey、definitionName、category、status、version、createDate、updateDate
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.WorkflowDefinitionResponse'
+                        type: array
+                    type: object
+              type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取流程定义列表
+      tags:
+      - 流程管理-流程定义
+    post:
+      consumes:
+      - application/json
+      description: 创建新的流程定义
+      parameters:
+      - description: 流程定义信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateWorkflowDefinitionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建流程定义
+      tags:
+      - 流程管理-流程定义
+  /workflow/definitions/{definitionId}:
+    get:
+      consumes:
+      - application/json
+      description: 根据流程定义ID获取流程定义详情
+      parameters:
+      - description: 流程定义ID
+        in: path
+        name: definitionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.WorkflowDefinitionResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取流程定义详情
+      tags:
+      - 流程管理-流程定义
+    put:
+      consumes:
+      - application/json
+      description: 更新流程定义基础信息和画布数据
+      parameters:
+      - description: 流程定义ID
+        in: path
+        name: definitionId
+        required: true
+        type: string
+      - description: 流程定义信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateWorkflowDefinitionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新流程定义
+      tags:
+      - 流程管理-流程定义
+  /workflow/definitions/{definitionId}/canvas:
+    put:
+      consumes:
+      - application/json
+      description: 保存 LogicFlow 画布JSON数据
+      parameters:
+      - description: 流程定义ID
+        in: path
+        name: definitionId
+        required: true
+        type: string
+      - description: 流程画布信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateWorkflowCanvasRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 保存流程画布
+      tags:
+      - 流程管理-流程定义
+  /workflow/definitions/{definitionId}/publish:
+    put:
+      consumes:
+      - application/json
+      description: 发布流程定义并递增版本号
+      parameters:
+      - description: 流程定义ID
+        in: path
+        name: definitionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 发布成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 发布流程定义
+      tags:
+      - 流程管理-流程定义
+  /workflow/definitions/{definitionId}/status:
+    put:
+      consumes:
+      - application/json
+      description: 更新流程定义状态：0草稿 1已发布 2已停用
+      parameters:
+      - description: 流程定义ID
+        in: path
+        name: definitionId
+        required: true
+        type: string
+      - description: 状态信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateWorkflowStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新流程定义状态
+      tags:
+      - 流程管理-流程定义
+  /workflow/definitions/all:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有流程定义（不分页）
+      parameters:
+      - description: 流程名称
+        in: query
+        name: definitionName
+        type: string
+      - description: 流程分类
+        in: query
+        name: category
+        type: string
+      - description: 流程状态
+        in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.WorkflowDefinitionResponse'
+                  type: array
+              type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有流程定义
+      tags:
+      - 流程管理-流程定义
 schemes:
 - http
 - https

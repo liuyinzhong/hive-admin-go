@@ -143,12 +143,12 @@ func (dc *DevController) GetStory(c *gin.Context) {
 
 // CreateStory 创建需求
 // @Summary 创建需求
-// @Description 创建新需求，可选传入nodes参数创建关联节点
+// @Description 创建新需求
 // @Tags 开发管理-需求管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param request body models.CreateStoryRequest true "需求信息，nodes为节点数组，可选"
+// @Param request body models.CreateStoryRequest true "需求信息"
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"

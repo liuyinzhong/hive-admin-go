@@ -1333,280 +1333,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/dev/nodes": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "获取所有节点（不分页），可根据业务ID筛选",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "开发管理-节点管理"
-                ],
-                "summary": "获取节点列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "业务ID",
-                        "name": "businessId",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "获取成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/models.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/models.NodeResponse"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "401": {
-                        "description": "未授权",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "创建新节点",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "开发管理-节点管理"
-                ],
-                "summary": "创建节点",
-                "parameters": [
-                    {
-                        "description": "节点信息",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateNodeRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "创建成功",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "参数错误",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "未授权",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "批量删除节点",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "开发管理-节点管理"
-                ],
-                "summary": "删除节点",
-                "parameters": [
-                    {
-                        "description": "节点ID列表",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "删除成功",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "参数错误",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "未授权",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/dev/nodes/{nodeId}/approve": {
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "对审批类型的节点进行审批",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "开发管理-节点管理"
-                ],
-                "summary": "节点审批",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "节点ID",
-                        "name": "nodeId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "审批信息",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.NodeApproveRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "审批成功",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "参数错误",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "未授权",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/dev/nodes/{nodeId}/next": {
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "将当前节点流转到下一个节点",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "开发管理-节点管理"
-                ],
-                "summary": "节点流转",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "节点ID",
-                        "name": "nodeId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "流转成功",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "参数错误",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "未授权",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/dev/projects": {
             "get": {
                 "security": [
@@ -1952,7 +1678,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "创建新需求，可选传入nodes参数创建关联节点",
+                "description": "创建新需求",
                 "consumes": [
                     "application/json"
                 ],
@@ -1965,7 +1691,7 @@ const docTemplate = `{
                 "summary": "创建需求",
                 "parameters": [
                     {
-                        "description": "需求信息，nodes为节点数组，可选",
+                        "description": "需求信息",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -5713,6 +5439,579 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/workflow/definitions": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "分页获取流程定义列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程定义"
+                ],
+                "summary": "获取流程定义列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "流程标识",
+                        "name": "definitionKey",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "流程名称",
+                        "name": "definitionName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "流程分类",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "流程状态，支持多选：0,1,2",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序参数，支持：definitionKey、definitionName、category、status、version、createDate、updateDate",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.WorkflowDefinitionResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "创建新的流程定义",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程定义"
+                ],
+                "summary": "创建流程定义",
+                "parameters": [
+                    {
+                        "description": "流程定义信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateWorkflowDefinitionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "批量删除流程定义",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程定义"
+                ],
+                "summary": "删除流程定义",
+                "parameters": [
+                    {
+                        "description": "流程定义ID数组",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/definitions/all": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取所有流程定义（不分页）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程定义"
+                ],
+                "summary": "获取所有流程定义",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "流程名称",
+                        "name": "definitionName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "流程分类",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "流程状态",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.WorkflowDefinitionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/definitions/{definitionId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据流程定义ID获取流程定义详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程定义"
+                ],
+                "summary": "获取流程定义详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "流程定义ID",
+                        "name": "definitionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.WorkflowDefinitionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "更新流程定义基础信息和画布数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程定义"
+                ],
+                "summary": "更新流程定义",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "流程定义ID",
+                        "name": "definitionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "流程定义信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateWorkflowDefinitionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/definitions/{definitionId}/canvas": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "保存 LogicFlow 画布JSON数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程定义"
+                ],
+                "summary": "保存流程画布",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "流程定义ID",
+                        "name": "definitionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "流程画布信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateWorkflowCanvasRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/definitions/{definitionId}/publish": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "发布流程定义并递增版本号",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程定义"
+                ],
+                "summary": "发布流程定义",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "流程定义ID",
+                        "name": "definitionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "发布成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/definitions/{definitionId}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "更新流程定义状态：0草稿 1已发布 2已停用",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程定义"
+                ],
+                "summary": "更新流程定义状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "流程定义ID",
+                        "name": "definitionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateWorkflowStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -6178,98 +6477,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.CreateNodeItemRequest": {
-            "type": "object",
-            "properties": {
-                "label": {
-                    "description": "节点名称",
-                    "type": "string",
-                    "example": "需求提交"
-                },
-                "nodeType": {
-                    "description": "节点类型 0=开始 1=办理 2=审批 3=结束",
-                    "type": "integer",
-                    "enum": [
-                        0,
-                        1,
-                        2,
-                        3
-                    ],
-                    "example": 0
-                },
-                "remark": {
-                    "description": "备注",
-                    "type": "string",
-                    "example": "流程开始节点"
-                },
-                "sort": {
-                    "description": "节点顺序",
-                    "type": "integer",
-                    "example": 1
-                },
-                "userId": {
-                    "description": "负责人id",
-                    "type": "string",
-                    "example": "UUID"
-                },
-                "value": {
-                    "description": "节点值",
-                    "type": "string",
-                    "example": "0"
-                }
-            }
-        },
-        "models.CreateNodeRequest": {
-            "type": "object",
-            "required": [
-                "businessId",
-                "label",
-                "userId",
-                "value"
-            ],
-            "properties": {
-                "businessId": {
-                    "description": "业务ID",
-                    "type": "string",
-                    "example": "UUID"
-                },
-                "businessType": {
-                    "description": "业务类型",
-                    "type": "string",
-                    "example": "0"
-                },
-                "label": {
-                    "description": "节点名称",
-                    "type": "string",
-                    "example": "需求提交"
-                },
-                "nodeType": {
-                    "description": "节点类型 0=开始 1=办理 2=审批 3=结束",
-                    "type": "integer",
-                    "example": 1
-                },
-                "remark": {
-                    "description": "备注",
-                    "type": "string",
-                    "example": "节点备注"
-                },
-                "sort": {
-                    "description": "节点顺序",
-                    "type": "integer",
-                    "example": 1
-                },
-                "userId": {
-                    "description": "负责人ID",
-                    "type": "string",
-                    "example": "UUID"
-                },
-                "value": {
-                    "description": "节点值",
-                    "type": "string",
-                    "example": "0"
-                }
-            }
-        },
         "models.CreateProjectRequest": {
             "type": "object",
             "required": [
@@ -6336,11 +6543,6 @@ const docTemplate = `{
                 "versionId"
             ],
             "properties": {
-                "businessType": {
-                    "description": "业务类型,关联dev_node表business_type",
-                    "type": "string",
-                    "example": "0"
-                },
                 "fileIds": {
                     "description": "附件id数组",
                     "type": "array",
@@ -6355,13 +6557,6 @@ const docTemplate = `{
                     "description": "关联模块id",
                     "type": "string",
                     "example": "UUID"
-                },
-                "nodes": {
-                    "description": "节点信息,新增需求时创建对应节点",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.CreateNodeItemRequest"
-                    }
                 },
                 "projectId": {
                     "description": "关联项目id",
@@ -6580,6 +6775,40 @@ const docTemplate = `{
                     "description": "版本类型",
                     "type": "string",
                     "example": "0"
+                }
+            }
+        },
+        "models.CreateWorkflowDefinitionRequest": {
+            "type": "object",
+            "required": [
+                "definitionKey",
+                "definitionName"
+            ],
+            "properties": {
+                "category": {
+                    "description": "流程分类",
+                    "type": "string",
+                    "example": "dev"
+                },
+                "definitionKey": {
+                    "description": "流程标识，系统内唯一",
+                    "type": "string",
+                    "example": "story_approval"
+                },
+                "definitionName": {
+                    "description": "流程名称",
+                    "type": "string",
+                    "example": "需求审批流程"
+                },
+                "flowData": {
+                    "description": "LogicFlow画布JSON",
+                    "type": "string",
+                    "example": "{\"nodes\":[],\"edges\":[]}"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "流程说明"
                 }
             }
         },
@@ -7031,109 +7260,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.NodeApproveRequest": {
-            "type": "object",
-            "required": [
-                "result"
-            ],
-            "properties": {
-                "result": {
-                    "description": "审批结果 0=驳回 1=通过",
-                    "type": "integer",
-                    "example": 1
-                },
-                "resultRichText": {
-                    "description": "审批意见(富文本)",
-                    "type": "string",
-                    "example": "\u003cp\u003e审批意见\u003c/p\u003e"
-                }
-            }
-        },
-        "models.NodeResponse": {
-            "type": "object",
-            "properties": {
-                "businessId": {
-                    "description": "业务ID",
-                    "type": "string",
-                    "example": "UUID"
-                },
-                "businessType": {
-                    "description": "业务类型",
-                    "type": "string",
-                    "example": "0"
-                },
-                "createDate": {
-                    "description": "创建时间",
-                    "type": "string",
-                    "example": "2024-01-01 12:00:00"
-                },
-                "current": {
-                    "description": "是否为当前节点",
-                    "type": "boolean",
-                    "example": false
-                },
-                "endDate": {
-                    "description": "结束时间",
-                    "type": "string",
-                    "example": "2024-12-31 12:00:00"
-                },
-                "label": {
-                    "description": "节点名称",
-                    "type": "string",
-                    "example": "需求提交"
-                },
-                "nodeId": {
-                    "description": "节点ID",
-                    "type": "string",
-                    "example": "UUID"
-                },
-                "nodeType": {
-                    "description": "节点类型 0=开始 1=办理 2=审批 3=结束",
-                    "type": "integer",
-                    "example": 1
-                },
-                "realName": {
-                    "description": "负责人姓名",
-                    "type": "string",
-                    "example": "张三"
-                },
-                "remark": {
-                    "description": "备注",
-                    "type": "string",
-                    "example": "节点备注"
-                },
-                "result": {
-                    "description": "处理结果",
-                    "type": "integer",
-                    "example": 0
-                },
-                "resultRichText": {
-                    "description": "处理结果(富文本)",
-                    "type": "string",
-                    "example": "\u003cp\u003e审批意见\u003c/p\u003e"
-                },
-                "sort": {
-                    "description": "节点顺序",
-                    "type": "integer",
-                    "example": 1
-                },
-                "startDate": {
-                    "description": "开始时间",
-                    "type": "string",
-                    "example": "2024-01-01 12:00:00"
-                },
-                "userId": {
-                    "description": "负责人ID",
-                    "type": "string",
-                    "example": "UUID"
-                },
-                "value": {
-                    "description": "节点值",
-                    "type": "string",
-                    "example": "0"
-                }
-            }
-        },
         "models.ProfileResponse": {
             "type": "object",
             "properties": {
@@ -7381,13 +7507,6 @@ const docTemplate = `{
                     "description": "关联模块标题",
                     "type": "string",
                     "example": "模块名称"
-                },
-                "nodes": {
-                    "description": "节点列表",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.NodeResponse"
-                    }
                 },
                 "projectId": {
                     "description": "关联项目ID",
@@ -8212,6 +8331,66 @@ const docTemplate = `{
                 }
             }
         },
+        "models.UpdateWorkflowCanvasRequest": {
+            "type": "object",
+            "required": [
+                "flowData"
+            ],
+            "properties": {
+                "flowData": {
+                    "description": "LogicFlow画布JSON",
+                    "type": "string",
+                    "example": "{\"nodes\":[],\"edges\":[]}"
+                }
+            }
+        },
+        "models.UpdateWorkflowDefinitionRequest": {
+            "type": "object",
+            "required": [
+                "definitionKey",
+                "definitionName"
+            ],
+            "properties": {
+                "category": {
+                    "description": "流程分类",
+                    "type": "string",
+                    "example": "dev"
+                },
+                "definitionKey": {
+                    "description": "流程标识，系统内唯一",
+                    "type": "string",
+                    "example": "story_approval"
+                },
+                "definitionName": {
+                    "description": "流程名称",
+                    "type": "string",
+                    "example": "需求审批流程"
+                },
+                "flowData": {
+                    "description": "LogicFlow画布JSON",
+                    "type": "string",
+                    "example": "{\"nodes\":[],\"edges\":[]}"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "流程说明"
+                }
+            }
+        },
+        "models.UpdateWorkflowStatusRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "description": "流程状态：0草稿 1已发布 2已停用",
+                    "type": "string",
+                    "example": "2"
+                }
+            }
+        },
         "models.VersionResponse": {
             "type": "object",
             "properties": {
@@ -8292,7 +8471,81 @@ const docTemplate = `{
                 }
             }
         },
+        "models.WorkflowDefinitionResponse": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "description": "流程分类",
+                    "type": "string",
+                    "example": "dev"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-05-18 15:30:26"
+                },
+                "creatorId": {
+                    "description": "创建人ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "creatorName": {
+                    "description": "创建人姓名",
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "definitionId": {
+                    "description": "流程定义ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "definitionKey": {
+                    "description": "流程标识",
+                    "type": "string",
+                    "example": "story_approval"
+                },
+                "definitionName": {
+                    "description": "流程名称",
+                    "type": "string",
+                    "example": "需求审批流程"
+                },
+                "flowData": {
+                    "description": "LogicFlow画布JSON",
+                    "type": "string",
+                    "example": "{\"nodes\":[],\"edges\":[]}"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "流程说明"
+                },
+                "status": {
+                    "description": "流程状态：0草稿 1已发布 2已停用",
+                    "type": "string",
+                    "example": "0"
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-05-18 15:30:26"
+                },
+                "version": {
+                    "description": "发布版本号",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
         "utils.PageResult": {
+            "type": "object",
+            "properties": {
+                "items": {},
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "utils.PaginationResponse": {
             "type": "object",
             "properties": {
                 "items": {},

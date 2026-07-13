@@ -388,7 +388,6 @@ type StoryResponse struct {
 	FileList      []FileResponse  `json:"fileList"`                                        // 附件列表
 	TaskList      []TaskResponse  `json:"taskList"`                                        // 关联任务列表
 	BugList       []BugResponse   `json:"bugList"`                                         // 关联缺陷列表
-	Nodes         []NodeResponse  `json:"nodes"`                                           // 节点列表
 }
 
 type FileResponse struct {
@@ -533,29 +532,18 @@ type UpdateVersionNextRequest struct {
 	ChangeRichText string `json:"changeRichText" example:"<p>变更详情</p>"`            // 变更详情(富文本)
 }
 
-type CreateNodeItemRequest struct {
-	Label    string  `json:"label" example:"需求提交"`                 // 节点名称
-	Value    string  `json:"value" example:"0"`                    // 节点值
-	Sort     int     `json:"sort" example:"1"`                     // 节点顺序
-	UserID   string  `json:"userId" example:"UUID"`                // 负责人id
-	NodeType int     `json:"nodeType" enums:"0,1,2,3" example:"0"` // 节点类型 0=开始 1=办理 2=审批 3=结束
-	Remark   *string `json:"remark" example:"流程开始节点"`              // 备注
-}
-
 type CreateStoryRequest struct {
-	StoryStatus   string                  `json:"storyStatus" example:"0"`                      // 需求状态,字典STORY_STATUS值
-	StoryType     string                  `json:"storyType" binding:"required" example:"0"`     // 需求类型,字典STORY_TYPE值
-	StoryLevel    string                  `json:"storyLevel" example:"0"`                       // 需求优先级,字典STORY_LEVEL值
-	Source        string                  `json:"source" example:"0"`                           // 需求来源,字典STORY_SOURCE值
-	StoryTitle    *string                 `json:"storyTitle" binding:"required" example:"需求标题"` // 需求标题
-	StoryRichText *string                 `json:"storyRichText" example:"需求描述"`                 // 需求描述,富文本格式
-	UserIDs       []string                `json:"userIds" example:"[\"UUID\"]"`                 // 参与人员id数组
-	ProjectID     string                  `json:"projectId" binding:"required" example:"UUID"`  // 关联项目id
-	VersionID     *string                 `json:"versionId" binding:"required" example:"UUID"`  // 关联版本id
-	ModuleID      *string                 `json:"moduleId" binding:"required" example:"UUID"`   // 关联模块id
-	FileIDs       []string                `json:"fileIds" example:"[\"UUID\"]"`                 // 附件id数组
-	BusinessType  string                  `json:"businessType" example:"0"`                     // 业务类型,关联dev_node表business_type
-	Nodes         []CreateNodeItemRequest `json:"nodes"`                                        // 节点信息,新增需求时创建对应节点
+	StoryStatus   string   `json:"storyStatus" example:"0"`                      // 需求状态,字典STORY_STATUS值
+	StoryType     string   `json:"storyType" binding:"required" example:"0"`     // 需求类型,字典STORY_TYPE值
+	StoryLevel    string   `json:"storyLevel" example:"0"`                       // 需求优先级,字典STORY_LEVEL值
+	Source        string   `json:"source" example:"0"`                           // 需求来源,字典STORY_SOURCE值
+	StoryTitle    *string  `json:"storyTitle" binding:"required" example:"需求标题"` // 需求标题
+	StoryRichText *string  `json:"storyRichText" example:"需求描述"`                 // 需求描述,富文本格式
+	UserIDs       []string `json:"userIds" example:"[\"UUID\"]"`                 // 参与人员id数组
+	ProjectID     string   `json:"projectId" binding:"required" example:"UUID"`  // 关联项目id
+	VersionID     *string  `json:"versionId" binding:"required" example:"UUID"`  // 关联版本id
+	ModuleID      *string  `json:"moduleId" binding:"required" example:"UUID"`   // 关联模块id
+	FileIDs       []string `json:"fileIds" example:"[\"UUID\"]"`                 // 附件id数组
 }
 
 type UpdateStoryRequest struct {
@@ -669,62 +657,4 @@ type ConfirmBugRequest struct {
 	ChangeRichText   string `json:"changeRichText" example:"<p>确认说明</p>"`                // 确认说明(富文本)
 }
 
-type NodeListRequest struct {
-	BusinessID string `form:"businessId" example:"UUID"`                             // 业务ID
-}
 
-type NodeResponse struct {
-	NodeID         string  `json:"nodeId" example:"UUID"`                                // 节点ID
-	Label          string  `json:"label" example:"需求提交"`                                 // 节点名称
-	Value          string  `json:"value" example:"0"`                                    // 节点值
-	Sort           int     `json:"sort" example:"1"`                                     // 节点顺序
-	UserID         string  `json:"userId" example:"UUID"`                                // 负责人ID
-	RealName       string  `json:"realName" example:"张三"`                                // 负责人姓名
-	Current        bool    `json:"current" example:"false"`                              // 是否为当前节点
-	NodeType       int     `json:"nodeType" example:"1"`                                 // 节点类型 0=开始 1=办理 2=审批 3=结束
-	Result         int     `json:"result" example:"0"`                                   // 处理结果
-	Remark         *string `json:"remark" example:"节点备注"`                                // 备注
-	ResultRichText *string `json:"resultRichText" example:"<p>审批意见</p>"`                 // 处理结果(富文本)
-	BusinessType   *string `json:"businessType" example:"0"`                             // 业务类型
-	BusinessID     string  `json:"businessId" example:"UUID"`                            // 业务ID
-	StartDate      *string `json:"startDate" example:"2024-01-01 12:00:00"`             // 开始时间
-	EndDate        *string `json:"endDate" example:"2024-12-31 12:00:00"`               // 结束时间
-	CreateDate     *string `json:"createDate" example:"2024-01-01 12:00:00"`            // 创建时间
-}
-
-type CreateNodeRequest struct {
-	Label        string  `json:"label" binding:"required" example:"需求提交"`               // 节点名称
-	Value        string  `json:"value" binding:"required" example:"0"`                  // 节点值
-	Sort         int     `json:"sort" example:"1"`                                      // 节点顺序
-	UserID       string  `json:"userId" binding:"required" example:"UUID"`             // 负责人ID
-	NodeType     int     `json:"nodeType" example:"1"`                                  // 节点类型 0=开始 1=办理 2=审批 3=结束
-	Remark       *string `json:"remark" example:"节点备注"`                                 // 备注
-	BusinessType string  `json:"businessType" example:"0"`                              // 业务类型
-	BusinessID   string  `json:"businessId" binding:"required" example:"UUID"`         // 业务ID
-}
-
-type NodeApproveRequest struct {
-	Result         int    `json:"result" binding:"required" example:"1"`                // 审批结果 0=驳回 1=通过
-	ResultRichText string `json:"resultRichText" example:"<p>审批意见</p>"`                 // 审批意见(富文本)
-}
-
-func DevNodeToNodeResponse(node DevNode, realName string) *NodeResponse {
-	return &NodeResponse{
-		NodeID:         node.NodeID,
-		Label:          node.Label,
-		Value:          node.Value,
-		Sort:           node.Sort,
-		UserID:         node.UserID,
-		RealName:       realName,
-		Current:        node.Current == 1,
-		NodeType:       node.NodeType,
-		Result:         node.Result,
-		Remark:         node.Remark,
-		ResultRichText: node.ResultRichText,
-		BusinessType:   node.BusinessType,
-		BusinessID:     node.BusinessID,
-		StartDate:      TimeToStringPtr(node.StartDate),
-		EndDate:        TimeToStringPtr(node.EndDate),
-		CreateDate:     TimeToStringPtr(node.CreateDate),
-	}
-}

@@ -317,24 +317,4 @@ func (SysFile) TableName() string {
 	return "sys_file"
 }
 
-type DevNode struct {
-	NodeID         string     `gorm:"column:node_id;type:char(36);primaryKey" json:"nodeId"`
-	Label          string     `gorm:"column:label;type:varchar(36)" json:"label"`
-	Value          string     `gorm:"column:value;type:varchar(36)" json:"value"`
-	Sort           int        `gorm:"column:sort;type:int;default:0" json:"sort"`
-	UserID         string     `gorm:"column:user_id;type:char(36)" json:"userId"`
-	Current        int        `gorm:"column:current;type:tinyint;default:0" json:"current"`
-	NodeType       int        `gorm:"column:node_type;type:tinyint;default:0" json:"nodeType"`
-	Result         int        `gorm:"column:result;type:tinyint;default:0" json:"result"`
-	Remark         *string    `gorm:"column:remark;type:varchar(256)" json:"remark"`
-	ResultRichText *string    `gorm:"column:result_rich_text;type:longtext" json:"resultRichText"`
-	BusinessType   *string    `gorm:"column:business_type;type:varchar(36)" json:"businessType"`
-	BusinessID     string     `gorm:"column:business_id;type:char(36)" json:"businessId"`
-	StartDate      *time.Time `gorm:"column:start_date" json:"startDate"`
-	EndDate        *time.Time `gorm:"column:end_date" json:"endDate"`
-	CreateDate     *time.Time `gorm:"column:create_date" json:"createDate"`
-}
 
-func (DevNode) TableName() string {
-	return "dev_node"
-}

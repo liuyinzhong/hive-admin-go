@@ -14,6 +14,7 @@ func SetupRouter() *gin.Engine {
 	authController := controllers.NewAuthController()
 	systemController := controllers.NewSystemController()
 	devController := controllers.DevController{}
+	workflowController := controllers.WorkflowController{}
 
 	api := router.Group("/api")
 	{
@@ -158,14 +159,21 @@ func SetupRouter() *gin.Engine {
 
 			dev.GET("/changeHistory", devController.GetChangeHistory)
 			dev.POST("/changeHistory", devController.CreateChangeHistory)
+		}
 
-			nodes := dev.Group("/nodes")
+		workflow := api.Group("/workflow", middleware.AuthMiddleware())
+		{
+			definitions := workflow.Group("/definitions")
 			{
-				nodes.GET("", devController.GetNodes)
-				nodes.POST("", devController.CreateNode)
-				nodes.DELETE("", devController.DeleteNodes)
-				nodes.PUT("/:nodeId/approve", devController.ApproveNode)
-				nodes.PUT("/:nodeId/next", devController.NextNode)
+				definitions.GET("", workflowController.GetWorkflowDefinitions)
+				definitions.GET("/all", workflowController.GetAllWorkflowDefinitions)
+				definitions.POST("", workflowController.CreateWorkflowDefinition)
+				definitions.GET("/:definitionId", workflowController.GetWorkflowDefinition)
+				definitions.PUT("/:definitionId", workflowController.UpdateWorkflowDefinition)
+				definitions.PUT("/:definitionId/canvas", workflowController.UpdateWorkflowCanvas)
+				definitions.PUT("/:definitionId/publish", workflowController.PublishWorkflowDefinition)
+				definitions.PUT("/:definitionId/status", workflowController.UpdateWorkflowDefinitionStatus)
+				definitions.DELETE("", workflowController.DeleteWorkflowDefinitions)
 			}
 		}
 	}

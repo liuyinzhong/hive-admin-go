@@ -401,29 +401,6 @@ func buildSingleStoryResponse(story *models.DevStory) *models.StoryResponse {
 		bugList = bugs
 	}
 
-	nodes := make([]models.NodeResponse, 0)
-	var nodeList []models.DevNode
-	database.DB.Where("business_id = ?", story.StoryID).Order("sort ASC").Find(&nodeList)
-	nodeUserIDs := make([]string, 0)
-	nodeUserMap := make(map[string]string)
-	for _, n := range nodeList {
-		if n.UserID != "" {
-			nodeUserIDs = append(nodeUserIDs, n.UserID)
-		}
-	}
-	if len(nodeUserIDs) > 0 {
-		var nodeUsers []models.SysUser
-		database.DB.Where("user_id IN ?", nodeUserIDs).Find(&nodeUsers)
-		for _, u := range nodeUsers {
-			if u.RealName != nil {
-				nodeUserMap[u.UserID] = *u.RealName
-			}
-		}
-	}
-	for _, n := range nodeList {
-		nodes = append(nodes, *models.DevNodeToNodeResponse(n, nodeUserMap[n.UserID]))
-	}
-
 	return &models.StoryResponse{
 		StoryID:       &story.StoryID,
 		StoryTitle:    story.StoryTitle,
@@ -449,28 +426,12 @@ func buildSingleStoryResponse(story *models.DevStory) *models.StoryResponse {
 		FileList:      fileList,
 		TaskList:      taskList,
 		BugList:       bugList,
-		Nodes:         nodes,
 	}
 }
 
 func CreateStory(req *models.CreateStoryRequest, creatorID string) error {
 	storyID := uuid.New().String()
 	now := time.Now()
-
-	if len(req.Nodes) > 0 {
-		hasHandleOrApprove := false
-		for _, n := range req.Nodes {
-			if n.NodeType == 1 || n.NodeType == 2 {
-				hasHandleOrApprove = true
-				if strings.TrimSpace(n.UserID) == "" {
-					return fmt.Errorf("办理节点和审批节点的负责人不能为空")
-				}
-			}
-		}
-		if !hasHandleOrApprove {
-			return fmt.Errorf("不能仅包含开始节点和结束节点")
-		}
-	}
 
 	userIDsStr := ""
 	if len(req.UserIDs) > 0 {
@@ -509,11 +470,6 @@ func CreateStory(req *models.CreateStoryRequest, creatorID string) error {
 		fileIDsPtr = &fileIDsStr
 	}
 
-	businessType := req.BusinessType
-	if businessType == "" {
-		businessType = "0"
-	}
-
 	story := models.DevStory{
 		StoryID:       storyID,
 		StoryTitle:    req.StoryTitle,
@@ -537,32 +493,6 @@ func CreateStory(req *models.CreateStoryRequest, creatorID string) error {
 	err = database.DB.Create(&story).Error
 	if err != nil {
 		return err
-	}
-
-	if len(req.Nodes) > 0 {
-		for i, n := range req.Nodes {
-			node := models.DevNode{
-				NodeID:       uuid.New().String(),
-				Label:        n.Label,
-				Value:        n.Value,
-				Sort:         n.Sort,
-				UserID:       n.UserID,
-				Current:      0,
-				NodeType:     n.NodeType,
-				Result:       0,
-				Remark:       n.Remark,
-				BusinessType: &businessType,
-				BusinessID:   storyID,
-				CreateDate:   &now,
-			}
-			if i == 0 {
-				node.Current = 1
-				node.StartDate = &now
-			}
-			if err := database.DB.Create(&node).Error; err != nil {
-				return err
-			}
-		}
 	}
 
 	return createChangeHistory(creatorID, storyID, 0, 0, "")
