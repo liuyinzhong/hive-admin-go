@@ -528,6 +528,10 @@ definitions:
         description: 描述
         example: 普通用户
         type: string
+      leaderUserId:
+        description: 直属主管用户ID
+        example: UUID
+        type: string
       password:
         description: 密码
         example: "123456"
@@ -991,6 +995,10 @@ definitions:
         description: 首页路径
         example: /dashboard/analytics
         type: string
+      leaderUserId:
+        description: 直属主管用户ID
+        example: UUID
+        type: string
       phone:
         description: 手机号
         example: "13800138000"
@@ -1108,6 +1116,28 @@ definitions:
         description: 状态 0=禁用 1=启用
         example: 1
         type: integer
+    type: object
+  models.StartWorkflowInstanceRequest:
+    properties:
+      businessKey:
+        description: 业务对象唯一标识
+        example: purchase:UUID
+        type: string
+      definitionId:
+        description: 流程定义ID
+        example: UUID
+        type: string
+      title:
+        description: 实例标题
+        example: 采购申请审批
+        type: string
+      variables:
+        additionalProperties: true
+        description: 条件判断业务变量
+        type: object
+    required:
+    - definitionId
+    - title
     type: object
   models.StoryResponse:
     properties:
@@ -1710,6 +1740,10 @@ definitions:
         description: 描述
         example: 普通用户
         type: string
+      leaderUserId:
+        description: 直属主管用户ID
+        example: UUID
+        type: string
       phone:
         description: 手机号
         example: "13800138000"
@@ -1882,6 +1916,31 @@ definitions:
         example: "0"
         type: string
     type: object
+  models.WorkflowCopyResponse:
+    properties:
+      copyId:
+        type: string
+      createDate:
+        type: string
+      instanceId:
+        type: string
+      instanceTitle:
+        type: string
+      nodeId:
+        type: string
+      nodeName:
+        type: string
+      readDate:
+        type: string
+      receiverId:
+        type: string
+      receiverName:
+        type: string
+      starterName:
+        type: string
+      status:
+        type: string
+    type: object
   models.WorkflowDefinitionResponse:
     properties:
       category:
@@ -1932,6 +1991,112 @@ definitions:
         description: 发布版本号
         example: 1
         type: integer
+    type: object
+  models.WorkflowInstanceDetailResponse:
+    properties:
+      copies:
+        items:
+          $ref: '#/definitions/models.WorkflowCopyResponse'
+        type: array
+      instance:
+        $ref: '#/definitions/models.WorkflowInstanceResponse'
+      records:
+        items:
+          $ref: '#/definitions/models.WorkflowRecordResponse'
+        type: array
+      tasks:
+        items:
+          $ref: '#/definitions/models.WorkflowTaskResponse'
+        type: array
+    type: object
+  models.WorkflowInstanceResponse:
+    properties:
+      businessKey:
+        type: string
+      createDate:
+        type: string
+      definitionId:
+        type: string
+      definitionKey:
+        type: string
+      definitionName:
+        type: string
+      definitionVersion:
+        type: integer
+      endDate:
+        type: string
+      instanceId:
+        type: string
+      startDate:
+        type: string
+      starterId:
+        type: string
+      starterName:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      variables:
+        additionalProperties: true
+        type: object
+    type: object
+  models.WorkflowRecordResponse:
+    properties:
+      action:
+        type: string
+      comment:
+        type: string
+      createDate:
+        type: string
+      nodeId:
+        type: string
+      nodeName:
+        type: string
+      operatorId:
+        type: string
+      operatorName:
+        type: string
+      recordId:
+        type: string
+      taskId:
+        type: string
+    type: object
+  models.WorkflowTaskActionRequest:
+    properties:
+      comment:
+        description: 审批意见
+        example: 同意
+        type: string
+    type: object
+  models.WorkflowTaskResponse:
+    properties:
+      approvalMode:
+        type: string
+      assigneeId:
+        type: string
+      assigneeName:
+        type: string
+      comment:
+        type: string
+      createDate:
+        type: string
+      finishDate:
+        type: string
+      instanceId:
+        type: string
+      instanceTitle:
+        type: string
+      nodeId:
+        type: string
+      nodeName:
+        type: string
+      starterName:
+        type: string
+      status:
+        type: string
+      taskId:
+        type: string
     type: object
   utils.PageResult:
     properties:
@@ -5333,6 +5498,65 @@ paths:
       summary: 获取所有用户
       tags:
       - 系统管理-用户管理
+  /workflow/copies:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 已读状态，支持逗号分隔：0,1
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.WorkflowCopyResponse'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取我的抄送
+      tags:
+      - 流程管理-流程抄送
+  /workflow/copies/{copyId}/read:
+    put:
+      parameters:
+      - description: 抄送ID
+        in: path
+        name: copyId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 标记抄送已读
+      tags:
+      - 流程管理-流程抄送
   /workflow/definitions:
     delete:
       consumes:
@@ -5693,6 +5917,217 @@ paths:
       summary: 获取所有流程定义
       tags:
       - 流程管理-流程定义
+  /workflow/instances:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 实例状态，支持逗号分隔：0,1,2,3
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.WorkflowInstanceResponse'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取我发起的流程
+      tags:
+      - 流程管理-流程运行
+    post:
+      consumes:
+      - application/json
+      description: 根据已发布流程定义创建运行实例
+      parameters:
+      - description: 流程发起信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.StartWorkflowInstanceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 发起成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.WorkflowInstanceResponse'
+              type: object
+        "400":
+          description: 参数或流程配置错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 发起流程实例
+      tags:
+      - 流程管理-流程运行
+  /workflow/instances/{instanceId}:
+    get:
+      parameters:
+      - description: 流程实例ID
+        in: path
+        name: instanceId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.WorkflowInstanceDetailResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取流程实例详情
+      tags:
+      - 流程管理-流程运行
+  /workflow/instances/{instanceId}/cancel:
+    put:
+      parameters:
+      - description: 流程实例ID
+        in: path
+        name: instanceId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 撤销成功
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 撤销流程实例
+      tags:
+      - 流程管理-流程运行
+  /workflow/tasks:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 任务状态，支持逗号分隔：0,1,2,3
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.WorkflowTaskResponse'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取我的待办和已办
+      tags:
+      - 流程管理-流程任务
+  /workflow/tasks/{taskId}/approve:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: 审批意见
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.WorkflowTaskActionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 审批成功
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 审批通过
+      tags:
+      - 流程管理-流程任务
+  /workflow/tasks/{taskId}/reject:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: 审批意见
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.WorkflowTaskActionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 驳回成功
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 审批驳回
+      tags:
+      - 流程管理-流程任务
 schemes:
 - http
 - https

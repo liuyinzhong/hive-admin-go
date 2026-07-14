@@ -175,6 +175,24 @@ func SetupRouter() *gin.Engine {
 				definitions.PUT("/:definitionId/status", workflowController.UpdateWorkflowDefinitionStatus)
 				definitions.DELETE("", workflowController.DeleteWorkflowDefinitions)
 			}
+			instances := workflow.Group("/instances")
+			{
+				instances.GET("", workflowController.GetWorkflowInstances)
+				instances.POST("", workflowController.StartWorkflowInstance)
+				instances.GET("/:instanceId", workflowController.GetWorkflowInstanceDetail)
+				instances.PUT("/:instanceId/cancel", workflowController.CancelWorkflowInstance)
+			}
+			tasks := workflow.Group("/tasks")
+			{
+				tasks.GET("", workflowController.GetWorkflowTasks)
+				tasks.PUT("/:taskId/approve", workflowController.ApproveWorkflowTask)
+				tasks.PUT("/:taskId/reject", workflowController.RejectWorkflowTask)
+			}
+			copies := workflow.Group("/copies")
+			{
+				copies.GET("", workflowController.GetWorkflowCopies)
+				copies.PUT("/:copyId/read", workflowController.ReadWorkflowCopy)
+			}
 		}
 	}
 

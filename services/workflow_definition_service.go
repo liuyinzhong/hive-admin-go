@@ -1,7 +1,6 @@
 package services
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -93,8 +92,10 @@ func CreateWorkflowDefinition(req *models.CreateWorkflowDefinitionRequest, creat
 	}
 
 	flowData := normalizeWorkflowFlowData(req.FlowData)
-	if err := validateWorkflowFlowData(flowData); err != nil {
-		return err
+	if req.FlowData != nil && strings.TrimSpace(*req.FlowData) != "" {
+		if err := validateWorkflowFlowData(flowData); err != nil {
+			return err
+		}
 	}
 
 	now := time.Now()
@@ -130,19 +131,22 @@ func UpdateWorkflowDefinition(definitionID string, req *models.UpdateWorkflowDef
 		return err
 	}
 
-	flowData := normalizeWorkflowFlowData(req.FlowData)
-	if err := validateWorkflowFlowData(flowData); err != nil {
-		return err
-	}
-
-	return database.DB.Model(&definition).Updates(map[string]interface{}{
+	updates := map[string]interface{}{
 		"definition_key":  strings.TrimSpace(req.DefinitionKey),
 		"definition_name": strings.TrimSpace(req.DefinitionName),
 		"category":        req.Category,
-		"flow_data":       flowData,
 		"remark":          req.Remark,
 		"update_date":     time.Now(),
-	}).Error
+	}
+	if req.FlowData != nil && strings.TrimSpace(*req.FlowData) != "" {
+		flowData := normalizeWorkflowFlowData(req.FlowData)
+		if err := validateWorkflowFlowData(flowData); err != nil {
+			return err
+		}
+		updates["flow_data"] = flowData
+		updates["status"] = 0
+	}
+	return database.DB.Model(&definition).Updates(updates).Error
 }
 
 func UpdateWorkflowCanvas(definitionID string, flowData string) error {
@@ -161,6 +165,7 @@ func UpdateWorkflowCanvas(definitionID string, flowData string) error {
 
 	return database.DB.Model(&definition).Updates(map[string]interface{}{
 		"flow_data":   strings.TrimSpace(flowData),
+		"status":      0,
 		"update_date": time.Now(),
 	}).Error
 }
@@ -198,6 +203,9 @@ func PublishWorkflowDefinition(definitionID string) error {
 func UpdateWorkflowDefinitionStatus(definitionID string, status int) error {
 	if status != 0 && status != 1 && status != 2 {
 		return fmt.Errorf("流程状态只能是 0、1、2")
+	}
+	if status == 1 {
+		return PublishWorkflowDefinition(definitionID)
 	}
 
 	var definition models.WfProcessDefinition
@@ -304,10 +312,6 @@ func validateWorkflowFlowData(flowData string) error {
 		return fmt.Errorf("流程画布数据不能为空")
 	}
 
-	var data map[string]interface{}
-	if err := json.Unmarshal([]byte(flowData), &data); err != nil {
-		return fmt.Errorf("流程画布数据必须是合法JSON")
-	}
-
-	return nil
+	_, err := parseWorkflowGraph(flowData)
+	return err
 }

@@ -5438,6 +5438,110 @@
                 }
             }
         },
+        "/workflow/copies": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程抄送"
+                ],
+                "summary": "获取我的抄送",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "已读状态，支持逗号分隔：0,1",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.WorkflowCopyResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/copies/{copyId}/read": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程抄送"
+                ],
+                "summary": "标记抄送已读",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "抄送ID",
+                        "name": "copyId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/workflow/definitions": {
             "get": {
                 "security": [
@@ -6006,6 +6110,371 @@
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/instances": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程运行"
+                ],
+                "summary": "获取我发起的流程",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "实例状态，支持逗号分隔：0,1,2,3",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.WorkflowInstanceResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据已发布流程定义创建运行实例",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程运行"
+                ],
+                "summary": "发起流程实例",
+                "parameters": [
+                    {
+                        "description": "流程发起信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.StartWorkflowInstanceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "发起成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.WorkflowInstanceResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数或流程配置错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/instances/{instanceId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程运行"
+                ],
+                "summary": "获取流程实例详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "流程实例ID",
+                        "name": "instanceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.WorkflowInstanceDetailResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/instances/{instanceId}/cancel": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程运行"
+                ],
+                "summary": "撤销流程实例",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "流程实例ID",
+                        "name": "instanceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "撤销成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/tasks": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程任务"
+                ],
+                "summary": "获取我的待办和已办",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "任务状态，支持逗号分隔：0,1,2,3",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.WorkflowTaskResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/tasks/{taskId}/approve": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程任务"
+                ],
+                "summary": "审批通过",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "任务ID",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "审批意见",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WorkflowTaskActionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "审批成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/tasks/{taskId}/reject": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程任务"
+                ],
+                "summary": "审批驳回",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "任务ID",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "审批意见",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WorkflowTaskActionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "驳回成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -6704,6 +7173,11 @@
                     "type": "string",
                     "example": "普通用户"
                 },
+                "leaderUserId": {
+                    "description": "直属主管用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
                 "password": {
                     "description": "密码",
                     "type": "string",
@@ -7300,6 +7774,11 @@
                     "type": "string",
                     "example": "/dashboard/analytics"
                 },
+                "leaderUserId": {
+                    "description": "直属主管用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
                 "phone": {
                     "description": "手机号",
                     "type": "string",
@@ -7454,6 +7933,35 @@
                     "description": "状态 0=禁用 1=启用",
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "models.StartWorkflowInstanceRequest": {
+            "type": "object",
+            "required": [
+                "definitionId",
+                "title"
+            ],
+            "properties": {
+                "businessKey": {
+                    "description": "业务对象唯一标识",
+                    "type": "string",
+                    "example": "purchase:UUID"
+                },
+                "definitionId": {
+                    "description": "流程定义ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "title": {
+                    "description": "实例标题",
+                    "type": "string",
+                    "example": "采购申请审批"
+                },
+                "variables": {
+                    "description": "条件判断业务变量",
+                    "type": "object",
+                    "additionalProperties": true
                 }
             }
         },
@@ -8247,6 +8755,11 @@
                     "type": "string",
                     "example": "普通用户"
                 },
+                "leaderUserId": {
+                    "description": "直属主管用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
                 "phone": {
                     "description": "手机号",
                     "type": "string",
@@ -8469,6 +8982,44 @@
                 }
             }
         },
+        "models.WorkflowCopyResponse": {
+            "type": "object",
+            "properties": {
+                "copyId": {
+                    "type": "string"
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "instanceId": {
+                    "type": "string"
+                },
+                "instanceTitle": {
+                    "type": "string"
+                },
+                "nodeId": {
+                    "type": "string"
+                },
+                "nodeName": {
+                    "type": "string"
+                },
+                "readDate": {
+                    "type": "string"
+                },
+                "receiverId": {
+                    "type": "string"
+                },
+                "receiverName": {
+                    "type": "string"
+                },
+                "starterName": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "models.WorkflowDefinitionResponse": {
             "type": "object",
             "properties": {
@@ -8531,6 +9082,166 @@
                     "description": "发布版本号",
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "models.WorkflowInstanceDetailResponse": {
+            "type": "object",
+            "properties": {
+                "copies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WorkflowCopyResponse"
+                    }
+                },
+                "instance": {
+                    "$ref": "#/definitions/models.WorkflowInstanceResponse"
+                },
+                "records": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WorkflowRecordResponse"
+                    }
+                },
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WorkflowTaskResponse"
+                    }
+                }
+            }
+        },
+        "models.WorkflowInstanceResponse": {
+            "type": "object",
+            "properties": {
+                "businessKey": {
+                    "type": "string"
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "definitionId": {
+                    "type": "string"
+                },
+                "definitionKey": {
+                    "type": "string"
+                },
+                "definitionName": {
+                    "type": "string"
+                },
+                "definitionVersion": {
+                    "type": "integer"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "instanceId": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "starterId": {
+                    "type": "string"
+                },
+                "starterName": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "models.WorkflowRecordResponse": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "nodeId": {
+                    "type": "string"
+                },
+                "nodeName": {
+                    "type": "string"
+                },
+                "operatorId": {
+                    "type": "string"
+                },
+                "operatorName": {
+                    "type": "string"
+                },
+                "recordId": {
+                    "type": "string"
+                },
+                "taskId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.WorkflowTaskActionRequest": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "description": "审批意见",
+                    "type": "string",
+                    "example": "同意"
+                }
+            }
+        },
+        "models.WorkflowTaskResponse": {
+            "type": "object",
+            "properties": {
+                "approvalMode": {
+                    "type": "string"
+                },
+                "assigneeId": {
+                    "type": "string"
+                },
+                "assigneeName": {
+                    "type": "string"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "finishDate": {
+                    "type": "string"
+                },
+                "instanceId": {
+                    "type": "string"
+                },
+                "instanceTitle": {
+                    "type": "string"
+                },
+                "nodeId": {
+                    "type": "string"
+                },
+                "nodeName": {
+                    "type": "string"
+                },
+                "starterName": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "taskId": {
+                    "type": "string"
                 }
             }
         },
