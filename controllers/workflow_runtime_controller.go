@@ -156,6 +156,115 @@ func (wc *WorkflowController) RejectWorkflowTask(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
 }
 
+// TransferWorkflowTask 转交当前用户的待办任务。
+// @Summary 转交审批任务
+// @Tags 流程管理-流程任务
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param taskId path string true "任务ID"
+// @Param request body models.WorkflowTaskTransferRequest true "转交信息"
+// @Success 200 {object} models.Response "转交成功"
+// @Router /workflow/tasks/{taskId}/transfer [put]
+func (wc *WorkflowController) TransferWorkflowTask(c *gin.Context) {
+	var req models.WorkflowTaskTransferRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
+		return
+	}
+	if err := services.TransferWorkflowTask(c.Param("taskId"), c.GetString("userId"), &req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+}
+
+// AddWorkflowTaskSign 向当前审批组并行加签。
+// @Summary 并行加签
+// @Tags 流程管理-流程任务
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param taskId path string true "任务ID"
+// @Param request body models.WorkflowTaskAddSignRequest true "加签信息"
+// @Success 200 {object} models.Response "加签成功"
+// @Router /workflow/tasks/{taskId}/add-sign [put]
+func (wc *WorkflowController) AddWorkflowTaskSign(c *gin.Context) {
+	var req models.WorkflowTaskAddSignRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
+		return
+	}
+	if err := services.AddWorkflowTaskSign(c.Param("taskId"), c.GetString("userId"), &req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+}
+
+// RemoveWorkflowTaskSign 从当前审批组减签未处理任务。
+// @Summary 减签
+// @Tags 流程管理-流程任务
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param taskId path string true "任务ID"
+// @Param request body models.WorkflowTaskRemoveSignRequest true "减签信息"
+// @Success 200 {object} models.Response "减签成功"
+// @Router /workflow/tasks/{taskId}/remove-sign [put]
+func (wc *WorkflowController) RemoveWorkflowTaskSign(c *gin.Context) {
+	var req models.WorkflowTaskRemoveSignRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
+		return
+	}
+	if err := services.RemoveWorkflowTaskSign(c.Param("taskId"), c.GetString("userId"), &req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+}
+
+// GetWorkflowTaskReturnTargets 查询当前任务可退回的历史审批节点。
+// @Summary 查询可退回节点
+// @Tags 流程管理-流程任务
+// @Produce json
+// @Security ApiKeyAuth
+// @Param taskId path string true "任务ID"
+// @Success 200 {object} models.Response{data=[]models.WorkflowReturnTargetResponse} "获取成功"
+// @Router /workflow/tasks/{taskId}/return-targets [get]
+func (wc *WorkflowController) GetWorkflowTaskReturnTargets(c *gin.Context) {
+	result, err := services.GetWorkflowTaskReturnTargets(c.Param("taskId"), c.GetString("userId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
+// ReturnWorkflowTask 将当前任务退回历史审批节点。
+// @Summary 退回审批任务
+// @Tags 流程管理-流程任务
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param taskId path string true "任务ID"
+// @Param request body models.WorkflowTaskReturnRequest true "退回信息"
+// @Success 200 {object} models.Response "退回成功"
+// @Router /workflow/tasks/{taskId}/return [put]
+func (wc *WorkflowController) ReturnWorkflowTask(c *gin.Context) {
+	var req models.WorkflowTaskReturnRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
+		return
+	}
+	if err := services.ReturnWorkflowTask(c.Param("taskId"), c.GetString("userId"), &req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+}
+
 // GetWorkflowCopies 获取当前用户抄送记录。
 // @Summary 获取我的抄送
 // @Tags 流程管理-流程抄送

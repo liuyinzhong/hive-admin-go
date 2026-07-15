@@ -184,7 +184,15 @@ func PublishWorkflowDefinition(definitionID string) error {
 	if definition.FlowData != nil {
 		flowData = *definition.FlowData
 	}
-	if err := validateWorkflowFlowData(flowData); err != nil {
+	graph, err := parseWorkflowGraph(flowData)
+	if err != nil {
+		return err
+	}
+	formSchema, err := parseWorkflowFormSchema(definition.FormSchema)
+	if err != nil {
+		return err
+	}
+	if err := validateWorkflowConditionFields(graph, formSchema); err != nil {
 		return err
 	}
 
@@ -266,6 +274,7 @@ func buildWorkflowDefinitionResponses(definitions []models.WfProcessDefinition) 
 			Status:         fmt.Sprintf("%d", definition.Status),
 			Version:        definition.Version,
 			FlowData:       definition.FlowData,
+			FormSchema:     definition.FormSchema,
 			Remark:         definition.Remark,
 			CreatorID:      definition.CreatorID,
 			CreatorName:    &creatorName,

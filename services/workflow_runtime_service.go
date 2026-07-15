@@ -19,6 +19,17 @@ import (
 
 const workflowMaxAutomaticSteps = 100
 
+var workflowCategoryPrefixes = map[string]string{
+	"general":        "TY",
+	"finance":        "CW",
+	"hr":             "RS",
+	"administration": "XZ",
+	"procurement":    "CG",
+	"development":    "DEV",
+	"system":         "SYS",
+	"other":          "QT",
+}
+
 type workflowGraph struct {
 	Nodes []workflowNode `json:"nodes"`
 	Edges []workflowEdge `json:"edges"`
@@ -26,18 +37,25 @@ type workflowGraph struct {
 
 type workflowNode struct {
 	ID         string                 `json:"id"`
-	Text       json.RawMessage        `json:"text"`
+	Text       workflowElementText    `json:"text"`
 	Properties workflowNodeProperties `json:"properties"`
 }
 
+type workflowElementText struct {
+	Value string  `json:"value"`
+	X     float64 `json:"x"`
+	Y     float64 `json:"y"`
+}
+
 type workflowNodeProperties struct {
-	NodeType     string   `json:"nodeType"`
-	AssigneeType string   `json:"assigneeType"`
-	AssigneeIDs  []string `json:"assigneeIds"`
-	ApprovalMode string   `json:"approvalMode"`
-	CopyType     string   `json:"copyType"`
-	CopyIDs      []string `json:"copyIds"`
-	BranchMode   string   `json:"branchMode"`
+	NodeType         string            `json:"nodeType"`
+	AssigneeType     string            `json:"assigneeType"`
+	AssigneeIDs      []string          `json:"assigneeIds"`
+	ApprovalMode     string            `json:"approvalMode"`
+	CopyType         string            `json:"copyType"`
+	CopyIDs          []string          `json:"copyIds"`
+	BranchMode       string            `json:"branchMode"`
+	FieldPermissions map[string]string `json:"fieldPermissions"`
 }
 
 type workflowEdge struct {
@@ -48,11 +66,10 @@ type workflowEdge struct {
 }
 
 type workflowEdgeProperties struct {
-	IsDefaultBranch     bool                    `json:"isDefaultBranch"`
-	Priority            int                     `json:"priority"`
-	ConditionLogic      string                  `json:"conditionLogic"`
-	ConditionRules      []workflowConditionRule `json:"conditionRules"`
-	ConditionExpression string                  `json:"conditionExpression"`
+	IsDefaultBranch bool                    `json:"isDefaultBranch"`
+	Priority        int                     `json:"priority"`
+	ConditionLogic  string                  `json:"conditionLogic"`
+	ConditionRules  []workflowConditionRule `json:"conditionRules"`
 }
 
 type workflowConditionRule struct {
@@ -88,6 +105,10 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 		if err != nil {
 			return err
 		}
+		formSchema, err := parseWorkflowFormSchema(definition.FormSchema)
+		if err != nil {
+			return err
+		}
 		starter, err := getActiveWorkflowUser(tx, starterID)
 		if err != nil {
 			return fmt.Errorf("流程发起人不存在或已停用")
@@ -96,46 +117,52 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 		if variables == nil {
 			variables = make(map[string]interface{})
 		}
+		if err := validateWorkflowFormVariables(formSchema, variables); err != nil {
+			return err
+		}
 		variablesJSON, err := json.Marshal(variables)
 		if err != nil {
 			return fmt.Errorf("流程变量无法序列化")
 		}
 
 		now := time.Now()
+		categoryPrefix, err := workflowCategoryPrefix(definition.Category)
+		if err != nil {
+			return err
+		}
+		instanceNo, err := nextWorkflowInstanceNo(tx, categoryPrefix, now)
+		if err != nil {
+			return err
+		}
 		instance := models.WfProcessInstance{
 			InstanceID:        utils.GenerateUUID(),
+			InstanceNo:        instanceNo,
 			DefinitionID:      definition.DefinitionID,
 			DefinitionKey:     definition.DefinitionKey,
 			DefinitionName:    definition.DefinitionName,
 			DefinitionVersion: definition.Version,
-			Title:             strings.TrimSpace(req.Title),
+			Title:             workflowInstanceTitle(definition.DefinitionName, workflowUserName(starter)),
 			BusinessKey:       normalizeOptionalString(req.BusinessKey),
 			StarterID:         starter.UserID,
 			StarterName:       workflowUserName(starter),
 			Status:            models.WorkflowInstanceStatusRunning,
 			Variables:         string(variablesJSON),
 			FlowSnapshot:      *definition.FlowData,
+			FormSnapshot:      definition.FormSchema,
 			StartDate:         &now,
 			CreateDate:        &now,
 			UpdateDate:        &now,
 			DelFlag:           0,
 		}
-		if instance.Title == "" {
-			return fmt.Errorf("流程标题不能为空")
-		}
 		if err := tx.Create(&instance).Error; err != nil {
 			return err
 		}
-		if err := createWorkflowRecord(tx, &instance, nil, nil, "start", &starter.UserID, stringPtr(instance.StarterName), nil); err != nil {
-			return err
-		}
-
 		startNode := findWorkflowNodeByType(graph, "start")
 		if startNode == nil {
 			return fmt.Errorf("流程缺少开始节点")
 		}
 		context := &workflowExecutionContext{graph: graph, instance: &instance, variables: variables}
-		if err := advanceWorkflowFromNode(tx, context, startNode.ID); err != nil {
+		if err := initializeWorkflowRoute(tx, context, startNode.ID); err != nil {
 			return err
 		}
 
@@ -255,9 +282,14 @@ func GetWorkflowInstanceDetail(instanceID, userID string) (*models.WorkflowInsta
 		}
 	}
 
+	var nodeInstances []models.WfProcessNodeInstance
 	var tasks []models.WfProcessTask
 	var records []models.WfProcessRecord
 	var copies []models.WfProcessCopy
+	if err := database.DB.Where("instance_id = ? AND status <> ?", instanceID, models.WorkflowNodeStatusSuperseded).
+		Order("sequence ASC").Find(&nodeInstances).Error; err != nil {
+		return nil, err
+	}
 	if err := database.DB.Where("instance_id = ? AND del_flag = 0", instanceID).Order("create_date ASC").Find(&tasks).Error; err != nil {
 		return nil, err
 	}
@@ -272,34 +304,226 @@ func GetWorkflowInstanceDetail(instanceID, userID string) (*models.WorkflowInsta
 	if err != nil {
 		return nil, err
 	}
-	detail := &models.WorkflowInstanceDetailResponse{Instance: instanceResponse}
-	detail.Tasks = make([]models.WorkflowTaskResponse, 0, len(tasks))
-	for _, task := range tasks {
-		detail.Tasks = append(detail.Tasks, buildWorkflowTaskResponse(task, instance))
+	nodes, err := buildWorkflowNodeResponses(nodeInstances, tasks, copies, records, instance, time.Now())
+	if err != nil {
+		return nil, err
 	}
-	detail.Records = make([]models.WorkflowRecordResponse, 0, len(records))
-	for _, record := range records {
-		detail.Records = append(detail.Records, models.WorkflowRecordResponse{
-			RecordID: record.RecordID, TaskID: record.TaskID, NodeID: record.NodeID, NodeName: record.NodeName,
-			Action: record.Action, OperatorID: record.OperatorID, OperatorName: record.OperatorName,
-			Comment: record.Comment, CreateDate: models.TimeToStringPtr(record.CreateDate),
-		})
-	}
-	detail.Copies = make([]models.WorkflowCopyResponse, 0, len(copies))
-	for _, copyItem := range copies {
-		detail.Copies = append(detail.Copies, buildWorkflowCopyResponse(copyItem, instance))
-	}
-	return detail, nil
+	return &models.WorkflowInstanceDetailResponse{Instance: instanceResponse, Nodes: nodes}, nil
 }
 
 // ApproveWorkflowTask 审批通过任务，并按或签/会签规则推进流程。
 func ApproveWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionRequest) error {
-	return handleWorkflowTask(taskID, userID, req.Comment, true)
+	return handleWorkflowTask(taskID, userID, req, true)
 }
 
 // RejectWorkflowTask 驳回任务并终止当前流程实例。
 func RejectWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionRequest) error {
-	return handleWorkflowTask(taskID, userID, req.Comment, false)
+	return handleWorkflowTask(taskID, userID, req, false)
+}
+
+// TransferWorkflowTask 将当前用户的待办转交给另一名启用用户。
+func TransferWorkflowTask(taskID, userID string, req *models.WorkflowTaskTransferRequest) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		task, instance, operator, err := loadPendingWorkflowTask(tx, taskID, userID)
+		if err != nil {
+			return err
+		}
+		target, err := getActiveWorkflowUser(tx, strings.TrimSpace(req.TargetUserID))
+		if err != nil {
+			return fmt.Errorf("转交用户不存在或已停用")
+		}
+		if target.UserID == userID {
+			return fmt.Errorf("不能将任务转交给自己")
+		}
+		var duplicate int64
+		if err := tx.Model(&models.WfProcessTask{}).
+			Where("task_group_id = ? AND assignee_id = ? AND status IN ? AND del_flag = 0", task.TaskGroupID, target.UserID, []int{models.WorkflowTaskStatusPending, models.WorkflowTaskStatusApproved}).
+			Count(&duplicate).Error; err != nil {
+			return err
+		}
+		if duplicate > 0 {
+			return fmt.Errorf("该用户已经在当前审批组中")
+		}
+		originalName := task.AssigneeName
+		task.AssigneeID = target.UserID
+		task.AssigneeName = workflowUserName(target)
+		now := time.Now()
+		if err := tx.Model(&task).Updates(map[string]interface{}{
+			"assignee_id": task.AssigneeID, "assignee_name": task.AssigneeName, "update_date": now,
+		}).Error; err != nil {
+			return err
+		}
+		comment := workflowOperationComment(fmt.Sprintf("%s 转交给 %s", originalName, task.AssigneeName), req.Comment)
+		return createWorkflowRecord(tx, instance, task, nil, "transfer", &userID, stringPtr(workflowUserName(*operator)), comment)
+	})
+}
+
+// AddWorkflowTaskSign 向当前审批组增加并行审批任务。
+func AddWorkflowTaskSign(taskID, userID string, req *models.WorkflowTaskAddSignRequest) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		task, instance, operator, err := loadPendingWorkflowTask(tx, taskID, userID)
+		if err != nil {
+			return err
+		}
+		userIDs := uniqueStrings(req.UserIDs)
+		if len(userIDs) == 0 || len(userIDs) > 20 {
+			return fmt.Errorf("加签用户数量必须在1到20人之间")
+		}
+		users, err := resolveWorkflowActors(tx, instance, "user", userIDs)
+		if err != nil {
+			return err
+		}
+		var existingIDs []string
+		if err := tx.Model(&models.WfProcessTask{}).
+			Where("task_group_id = ? AND assignee_id IN ? AND status IN ? AND del_flag = 0", task.TaskGroupID, userIDs, []int{models.WorkflowTaskStatusPending, models.WorkflowTaskStatusApproved}).
+			Pluck("assignee_id", &existingIDs).Error; err != nil {
+			return err
+		}
+		if len(existingIDs) > 0 {
+			return fmt.Errorf("加签用户已经在当前审批组中")
+		}
+		var groupMemberCount int64
+		if err := tx.Model(&models.WfProcessTask{}).
+			Where("task_group_id = ? AND status IN ? AND del_flag = 0", task.TaskGroupID, []int{models.WorkflowTaskStatusPending, models.WorkflowTaskStatusApproved}).
+			Count(&groupMemberCount).Error; err != nil {
+			return err
+		}
+		if groupMemberCount+int64(len(users)) > 20 {
+			return fmt.Errorf("当前审批组最多允许20人")
+		}
+		now := time.Now()
+		names := make([]string, 0, len(users))
+		for _, user := range users {
+			names = append(names, workflowUserName(user))
+			newTask := models.WfProcessTask{
+				TaskID: utils.GenerateUUID(), TaskGroupID: task.TaskGroupID, NodeInstanceID: task.NodeInstanceID, InstanceID: task.InstanceID,
+				NodeID: task.NodeID, NodeName: task.NodeName, AssigneeID: user.UserID,
+				AssigneeName: workflowUserName(user), ApprovalMode: task.ApprovalMode,
+				Status: models.WorkflowTaskStatusPending, CreateDate: &now, UpdateDate: &now,
+			}
+			if err := tx.Create(&newTask).Error; err != nil {
+				return err
+			}
+		}
+		comment := workflowOperationComment("加签："+strings.Join(names, "、"), req.Comment)
+		return createWorkflowRecord(tx, instance, task, nil, "addSign", &userID, stringPtr(workflowUserName(*operator)), comment)
+	})
+}
+
+// RemoveWorkflowTaskSign 取消当前审批组中指定的未处理任务。
+func RemoveWorkflowTaskSign(taskID, userID string, req *models.WorkflowTaskRemoveSignRequest) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		task, instance, operator, err := loadPendingWorkflowTask(tx, taskID, userID)
+		if err != nil {
+			return err
+		}
+		taskIDs := uniqueStrings(req.TaskIDs)
+		if len(taskIDs) == 0 || len(taskIDs) > 20 {
+			return fmt.Errorf("减签任务数量必须在1到20个之间")
+		}
+		for _, removeTaskID := range taskIDs {
+			if removeTaskID == task.TaskID {
+				return fmt.Errorf("不能减签当前正在操作的任务")
+			}
+		}
+		var removeTasks []models.WfProcessTask
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("task_id IN ? AND task_group_id = ? AND status = ? AND del_flag = 0", taskIDs, task.TaskGroupID, models.WorkflowTaskStatusPending).
+			Find(&removeTasks).Error; err != nil {
+			return err
+		}
+		if len(removeTasks) != len(taskIDs) {
+			return fmt.Errorf("部分减签任务不存在、已处理或不属于当前审批组")
+		}
+		now := time.Now()
+		if err := tx.Model(&models.WfProcessTask{}).
+			Where("task_id IN ?", taskIDs).
+			Updates(map[string]interface{}{"status": models.WorkflowTaskStatusCanceled, "finish_date": now, "update_date": now}).Error; err != nil {
+			return err
+		}
+		names := make([]string, 0, len(removeTasks))
+		for _, removeTask := range removeTasks {
+			names = append(names, removeTask.AssigneeName)
+		}
+		comment := workflowOperationComment("减签："+strings.Join(names, "、"), req.Comment)
+		return createWorkflowRecord(tx, instance, task, nil, "removeSign", &userID, stringPtr(workflowUserName(*operator)), comment)
+	})
+}
+
+// GetWorkflowTaskReturnTargets 返回当前任务可退回的历史审批节点，顺序由近到远。
+func GetWorkflowTaskReturnTargets(taskID, userID string) ([]models.WorkflowReturnTargetResponse, error) {
+	var task models.WfProcessTask
+	if err := database.DB.Where("task_id = ? AND assignee_id = ? AND status = ? AND del_flag = 0", taskID, userID, models.WorkflowTaskStatusPending).
+		First(&task).Error; err != nil {
+		return nil, fmt.Errorf("审批任务不存在或已处理")
+	}
+	var instance models.WfProcessInstance
+	if err := database.DB.Where("instance_id = ? AND status = ? AND del_flag = 0", task.InstanceID, models.WorkflowInstanceStatusRunning).
+		First(&instance).Error; err != nil {
+		return nil, fmt.Errorf("流程实例不存在或已结束")
+	}
+	return loadWorkflowReturnTargets(database.DB, &task, &instance)
+}
+
+// ReturnWorkflowTask 将当前审批组退回到指定的历史审批节点。
+func ReturnWorkflowTask(taskID, userID string, req *models.WorkflowTaskReturnRequest) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		task, instance, operator, err := loadPendingWorkflowTask(tx, taskID, userID)
+		if err != nil {
+			return err
+		}
+		targets, err := loadWorkflowReturnTargets(tx, task, instance)
+		if err != nil {
+			return err
+		}
+		if len(targets) == 0 {
+			return fmt.Errorf("当前任务没有可退回的历史审批节点")
+		}
+		targetNodeID := ""
+		if req.TargetNodeID != nil {
+			targetNodeID = strings.TrimSpace(*req.TargetNodeID)
+		}
+		if targetNodeID == "" {
+			targetNodeID = targets[0].NodeID
+		}
+		allowed := false
+		for _, target := range targets {
+			if target.NodeID == targetNodeID {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return fmt.Errorf("只能退回到已经经过的审批节点")
+		}
+		graph, err := parseWorkflowGraph(instance.FlowSnapshot)
+		if err != nil {
+			return err
+		}
+		targetNode := findWorkflowNode(graph, targetNodeID)
+		if targetNode == nil || targetNode.Properties.NodeType != "approve" {
+			return fmt.Errorf("退回目标不是有效审批节点")
+		}
+		now := time.Now()
+		if err := tx.Model(&models.WfProcessTask{}).
+			Where("instance_id = ? AND status = ? AND del_flag = 0", instance.InstanceID, models.WorkflowTaskStatusPending).
+			Updates(map[string]interface{}{"status": models.WorkflowTaskStatusCanceled, "finish_date": now, "update_date": now}).Error; err != nil {
+			return err
+		}
+		if err := terminateWorkflowNode(tx, task.NodeInstanceID); err != nil {
+			return err
+		}
+		comment := workflowOperationComment("退回至："+workflowNodeName(targetNode), req.Comment)
+		if err := createWorkflowRecord(tx, instance, task, nil, "return", &userID, stringPtr(workflowUserName(*operator)), comment); err != nil {
+			return err
+		}
+		variables := make(map[string]interface{})
+		if err := json.Unmarshal([]byte(instance.Variables), &variables); err != nil {
+			return fmt.Errorf("流程变量解析失败")
+		}
+		context := &workflowExecutionContext{graph: graph, instance: instance, variables: variables}
+		return restartWorkflowRouteAtNode(tx, context, targetNode.ID)
+	})
 }
 
 // CancelWorkflowInstance 允许发起人撤销仍在运行的实例。
@@ -331,7 +555,19 @@ func CancelWorkflowInstance(instanceID, userID string) error {
 			Updates(map[string]interface{}{"status": models.WorkflowTaskStatusCanceled, "finish_date": now, "update_date": now}).Error; err != nil {
 			return err
 		}
-		return createWorkflowRecord(tx, &instance, nil, nil, "cancel", &userID, stringPtr(workflowUserName(operator)), nil)
+		var activeNode models.WfProcessNodeInstance
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("instance_id = ? AND status = ?", instanceID, models.WorkflowNodeStatusActive).
+			First(&activeNode).Error; err != nil {
+			return fmt.Errorf("当前流程节点不存在")
+		}
+		if err := terminateWorkflowNode(tx, activeNode.NodeInstanceID); err != nil {
+			return err
+		}
+		if err := supersedePlannedWorkflowNodes(tx, instanceID); err != nil {
+			return err
+		}
+		return createWorkflowRecord(tx, &instance, nil, &activeNode, "cancel", &userID, stringPtr(workflowUserName(operator)), nil)
 	})
 }
 
@@ -350,8 +586,123 @@ func ReadWorkflowCopy(copyID, userID string) error {
 	return nil
 }
 
+// loadPendingWorkflowTask 锁定当前用户可操作的待办及其运行实例。
+func loadPendingWorkflowTask(tx *gorm.DB, taskID, userID string) (*models.WfProcessTask, *models.WfProcessInstance, *models.SysUser, error) {
+	var task models.WfProcessTask
+	if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("task_id = ? AND del_flag = 0", taskID).First(&task).Error; err != nil {
+		return nil, nil, nil, fmt.Errorf("审批任务不存在")
+	}
+	if task.AssigneeID != userID {
+		return nil, nil, nil, fmt.Errorf("无权操作该审批任务")
+	}
+	if task.Status != models.WorkflowTaskStatusPending {
+		return nil, nil, nil, fmt.Errorf("审批任务已处理")
+	}
+	var instance models.WfProcessInstance
+	if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("instance_id = ? AND del_flag = 0", task.InstanceID).First(&instance).Error; err != nil {
+		return nil, nil, nil, fmt.Errorf("流程实例不存在")
+	}
+	if instance.Status != models.WorkflowInstanceStatusRunning {
+		return nil, nil, nil, fmt.Errorf("流程实例已结束")
+	}
+	var nodeInstance models.WfProcessNodeInstance
+	if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("node_instance_id = ? AND instance_id = ? AND status = ?", task.NodeInstanceID, task.InstanceID, models.WorkflowNodeStatusActive).
+		First(&nodeInstance).Error; err != nil {
+		return nil, nil, nil, fmt.Errorf("当前流程节点不存在或已结束")
+	}
+	operator, err := getActiveWorkflowUser(tx, userID)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("操作用户不存在或已停用")
+	}
+	return &task, &instance, &operator, nil
+}
+
+// loadWorkflowReturnTargets 按已完成节点实例倒序提取去重后的历史审批节点。
+func loadWorkflowReturnTargets(db *gorm.DB, task *models.WfProcessTask, instance *models.WfProcessInstance) ([]models.WorkflowReturnTargetResponse, error) {
+	var nodeInstances []models.WfProcessNodeInstance
+	if err := db.Where("instance_id = ? AND node_type = ? AND status = ?", instance.InstanceID, "approve", models.WorkflowNodeStatusCompleted).
+		Order("sequence DESC").Find(&nodeInstances).Error; err != nil {
+		return nil, err
+	}
+	return buildWorkflowReturnTargets(nodeInstances, task.NodeID), nil
+}
+
+// buildWorkflowReturnTargets 按节点执行顺序提取去重后的审批节点。
+func buildWorkflowReturnTargets(nodeInstances []models.WfProcessNodeInstance, currentNodeID string) []models.WorkflowReturnTargetResponse {
+	seen := make(map[string]bool)
+	targets := make([]models.WorkflowReturnTargetResponse, 0)
+	for _, nodeInstance := range nodeInstances {
+		if nodeInstance.NodeID == currentNodeID || seen[nodeInstance.NodeID] {
+			continue
+		}
+		seen[nodeInstance.NodeID] = true
+		targets = append(targets, models.WorkflowReturnTargetResponse{NodeID: nodeInstance.NodeID, NodeName: nodeInstance.NodeName})
+	}
+	return targets
+}
+
+// applyWorkflowTaskVariables 校验节点字段权限后合并审批人修改的表单变量。
+func applyWorkflowTaskVariables(tx *gorm.DB, instance *models.WfProcessInstance, nodeInstance *models.WfProcessNodeInstance, changes map[string]interface{}) error {
+	if len(changes) == 0 {
+		return nil
+	}
+	fieldPermissions, err := workflowNodeFieldPermissions(nodeInstance)
+	if err != nil {
+		return err
+	}
+	if err := validateWorkflowTaskVariableChanges(fieldPermissions, changes); err != nil {
+		return err
+	}
+	variables := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(instance.Variables), &variables); err != nil {
+		return fmt.Errorf("流程变量解析失败")
+	}
+	for key, value := range changes {
+		variables[key] = value
+	}
+	formSchema, err := parseWorkflowFormSchema(instance.FormSnapshot)
+	if err != nil {
+		return err
+	}
+	if err := validateWorkflowFormVariables(formSchema, variables); err != nil {
+		return err
+	}
+	variablesJSON, err := json.Marshal(variables)
+	if err != nil {
+		return fmt.Errorf("流程变量无法序列化")
+	}
+	if err := tx.Model(instance).Updates(map[string]interface{}{
+		"variables": string(variablesJSON), "update_date": time.Now(),
+	}).Error; err != nil {
+		return err
+	}
+	instance.Variables = string(variablesJSON)
+	return nil
+}
+
+// validateWorkflowTaskVariableChanges 确保审批请求只修改当前节点可编辑字段。
+func validateWorkflowTaskVariableChanges(fieldPermissions map[string]string, changes map[string]interface{}) error {
+	for key := range changes {
+		if fieldPermissions[key] != "editable" {
+			return fmt.Errorf("字段“%s”在当前节点不可编辑", key)
+		}
+	}
+	return nil
+}
+
+// workflowOperationComment 组合操作摘要和可选说明。
+func workflowOperationComment(summary string, comment *string) *string {
+	if normalized := normalizeOptionalString(comment); normalized != nil {
+		return stringPtr(summary + "；" + *normalized)
+	}
+	return stringPtr(summary)
+}
+
 // handleWorkflowTask 在事务内处理审批并推进或终止实例。
-func handleWorkflowTask(taskID, userID string, comment *string, approved bool) error {
+func handleWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionRequest, approved bool) error {
 	return database.DB.Transaction(func(tx *gorm.DB) error {
 		var task models.WfProcessTask
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
@@ -377,6 +728,16 @@ func handleWorkflowTask(taskID, userID string, comment *string, approved bool) e
 		if err != nil {
 			return err
 		}
+		nodeInstance, err := loadActiveWorkflowNode(tx, task.NodeInstanceID)
+		if err != nil {
+			return err
+		}
+
+		if approved {
+			if err := applyWorkflowTaskVariables(tx, &instance, nodeInstance, req.Variables); err != nil {
+				return err
+			}
+		}
 
 		now := time.Now()
 		taskStatus := models.WorkflowTaskStatusRejected
@@ -386,11 +747,11 @@ func handleWorkflowTask(taskID, userID string, comment *string, approved bool) e
 			action = "approve"
 		}
 		if err := tx.Model(&task).Updates(map[string]interface{}{
-			"status": taskStatus, "comment": normalizeOptionalString(comment), "finish_date": now, "update_date": now,
+			"status": taskStatus, "comment": normalizeOptionalString(req.Comment), "finish_date": now, "update_date": now,
 		}).Error; err != nil {
 			return err
 		}
-		if err := createWorkflowRecord(tx, &instance, &task, nil, action, &userID, stringPtr(workflowUserName(operator)), normalizeOptionalString(comment)); err != nil {
+		if err := createWorkflowRecord(tx, &instance, &task, nil, action, &userID, stringPtr(workflowUserName(operator)), normalizeOptionalString(req.Comment)); err != nil {
 			return err
 		}
 
@@ -398,7 +759,13 @@ func handleWorkflowTask(taskID, userID string, comment *string, approved bool) e
 			if err := cancelWorkflowTaskGroup(tx, task.TaskGroupID, task.TaskID, now); err != nil {
 				return err
 			}
-			return finishWorkflowInstance(tx, &instance, models.WorkflowInstanceStatusRejected, "rejected")
+			if err := terminateWorkflowNode(tx, nodeInstance.NodeInstanceID); err != nil {
+				return err
+			}
+			if err := supersedePlannedWorkflowNodes(tx, instance.InstanceID); err != nil {
+				return err
+			}
+			return finishWorkflowInstance(tx, &instance, models.WorkflowInstanceStatusRejected)
 		}
 
 		if task.ApprovalMode == "any" {
@@ -425,118 +792,15 @@ func handleWorkflowTask(taskID, userID string, comment *string, approved bool) e
 		if err := json.Unmarshal([]byte(instance.Variables), &variables); err != nil {
 			return fmt.Errorf("流程变量解析失败")
 		}
+		if err := completeWorkflowNode(tx, nodeInstance); err != nil {
+			return err
+		}
 		context := &workflowExecutionContext{graph: graph, instance: &instance, variables: variables}
-		return advanceWorkflowFromNode(tx, context, task.NodeID)
+		return rebuildWorkflowRouteAfterNode(tx, context, nodeInstance)
 	})
 }
 
-// advanceWorkflowFromNode 从指定节点沿唯一出线继续执行。
-func advanceWorkflowFromNode(tx *gorm.DB, context *workflowExecutionContext, nodeID string) error {
-	context.steps++
-	if context.steps > workflowMaxAutomaticSteps {
-		return fmt.Errorf("流程自动流转超过安全上限，请检查是否存在循环")
-	}
-	outgoing := workflowOutgoingEdges(context.graph, nodeID)
-	if len(outgoing) != 1 {
-		return fmt.Errorf("节点 %s 必须且只能有一条普通出线", nodeID)
-	}
-	return enterWorkflowNode(tx, context, outgoing[0].TargetNodeID)
-}
-
-// enterWorkflowNode 根据节点类型执行自动节点或创建人工任务。
-func enterWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeID string) error {
-	node := findWorkflowNode(context.graph, nodeID)
-	if node == nil {
-		return fmt.Errorf("流程节点 %s 不存在", nodeID)
-	}
-	nodeName := workflowNodeName(node)
-	switch node.Properties.NodeType {
-	case "end":
-		if err := createWorkflowRecord(tx, context.instance, nil, node, "complete", nil, nil, nil); err != nil {
-			return err
-		}
-		return finishWorkflowInstance(tx, context.instance, models.WorkflowInstanceStatusCompleted, "completed")
-	case "approve":
-		return createWorkflowApprovalTasks(tx, context, node)
-	case "copy":
-		if err := createWorkflowCopies(tx, context, node); err != nil {
-			return err
-		}
-		if err := createWorkflowRecord(tx, context.instance, nil, node, "copy", nil, nil, nil); err != nil {
-			return err
-		}
-		return advanceWorkflowFromNode(tx, context, node.ID)
-	case "condition":
-		edge, err := selectWorkflowConditionEdge(context.graph, node.ID, context.variables)
-		if err != nil {
-			return fmt.Errorf("条件节点 %s：%w", nodeName, err)
-		}
-		if err := createWorkflowRecord(tx, context.instance, nil, node, "branch", nil, nil, stringPtr(edge.ID)); err != nil {
-			return err
-		}
-		context.steps++
-		if context.steps > workflowMaxAutomaticSteps {
-			return fmt.Errorf("流程自动流转超过安全上限，请检查是否存在循环")
-		}
-		return enterWorkflowNode(tx, context, edge.TargetNodeID)
-	case "start":
-		return advanceWorkflowFromNode(tx, context, node.ID)
-	default:
-		return fmt.Errorf("不支持的流程节点类型：%s", node.Properties.NodeType)
-	}
-}
-
-// createWorkflowApprovalTasks 解析审批人并按同一任务组创建审批任务。
-func createWorkflowApprovalTasks(tx *gorm.DB, context *workflowExecutionContext, node *workflowNode) error {
-	users, err := resolveWorkflowActors(tx, context.instance, node.Properties.AssigneeType, node.Properties.AssigneeIDs)
-	if err != nil {
-		return fmt.Errorf("审批节点 %s：%w", workflowNodeName(node), err)
-	}
-	approvalMode := node.Properties.ApprovalMode
-	if approvalMode == "" {
-		approvalMode = "any"
-	}
-	if approvalMode != "any" && approvalMode != "all" {
-		return fmt.Errorf("审批方式必须是 any 或 all")
-	}
-	taskGroupID := utils.GenerateUUID()
-	now := time.Now()
-	for _, user := range users {
-		task := models.WfProcessTask{
-			TaskID: utils.GenerateUUID(), TaskGroupID: taskGroupID, InstanceID: context.instance.InstanceID,
-			NodeID: node.ID, NodeName: workflowNodeName(node), AssigneeID: user.UserID,
-			AssigneeName: workflowUserName(user), ApprovalMode: approvalMode,
-			Status: models.WorkflowTaskStatusPending, CreateDate: &now, UpdateDate: &now,
-		}
-		if err := tx.Create(&task).Error; err != nil {
-			return err
-		}
-	}
-	return createWorkflowRecord(tx, context.instance, nil, node, "pending", nil, nil, nil)
-}
-
-// createWorkflowCopies 解析抄送人并生成去重后的抄送记录。
-func createWorkflowCopies(tx *gorm.DB, context *workflowExecutionContext, node *workflowNode) error {
-	users, err := resolveWorkflowActors(tx, context.instance, node.Properties.CopyType, node.Properties.CopyIDs)
-	if err != nil {
-		return fmt.Errorf("抄送节点 %s：%w", workflowNodeName(node), err)
-	}
-	now := time.Now()
-	for _, user := range users {
-		copyItem := models.WfProcessCopy{
-			CopyID: utils.GenerateUUID(), InstanceID: context.instance.InstanceID,
-			NodeID: node.ID, NodeName: workflowNodeName(node), ReceiverID: user.UserID,
-			ReceiverName: workflowUserName(user), Status: models.WorkflowCopyStatusUnread,
-			CreateDate: &now,
-		}
-		if err := tx.Create(&copyItem).Error; err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// resolveWorkflowActors 按用户、角色或发起人主管解析启用用户。
+// resolveWorkflowActors 按用户、角色或发起人直属上级解析启用用户。
 func resolveWorkflowActors(tx *gorm.DB, instance *models.WfProcessInstance, actorType string, actorIDs []string) ([]models.SysUser, error) {
 	userIDs := make([]string, 0)
 	switch actorType {
@@ -556,7 +820,7 @@ func resolveWorkflowActors(tx *gorm.DB, instance *models.WfProcessInstance, acto
 			return nil, err
 		}
 		if starter.LeaderUserID == nil || *starter.LeaderUserID == "" {
-			return nil, fmt.Errorf("发起人未配置直属主管")
+			return nil, fmt.Errorf("发起人未配置直属上级")
 		}
 		userIDs = append(userIDs, *starter.LeaderUserID)
 	default:
@@ -614,8 +878,8 @@ func evaluateWorkflowEdge(edge workflowEdge, variables map[string]interface{}) (
 	if len(rules) == 0 {
 		return false, fmt.Errorf("分支 %s 没有结构化条件规则", edge.ID)
 	}
-	logic := edge.Properties.ConditionLogic
-	if logic == "or" {
+	switch edge.Properties.ConditionLogic {
+	case "or":
 		for _, rule := range rules {
 			matched, err := evaluateWorkflowRule(rule, variables)
 			if err != nil {
@@ -626,6 +890,9 @@ func evaluateWorkflowEdge(edge workflowEdge, variables map[string]interface{}) (
 			}
 		}
 		return false, nil
+	case "and":
+	default:
+		return false, fmt.Errorf("分支 %s 的规则关系无效", edge.ID)
 	}
 	for _, rule := range rules {
 		matched, err := evaluateWorkflowRule(rule, variables)
@@ -739,9 +1006,6 @@ func parseWorkflowGraph(flowData string) (*workflowGraph, error) {
 			if node.Properties.AssigneeType == "" {
 				return nil, fmt.Errorf("审批节点 %s 未配置审批人", workflowNodeName(node))
 			}
-			if node.Properties.ApprovalMode == "" {
-				node.Properties.ApprovalMode = "any"
-			}
 			if node.Properties.ApprovalMode != "any" && node.Properties.ApprovalMode != "all" {
 				return nil, fmt.Errorf("审批节点 %s 的审批方式无效", workflowNodeName(node))
 			}
@@ -776,7 +1040,7 @@ func validateWorkflowConditionEdges(node *workflowNode, edges []workflowEdge) er
 		if len(edge.Properties.ConditionRules) == 0 {
 			return fmt.Errorf("条件节点 %s 存在未配置结构化规则的分支", workflowNodeName(node))
 		}
-		if edge.Properties.ConditionLogic != "" && edge.Properties.ConditionLogic != "and" && edge.Properties.ConditionLogic != "or" {
+		if edge.Properties.ConditionLogic != "and" && edge.Properties.ConditionLogic != "or" {
 			return fmt.Errorf("条件节点 %s 存在无效的规则关系", workflowNodeName(node))
 		}
 		for _, rule := range edge.Properties.ConditionRules {
@@ -814,8 +1078,8 @@ func cancelWorkflowTaskGroup(tx *gorm.DB, taskGroupID, excludeTaskID string, now
 		Updates(map[string]interface{}{"status": models.WorkflowTaskStatusCanceled, "finish_date": now, "update_date": now}).Error
 }
 
-// finishWorkflowInstance 更新实例终态并记录实例结束事件。
-func finishWorkflowInstance(tx *gorm.DB, instance *models.WfProcessInstance, status int, action string) error {
+// finishWorkflowInstance 更新流程实例终态。
+func finishWorkflowInstance(tx *gorm.DB, instance *models.WfProcessInstance, status int) error {
 	now := time.Now()
 	if err := tx.Model(instance).Updates(map[string]interface{}{
 		"status": status, "end_date": now, "update_date": now,
@@ -824,25 +1088,29 @@ func finishWorkflowInstance(tx *gorm.DB, instance *models.WfProcessInstance, sta
 	}
 	instance.Status = status
 	instance.EndDate = &now
-	return createWorkflowRecord(tx, instance, nil, nil, action, nil, nil, nil)
+	return nil
 }
 
 // createWorkflowRecord 创建一条流程审计记录。
-func createWorkflowRecord(tx *gorm.DB, instance *models.WfProcessInstance, task *models.WfProcessTask, node *workflowNode, action string, operatorID, operatorName, comment *string) error {
+func createWorkflowRecord(tx *gorm.DB, instance *models.WfProcessInstance, task *models.WfProcessTask, nodeInstance *models.WfProcessNodeInstance, action string, operatorID, operatorName, comment *string) error {
 	now := time.Now()
 	record := models.WfProcessRecord{
 		RecordID: utils.GenerateUUID(), InstanceID: instance.InstanceID, Action: action,
 		OperatorID: operatorID, OperatorName: operatorName, Comment: comment, CreateDate: &now,
 	}
 	if task != nil {
+		record.NodeInstanceID = task.NodeInstanceID
 		record.TaskID = &task.TaskID
 		record.NodeID = &task.NodeID
 		record.NodeName = &task.NodeName
 	}
-	if node != nil {
-		record.NodeID = &node.ID
-		nodeName := workflowNodeName(node)
-		record.NodeName = &nodeName
+	if nodeInstance != nil {
+		record.NodeInstanceID = nodeInstance.NodeInstanceID
+		record.NodeID = &nodeInstance.NodeID
+		record.NodeName = &nodeInstance.NodeName
+	}
+	if record.NodeInstanceID == "" {
+		return fmt.Errorf("流程审计记录缺少节点实例")
 	}
 	return tx.Create(&record).Error
 }
@@ -885,20 +1153,10 @@ func findWorkflowNodeByType(graph *workflowGraph, nodeType string) *workflowNode
 	return nil
 }
 
-// workflowNodeName 兼容 LogicFlow 字符串和对象文本格式。
+// workflowNodeName 返回 LogicFlow 节点名称。
 func workflowNodeName(node *workflowNode) string {
-	if len(node.Text) == 0 {
-		return node.ID
-	}
-	var text string
-	if json.Unmarshal(node.Text, &text) == nil && text != "" {
-		return text
-	}
-	var textObject struct {
-		Value string `json:"value"`
-	}
-	if json.Unmarshal(node.Text, &textObject) == nil && textObject.Value != "" {
-		return textObject.Value
+	if node.Text.Value != "" {
+		return node.Text.Value
 	}
 	return node.ID
 }
@@ -989,20 +1247,68 @@ func buildWorkflowInstanceResponse(instance models.WfProcessInstance) (models.Wo
 		return models.WorkflowInstanceResponse{}, fmt.Errorf("流程实例 %s 的变量数据损坏", instance.InstanceID)
 	}
 	return models.WorkflowInstanceResponse{
-		InstanceID: instance.InstanceID, DefinitionID: instance.DefinitionID,
+		InstanceID: instance.InstanceID, InstanceNo: instance.InstanceNo, DefinitionID: instance.DefinitionID,
 		DefinitionKey: instance.DefinitionKey, DefinitionName: instance.DefinitionName,
 		DefinitionVersion: instance.DefinitionVersion, Title: instance.Title,
 		BusinessKey: instance.BusinessKey, StarterID: instance.StarterID,
 		StarterName: instance.StarterName, Status: strconv.Itoa(instance.Status),
-		Variables: variables, StartDate: models.TimeToStringPtr(instance.StartDate),
+		Variables: variables, FormSchema: instance.FormSnapshot, StartDate: models.TimeToStringPtr(instance.StartDate),
 		EndDate: models.TimeToStringPtr(instance.EndDate), CreateDate: models.TimeToStringPtr(instance.CreateDate),
 	}, nil
+}
+
+// workflowCategoryPrefix 返回流程分类对应的实例编号前缀。
+func workflowCategoryPrefix(category *string) (string, error) {
+	if category == nil {
+		return "", fmt.Errorf("流程定义未配置流程分类")
+	}
+	prefix, exists := workflowCategoryPrefixes[*category]
+	if !exists {
+		return "", fmt.Errorf("流程分类 %s 不支持生成实例编号", *category)
+	}
+	return prefix, nil
+}
+
+// nextWorkflowInstanceNo 在当前事务连接中原子递增分类的当日流水号。
+func nextWorkflowInstanceNo(tx *gorm.DB, prefix string, now time.Time) (string, error) {
+	businessDate := now.Format("2006-01-02")
+	result := tx.Exec(`
+INSERT INTO wf_process_instance_sequence (prefix, business_date, current_value, create_date, update_date)
+VALUES (?, ?, LAST_INSERT_ID(1), ?, ?)
+ON DUPLICATE KEY UPDATE
+  current_value = LAST_INSERT_ID(current_value + 1),
+  update_date = VALUES(update_date)`, prefix, businessDate, now, now)
+	if result.Error != nil {
+		return "", result.Error
+	}
+
+	var sequence int64
+	if err := tx.Raw("SELECT LAST_INSERT_ID()").Scan(&sequence).Error; err != nil {
+		return "", err
+	}
+	return formatWorkflowInstanceNo(prefix, now, sequence)
+}
+
+// formatWorkflowInstanceNo 组合分类前缀、业务日期和六位当日流水号。
+func formatWorkflowInstanceNo(prefix string, now time.Time, sequence int64) (string, error) {
+	if prefix == "" {
+		return "", fmt.Errorf("流程实例编号前缀不能为空")
+	}
+	if sequence < 1 || sequence > 999999 {
+		return "", fmt.Errorf("流程实例编号当日流水号超出范围")
+	}
+	return fmt.Sprintf("%s%s%06d", prefix, now.Format("20060102"), sequence), nil
+}
+
+// workflowInstanceTitle 生成流程实例标题。
+func workflowInstanceTitle(definitionName, starterName string) string {
+	return fmt.Sprintf("%s-%s", definitionName, starterName)
 }
 
 // buildWorkflowTaskResponse 组合任务及实例摘要。
 func buildWorkflowTaskResponse(task models.WfProcessTask, instance models.WfProcessInstance) models.WorkflowTaskResponse {
 	return models.WorkflowTaskResponse{
-		TaskID: task.TaskID, InstanceID: task.InstanceID, InstanceTitle: instance.Title,
+		TaskID: task.TaskID, TaskGroupID: task.TaskGroupID, NodeInstanceID: task.NodeInstanceID, InstanceID: task.InstanceID, InstanceTitle: instance.Title,
 		NodeID: task.NodeID, NodeName: task.NodeName, AssigneeID: task.AssigneeID,
 		AssigneeName: task.AssigneeName, ApprovalMode: task.ApprovalMode,
 		Status: strconv.Itoa(task.Status), Comment: task.Comment, StarterName: instance.StarterName,
@@ -1013,12 +1319,28 @@ func buildWorkflowTaskResponse(task models.WfProcessTask, instance models.WfProc
 // buildWorkflowCopyResponse 组合抄送及实例摘要。
 func buildWorkflowCopyResponse(copyItem models.WfProcessCopy, instance models.WfProcessInstance) models.WorkflowCopyResponse {
 	return models.WorkflowCopyResponse{
-		CopyID: copyItem.CopyID, InstanceID: copyItem.InstanceID, InstanceTitle: instance.Title,
+		CopyID: copyItem.CopyID, NodeInstanceID: copyItem.NodeInstanceID, InstanceID: copyItem.InstanceID, InstanceTitle: instance.Title,
 		NodeID: copyItem.NodeID, NodeName: copyItem.NodeName, ReceiverID: copyItem.ReceiverID,
 		ReceiverName: copyItem.ReceiverName, StarterName: instance.StarterName,
 		Status: strconv.Itoa(copyItem.Status), ReadDate: models.TimeToStringPtr(copyItem.ReadDate),
 		CreateDate: models.TimeToStringPtr(copyItem.CreateDate),
 	}
+}
+
+// buildWorkflowRecordResponse 转换节点操作审计记录。
+func buildWorkflowRecordResponse(record models.WfProcessRecord) models.WorkflowRecordResponse {
+	response := models.WorkflowRecordResponse{
+		RecordID: record.RecordID, NodeInstanceID: record.NodeInstanceID, TaskID: record.TaskID,
+		Action: record.Action, OperatorID: record.OperatorID, OperatorName: record.OperatorName,
+		Comment: record.Comment, CreateDate: models.TimeToStringPtr(record.CreateDate),
+	}
+	if record.NodeID != nil {
+		response.NodeID = record.NodeID
+	}
+	if record.NodeName != nil {
+		response.NodeName = record.NodeName
+	}
+	return response
 }
 
 // loadWorkflowInstancesByTasks 批量加载任务关联实例。

@@ -6006,6 +6006,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/workflow/definitions/{definitionId}/form": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "保存流程定义绑定的申请表单结构，并将流程恢复为草稿状态",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程定义"
+                ],
+                "summary": "保存流程表单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "流程定义ID",
+                        "name": "definitionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "流程表单结构",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateWorkflowFormRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数或表单配置错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/workflow/definitions/{definitionId}/publish": {
             "put": {
                 "security": [
@@ -6392,6 +6444,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/workflow/tasks/{taskId}/add-sign": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程任务"
+                ],
+                "summary": "并行加签",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "任务ID",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "加签信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WorkflowTaskAddSignRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "加签成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/workflow/tasks/{taskId}/approve": {
             "put": {
                 "security": [
@@ -6475,6 +6572,189 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "驳回成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/tasks/{taskId}/remove-sign": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程任务"
+                ],
+                "summary": "减签",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "任务ID",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "减签信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WorkflowTaskRemoveSignRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "减签成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/tasks/{taskId}/return": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程任务"
+                ],
+                "summary": "退回审批任务",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "任务ID",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "退回信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WorkflowTaskReturnRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "退回成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/tasks/{taskId}/return-targets": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程任务"
+                ],
+                "summary": "查询可退回节点",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "任务ID",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.WorkflowReturnTargetResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/tasks/{taskId}/transfer": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理-流程任务"
+                ],
+                "summary": "转交审批任务",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "任务ID",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "转交信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WorkflowTaskTransferRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "转交成功",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -7176,7 +7456,7 @@ const docTemplate = `{
                     "example": "普通用户"
                 },
                 "leaderUserId": {
-                    "description": "直属主管用户ID",
+                    "description": "直属上级用户ID",
                     "type": "string",
                     "example": "UUID"
                 },
@@ -7777,9 +8057,14 @@ const docTemplate = `{
                     "example": "/dashboard/analytics"
                 },
                 "leaderUserId": {
-                    "description": "直属主管用户ID",
+                    "description": "直属上级用户ID",
                     "type": "string",
                     "example": "UUID"
+                },
+                "leaderUserName": {
+                    "description": "直属上级用户姓名",
+                    "type": "string",
+                    "example": "张三"
                 },
                 "phone": {
                     "description": "手机号",
@@ -7941,8 +8226,7 @@ const docTemplate = `{
         "models.StartWorkflowInstanceRequest": {
             "type": "object",
             "required": [
-                "definitionId",
-                "title"
+                "definitionId"
             ],
             "properties": {
                 "businessKey": {
@@ -7954,11 +8238,6 @@ const docTemplate = `{
                     "description": "流程定义ID",
                     "type": "string",
                     "example": "UUID"
-                },
-                "title": {
-                    "description": "实例标题",
-                    "type": "string",
-                    "example": "采购申请审批"
                 },
                 "variables": {
                     "description": "条件判断业务变量",
@@ -8758,7 +9037,7 @@ const docTemplate = `{
                     "example": "普通用户"
                 },
                 "leaderUserId": {
-                    "description": "直属主管用户ID",
+                    "description": "直属上级用户ID",
                     "type": "string",
                     "example": "UUID"
                 },
@@ -8891,6 +9170,17 @@ const docTemplate = `{
                 }
             }
         },
+        "models.UpdateWorkflowFormRequest": {
+            "type": "object",
+            "required": [
+                "formSchema"
+            ],
+            "properties": {
+                "formSchema": {
+                    "$ref": "#/definitions/models.WorkflowFormSchema"
+                }
+            }
+        },
         "models.UpdateWorkflowStatusRequest": {
             "type": "object",
             "required": [
@@ -9002,6 +9292,9 @@ const docTemplate = `{
                 "nodeId": {
                     "type": "string"
                 },
+                "nodeInstanceId": {
+                    "type": "string"
+                },
                 "nodeName": {
                     "type": "string"
                 },
@@ -9065,6 +9358,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "{\"nodes\":[],\"edges\":[]}"
                 },
+                "formSchema": {
+                    "description": "表单结构JSON",
+                    "type": "string",
+                    "example": "{\"version\":1,\"fields\":[]}"
+                },
                 "remark": {
                     "description": "备注",
                     "type": "string",
@@ -9087,28 +9385,105 @@ const docTemplate = `{
                 }
             }
         },
+        "models.WorkflowFormField": {
+            "type": "object",
+            "properties": {
+                "columns": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WorkflowFormGridColumn"
+                    }
+                },
+                "defaultValue": {},
+                "id": {
+                    "type": "string",
+                    "example": "field_amount"
+                },
+                "key": {
+                    "type": "string",
+                    "example": "amount"
+                },
+                "label": {
+                    "type": "string",
+                    "example": "申请金额"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WorkflowFormOption"
+                    }
+                },
+                "placeholder": {
+                    "type": "string",
+                    "example": "请输入申请金额"
+                },
+                "required": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "type": {
+                    "type": "string",
+                    "example": "number"
+                }
+            }
+        },
+        "models.WorkflowFormGridColumn": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WorkflowFormField"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "column_left"
+                },
+                "span": {
+                    "type": "integer",
+                    "example": 12
+                }
+            }
+        },
+        "models.WorkflowFormOption": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string",
+                    "example": "高"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "high"
+                }
+            }
+        },
+        "models.WorkflowFormSchema": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WorkflowFormField"
+                    }
+                },
+                "version": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
         "models.WorkflowInstanceDetailResponse": {
             "type": "object",
             "properties": {
-                "copies": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.WorkflowCopyResponse"
-                    }
-                },
                 "instance": {
                     "$ref": "#/definitions/models.WorkflowInstanceResponse"
                 },
-                "records": {
+                "nodes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.WorkflowRecordResponse"
-                    }
-                },
-                "tasks": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.WorkflowTaskResponse"
+                        "$ref": "#/definitions/models.WorkflowNodeInstanceResponse"
                     }
                 }
             }
@@ -9137,7 +9512,13 @@ const docTemplate = `{
                 "endDate": {
                     "type": "string"
                 },
+                "formSchema": {
+                    "type": "string"
+                },
                 "instanceId": {
+                    "type": "string"
+                },
+                "instanceNo": {
                     "type": "string"
                 },
                 "startDate": {
@@ -9161,6 +9542,92 @@ const docTemplate = `{
                 }
             }
         },
+        "models.WorkflowNodeActorResponse": {
+            "type": "object",
+            "properties": {
+                "userId": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.WorkflowNodeInstanceResponse": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "actors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WorkflowNodeActorResponse"
+                    }
+                },
+                "approvalMode": {
+                    "type": "string"
+                },
+                "branchEdgeId": {
+                    "type": "string"
+                },
+                "copies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WorkflowCopyResponse"
+                    }
+                },
+                "durationSeconds": {
+                    "type": "integer",
+                    "example": 4500
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "fieldPermissions": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "nodeId": {
+                    "type": "string"
+                },
+                "nodeInstanceId": {
+                    "type": "string"
+                },
+                "nodeName": {
+                    "type": "string"
+                },
+                "nodeType": {
+                    "type": "string"
+                },
+                "records": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WorkflowRecordResponse"
+                    }
+                },
+                "routeVersion": {
+                    "type": "integer"
+                },
+                "sequence": {
+                    "type": "integer"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WorkflowTaskResponse"
+                    }
+                }
+            }
+        },
         "models.WorkflowRecordResponse": {
             "type": "object",
             "properties": {
@@ -9174,6 +9641,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "nodeId": {
+                    "type": "string"
+                },
+                "nodeInstanceId": {
                     "type": "string"
                 },
                 "nodeName": {
@@ -9193,6 +9663,17 @@ const docTemplate = `{
                 }
             }
         },
+        "models.WorkflowReturnTargetResponse": {
+            "type": "object",
+            "properties": {
+                "nodeId": {
+                    "type": "string"
+                },
+                "nodeName": {
+                    "type": "string"
+                }
+            }
+        },
         "models.WorkflowTaskActionRequest": {
             "type": "object",
             "properties": {
@@ -9200,6 +9681,51 @@ const docTemplate = `{
                     "description": "审批意见",
                     "type": "string",
                     "example": "同意"
+                },
+                "variables": {
+                    "description": "当前节点允许编辑的表单字段",
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "models.WorkflowTaskAddSignRequest": {
+            "type": "object",
+            "required": [
+                "userIds"
+            ],
+            "properties": {
+                "comment": {
+                    "description": "加签说明",
+                    "type": "string",
+                    "example": "增加财务复核"
+                },
+                "userIds": {
+                    "description": "加签用户ID",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.WorkflowTaskRemoveSignRequest": {
+            "type": "object",
+            "required": [
+                "taskIds"
+            ],
+            "properties": {
+                "comment": {
+                    "description": "减签说明",
+                    "type": "string",
+                    "example": "无需重复审批"
+                },
+                "taskIds": {
+                    "description": "待取消的任务ID",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -9233,6 +9759,9 @@ const docTemplate = `{
                 "nodeId": {
                     "type": "string"
                 },
+                "nodeInstanceId": {
+                    "type": "string"
+                },
                 "nodeName": {
                     "type": "string"
                 },
@@ -9242,8 +9771,44 @@ const docTemplate = `{
                 "status": {
                     "type": "string"
                 },
+                "taskGroupId": {
+                    "type": "string"
+                },
                 "taskId": {
                     "type": "string"
+                }
+            }
+        },
+        "models.WorkflowTaskReturnRequest": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "description": "退回说明",
+                    "type": "string",
+                    "example": "请补充材料"
+                },
+                "targetNodeId": {
+                    "description": "历史审批节点ID",
+                    "type": "string",
+                    "example": "approve_manager"
+                }
+            }
+        },
+        "models.WorkflowTaskTransferRequest": {
+            "type": "object",
+            "required": [
+                "targetUserId"
+            ],
+            "properties": {
+                "comment": {
+                    "description": "转交说明",
+                    "type": "string",
+                    "example": "请协助处理"
+                },
+                "targetUserId": {
+                    "description": "目标用户ID",
+                    "type": "string",
+                    "example": "UUID"
                 }
             }
         },

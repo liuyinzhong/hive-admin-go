@@ -529,7 +529,7 @@ definitions:
         example: 普通用户
         type: string
       leaderUserId:
-        description: 直属主管用户ID
+        description: 直属上级用户ID
         example: UUID
         type: string
       password:
@@ -996,8 +996,12 @@ definitions:
         example: /dashboard/analytics
         type: string
       leaderUserId:
-        description: 直属主管用户ID
+        description: 直属上级用户ID
         example: UUID
+        type: string
+      leaderUserName:
+        description: 直属上级用户姓名
+        example: 张三
         type: string
       phone:
         description: 手机号
@@ -1127,17 +1131,12 @@ definitions:
         description: 流程定义ID
         example: UUID
         type: string
-      title:
-        description: 实例标题
-        example: 采购申请审批
-        type: string
       variables:
         additionalProperties: true
         description: 条件判断业务变量
         type: object
     required:
     - definitionId
-    - title
     type: object
   models.StoryResponse:
     properties:
@@ -1741,7 +1740,7 @@ definitions:
         example: 普通用户
         type: string
       leaderUserId:
-        description: 直属主管用户ID
+        description: 直属上级用户ID
         example: UUID
         type: string
       phone:
@@ -1844,6 +1843,13 @@ definitions:
     - definitionKey
     - definitionName
     type: object
+  models.UpdateWorkflowFormRequest:
+    properties:
+      formSchema:
+        $ref: '#/definitions/models.WorkflowFormSchema'
+    required:
+    - formSchema
+    type: object
   models.UpdateWorkflowStatusRequest:
     properties:
       status:
@@ -1928,6 +1934,8 @@ definitions:
         type: string
       nodeId:
         type: string
+      nodeInstanceId:
+        type: string
       nodeName:
         type: string
       readDate:
@@ -1975,6 +1983,10 @@ definitions:
         description: LogicFlow画布JSON
         example: '{"nodes":[],"edges":[]}'
         type: string
+      formSchema:
+        description: 表单结构JSON
+        example: '{"version":1,"fields":[]}'
+        type: string
       remark:
         description: 备注
         example: 流程说明
@@ -1992,21 +2004,75 @@ definitions:
         example: 1
         type: integer
     type: object
+  models.WorkflowFormField:
+    properties:
+      columns:
+        items:
+          $ref: '#/definitions/models.WorkflowFormGridColumn'
+        type: array
+      defaultValue: {}
+      id:
+        example: field_amount
+        type: string
+      key:
+        example: amount
+        type: string
+      label:
+        example: 申请金额
+        type: string
+      options:
+        items:
+          $ref: '#/definitions/models.WorkflowFormOption'
+        type: array
+      placeholder:
+        example: 请输入申请金额
+        type: string
+      required:
+        example: true
+        type: boolean
+      type:
+        example: number
+        type: string
+    type: object
+  models.WorkflowFormGridColumn:
+    properties:
+      fields:
+        items:
+          $ref: '#/definitions/models.WorkflowFormField'
+        type: array
+      id:
+        example: column_left
+        type: string
+      span:
+        example: 12
+        type: integer
+    type: object
+  models.WorkflowFormOption:
+    properties:
+      label:
+        example: 高
+        type: string
+      value:
+        example: high
+        type: string
+    type: object
+  models.WorkflowFormSchema:
+    properties:
+      fields:
+        items:
+          $ref: '#/definitions/models.WorkflowFormField'
+        type: array
+      version:
+        example: 1
+        type: integer
+    type: object
   models.WorkflowInstanceDetailResponse:
     properties:
-      copies:
-        items:
-          $ref: '#/definitions/models.WorkflowCopyResponse'
-        type: array
       instance:
         $ref: '#/definitions/models.WorkflowInstanceResponse'
-      records:
+      nodes:
         items:
-          $ref: '#/definitions/models.WorkflowRecordResponse'
-        type: array
-      tasks:
-        items:
-          $ref: '#/definitions/models.WorkflowTaskResponse'
+          $ref: '#/definitions/models.WorkflowNodeInstanceResponse'
         type: array
     type: object
   models.WorkflowInstanceResponse:
@@ -2025,7 +2091,11 @@ definitions:
         type: integer
       endDate:
         type: string
+      formSchema:
+        type: string
       instanceId:
+        type: string
+      instanceNo:
         type: string
       startDate:
         type: string
@@ -2041,6 +2111,63 @@ definitions:
         additionalProperties: true
         type: object
     type: object
+  models.WorkflowNodeActorResponse:
+    properties:
+      userId:
+        type: string
+      userName:
+        type: string
+    type: object
+  models.WorkflowNodeInstanceResponse:
+    properties:
+      action:
+        type: string
+      actors:
+        items:
+          $ref: '#/definitions/models.WorkflowNodeActorResponse'
+        type: array
+      approvalMode:
+        type: string
+      branchEdgeId:
+        type: string
+      copies:
+        items:
+          $ref: '#/definitions/models.WorkflowCopyResponse'
+        type: array
+      durationSeconds:
+        example: 4500
+        type: integer
+      endDate:
+        type: string
+      fieldPermissions:
+        additionalProperties:
+          type: string
+        type: object
+      nodeId:
+        type: string
+      nodeInstanceId:
+        type: string
+      nodeName:
+        type: string
+      nodeType:
+        type: string
+      records:
+        items:
+          $ref: '#/definitions/models.WorkflowRecordResponse'
+        type: array
+      routeVersion:
+        type: integer
+      sequence:
+        type: integer
+      startDate:
+        type: string
+      status:
+        type: string
+      tasks:
+        items:
+          $ref: '#/definitions/models.WorkflowTaskResponse'
+        type: array
+    type: object
   models.WorkflowRecordResponse:
     properties:
       action:
@@ -2050,6 +2177,8 @@ definitions:
       createDate:
         type: string
       nodeId:
+        type: string
+      nodeInstanceId:
         type: string
       nodeName:
         type: string
@@ -2062,12 +2191,51 @@ definitions:
       taskId:
         type: string
     type: object
+  models.WorkflowReturnTargetResponse:
+    properties:
+      nodeId:
+        type: string
+      nodeName:
+        type: string
+    type: object
   models.WorkflowTaskActionRequest:
     properties:
       comment:
         description: 审批意见
         example: 同意
         type: string
+      variables:
+        additionalProperties: true
+        description: 当前节点允许编辑的表单字段
+        type: object
+    type: object
+  models.WorkflowTaskAddSignRequest:
+    properties:
+      comment:
+        description: 加签说明
+        example: 增加财务复核
+        type: string
+      userIds:
+        description: 加签用户ID
+        items:
+          type: string
+        type: array
+    required:
+    - userIds
+    type: object
+  models.WorkflowTaskRemoveSignRequest:
+    properties:
+      comment:
+        description: 减签说明
+        example: 无需重复审批
+        type: string
+      taskIds:
+        description: 待取消的任务ID
+        items:
+          type: string
+        type: array
+    required:
+    - taskIds
     type: object
   models.WorkflowTaskResponse:
     properties:
@@ -2089,14 +2257,42 @@ definitions:
         type: string
       nodeId:
         type: string
+      nodeInstanceId:
+        type: string
       nodeName:
         type: string
       starterName:
         type: string
       status:
         type: string
+      taskGroupId:
+        type: string
       taskId:
         type: string
+    type: object
+  models.WorkflowTaskReturnRequest:
+    properties:
+      comment:
+        description: 退回说明
+        example: 请补充材料
+        type: string
+      targetNodeId:
+        description: 历史审批节点ID
+        example: approve_manager
+        type: string
+    type: object
+  models.WorkflowTaskTransferRequest:
+    properties:
+      comment:
+        description: 转交说明
+        example: 请协助处理
+        type: string
+      targetUserId:
+        description: 目标用户ID
+        example: UUID
+        type: string
+    required:
+    - targetUserId
     type: object
   utils.PageResult:
     properties:
@@ -5803,6 +5999,39 @@ paths:
       summary: 保存流程画布
       tags:
       - 流程管理-流程定义
+  /workflow/definitions/{definitionId}/form:
+    put:
+      consumes:
+      - application/json
+      description: 保存流程定义绑定的申请表单结构，并将流程恢复为草稿状态
+      parameters:
+      - description: 流程定义ID
+        in: path
+        name: definitionId
+        required: true
+        type: string
+      - description: 流程表单结构
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateWorkflowFormRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数或表单配置错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 保存流程表单
+      tags:
+      - 流程管理-流程定义
   /workflow/definitions/{definitionId}/publish:
     put:
       consumes:
@@ -6072,6 +6301,34 @@ paths:
       summary: 获取我的待办和已办
       tags:
       - 流程管理-流程任务
+  /workflow/tasks/{taskId}/add-sign:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: 加签信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.WorkflowTaskAddSignRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 加签成功
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 并行加签
+      tags:
+      - 流程管理-流程任务
   /workflow/tasks/{taskId}/approve:
     put:
       consumes:
@@ -6126,6 +6383,117 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 审批驳回
+      tags:
+      - 流程管理-流程任务
+  /workflow/tasks/{taskId}/remove-sign:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: 减签信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.WorkflowTaskRemoveSignRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 减签成功
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 减签
+      tags:
+      - 流程管理-流程任务
+  /workflow/tasks/{taskId}/return:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: 退回信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.WorkflowTaskReturnRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 退回成功
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 退回审批任务
+      tags:
+      - 流程管理-流程任务
+  /workflow/tasks/{taskId}/return-targets:
+    get:
+      parameters:
+      - description: 任务ID
+        in: path
+        name: taskId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.WorkflowReturnTargetResponse'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 查询可退回节点
+      tags:
+      - 流程管理-流程任务
+  /workflow/tasks/{taskId}/transfer:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: path
+        name: taskId
+        required: true
+        type: string
+      - description: 转交信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.WorkflowTaskTransferRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 转交成功
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 转交审批任务
       tags:
       - 流程管理-流程任务
 schemes:

@@ -31,8 +31,8 @@ type ProfileResponse struct {
 	Desc           *string  `json:"desc" example:"超级管理员"`                     // 用户描述
 	Email          *string  `json:"email" example:"admin@example.com"`        // 邮箱
 	HomePath       *string  `json:"homePath" example:"/dashboard/analytics"`  // 首页路径
-	LeaderUserId   *string  `json:"leaderUserId" example:"UUID"`              // 直属主管用户ID
-	LeaderUserName *string  `json:"leaderUserName" example:"张三"`              // 直属主管用户姓名
+	LeaderUserId   *string  `json:"leaderUserId" example:"UUID"`              // 直属上级用户ID
+	LeaderUserName *string  `json:"leaderUserName" example:"张三"`              // 直属上级用户姓名
 	DeptTitles     []string `json:"deptTitles"`                               // 部门名称数组
 	DeptIds        []string `json:"deptIds"`                                  // 部门id数组
 	Status         int      `json:"status" example:"1"`                       // 用户状态 0=禁用 1=启用
@@ -111,7 +111,7 @@ type CreateUserRequest struct {
 	Desc         *string  `json:"desc" example:"普通用户"`                           // 描述
 	DeptIds      []string `json:"deptIds" example:"[\"UUID\"]"`                  // 部门id数组
 	RoleIds      []string `json:"roleIds" example:"[\"UUID\"]"`                  // 角色id数组
-	LeaderUserId *string  `json:"leaderUserId" example:"UUID"`                   // 直属主管用户ID
+	LeaderUserId *string  `json:"leaderUserId" example:"UUID"`                   // 直属上级用户ID
 }
 
 type UpdateUserRequest struct {
@@ -121,7 +121,7 @@ type UpdateUserRequest struct {
 	Desc         *string  `json:"desc" example:"普通用户"`                           // 描述
 	DeptIds      []string `json:"deptIds" example:"[\"UUID\"]"`                  // 部门id数组
 	RoleIds      []string `json:"roleIds" example:"[\"UUID\"]"`                  // 角色id数组
-	LeaderUserId *string  `json:"leaderUserId" example:"UUID"`                   // 直属主管用户ID
+	LeaderUserId *string  `json:"leaderUserId" example:"UUID"`                   // 直属上级用户ID
 }
 
 type UpdateUserStatusRequest struct {

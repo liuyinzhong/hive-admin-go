@@ -221,13 +221,13 @@ func (s *UserService) UpdateUser(userId string, req models.UpdateUserRequest) er
 	return nil
 }
 
-// validateLeaderUser 校验直属主管存在、启用且不能指向用户自身。
+// validateLeaderUser 校验直属上级存在、启用且不能指向用户自身。
 func (s *UserService) validateLeaderUser(userID string, leaderUserID *string) error {
 	if leaderUserID == nil || *leaderUserID == "" {
 		return nil
 	}
 	if userID == *leaderUserID {
-		return errors.New("直属主管不能选择用户本人")
+		return errors.New("直属上级不能选择用户本人")
 	}
 
 	var count int64
@@ -237,7 +237,7 @@ func (s *UserService) validateLeaderUser(userID string, leaderUserID *string) er
 		return err
 	}
 	if count == 0 {
-		return errors.New("直属主管不存在或已停用")
+		return errors.New("直属上级不存在或已停用")
 	}
 	return nil
 }
