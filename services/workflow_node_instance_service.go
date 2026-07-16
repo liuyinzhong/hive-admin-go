@@ -167,6 +167,20 @@ func resolveWorkflowNodeActorSnapshot(tx *gorm.DB, instance *models.WfProcessIns
 	return userIDs, userNames, nil
 }
 
+// validateWorkflowGraphApprovers 校验整张流程图中所有审批节点均可解析到启用用户。
+func validateWorkflowGraphApprovers(tx *gorm.DB, graph *workflowGraph, instance *models.WfProcessInstance) error {
+	for index := range graph.Nodes {
+		node := &graph.Nodes[index]
+		if node.Properties.NodeType != "approve" {
+			continue
+		}
+		if _, _, err := resolveWorkflowNodeActorSnapshot(tx, instance, node); err != nil {
+			return fmt.Errorf("节点 %s：%w", workflowNodeName(node), err)
+		}
+	}
+	return nil
+}
+
 // activateWorkflowNode 激活节点；自动节点在同一事务内继续推进。
 func activateWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeInstance *models.WfProcessNodeInstance) error {
 	now := time.Now()
@@ -184,7 +198,7 @@ func activateWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeIn
 		}
 		return completeAndAdvanceWorkflowNode(tx, context, nodeInstance)
 	case "approve":
-		return createWorkflowApprovalTasks(tx, context.instance, nodeInstance)
+		return createWorkflowApprovalTasks(tx, context, nodeInstance)
 	case "copy":
 		if err := createWorkflowCopies(tx, context.instance, nodeInstance); err != nil {
 			return err
@@ -273,7 +287,7 @@ func loadActiveWorkflowNode(tx *gorm.DB, nodeInstanceID string) (*models.WfProce
 	return &nodeInstance, nil
 }
 
-func createWorkflowApprovalTasks(tx *gorm.DB, instance *models.WfProcessInstance, nodeInstance *models.WfProcessNodeInstance) error {
+func createWorkflowApprovalTasks(tx *gorm.DB, context *workflowExecutionContext, nodeInstance *models.WfProcessNodeInstance) error {
 	actorIDs, actorNames, err := workflowNodeActors(nodeInstance)
 	if err != nil {
 		return err
@@ -281,20 +295,94 @@ func createWorkflowApprovalTasks(tx *gorm.DB, instance *models.WfProcessInstance
 	if nodeInstance.ApprovalMode == nil || (*nodeInstance.ApprovalMode != "any" && *nodeInstance.ApprovalMode != "all") {
 		return fmt.Errorf("审批节点 %s 的审批方式无效", nodeInstance.NodeName)
 	}
+	previousApprovedActorIDs, err := loadAdjacentApprovedWorkflowActorIDs(tx, nodeInstance)
+	if err != nil {
+		return err
+	}
+	autoApprovedActorIDs := adjacentWorkflowAutoApprovedActorIDs(*nodeInstance.ApprovalMode, actorIDs, previousApprovedActorIDs)
+	autoApprovedActorSet := make(map[string]bool, len(autoApprovedActorIDs))
+	for _, actorID := range autoApprovedActorIDs {
+		autoApprovedActorSet[actorID] = true
+	}
+
 	taskGroupID := utils.GenerateUUID()
 	now := time.Now()
+	tasks := make([]models.WfProcessTask, 0, len(actorIDs))
 	for index, actorID := range actorIDs {
 		task := models.WfProcessTask{
 			TaskID: utils.GenerateUUID(), TaskGroupID: taskGroupID, NodeInstanceID: nodeInstance.NodeInstanceID,
-			InstanceID: instance.InstanceID, NodeID: nodeInstance.NodeID, NodeName: nodeInstance.NodeName,
+			InstanceID: context.instance.InstanceID, NodeID: nodeInstance.NodeID, NodeName: nodeInstance.NodeName,
 			AssigneeID: actorID, AssigneeName: actorNames[index], ApprovalMode: *nodeInstance.ApprovalMode,
 			Status: models.WorkflowTaskStatusPending, CreateDate: &now, UpdateDate: &now,
 		}
-		if err := tx.Create(&task).Error; err != nil {
+		if autoApprovedActorSet[actorID] {
+			task.Status = models.WorkflowTaskStatusApproved
+			task.Comment = stringPtr("与上一审批节点审批人相同，系统自动通过")
+			task.FinishDate = &now
+		} else if *nodeInstance.ApprovalMode == "any" && len(autoApprovedActorIDs) > 0 {
+			task.Status = models.WorkflowTaskStatusCanceled
+			task.FinishDate = &now
+		}
+		tasks = append(tasks, task)
+	}
+	if err := tx.Create(&tasks).Error; err != nil {
+		return err
+	}
+	for index := range tasks {
+		task := &tasks[index]
+		if !autoApprovedActorSet[task.AssigneeID] {
+			continue
+		}
+		if err := createWorkflowRecord(tx, context.instance, task, nil, "autoApprove", &task.AssigneeID, &task.AssigneeName, task.Comment); err != nil {
 			return err
 		}
 	}
+	if len(autoApprovedActorIDs) > 0 && (*nodeInstance.ApprovalMode == "any" || len(autoApprovedActorIDs) == len(actorIDs)) {
+		return completeAndAdvanceWorkflowNode(tx, context, nodeInstance)
+	}
 	return nil
+}
+
+// loadAdjacentApprovedWorkflowActorIDs 返回实际执行顺序中相邻审批节点真正通过的人员。
+func loadAdjacentApprovedWorkflowActorIDs(tx *gorm.DB, nodeInstance *models.WfProcessNodeInstance) ([]string, error) {
+	var previousNode models.WfProcessNodeInstance
+	err := tx.Where("instance_id = ? AND sequence < ? AND status IN ?", nodeInstance.InstanceID, nodeInstance.Sequence, []int{models.WorkflowNodeStatusCompleted, models.WorkflowNodeStatusTerminated}).
+		Order("sequence DESC").First(&previousNode).Error
+	if err == gorm.ErrRecordNotFound {
+		return []string{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if previousNode.NodeType != "approve" || previousNode.Status != models.WorkflowNodeStatusCompleted {
+		return []string{}, nil
+	}
+	var actorIDs []string
+	if err := tx.Model(&models.WfProcessTask{}).
+		Where("node_instance_id = ? AND status = ? AND del_flag = 0", previousNode.NodeInstanceID, models.WorkflowTaskStatusApproved).
+		Order("create_date ASC").Pluck("assignee_id", &actorIDs).Error; err != nil {
+		return nil, err
+	}
+	return uniqueStrings(actorIDs), nil
+}
+
+// adjacentWorkflowAutoApprovedActorIDs 按当前审批方式筛选相邻节点可自动通过的人员。
+func adjacentWorkflowAutoApprovedActorIDs(approvalMode string, actorIDs, previousApprovedActorIDs []string) []string {
+	previousActorSet := make(map[string]bool, len(previousApprovedActorIDs))
+	for _, actorID := range previousApprovedActorIDs {
+		previousActorSet[actorID] = true
+	}
+	autoApprovedActorIDs := make([]string, 0)
+	for _, actorID := range actorIDs {
+		if !previousActorSet[actorID] {
+			continue
+		}
+		autoApprovedActorIDs = append(autoApprovedActorIDs, actorID)
+		if approvalMode == "any" {
+			break
+		}
+	}
+	return autoApprovedActorIDs
 }
 
 func createWorkflowCopies(tx *gorm.DB, instance *models.WfProcessInstance, nodeInstance *models.WfProcessNodeInstance) error {

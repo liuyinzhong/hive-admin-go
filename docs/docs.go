@@ -3569,6 +3569,654 @@ const docTemplate = `{
                 }
             }
         },
+        "/medical/departments": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-临床科室"
+                ],
+                "summary": "获取临床科室树",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "科室编码或名称",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态 0停用 1启用",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.MedicalDepartmentTreeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-临床科室"
+                ],
+                "summary": "创建临床科室",
+                "parameters": [
+                    {
+                        "description": "临床科室信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateMedicalDepartmentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-临床科室"
+                ],
+                "summary": "批量删除临床科室",
+                "parameters": [
+                    {
+                        "description": "临床科室ID列表",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/departments/all": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-临床科室"
+                ],
+                "summary": "获取所有启用的临床科室",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.MedicalDepartmentTreeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/departments/{departmentId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-临床科室"
+                ],
+                "summary": "获取临床科室详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "临床科室ID",
+                        "name": "departmentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.MedicalDepartmentTreeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-临床科室"
+                ],
+                "summary": "更新临床科室",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "临床科室ID",
+                        "name": "departmentId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "临床科室信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateMedicalDepartmentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/departments/{departmentId}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-临床科室"
+                ],
+                "summary": "更新临床科室状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "临床科室ID",
+                        "name": "departmentId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateMedicalStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/doctors": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-医生档案"
+                ],
+                "summary": "获取医生列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小，最大100",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "姓名、拼音或医生编号",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "临床科室ID",
+                        "name": "departmentId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "职称字典值",
+                        "name": "professionalTitle",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用工类型字典值",
+                        "name": "employmentType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态 0停用 1启用",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.DoctorResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-医生档案"
+                ],
+                "summary": "创建医生档案",
+                "parameters": [
+                    {
+                        "description": "医生档案",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveDoctorRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-医生档案"
+                ],
+                "summary": "批量删除医生档案",
+                "parameters": [
+                    {
+                        "description": "医生ID列表",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/doctors/all": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-医生档案"
+                ],
+                "summary": "获取所有启用医生选项",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.DoctorOptionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/doctors/{doctorId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-医生档案"
+                ],
+                "summary": "获取医生详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "医生ID",
+                        "name": "doctorId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.DoctorResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-医生档案"
+                ],
+                "summary": "更新医生档案",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "医生ID",
+                        "name": "doctorId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "医生档案",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveDoctorRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/doctors/{doctorId}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-医生档案"
+                ],
+                "summary": "更新医生状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "医生ID",
+                        "name": "doctorId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateMedicalStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/system/depts": {
             "get": {
                 "security": [
@@ -7431,6 +8079,35 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CreateMedicalDepartmentRequest": {
+            "type": "object",
+            "required": [
+                "departmentCode",
+                "departmentName"
+            ],
+            "properties": {
+                "departmentCode": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "departmentName": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "pid": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.CreateMenuRequest": {
             "type": "object",
             "required": [
@@ -7952,6 +8629,171 @@ const docTemplate = `{
                 }
             }
         },
+        "models.DoctorDepartmentResponse": {
+            "type": "object",
+            "properties": {
+                "appointmentEnabled": {
+                    "type": "integer"
+                },
+                "departmentCode": {
+                    "type": "string"
+                },
+                "departmentId": {
+                    "type": "string"
+                },
+                "departmentName": {
+                    "type": "string"
+                },
+                "departmentPosition": {
+                    "type": "string"
+                },
+                "doctorDepartmentId": {
+                    "type": "string"
+                },
+                "isPrimary": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.DoctorOptionResponse": {
+            "type": "object",
+            "properties": {
+                "doctorId": {
+                    "type": "string"
+                },
+                "doctorNo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "primaryDepartmentId": {
+                    "type": "string"
+                },
+                "primaryDepartmentName": {
+                    "type": "string"
+                },
+                "professionalTitle": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.DoctorResponse": {
+            "type": "object",
+            "properties": {
+                "administrativePosition": {
+                    "type": "string"
+                },
+                "appointmentEnabled": {
+                    "type": "integer"
+                },
+                "avatar": {
+                    "type": "string"
+                },
+                "birthDate": {
+                    "type": "string"
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "defaultVisitMinutes": {
+                    "type": "integer"
+                },
+                "departmentIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "departmentNames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "departments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DoctorDepartmentResponse"
+                    }
+                },
+                "departureDate": {
+                    "type": "string"
+                },
+                "doctorId": {
+                    "type": "string"
+                },
+                "doctorNo": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "employmentDate": {
+                    "type": "string"
+                },
+                "employmentType": {
+                    "type": "string"
+                },
+                "expertise": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "introduction": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namePinyin": {
+                    "type": "string"
+                },
+                "onlineConsultation": {
+                    "type": "integer"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "practiceStartDate": {
+                    "type": "string"
+                },
+                "primaryDepartmentId": {
+                    "type": "string"
+                },
+                "primaryDepartmentName": {
+                    "type": "string"
+                },
+                "professionalTitle": {
+                    "type": "string"
+                },
+                "profileVisible": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "updateDate": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
         "models.FileResponse": {
             "type": "object",
             "properties": {
@@ -8108,6 +8950,44 @@ const docTemplate = `{
                     "description": "JWT访问令牌",
                     "type": "string",
                     "example": "eyJhbGciOiJIUzI1NiIs..."
+                }
+            }
+        },
+        "models.MedicalDepartmentTreeResponse": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MedicalDepartmentTreeResponse"
+                    }
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "departmentCode": {
+                    "type": "string"
+                },
+                "departmentId": {
+                    "type": "string"
+                },
+                "departmentName": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "updateDate": {
+                    "type": "string"
                 }
             }
         },
@@ -8557,6 +9437,103 @@ const docTemplate = `{
                     "description": "状态 0=禁用 1=启用",
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "models.SaveDoctorRequest": {
+            "type": "object",
+            "required": [
+                "departmentIds",
+                "doctorNo",
+                "employmentType",
+                "name",
+                "primaryDepartmentId",
+                "professionalTitle"
+            ],
+            "properties": {
+                "administrativePosition": {
+                    "type": "string"
+                },
+                "appointmentEnabled": {
+                    "type": "integer"
+                },
+                "avatar": {
+                    "type": "string"
+                },
+                "birthDate": {
+                    "type": "string"
+                },
+                "defaultVisitMinutes": {
+                    "type": "integer"
+                },
+                "departmentIds": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "departureDate": {
+                    "type": "string"
+                },
+                "doctorNo": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "email": {
+                    "type": "string"
+                },
+                "employmentDate": {
+                    "type": "string"
+                },
+                "employmentType": {
+                    "type": "string"
+                },
+                "expertise": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "introduction": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "namePinyin": {
+                    "type": "string"
+                },
+                "onlineConsultation": {
+                    "type": "integer"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "practiceStartDate": {
+                    "type": "string"
+                },
+                "primaryDepartmentId": {
+                    "type": "string"
+                },
+                "professionalTitle": {
+                    "type": "string"
+                },
+                "profileVisible": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "string"
                 }
             }
         },
@@ -9035,6 +10012,47 @@ const docTemplate = `{
                     "description": "字典值",
                     "type": "string",
                     "example": "0"
+                }
+            }
+        },
+        "models.UpdateMedicalDepartmentRequest": {
+            "type": "object",
+            "required": [
+                "departmentCode",
+                "departmentName"
+            ],
+            "properties": {
+                "departmentCode": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "departmentName": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "pid": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.UpdateMedicalStatusRequest": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
                 }
             }
         },

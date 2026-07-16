@@ -169,6 +169,59 @@ func TestWorkflowNodeDisplayAction(t *testing.T) {
 	}
 }
 
+func TestAdjacentWorkflowAutoApprovedActorIDs(t *testing.T) {
+	tests := []struct {
+		name                     string
+		approvalMode             string
+		actorIDs                 []string
+		previousApprovedActorIDs []string
+		wantAutoApprovedActorIDs []string
+	}{
+		{
+			name:                     "single approver",
+			approvalMode:             "any",
+			actorIDs:                 []string{"manager"},
+			previousApprovedActorIDs: []string{"manager"},
+			wantAutoApprovedActorIDs: []string{"manager"},
+		},
+		{
+			name:                     "all approval partial overlap",
+			approvalMode:             "all",
+			actorIDs:                 []string{"manager", "finance", "director"},
+			previousApprovedActorIDs: []string{"manager", "director"},
+			wantAutoApprovedActorIDs: []string{"manager", "director"},
+		},
+		{
+			name:                     "any approval uses first overlap",
+			approvalMode:             "any",
+			actorIDs:                 []string{"manager", "director"},
+			previousApprovedActorIDs: []string{"director", "manager"},
+			wantAutoApprovedActorIDs: []string{"manager"},
+		},
+		{
+			name:                     "no overlap",
+			approvalMode:             "all",
+			actorIDs:                 []string{"finance"},
+			previousApprovedActorIDs: []string{"manager"},
+			wantAutoApprovedActorIDs: []string{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := adjacentWorkflowAutoApprovedActorIDs(tt.approvalMode, tt.actorIDs, tt.previousApprovedActorIDs)
+			if len(got) != len(tt.wantAutoApprovedActorIDs) {
+				t.Fatalf("adjacentWorkflowAutoApprovedActorIDs() = %#v, want %#v", got, tt.wantAutoApprovedActorIDs)
+			}
+			for index := range got {
+				if got[index] != tt.wantAutoApprovedActorIDs[index] {
+					t.Fatalf("adjacentWorkflowAutoApprovedActorIDs() = %#v, want %#v", got, tt.wantAutoApprovedActorIDs)
+				}
+			}
+		})
+	}
+}
+
 func TestWorkflowApprovalDurationSeconds(t *testing.T) {
 	startTime := time.Date(2026, time.July, 15, 8, 0, 0, 0, time.Local)
 	endTime := startTime.Add(75 * time.Minute)

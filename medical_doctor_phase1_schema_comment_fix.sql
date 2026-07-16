@@ -1,0 +1,72 @@
+-- 修复医生管理第一阶段表和字段中文注释。
+-- 原因：通过 Windows PowerShell 文本管道执行 UTF-8 SQL 时，中文曾被转换为问号。
+-- 当前医疗表为空；本脚本只重写相同字段定义的注释，不删除字段或数据。
+
+SET NAMES utf8mb4;
+
+ALTER TABLE `med_department`
+  MODIFY COLUMN `department_id` CHAR(36) NOT NULL COMMENT '临床科室ID',
+  MODIFY COLUMN `department_code` VARCHAR(32) NOT NULL COMMENT '临床科室编码',
+  MODIFY COLUMN `department_name` VARCHAR(64) NOT NULL COMMENT '临床科室名称',
+  MODIFY COLUMN `pid` CHAR(36) NULL COMMENT '上级临床科室ID',
+  MODIFY COLUMN `sort` INT NOT NULL DEFAULT 0 COMMENT '排序，升序',
+  MODIFY COLUMN `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态 0停用 1启用',
+  MODIFY COLUMN `remark` VARCHAR(512) NULL COMMENT '备注',
+  MODIFY COLUMN `creator_id` CHAR(36) NULL COMMENT '创建人ID',
+  MODIFY COLUMN `updater_id` CHAR(36) NULL COMMENT '更新人ID',
+  MODIFY COLUMN `create_date` DATETIME NOT NULL COMMENT '创建时间',
+  MODIFY COLUMN `update_date` DATETIME NOT NULL COMMENT '更新时间',
+  MODIFY COLUMN `del_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标记 0正常 1删除',
+  COMMENT = '临床科室';
+
+ALTER TABLE `med_doctor`
+  MODIFY COLUMN `doctor_id` CHAR(36) NOT NULL COMMENT '医生ID',
+  MODIFY COLUMN `doctor_no` VARCHAR(32) NOT NULL COMMENT '医生编号',
+  MODIFY COLUMN `user_id` CHAR(36) NULL COMMENT '绑定系统用户ID',
+  MODIFY COLUMN `name` VARCHAR(64) NOT NULL COMMENT '医生姓名',
+  MODIFY COLUMN `name_pinyin` VARCHAR(128) NULL COMMENT '姓名拼音',
+  MODIFY COLUMN `gender` VARCHAR(36) NULL COMMENT '性别，字典MED_DOCTOR_GENDER',
+  MODIFY COLUMN `birth_date` DATE NULL COMMENT '出生日期',
+  MODIFY COLUMN `phone` VARCHAR(20) NULL COMMENT '工作联系电话',
+  MODIFY COLUMN `email` VARCHAR(128) NULL COMMENT '工作邮箱',
+  MODIFY COLUMN `avatar` VARCHAR(512) NULL COMMENT '头像URL',
+  MODIFY COLUMN `professional_title` VARCHAR(36) NOT NULL COMMENT '职称，字典MED_DOCTOR_TITLE',
+  MODIFY COLUMN `administrative_position` VARCHAR(64) NULL COMMENT '行政职务',
+  MODIFY COLUMN `employment_type` VARCHAR(36) NOT NULL COMMENT '用工类型，字典MED_EMPLOYMENT_TYPE',
+  MODIFY COLUMN `practice_start_date` DATE NULL COMMENT '开始从业日期',
+  MODIFY COLUMN `employment_date` DATE NULL COMMENT '入职日期',
+  MODIFY COLUMN `departure_date` DATE NULL COMMENT '离职日期',
+  MODIFY COLUMN `expertise` TEXT NULL COMMENT '擅长领域',
+  MODIFY COLUMN `introduction` TEXT NULL COMMENT '医生简介',
+  MODIFY COLUMN `default_visit_minutes` SMALLINT NOT NULL DEFAULT 15 COMMENT '默认接诊分钟数',
+  MODIFY COLUMN `online_consultation` TINYINT NOT NULL DEFAULT 0 COMMENT '是否支持线上问诊 0否 1是',
+  MODIFY COLUMN `appointment_enabled` TINYINT NOT NULL DEFAULT 1 COMMENT '是否允许预约 0否 1是',
+  MODIFY COLUMN `profile_visible` TINYINT NOT NULL DEFAULT 1 COMMENT '是否公开展示 0否 1是',
+  MODIFY COLUMN `sort` INT NOT NULL DEFAULT 0 COMMENT '展示排序，升序',
+  MODIFY COLUMN `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态 0停用 1启用',
+  MODIFY COLUMN `remark` VARCHAR(512) NULL COMMENT '内部备注',
+  MODIFY COLUMN `creator_id` CHAR(36) NULL COMMENT '创建人ID',
+  MODIFY COLUMN `updater_id` CHAR(36) NULL COMMENT '更新人ID',
+  MODIFY COLUMN `create_date` DATETIME NOT NULL COMMENT '创建时间',
+  MODIFY COLUMN `update_date` DATETIME NOT NULL COMMENT '更新时间',
+  MODIFY COLUMN `del_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标记 0正常 1删除',
+  COMMENT = '医生基础档案';
+
+ALTER TABLE `med_doctor_department`
+  MODIFY COLUMN `doctor_department_id` CHAR(36) NOT NULL COMMENT '医生出诊科室关系ID',
+  MODIFY COLUMN `doctor_id` CHAR(36) NOT NULL COMMENT '医生ID',
+  MODIFY COLUMN `department_id` CHAR(36) NOT NULL COMMENT '临床科室ID',
+  MODIFY COLUMN `is_primary` TINYINT NOT NULL DEFAULT 0 COMMENT '是否主科室 0否 1是',
+  MODIFY COLUMN `department_position` VARCHAR(64) NULL COMMENT '医生在该科室的职务',
+  MODIFY COLUMN `appointment_enabled` TINYINT NOT NULL DEFAULT 1 COMMENT '该科室是否允许预约 0否 1是',
+  MODIFY COLUMN `valid_from` DATE NULL COMMENT '关系生效日期',
+  MODIFY COLUMN `valid_to` DATE NULL COMMENT '关系失效日期',
+  MODIFY COLUMN `sort` INT NOT NULL DEFAULT 0 COMMENT '排序，升序',
+  MODIFY COLUMN `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态 0停用 1启用',
+  MODIFY COLUMN `creator_id` CHAR(36) NULL COMMENT '创建人ID',
+  MODIFY COLUMN `updater_id` CHAR(36) NULL COMMENT '更新人ID',
+  MODIFY COLUMN `create_date` DATETIME NOT NULL COMMENT '创建时间',
+  MODIFY COLUMN `update_date` DATETIME NOT NULL COMMENT '更新时间',
+  MODIFY COLUMN `del_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标记 0正常 1删除',
+  COMMENT = '医生出诊科室';
+

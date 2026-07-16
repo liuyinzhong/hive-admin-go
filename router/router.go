@@ -16,6 +16,7 @@ func SetupRouter() *gin.Engine {
 	devController := controllers.DevController{}
 	workflowController := controllers.WorkflowController{}
 	formSchemaController := controllers.FormSchemaController{}
+	medicalController := controllers.NewMedicalController()
 
 	api := router.Group("/api")
 	{
@@ -172,6 +173,31 @@ func SetupRouter() *gin.Engine {
 				schemas.GET("/:formSchemaId", formSchemaController.GetFormSchema)
 				schemas.PUT("/:formSchemaId", formSchemaController.UpdateFormSchema)
 				schemas.DELETE("", formSchemaController.DeleteFormSchemas)
+			}
+		}
+
+		medical := api.Group("/medical", middleware.AuthMiddleware())
+		{
+			departments := medical.Group("/departments")
+			{
+				departments.GET("", medicalController.GetMedicalDepartmentTree)
+				departments.GET("/all", medicalController.GetAllMedicalDepartments)
+				departments.POST("", medicalController.CreateMedicalDepartment)
+				departments.GET("/:departmentId", medicalController.GetMedicalDepartmentDetail)
+				departments.PUT("/:departmentId", medicalController.UpdateMedicalDepartment)
+				departments.PUT("/:departmentId/status", medicalController.UpdateMedicalDepartmentStatus)
+				departments.DELETE("", medicalController.DeleteMedicalDepartments)
+			}
+
+			doctors := medical.Group("/doctors")
+			{
+				doctors.GET("", medicalController.GetDoctorList)
+				doctors.GET("/all", medicalController.GetAllDoctors)
+				doctors.POST("", medicalController.CreateDoctor)
+				doctors.GET("/:doctorId", medicalController.GetDoctorDetail)
+				doctors.PUT("/:doctorId", medicalController.UpdateDoctor)
+				doctors.PUT("/:doctorId/status", medicalController.UpdateDoctorStatus)
+				doctors.DELETE("", medicalController.DeleteDoctors)
 			}
 		}
 

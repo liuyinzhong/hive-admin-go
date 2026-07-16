@@ -155,6 +155,9 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 			UpdateDate:        &now,
 			DelFlag:           0,
 		}
+		if err := validateWorkflowGraphApprovers(tx, graph, &instance); err != nil {
+			return err
+		}
 		if err := tx.Create(&instance).Error; err != nil {
 			return err
 		}

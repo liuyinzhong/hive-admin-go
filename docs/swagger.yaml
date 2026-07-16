@@ -300,6 +300,26 @@ definitions:
     - label
     - type
     type: object
+  models.CreateMedicalDepartmentRequest:
+    properties:
+      departmentCode:
+        maxLength: 32
+        type: string
+      departmentName:
+        maxLength: 64
+        type: string
+      pid:
+        type: string
+      remark:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: integer
+    required:
+    - departmentCode
+    - departmentName
+    type: object
   models.CreateMenuRequest:
     properties:
       authCode:
@@ -697,6 +717,115 @@ definitions:
         example: "0"
         type: string
     type: object
+  models.DoctorDepartmentResponse:
+    properties:
+      appointmentEnabled:
+        type: integer
+      departmentCode:
+        type: string
+      departmentId:
+        type: string
+      departmentName:
+        type: string
+      departmentPosition:
+        type: string
+      doctorDepartmentId:
+        type: string
+      isPrimary:
+        type: integer
+      status:
+        type: integer
+    type: object
+  models.DoctorOptionResponse:
+    properties:
+      doctorId:
+        type: string
+      doctorNo:
+        type: string
+      name:
+        type: string
+      primaryDepartmentId:
+        type: string
+      primaryDepartmentName:
+        type: string
+      professionalTitle:
+        type: string
+    type: object
+  models.DoctorResponse:
+    properties:
+      administrativePosition:
+        type: string
+      appointmentEnabled:
+        type: integer
+      avatar:
+        type: string
+      birthDate:
+        type: string
+      createDate:
+        type: string
+      defaultVisitMinutes:
+        type: integer
+      departmentIds:
+        items:
+          type: string
+        type: array
+      departmentNames:
+        items:
+          type: string
+        type: array
+      departments:
+        items:
+          $ref: '#/definitions/models.DoctorDepartmentResponse'
+        type: array
+      departureDate:
+        type: string
+      doctorId:
+        type: string
+      doctorNo:
+        type: string
+      email:
+        type: string
+      employmentDate:
+        type: string
+      employmentType:
+        type: string
+      expertise:
+        type: string
+      gender:
+        type: string
+      introduction:
+        type: string
+      name:
+        type: string
+      namePinyin:
+        type: string
+      onlineConsultation:
+        type: integer
+      phone:
+        type: string
+      practiceStartDate:
+        type: string
+      primaryDepartmentId:
+        type: string
+      primaryDepartmentName:
+        type: string
+      professionalTitle:
+        type: string
+      profileVisible:
+        type: integer
+      remark:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: integer
+      updateDate:
+        type: string
+      userId:
+        type: string
+      userName:
+        type: string
+    type: object
   models.FileResponse:
     properties:
       createDate:
@@ -815,6 +944,31 @@ definitions:
       accessToken:
         description: JWT访问令牌
         example: eyJhbGciOiJIUzI1NiIs...
+        type: string
+    type: object
+  models.MedicalDepartmentTreeResponse:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/models.MedicalDepartmentTreeResponse'
+        type: array
+      createDate:
+        type: string
+      departmentCode:
+        type: string
+      departmentId:
+        type: string
+      departmentName:
+        type: string
+      pid:
+        type: string
+      remark:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: integer
+      updateDate:
         type: string
     type: object
   models.MenuMeta:
@@ -1160,6 +1314,73 @@ definitions:
         description: 状态 0=禁用 1=启用
         example: 1
         type: integer
+    type: object
+  models.SaveDoctorRequest:
+    properties:
+      administrativePosition:
+        type: string
+      appointmentEnabled:
+        type: integer
+      avatar:
+        type: string
+      birthDate:
+        type: string
+      defaultVisitMinutes:
+        type: integer
+      departmentIds:
+        items:
+          type: string
+        minItems: 1
+        type: array
+      departureDate:
+        type: string
+      doctorNo:
+        maxLength: 32
+        type: string
+      email:
+        type: string
+      employmentDate:
+        type: string
+      employmentType:
+        type: string
+      expertise:
+        type: string
+      gender:
+        type: string
+      introduction:
+        type: string
+      name:
+        maxLength: 64
+        type: string
+      namePinyin:
+        type: string
+      onlineConsultation:
+        type: integer
+      phone:
+        type: string
+      practiceStartDate:
+        type: string
+      primaryDepartmentId:
+        type: string
+      professionalTitle:
+        type: string
+      profileVisible:
+        type: integer
+      remark:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: integer
+      userId:
+        type: string
+    required:
+    - departmentIds
+    - doctorNo
+    - employmentType
+    - name
+    - primaryDepartmentId
+    - professionalTitle
     type: object
   models.StartWorkflowInstanceRequest:
     properties:
@@ -1529,6 +1750,34 @@ definitions:
     required:
     - label
     - type
+    type: object
+  models.UpdateMedicalDepartmentRequest:
+    properties:
+      departmentCode:
+        maxLength: 32
+        type: string
+      departmentName:
+        maxLength: 64
+        type: string
+      pid:
+        type: string
+      remark:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: integer
+    required:
+    - departmentCode
+    - departmentName
+    type: object
+  models.UpdateMedicalStatusRequest:
+    properties:
+      status:
+        enum:
+        - 0
+        - 1
+        type: integer
     type: object
   models.UpdateMenuRequest:
     properties:
@@ -4538,6 +4787,389 @@ paths:
       summary: 获取全部表单 Schema
       tags:
       - 表单管理
+  /medical/departments:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 临床科室ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 批量删除临床科室
+      tags:
+      - 医疗管理-临床科室
+    get:
+      parameters:
+      - description: 科室编码或名称
+        in: query
+        name: keyword
+        type: string
+      - description: 状态 0停用 1启用
+        in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.MedicalDepartmentTreeResponse'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取临床科室树
+      tags:
+      - 医疗管理-临床科室
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 临床科室信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMedicalDepartmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建临床科室
+      tags:
+      - 医疗管理-临床科室
+  /medical/departments/{departmentId}:
+    get:
+      parameters:
+      - description: 临床科室ID
+        in: path
+        name: departmentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.MedicalDepartmentTreeResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取临床科室详情
+      tags:
+      - 医疗管理-临床科室
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 临床科室ID
+        in: path
+        name: departmentId
+        required: true
+        type: string
+      - description: 临床科室信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateMedicalDepartmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新临床科室
+      tags:
+      - 医疗管理-临床科室
+  /medical/departments/{departmentId}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 临床科室ID
+        in: path
+        name: departmentId
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateMedicalStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新临床科室状态
+      tags:
+      - 医疗管理-临床科室
+  /medical/departments/all:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.MedicalDepartmentTreeResponse'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有启用的临床科室
+      tags:
+      - 医疗管理-临床科室
+  /medical/doctors:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 医生ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 批量删除医生档案
+      tags:
+      - 医疗管理-医生档案
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 姓名、拼音或医生编号
+        in: query
+        name: keyword
+        type: string
+      - description: 临床科室ID
+        in: query
+        name: departmentId
+        type: string
+      - description: 职称字典值
+        in: query
+        name: professionalTitle
+        type: string
+      - description: 用工类型字典值
+        in: query
+        name: employmentType
+        type: string
+      - description: 状态 0停用 1启用
+        in: query
+        name: status
+        type: integer
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.DoctorResponse'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取医生列表
+      tags:
+      - 医疗管理-医生档案
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 医生档案
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveDoctorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建医生档案
+      tags:
+      - 医疗管理-医生档案
+  /medical/doctors/{doctorId}:
+    get:
+      parameters:
+      - description: 医生ID
+        in: path
+        name: doctorId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DoctorResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取医生详情
+      tags:
+      - 医疗管理-医生档案
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 医生ID
+        in: path
+        name: doctorId
+        required: true
+        type: string
+      - description: 医生档案
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveDoctorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新医生档案
+      tags:
+      - 医疗管理-医生档案
+  /medical/doctors/{doctorId}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 医生ID
+        in: path
+        name: doctorId
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateMedicalStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新医生状态
+      tags:
+      - 医疗管理-医生档案
+  /medical/doctors/all:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.DoctorOptionResponse'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有启用医生选项
+      tags:
+      - 医疗管理-医生档案
   /system/depts:
     delete:
       consumes:
