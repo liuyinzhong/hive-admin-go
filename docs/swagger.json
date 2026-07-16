@@ -3285,6 +3285,288 @@
                 }
             }
         },
+        "/form/schemas": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "表单管理"
+                ],
+                "summary": "获取表单 Schema 列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Schema 标识",
+                        "name": "schemaKey",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Schema 名称",
+                        "name": "schemaName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "分类",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/utils.PaginationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "表单管理"
+                ],
+                "summary": "创建表单 Schema",
+                "parameters": [
+                    {
+                        "description": "表单 Schema",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpsertFormSchemaRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "表单管理"
+                ],
+                "summary": "删除表单 Schema",
+                "parameters": [
+                    {
+                        "description": "表单 Schema ID 数组",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/form/schemas/all": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "表单管理"
+                ],
+                "summary": "获取全部表单 Schema",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.FormSchemaResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/form/schemas/{formSchemaId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "表单管理"
+                ],
+                "summary": "获取表单 Schema 详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "表单 Schema ID",
+                        "name": "formSchemaId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.FormSchemaResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "表单管理"
+                ],
+                "summary": "更新表单 Schema",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "表单 Schema ID",
+                        "name": "formSchemaId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "表单 Schema",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpsertFormSchemaRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/system/depts": {
             "get": {
                 "security": [
@@ -6004,14 +6286,14 @@
                 }
             }
         },
-        "/workflow/definitions/{definitionId}/form": {
+        "/workflow/definitions/{definitionId}/form-schema": {
             "put": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "保存流程定义绑定的申请表单结构，并将流程恢复为草稿状态",
+                "description": "保存流程定义关联的表单 Schema ID，并将流程恢复为草稿状态",
                 "consumes": [
                     "application/json"
                 ],
@@ -6021,7 +6303,7 @@
                 "tags": [
                     "流程管理-流程定义"
                 ],
-                "summary": "保存流程表单",
+                "summary": "绑定流程表单 Schema",
                 "parameters": [
                     {
                         "type": "string",
@@ -6031,12 +6313,12 @@
                         "required": true
                     },
                     {
-                        "description": "流程表单结构",
+                        "description": "表单 Schema ID",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdateWorkflowFormRequest"
+                            "$ref": "#/definitions/models.UpdateWorkflowFormSchemaRequest"
                         }
                     }
                 ],
@@ -7743,6 +8025,61 @@
                 }
             }
         },
+        "models.FormSchemaResponse": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "example": "workflow"
+                },
+                "createDate": {
+                    "type": "string",
+                    "example": "2026-07-15 15:30:26"
+                },
+                "creatorId": {
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "creatorName": {
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "formSchemaId": {
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "layout": {
+                    "type": "string",
+                    "example": "single"
+                },
+                "remark": {
+                    "type": "string",
+                    "example": "报销流程申请表"
+                },
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "schemaKey": {
+                    "type": "string",
+                    "example": "expense_apply"
+                },
+                "schemaName": {
+                    "type": "string",
+                    "example": "报销申请表"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "updateDate": {
+                    "type": "string",
+                    "example": "2026-07-15 15:30:26"
+                }
+            }
+        },
         "models.LoginRequest": {
             "type": "object",
             "required": [
@@ -9168,14 +9505,15 @@
                 }
             }
         },
-        "models.UpdateWorkflowFormRequest": {
+        "models.UpdateWorkflowFormSchemaRequest": {
             "type": "object",
             "required": [
-                "formSchema"
+                "formSchemaId"
             ],
             "properties": {
-                "formSchema": {
-                    "$ref": "#/definitions/models.WorkflowFormSchema"
+                "formSchemaId": {
+                    "type": "string",
+                    "example": "UUID"
                 }
             }
         },
@@ -9189,6 +9527,47 @@
                     "description": "流程状态：0草稿 1已发布 2已停用",
                     "type": "string",
                     "example": "2"
+                }
+            }
+        },
+        "models.UpsertFormSchemaRequest": {
+            "type": "object",
+            "required": [
+                "layout",
+                "schema",
+                "schemaKey",
+                "schemaName"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "example": "workflow"
+                },
+                "layout": {
+                    "type": "string",
+                    "example": "single"
+                },
+                "remark": {
+                    "type": "string",
+                    "example": "报销流程申请表"
+                },
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "schemaKey": {
+                    "type": "string",
+                    "example": "expense_apply"
+                },
+                "schemaName": {
+                    "type": "string",
+                    "example": "报销申请表"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "1"
                 }
             }
         },
@@ -9356,10 +9735,10 @@
                     "type": "string",
                     "example": "{\"nodes\":[],\"edges\":[]}"
                 },
-                "formSchema": {
-                    "description": "表单结构JSON",
+                "formSchemaId": {
+                    "description": "关联表单Schema ID",
                     "type": "string",
-                    "example": "{\"version\":1,\"fields\":[]}"
+                    "example": "UUID"
                 },
                 "remark": {
                     "description": "备注",
@@ -9378,95 +9757,6 @@
                 },
                 "version": {
                     "description": "发布版本号",
-                    "type": "integer",
-                    "example": 1
-                }
-            }
-        },
-        "models.WorkflowFormField": {
-            "type": "object",
-            "properties": {
-                "columns": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.WorkflowFormGridColumn"
-                    }
-                },
-                "defaultValue": {},
-                "id": {
-                    "type": "string",
-                    "example": "field_amount"
-                },
-                "key": {
-                    "type": "string",
-                    "example": "amount"
-                },
-                "label": {
-                    "type": "string",
-                    "example": "申请金额"
-                },
-                "options": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.WorkflowFormOption"
-                    }
-                },
-                "placeholder": {
-                    "type": "string",
-                    "example": "请输入申请金额"
-                },
-                "required": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "type": {
-                    "type": "string",
-                    "example": "number"
-                }
-            }
-        },
-        "models.WorkflowFormGridColumn": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.WorkflowFormField"
-                    }
-                },
-                "id": {
-                    "type": "string",
-                    "example": "column_left"
-                },
-                "span": {
-                    "type": "integer",
-                    "example": 12
-                }
-            }
-        },
-        "models.WorkflowFormOption": {
-            "type": "object",
-            "properties": {
-                "label": {
-                    "type": "string",
-                    "example": "高"
-                },
-                "value": {
-                    "type": "string",
-                    "example": "high"
-                }
-            }
-        },
-        "models.WorkflowFormSchema": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.WorkflowFormField"
-                    }
-                },
-                "version": {
                     "type": "integer",
                     "example": 1
                 }
@@ -9510,8 +9800,15 @@
                 "endDate": {
                     "type": "string"
                 },
+                "formLayout": {
+                    "type": "string",
+                    "example": "single"
+                },
                 "formSchema": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "instanceId": {
                     "type": "string"

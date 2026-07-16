@@ -100,12 +100,32 @@ func TestWorkflowInstanceTitle(t *testing.T) {
 }
 
 func TestValidateWorkflowTaskVariableChanges(t *testing.T) {
-	permissions := map[string]string{"amount": "editable", "remark": "readonly"}
+	permissions := map[string]string{"amount": "editable", "applicant.name": "editable", "applicant.dept": "readonly", "remark": "readonly"}
 	if err := validateWorkflowTaskVariableChanges(permissions, map[string]interface{}{"amount": 100}); err != nil {
 		t.Fatalf("validateWorkflowTaskVariableChanges() error = %v", err)
 	}
 	if err := validateWorkflowTaskVariableChanges(permissions, map[string]interface{}{"remark": "changed"}); err == nil || !strings.Contains(err.Error(), "不可编辑") {
 		t.Fatalf("validateWorkflowTaskVariableChanges() readonly error = %v", err)
+	}
+	if err := validateWorkflowTaskVariableChanges(permissions, map[string]interface{}{"applicant": map[string]interface{}{"name": "王五"}}); err != nil {
+		t.Fatalf("validateWorkflowTaskVariableChanges() nested error = %v", err)
+	}
+	if err := validateWorkflowTaskVariableChanges(permissions, map[string]interface{}{"applicant": map[string]interface{}{"dept": "财务部"}}); err == nil || !strings.Contains(err.Error(), "applicant.dept") {
+		t.Fatalf("validateWorkflowTaskVariableChanges() nested readonly error = %v", err)
+	}
+}
+
+func TestMergeWorkflowVariableChanges(t *testing.T) {
+	variables := map[string]interface{}{
+		"applicant": map[string]interface{}{"name": "李四", "dept": "研发部"},
+		"amount":    float64(100),
+	}
+	mergeWorkflowVariableChanges(variables, map[string]interface{}{
+		"applicant": map[string]interface{}{"name": "王五"},
+	})
+	applicant := variables["applicant"].(map[string]interface{})
+	if applicant["name"] != "王五" || applicant["dept"] != "研发部" {
+		t.Fatalf("mergeWorkflowVariableChanges() = %#v", variables)
 	}
 }
 

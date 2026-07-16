@@ -191,25 +191,25 @@ func (wc *WorkflowController) UpdateWorkflowCanvas(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
 }
 
-// UpdateWorkflowForm 保存流程申请表单结构。
-// @Summary 保存流程表单
-// @Description 保存流程定义绑定的申请表单结构，并将流程恢复为草稿状态
+// UpdateWorkflowFormSchema 绑定流程使用的独立表单 Schema。
+// @Summary 绑定流程表单 Schema
+// @Description 保存流程定义关联的表单 Schema ID，并将流程恢复为草稿状态
 // @Tags 流程管理-流程定义
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param definitionId path string true "流程定义ID"
-// @Param request body models.UpdateWorkflowFormRequest true "流程表单结构"
+// @Param request body models.UpdateWorkflowFormSchemaRequest true "表单 Schema ID"
 // @Success 200 {object} models.Response "保存成功"
 // @Failure 400 {object} models.Response "参数或表单配置错误"
-// @Router /workflow/definitions/{definitionId}/form [put]
-func (wc *WorkflowController) UpdateWorkflowForm(c *gin.Context) {
-	var req models.UpdateWorkflowFormRequest
+// @Router /workflow/definitions/{definitionId}/form-schema [put]
+func (wc *WorkflowController) UpdateWorkflowFormSchema(c *gin.Context) {
+	var req models.UpdateWorkflowFormSchemaRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	if err := services.UpdateWorkflowForm(c.Param("definitionId"), &req.FormSchema); err != nil {
+	if err := services.UpdateWorkflowFormSchema(c.Param("definitionId"), req.FormSchemaID); err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
 		return
 	}

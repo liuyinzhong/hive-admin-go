@@ -188,11 +188,21 @@ func PublishWorkflowDefinition(definitionID string) error {
 	if err != nil {
 		return err
 	}
-	formSchema, err := parseWorkflowFormSchema(definition.FormSchema)
+	formFields, _, _, err := loadWorkflowFormSchema(database.DB, definition.FormSchemaID, true)
 	if err != nil {
 		return err
 	}
-	if err := validateWorkflowConditionFields(graph, formSchema); err != nil {
+	hasValueField := false
+	for _, field := range formFields {
+		if formComponentHasValue(field.Component) {
+			hasValueField = true
+			break
+		}
+	}
+	if !hasValueField {
+		return fmt.Errorf("流程关联的表单 Schema 没有字段")
+	}
+	if err := validateWorkflowConditionFields(graph, formFields); err != nil {
 		return err
 	}
 
@@ -274,7 +284,7 @@ func buildWorkflowDefinitionResponses(definitions []models.WfProcessDefinition) 
 			Status:         fmt.Sprintf("%d", definition.Status),
 			Version:        definition.Version,
 			FlowData:       definition.FlowData,
-			FormSchema:     definition.FormSchema,
+			FormSchemaID:   definition.FormSchemaID,
 			Remark:         definition.Remark,
 			CreatorID:      definition.CreatorID,
 			CreatorName:    &creatorName,

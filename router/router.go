@@ -15,6 +15,7 @@ func SetupRouter() *gin.Engine {
 	systemController := controllers.NewSystemController()
 	devController := controllers.DevController{}
 	workflowController := controllers.WorkflowController{}
+	formSchemaController := controllers.FormSchemaController{}
 
 	api := router.Group("/api")
 	{
@@ -161,6 +162,19 @@ func SetupRouter() *gin.Engine {
 			dev.POST("/changeHistory", devController.CreateChangeHistory)
 		}
 
+		form := api.Group("/form", middleware.AuthMiddleware())
+		{
+			schemas := form.Group("/schemas")
+			{
+				schemas.GET("", formSchemaController.GetFormSchemas)
+				schemas.GET("/all", formSchemaController.GetAllFormSchemas)
+				schemas.POST("", formSchemaController.CreateFormSchema)
+				schemas.GET("/:formSchemaId", formSchemaController.GetFormSchema)
+				schemas.PUT("/:formSchemaId", formSchemaController.UpdateFormSchema)
+				schemas.DELETE("", formSchemaController.DeleteFormSchemas)
+			}
+		}
+
 		workflow := api.Group("/workflow", middleware.AuthMiddleware())
 		{
 			definitions := workflow.Group("/definitions")
@@ -171,7 +185,7 @@ func SetupRouter() *gin.Engine {
 				definitions.GET("/:definitionId", workflowController.GetWorkflowDefinition)
 				definitions.PUT("/:definitionId", workflowController.UpdateWorkflowDefinition)
 				definitions.PUT("/:definitionId/canvas", workflowController.UpdateWorkflowCanvas)
-				definitions.PUT("/:definitionId/form", workflowController.UpdateWorkflowForm)
+				definitions.PUT("/:definitionId/form-schema", workflowController.UpdateWorkflowFormSchema)
 				definitions.PUT("/:definitionId/publish", workflowController.PublishWorkflowDefinition)
 				definitions.PUT("/:definitionId/status", workflowController.UpdateWorkflowDefinitionStatus)
 				definitions.DELETE("", workflowController.DeleteWorkflowDefinitions)

@@ -105,7 +105,7 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 		if err != nil {
 			return err
 		}
-		formSchema, err := parseWorkflowFormSchema(definition.FormSchema)
+		formFields, formSchemaJSON, formLayout, err := loadWorkflowFormSchema(tx, definition.FormSchemaID, true)
 		if err != nil {
 			return err
 		}
@@ -117,7 +117,7 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 		if variables == nil {
 			variables = make(map[string]interface{})
 		}
-		if err := validateWorkflowFormVariables(formSchema, variables); err != nil {
+		if err := validateFormSchemaValues(formFields, variables); err != nil {
 			return err
 		}
 		variablesJSON, err := json.Marshal(variables)
@@ -148,7 +148,8 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 			Status:            models.WorkflowInstanceStatusRunning,
 			Variables:         string(variablesJSON),
 			FlowSnapshot:      *definition.FlowData,
-			FormSnapshot:      definition.FormSchema,
+			FormSnapshot:      &formSchemaJSON,
+			FormLayout:        formLayout,
 			StartDate:         &now,
 			CreateDate:        &now,
 			UpdateDate:        &now,
@@ -660,14 +661,12 @@ func applyWorkflowTaskVariables(tx *gorm.DB, instance *models.WfProcessInstance,
 	if err := json.Unmarshal([]byte(instance.Variables), &variables); err != nil {
 		return fmt.Errorf("流程变量解析失败")
 	}
-	for key, value := range changes {
-		variables[key] = value
-	}
-	formSchema, err := parseWorkflowFormSchema(instance.FormSnapshot)
+	mergeWorkflowVariableChanges(variables, changes)
+	formFields, err := parseWorkflowFormSnapshot(instance.FormSnapshot)
 	if err != nil {
 		return err
 	}
-	if err := validateWorkflowFormVariables(formSchema, variables); err != nil {
+	if err := validateFormSchemaValues(formFields, variables); err != nil {
 		return err
 	}
 	variablesJSON, err := json.Marshal(variables)
@@ -685,12 +684,39 @@ func applyWorkflowTaskVariables(tx *gorm.DB, instance *models.WfProcessInstance,
 
 // validateWorkflowTaskVariableChanges 确保审批请求只修改当前节点可编辑字段。
 func validateWorkflowTaskVariableChanges(fieldPermissions map[string]string, changes map[string]interface{}) error {
-	for key := range changes {
-		if fieldPermissions[key] != "editable" {
-			return fmt.Errorf("字段“%s”在当前节点不可编辑", key)
+	return validateWorkflowTaskVariableChangePaths(fieldPermissions, changes, "")
+}
+
+func validateWorkflowTaskVariableChangePaths(fieldPermissions map[string]string, changes map[string]interface{}, parent string) error {
+	for key, value := range changes {
+		path := key
+		if parent != "" {
+			path = parent + "." + key
 		}
+		if fieldPermissions[path] == "editable" {
+			continue
+		}
+		if nested, ok := value.(map[string]interface{}); ok {
+			if err := validateWorkflowTaskVariableChangePaths(fieldPermissions, nested, path); err != nil {
+				return err
+			}
+			continue
+		}
+		return fmt.Errorf("字段“%s”在当前节点不可编辑", path)
 	}
 	return nil
+}
+
+func mergeWorkflowVariableChanges(target map[string]interface{}, changes map[string]interface{}) {
+	for key, value := range changes {
+		nestedChanges, changesAreNested := value.(map[string]interface{})
+		nestedTarget, targetIsNested := target[key].(map[string]interface{})
+		if changesAreNested && targetIsNested {
+			mergeWorkflowVariableChanges(nestedTarget, nestedChanges)
+			continue
+		}
+		target[key] = value
+	}
 }
 
 // workflowOperationComment 组合操作摘要和可选说明。
@@ -1246,13 +1272,17 @@ func buildWorkflowInstanceResponse(instance models.WfProcessInstance) (models.Wo
 	if err := json.Unmarshal([]byte(instance.Variables), &variables); err != nil {
 		return models.WorkflowInstanceResponse{}, fmt.Errorf("流程实例 %s 的变量数据损坏", instance.InstanceID)
 	}
+	var formSchema json.RawMessage
+	if instance.FormSnapshot != nil {
+		formSchema = json.RawMessage(*instance.FormSnapshot)
+	}
 	return models.WorkflowInstanceResponse{
 		InstanceID: instance.InstanceID, InstanceNo: instance.InstanceNo, DefinitionID: instance.DefinitionID,
 		DefinitionKey: instance.DefinitionKey, DefinitionName: instance.DefinitionName,
 		DefinitionVersion: instance.DefinitionVersion, Title: instance.Title,
 		BusinessKey: instance.BusinessKey, StarterID: instance.StarterID,
 		StarterName: instance.StarterName, Status: strconv.Itoa(instance.Status),
-		Variables: variables, FormSchema: instance.FormSnapshot, StartDate: models.TimeToStringPtr(instance.StartDate),
+		Variables: variables, FormSchema: formSchema, FormLayout: instance.FormLayout, StartDate: models.TimeToStringPtr(instance.StartDate),
 		EndDate: models.TimeToStringPtr(instance.EndDate), CreateDate: models.TimeToStringPtr(instance.CreateDate),
 	}, nil
 }

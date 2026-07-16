@@ -756,6 +756,46 @@ definitions:
         example: /uploads/abc.jpg
         type: string
     type: object
+  models.FormSchemaResponse:
+    properties:
+      category:
+        example: workflow
+        type: string
+      createDate:
+        example: "2026-07-15 15:30:26"
+        type: string
+      creatorId:
+        example: UUID
+        type: string
+      creatorName:
+        example: 管理员
+        type: string
+      formSchemaId:
+        example: UUID
+        type: string
+      layout:
+        example: single
+        type: string
+      remark:
+        example: 报销流程申请表
+        type: string
+      schema:
+        items:
+          type: object
+        type: array
+      schemaKey:
+        example: expense_apply
+        type: string
+      schemaName:
+        example: 报销申请表
+        type: string
+      status:
+        example: "1"
+        type: string
+      updateDate:
+        example: "2026-07-15 15:30:26"
+        type: string
+    type: object
   models.LoginRequest:
     properties:
       password:
@@ -1843,12 +1883,13 @@ definitions:
     - definitionKey
     - definitionName
     type: object
-  models.UpdateWorkflowFormRequest:
+  models.UpdateWorkflowFormSchemaRequest:
     properties:
-      formSchema:
-        $ref: '#/definitions/models.WorkflowFormSchema'
+      formSchemaId:
+        example: UUID
+        type: string
     required:
-    - formSchema
+    - formSchemaId
     type: object
   models.UpdateWorkflowStatusRequest:
     properties:
@@ -1858,6 +1899,36 @@ definitions:
         type: string
     required:
     - status
+    type: object
+  models.UpsertFormSchemaRequest:
+    properties:
+      category:
+        example: workflow
+        type: string
+      layout:
+        example: single
+        type: string
+      remark:
+        example: 报销流程申请表
+        type: string
+      schema:
+        items:
+          type: object
+        type: array
+      schemaKey:
+        example: expense_apply
+        type: string
+      schemaName:
+        example: 报销申请表
+        type: string
+      status:
+        example: "1"
+        type: string
+    required:
+    - layout
+    - schema
+    - schemaKey
+    - schemaName
     type: object
   models.VersionResponse:
     properties:
@@ -1983,9 +2054,9 @@ definitions:
         description: LogicFlow画布JSON
         example: '{"nodes":[],"edges":[]}'
         type: string
-      formSchema:
-        description: 表单结构JSON
-        example: '{"version":1,"fields":[]}'
+      formSchemaId:
+        description: 关联表单Schema ID
+        example: UUID
         type: string
       remark:
         description: 备注
@@ -2001,68 +2072,6 @@ definitions:
         type: string
       version:
         description: 发布版本号
-        example: 1
-        type: integer
-    type: object
-  models.WorkflowFormField:
-    properties:
-      columns:
-        items:
-          $ref: '#/definitions/models.WorkflowFormGridColumn'
-        type: array
-      defaultValue: {}
-      id:
-        example: field_amount
-        type: string
-      key:
-        example: amount
-        type: string
-      label:
-        example: 申请金额
-        type: string
-      options:
-        items:
-          $ref: '#/definitions/models.WorkflowFormOption'
-        type: array
-      placeholder:
-        example: 请输入申请金额
-        type: string
-      required:
-        example: true
-        type: boolean
-      type:
-        example: number
-        type: string
-    type: object
-  models.WorkflowFormGridColumn:
-    properties:
-      fields:
-        items:
-          $ref: '#/definitions/models.WorkflowFormField'
-        type: array
-      id:
-        example: column_left
-        type: string
-      span:
-        example: 12
-        type: integer
-    type: object
-  models.WorkflowFormOption:
-    properties:
-      label:
-        example: 高
-        type: string
-      value:
-        example: high
-        type: string
-    type: object
-  models.WorkflowFormSchema:
-    properties:
-      fields:
-        items:
-          $ref: '#/definitions/models.WorkflowFormField'
-        type: array
-      version:
         example: 1
         type: integer
     type: object
@@ -2091,8 +2100,13 @@ definitions:
         type: integer
       endDate:
         type: string
-      formSchema:
+      formLayout:
+        example: single
         type: string
+      formSchema:
+        items:
+          type: object
+        type: array
       instanceId:
         type: string
       instanceNo:
@@ -4357,6 +4371,173 @@ paths:
       summary: 获取最新版本号
       tags:
       - 开发管理-版本管理
+  /form/schemas:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 表单 Schema ID 数组
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除表单 Schema
+      tags:
+      - 表单管理
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: Schema 标识
+        in: query
+        name: schemaKey
+        type: string
+      - description: Schema 名称
+        in: query
+        name: schemaName
+        type: string
+      - description: 分类
+        in: query
+        name: category
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: integer
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/utils.PaginationResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取表单 Schema 列表
+      tags:
+      - 表单管理
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 表单 Schema
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpsertFormSchemaRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建表单 Schema
+      tags:
+      - 表单管理
+  /form/schemas/{formSchemaId}:
+    get:
+      parameters:
+      - description: 表单 Schema ID
+        in: path
+        name: formSchemaId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.FormSchemaResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取表单 Schema 详情
+      tags:
+      - 表单管理
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 表单 Schema ID
+        in: path
+        name: formSchemaId
+        required: true
+        type: string
+      - description: 表单 Schema
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpsertFormSchemaRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新表单 Schema
+      tags:
+      - 表单管理
+  /form/schemas/all:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.FormSchemaResponse'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取全部表单 Schema
+      tags:
+      - 表单管理
   /system/depts:
     delete:
       consumes:
@@ -5999,23 +6180,23 @@ paths:
       summary: 保存流程画布
       tags:
       - 流程管理-流程定义
-  /workflow/definitions/{definitionId}/form:
+  /workflow/definitions/{definitionId}/form-schema:
     put:
       consumes:
       - application/json
-      description: 保存流程定义绑定的申请表单结构，并将流程恢复为草稿状态
+      description: 保存流程定义关联的表单 Schema ID，并将流程恢复为草稿状态
       parameters:
       - description: 流程定义ID
         in: path
         name: definitionId
         required: true
         type: string
-      - description: 流程表单结构
+      - description: 表单 Schema ID
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/models.UpdateWorkflowFormRequest'
+          $ref: '#/definitions/models.UpdateWorkflowFormSchemaRequest'
       produces:
       - application/json
       responses:
@@ -6029,7 +6210,7 @@ paths:
             $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
-      summary: 保存流程表单
+      summary: 绑定流程表单 Schema
       tags:
       - 流程管理-流程定义
   /workflow/definitions/{definitionId}/publish:

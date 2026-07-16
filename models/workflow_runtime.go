@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 const (
 	WorkflowInstanceStatusRunning   = 0
@@ -39,6 +42,7 @@ type WfProcessInstance struct {
 	Variables         string     `gorm:"column:variables;type:longtext" json:"variables"`
 	FlowSnapshot      string     `gorm:"column:flow_snapshot;type:longtext" json:"flowSnapshot"`
 	FormSnapshot      *string    `gorm:"column:form_snapshot;type:longtext" json:"formSnapshot"`
+	FormLayout        string     `gorm:"column:form_layout;type:varchar(16)" json:"formLayout"`
 	StartDate         *time.Time `gorm:"column:start_date" json:"startDate"`
 	EndDate           *time.Time `gorm:"column:end_date" json:"endDate"`
 	CreateDate        *time.Time `gorm:"column:create_date" json:"createDate"`
@@ -183,7 +187,8 @@ type WorkflowInstanceResponse struct {
 	StarterName       string                 `json:"starterName"`
 	Status            string                 `json:"status"`
 	Variables         map[string]interface{} `json:"variables"`
-	FormSchema        *string                `json:"formSchema"`
+	FormSchema        json.RawMessage        `json:"formSchema" swaggertype:"array,object"`
+	FormLayout        string                 `json:"formLayout" example:"single"`
 	StartDate         *string                `json:"startDate"`
 	EndDate           *string                `json:"endDate"`
 	CreateDate        *string                `json:"createDate"`
