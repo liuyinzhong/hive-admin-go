@@ -33,6 +33,19 @@
 
 项目代码是重要参考，但不要机械复制旧问题。现有代码、文档和规则不一致时，先说明差异。
 
+## 技能自动调用
+
+本仓库技能位于 `.agents/skills`，遵循工作区根 `AGENTS.md` 的通用技能路由。任务与技能说明匹配时，无需用户点名，必须先阅读对应 `SKILL.md` 再使用。
+
+- 新增或修改 Router、Controller、Service、Model/DTO 时，使用 `implement`；Service、工具函数、参数校验或缺陷回归存在稳定测试边界时，同时使用 `tdd`，沿用 Go 原生测试和项目现有验证命令。
+- 接口异常、事务问题、GORM 查询错误、性能回退或偶发失败的根因不明时，使用 `diagnosing-bugs`，先建立不启动服务、不连接生产环境的最小反馈命令。
+- 设计分层、事务边界、查询接口、公共 Service 或适配器时，使用 `codebase-design`，并继续遵守 Router -> Controller -> Service/Model 的依赖方向。
+- 前后端字段、DTO、数据库模型、枚举或业务术语存在歧义时，使用 `domain-modeling`；需要集中澄清并沉淀文档时组合 `grilling` 与 `grill-with-docs`。
+- 只有纯业务状态或算法问题需要可运行实验时才使用 `prototype`；原型不得连接生产数据库、执行迁移或触发 Apifox 同步。
+- 完成有实质代码变更的实现后使用 `code-review`，重点核对分层、统一响应、参数校验、事务、权限、SQL 安全、Swagger 和前后端契约。
+- 只有用户明确要求规格、任务拆分或架构巡检时，才使用 `to-spec`、`to-tickets`、`improve-codebase-architecture`；不得自动向外部工单系统发布内容。
+- 技能不能作为修改认证授权、数据库结构、公共响应、配置加载、依赖或生成文档流程的默认授权。
+
 ## 分层与依赖
 
 允许的主要依赖方向：
