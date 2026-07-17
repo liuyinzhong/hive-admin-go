@@ -22,7 +22,8 @@ import (
 // @Param periodStatus query string false "有效期状态 current/future/expired"
 // @Param sorts query string false "排序"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.RegistrationFeeRuleResponse}}
-// @Router /medical/registration-fee-rules [get]
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /medical/registrationFeeRules [get]
 func (ctrl *MedicalController) GetRegistrationFeeRuleList(c *gin.Context) {
 	var req models.RegistrationFeeRuleListRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -45,7 +46,8 @@ func (ctrl *MedicalController) GetRegistrationFeeRuleList(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param request body models.CreateRegistrationFeeRuleRequest true "挂号费规则"
 // @Success 200 {object} models.Response
-// @Router /medical/registration-fee-rules [post]
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /medical/registrationFeeRules [post]
 func (ctrl *MedicalController) CreateRegistrationFeeRule(c *gin.Context) {
 	var req models.CreateRegistrationFeeRuleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -68,7 +70,8 @@ func (ctrl *MedicalController) CreateRegistrationFeeRule(c *gin.Context) {
 // @Param feeRuleId path string true "挂号费规则ID"
 // @Param request body models.AdjustRegistrationFeeRuleRequest true "调价信息"
 // @Success 200 {object} models.Response
-// @Router /medical/registration-fee-rules/{feeRuleId}/adjustments [post]
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /medical/registrationFeeRules/{feeRuleId}/adjustments [post]
 func (ctrl *MedicalController) AdjustRegistrationFeeRule(c *gin.Context) {
 	var req models.AdjustRegistrationFeeRuleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

@@ -97,12 +97,11 @@ type ScheduleTemplateListRequest struct {
 	Sorts        string `form:"sorts"`
 }
 
-type SaveScheduleTemplateRequest struct {
+type ScheduleTemplateBaseRequest struct {
 	TemplateName     string                     `json:"templateName" binding:"required,max=64"`
 	DoctorID         string                     `json:"doctorId" binding:"required"`
 	DepartmentID     string                     `json:"departmentId" binding:"required"`
 	RegistrationType string                     `json:"registrationType" binding:"required"`
-	Weekday          int                        `json:"weekday" binding:"required,min=1,max=7"`
 	StartTime        string                     `json:"startTime" binding:"required"`
 	EndTime          string                     `json:"endTime" binding:"required"`
 	DefaultSlotQuota int                        `json:"defaultSlotQuota" binding:"required,min=1,max=99"`
@@ -111,6 +110,17 @@ type SaveScheduleTemplateRequest struct {
 	ExpiryDate       *string                    `json:"expiryDate"`
 	Status           int                        `json:"status" binding:"oneof=0 1"`
 	Remark           *string                    `json:"remark" binding:"omitempty,max=512"`
+}
+
+type CreateScheduleTemplateRequest struct {
+	ScheduleTemplateBaseRequest
+	// Weekdays 星期多选值，每项范围为1（周一）至7（周日）。
+	Weekdays []int `json:"weekdays" binding:"required,min=1,max=7,dive,min=1,max=7"`
+}
+
+type SaveScheduleTemplateRequest struct {
+	ScheduleTemplateBaseRequest
+	Weekday int `json:"weekday" binding:"required,min=1,max=7"`
 }
 
 type ScheduleTemplateResponse struct {

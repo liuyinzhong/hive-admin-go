@@ -98,50 +98,71 @@ func (s *MedicalScheduleService) GetScheduleTemplateList(req models.ScheduleTemp
 	return pageResult, nil
 }
 
-func (s *MedicalScheduleService) CreateScheduleTemplate(req models.SaveScheduleTemplateRequest, operatorID string) error {
-	prepared, err := prepareScheduleTemplateRequest(req)
+func (s *MedicalScheduleService) CreateScheduleTemplate(req models.CreateScheduleTemplateRequest, operatorID string) error {
+	weekdays, err := normalizeScheduleTemplateWeekdays(req.Weekdays)
 	if err != nil {
 		return err
 	}
-	slotQuotaConfig, err := marshalScheduleSlotQuotaConfig(prepared.slotQuotaConfig)
+	preparedTemplates := make([]*preparedScheduleTemplate, 0, len(weekdays))
+	for _, weekday := range weekdays {
+		weekdayRequest := models.SaveScheduleTemplateRequest{
+			ScheduleTemplateBaseRequest: req.ScheduleTemplateBaseRequest,
+			Weekday:                     weekday,
+		}
+		prepared, prepareErr := prepareScheduleTemplateRequest(weekdayRequest)
+		if prepareErr != nil {
+			return prepareErr
+		}
+		preparedTemplates = append(preparedTemplates, prepared)
+	}
+	slotQuotaConfig, err := marshalScheduleSlotQuotaConfig(preparedTemplates[0].slotQuotaConfig)
 	if err != nil {
 		return err
 	}
 	return database.DB.Transaction(func(tx *gorm.DB) error {
-		if err := lockScheduleDoctors(tx, []string{prepared.doctorID}); err != nil {
+		first := preparedTemplates[0]
+		if err := lockScheduleDoctors(tx, []string{first.doctorID}); err != nil {
 			return err
 		}
-		if _, err := validateScheduleDimension(tx, prepared.doctorID, prepared.departmentID, prepared.registrationType, nil); err != nil {
+		if _, err := validateScheduleDimension(tx, first.doctorID, first.departmentID, first.registrationType, nil); err != nil {
 			return err
 		}
-		if prepared.status == 1 {
-			if err := ensureScheduleTemplateAvailable(tx, prepared, ""); err != nil {
-				return err
+		for _, prepared := range preparedTemplates {
+			if prepared.status == 1 {
+				if err := ensureScheduleTemplateAvailable(tx, prepared, ""); err != nil {
+					return err
+				}
 			}
 		}
 		now := time.Now()
-		template := models.MedScheduleTemplate{
-			TemplateID:       utils.GenerateUUID(),
-			TemplateName:     prepared.templateName,
-			DoctorID:         prepared.doctorID,
-			DepartmentID:     prepared.departmentID,
-			RegistrationType: prepared.registrationType,
-			Weekday:          prepared.weekday,
-			StartTime:        prepared.startTime,
-			EndTime:          prepared.endTime,
-			DefaultSlotQuota: prepared.defaultSlotQuota,
-			SlotQuotaConfig:  slotQuotaConfig,
-			TotalQuota:       prepared.totalQuota,
-			EffectiveDate:    prepared.effectiveDate,
-			ExpiryDate:       prepared.expiryDate,
-			Status:           prepared.status,
-			Remark:           prepared.remark,
-			CreatorID:        optionalOperatorID(operatorID),
-			UpdaterID:        optionalOperatorID(operatorID),
-			CreateDate:       &now,
-			UpdateDate:       &now,
+		templates := make([]models.MedScheduleTemplate, 0, len(preparedTemplates))
+		for _, prepared := range preparedTemplates {
+			templates = append(templates, models.MedScheduleTemplate{
+				TemplateID:       utils.GenerateUUID(),
+				TemplateName:     prepared.templateName,
+				DoctorID:         prepared.doctorID,
+				DepartmentID:     prepared.departmentID,
+				RegistrationType: prepared.registrationType,
+				Weekday:          prepared.weekday,
+				StartTime:        prepared.startTime,
+				EndTime:          prepared.endTime,
+				DefaultSlotQuota: prepared.defaultSlotQuota,
+				SlotQuotaConfig:  slotQuotaConfig,
+				TotalQuota:       prepared.totalQuota,
+				EffectiveDate:    prepared.effectiveDate,
+				ExpiryDate:       prepared.expiryDate,
+				Status:           prepared.status,
+				Remark:           prepared.remark,
+				CreatorID:        optionalOperatorID(operatorID),
+				UpdaterID:        optionalOperatorID(operatorID),
+				CreateDate:       &now,
+				UpdateDate:       &now,
+			})
 		}
-		return tx.Create(&template).Error
+		if err := tx.Create(&templates).Error; err != nil {
+			return err
+		}
+		return nil
 	})
 }
 
@@ -244,6 +265,29 @@ func (s *MedicalScheduleService) UpdateScheduleTemplateStatus(templateID string,
 				"status":      status,
 				"updater_id":  optionalOperatorID(operatorID),
 				"update_date": time.Now(),
+			}).Error
+	})
+}
+
+func (s *MedicalScheduleService) DeleteScheduleTemplate(templateID string, operatorID string) error {
+	if err := validateMedicalUUID(templateID, "排班模板ID"); err != nil {
+		return err
+	}
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		var template models.MedScheduleTemplate
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("template_id = ? AND del_flag = 0", templateID).
+			First(&template).Error; err != nil {
+			return scheduleRecordError(err, "排班模板不存在")
+		}
+		now := time.Now()
+		return tx.Model(&models.MedScheduleTemplate{}).
+			Where("template_id = ? AND del_flag = 0", templateID).
+			Updates(map[string]interface{}{
+				"del_flag":    1,
+				"status":      0,
+				"updater_id":  optionalOperatorID(operatorID),
+				"update_date": now,
 			}).Error
 	})
 }

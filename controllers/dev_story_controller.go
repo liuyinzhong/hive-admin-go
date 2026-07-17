@@ -29,6 +29,7 @@ import (
 // @Param sorts query string false "排序参数"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.StoryResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/storys [get]
 func (dc *DevController) GetStorys(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -125,6 +126,7 @@ func (dc *DevController) GetAllStorys(c *gin.Context) {
 // @Success 200 {object} models.Response{data=models.StoryResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/storys/{storyNum} [get]
 func (dc *DevController) GetStory(c *gin.Context) {
 	storyNum, err := strconv.Atoi(c.Param("storyNum"))
@@ -152,6 +154,7 @@ func (dc *DevController) GetStory(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/storys [post]
 func (dc *DevController) CreateStory(c *gin.Context) {
 	var req models.CreateStoryRequest
@@ -180,6 +183,7 @@ func (dc *DevController) CreateStory(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/storys/batch [post]
 func (dc *DevController) CreateStorys(c *gin.Context) {
 	var reqs []models.CreateStoryRequest
@@ -209,6 +213,7 @@ func (dc *DevController) CreateStorys(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/storys/{storyId} [put]
 func (dc *DevController) UpdateStory(c *gin.Context) {
 	storyID := c.Param("storyId")
@@ -240,6 +245,7 @@ func (dc *DevController) UpdateStory(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/storys/{storyId}/field [put]
 func (dc *DevController) UpdateStoryField(c *gin.Context) {
 	storyID := c.Param("storyId")
@@ -271,6 +277,7 @@ func (dc *DevController) UpdateStoryField(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/storys/{storyId}/next [put]
 func (dc *DevController) UpdateStoryNext(c *gin.Context) {
 	storyID := c.Param("storyId")
@@ -301,6 +308,7 @@ func (dc *DevController) UpdateStoryNext(c *gin.Context) {
 // @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/storys [delete]
 func (dc *DevController) DeleteStorys(c *gin.Context) {
 	var ids []string

@@ -30,6 +30,7 @@ import (
 // @Param sorts query string false "排序参数"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.BugResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/bugs [get]
 func (dc *DevController) GetBugs(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -128,6 +129,7 @@ func (dc *DevController) GetAllBugs(c *gin.Context) {
 // @Success 200 {object} models.Response{data=models.BugResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/bugs/{bugNum} [get]
 func (dc *DevController) GetBug(c *gin.Context) {
 	bugNum, err := strconv.Atoi(c.Param("bugNum"))
@@ -155,6 +157,7 @@ func (dc *DevController) GetBug(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/bugs [post]
 func (dc *DevController) CreateBug(c *gin.Context) {
 	var req models.CreateBugRequest
@@ -184,6 +187,7 @@ func (dc *DevController) CreateBug(c *gin.Context) {
 // @Success 200 {object} models.Response "确认成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/bugs/{bugId}/confirm [put]
 func (dc *DevController) ConfirmBug(c *gin.Context) {
 	bugID := c.Param("bugId")
@@ -214,6 +218,7 @@ func (dc *DevController) ConfirmBug(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/bugs/batch [post]
 func (dc *DevController) CreateBugs(c *gin.Context) {
 	var reqs []models.CreateBugRequest
@@ -243,6 +248,7 @@ func (dc *DevController) CreateBugs(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/bugs/{bugId} [put]
 func (dc *DevController) UpdateBug(c *gin.Context) {
 	bugID := c.Param("bugId")
@@ -274,6 +280,7 @@ func (dc *DevController) UpdateBug(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/bugs/{bugId}/field [put]
 func (dc *DevController) UpdateBugField(c *gin.Context) {
 	bugID := c.Param("bugId")
@@ -305,6 +312,7 @@ func (dc *DevController) UpdateBugField(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/bugs/{bugId}/next [put]
 func (dc *DevController) UpdateBugNext(c *gin.Context) {
 	bugID := c.Param("bugId")
@@ -335,6 +343,7 @@ func (dc *DevController) UpdateBugNext(c *gin.Context) {
 // @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/bugs [delete]
 func (dc *DevController) DeleteBugs(c *gin.Context) {
 	var ids []string

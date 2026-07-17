@@ -7,10 +7,12 @@ import (
 	"hive-admin-go/utils"
 )
 
-type AuthService struct{}
+type AuthService struct {
+	permissionService *PermissionService
+}
 
 func NewAuthService() *AuthService {
-	return &AuthService{}
+	return &AuthService{permissionService: NewPermissionService()}
 }
 
 func (s *AuthService) Login(username, password string) (string, error) {
@@ -152,74 +154,7 @@ func (s *AuthService) GetMenus(userID string) ([]*models.MenuTreeResponse, error
 }
 
 func (s *AuthService) GetAuthCodes(userID string) ([]string, error) {
-	var user models.SysUser
-	if err := database.DB.Where("user_id = ? AND del_flag = 0", userID).First(&user).Error; err != nil {
-		return nil, errors.New("用户不存在")
-	}
-
-	var authCodes []string
-
-	if user.IsSys == 1 {
-		var menus []models.SysMenu
-		database.DB.Where("del_flag = 0 AND status = 1").Find(&menus)
-		for _, menu := range menus {
-			if menu.AuthCode != nil && *menu.AuthCode != "" {
-				authCodes = append(authCodes, *menu.AuthCode)
-			}
-		}
-	} else {
-		var userRoles []models.SysUserRole
-		database.DB.Where("user_id = ? AND del_flag = 0", userID).Find(&userRoles)
-
-		if len(userRoles) == 0 {
-			return []string{}, nil
-		}
-
-		var roleIDs []string
-		for _, ur := range userRoles {
-			var role models.SysRole
-			if err := database.DB.Where("role_id = ? AND del_flag = 0 AND status = 1", ur.RoleID).First(&role).Error; err == nil {
-				roleIDs = append(roleIDs, ur.RoleID)
-			}
-		}
-
-		if len(roleIDs) == 0 {
-			return []string{}, nil
-		}
-
-		var roleMenus []models.SysRoleMenu
-		database.DB.Where("role_id IN ? AND del_flag = 0", roleIDs).Find(&roleMenus)
-
-		if len(roleMenus) == 0 {
-			return []string{}, nil
-		}
-
-		var menuIDs []string
-		menuIDSet := make(map[string]bool)
-		for _, rm := range roleMenus {
-			menuIDSet[rm.MenuID] = true
-		}
-		for id := range menuIDSet {
-			menuIDs = append(menuIDs, id)
-		}
-
-		var menus []models.SysMenu
-		database.DB.Where("id IN ? AND del_flag = 0 AND status = 1", menuIDs).Find(&menus)
-
-		authCodeSet := make(map[string]bool)
-		for _, menu := range menus {
-			if menu.AuthCode != nil && *menu.AuthCode != "" {
-				authCodeSet[*menu.AuthCode] = true
-			}
-		}
-
-		for code := range authCodeSet {
-			authCodes = append(authCodes, code)
-		}
-	}
-
-	sortStrings(authCodes)
-	return authCodes, nil
+	return s.permissionService.GetUserCodes(userID)
 }
 
 func (s *AuthService) Logout(token string) error {
@@ -233,42 +168,42 @@ func buildMenuTree(menus []models.SysMenu) []*models.MenuTreeResponse {
 
 	for _, menu := range menus {
 		treeNode := &models.MenuTreeResponse{
-			ID:         menu.ID,
-			Pid:        menu.Pid,
-			Type:       menu.Type,
-			AuthCode:   menu.AuthCode,
-			Children:   []*models.MenuTreeResponse{},
-			Component:  menu.Component,
+			ID:        menu.ID,
+			Pid:       menu.Pid,
+			Type:      menu.Type,
+			AuthCode:  menu.AuthCode,
+			Children:  []*models.MenuTreeResponse{},
+			Component: menu.Component,
 			Meta: models.MenuMeta{
-				ActiveIcon:              menu.ActiveIcon,
-				ActivePath:              menu.ActivePath,
-				AffixTab:                menu.AffixTab == 1,
-				AffixTabOrder:           menu.AffixTabOrder,
-				Badge:                   menu.Badge,
-				BadgeType:               menu.BadgeType,
-				BadgeVariants:           menu.BadgeVariants,
-				HideChildrenInMenu:      menu.HideChildrenInMenu == 1,
-				HideInBreadcrumb:        menu.HideInBreadcrumb == 1,
-				HideInMenu:              menu.HideInMenu == 1,
-				HideInTab:               menu.HideInTab == 1,
-				Icon:                    menu.Icon,
-				IframeSrc:               menu.IframeSrc,
-				KeepAlive:               menu.KeepAlive == 1,
-				Link:                    menu.Link,
-				MaxNumOfOpenTab:         menu.MaxNumOfOpenTab,
-				NoBasicLayout:           menu.NoBasicLayout == 1,
-				OpenInNewWindow:         menu.OpenInNewWindow == 1,
-				Order:                   menu.Order,
-				Query:                   menu.Query,
-				Title:                   menu.Title,
-				DomCached:               menu.DomCached == 1,
+				ActiveIcon:               menu.ActiveIcon,
+				ActivePath:               menu.ActivePath,
+				AffixTab:                 menu.AffixTab == 1,
+				AffixTabOrder:            menu.AffixTabOrder,
+				Badge:                    menu.Badge,
+				BadgeType:                menu.BadgeType,
+				BadgeVariants:            menu.BadgeVariants,
+				HideChildrenInMenu:       menu.HideChildrenInMenu == 1,
+				HideInBreadcrumb:         menu.HideInBreadcrumb == 1,
+				HideInMenu:               menu.HideInMenu == 1,
+				HideInTab:                menu.HideInTab == 1,
+				Icon:                     menu.Icon,
+				IframeSrc:                menu.IframeSrc,
+				KeepAlive:                menu.KeepAlive == 1,
+				Link:                     menu.Link,
+				MaxNumOfOpenTab:          menu.MaxNumOfOpenTab,
+				NoBasicLayout:            menu.NoBasicLayout == 1,
+				OpenInNewWindow:          menu.OpenInNewWindow == 1,
+				Order:                    menu.Order,
+				Query:                    menu.Query,
+				Title:                    menu.Title,
+				DomCached:                menu.DomCached == 1,
 				MenuVisibleWithForbidden: menu.MenuVisibleWithForbidden == 1,
 			},
 			Name:        menu.Name,
-		Path:        menu.Path,
-		CreatorId:   menu.CreatorID,
-		CreatorName: menu.CreatorName,
-		Status:      menu.Status,
+			Path:        menu.Path,
+			CreatorId:   menu.CreatorID,
+			CreatorName: menu.CreatorName,
+			Status:      menu.Status,
 		}
 
 		if menu.CreateDate != nil {
@@ -294,14 +229,4 @@ func buildMenuTree(menus []models.SysMenu) []*models.MenuTreeResponse {
 	}
 
 	return roots
-}
-
-func sortStrings(strs []string) {
-	for i := 0; i < len(strs); i++ {
-		for j := i + 1; j < len(strs); j++ {
-			if strs[i] > strs[j] {
-				strs[i], strs[j] = strs[j], strs[i]
-			}
-		}
-	}
 }

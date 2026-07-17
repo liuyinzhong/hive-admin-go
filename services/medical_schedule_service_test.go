@@ -114,17 +114,19 @@ func TestScheduleAutomationWeekBoundaries(t *testing.T) {
 
 func TestMedicalScheduleServiceRejectsInvalidTimeRange(t *testing.T) {
 	service := NewMedicalScheduleService()
-	err := service.CreateScheduleTemplate(models.SaveScheduleTemplateRequest{
-		TemplateName:     "上午门诊",
-		DoctorID:         scheduleTestUUID,
-		DepartmentID:     scheduleTestUUID,
-		RegistrationType: "1",
-		Weekday:          1,
-		StartTime:        "09:00",
-		EndTime:          "09:00",
-		DefaultSlotQuota: 1,
-		EffectiveDate:    medicalToday().Format("2006-01-02"),
-		Status:           1,
+	err := service.CreateScheduleTemplate(models.CreateScheduleTemplateRequest{
+		ScheduleTemplateBaseRequest: models.ScheduleTemplateBaseRequest{
+			TemplateName:     "上午门诊",
+			DoctorID:         scheduleTestUUID,
+			DepartmentID:     scheduleTestUUID,
+			RegistrationType: "1",
+			StartTime:        "09:00",
+			EndTime:          "09:00",
+			DefaultSlotQuota: 1,
+			EffectiveDate:    medicalToday().Format("2006-01-02"),
+			Status:           1,
+		},
+		Weekdays: []int{1},
 	}, "")
 	if !errors.Is(err, ErrMedicalInvalidInput) {
 		t.Fatalf("CreateScheduleTemplate() error = %v, want ErrMedicalInvalidInput", err)

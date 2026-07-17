@@ -18,6 +18,7 @@ import (
 // @Param sorts query string false "排序参数 排序时仅支持：label、type、value"
 // @Success 200 {object} models.Response{data=[]models.DictTreeResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/dicts [get]
 func (ctrl *SystemController) GetDictTree(c *gin.Context) {
 	var req models.DictListRequest
@@ -46,6 +47,7 @@ func (ctrl *SystemController) GetDictTree(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/dicts [post]
 func (ctrl *SystemController) CreateDict(c *gin.Context) {
 	var req models.CreateDictRequest
@@ -73,6 +75,7 @@ func (ctrl *SystemController) CreateDict(c *gin.Context) {
 // @Success 200 {object} models.Response{data=models.DictTreeResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/dicts/{id} [get]
 func (ctrl *SystemController) GetDictDetail(c *gin.Context) {
 	id := c.Param("id")
@@ -102,6 +105,7 @@ func (ctrl *SystemController) GetDictDetail(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/dicts/{id} [put]
 func (ctrl *SystemController) UpdateDict(c *gin.Context) {
 	id := c.Param("id")
@@ -136,6 +140,7 @@ func (ctrl *SystemController) UpdateDict(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/dicts/{id}/status [put]
 func (ctrl *SystemController) UpdateDictStatus(c *gin.Context) {
 	id := c.Param("id")
@@ -169,6 +174,7 @@ func (ctrl *SystemController) UpdateDictStatus(c *gin.Context) {
 // @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/dicts [delete]
 func (ctrl *SystemController) DeleteDicts(c *gin.Context) {
 	var ids []string

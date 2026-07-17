@@ -20,6 +20,7 @@ import (
 // @Param request body models.StartWorkflowInstanceRequest true "流程发起信息"
 // @Success 200 {object} models.Response{data=models.WorkflowInstanceResponse} "发起成功"
 // @Failure 400 {object} models.Response "参数或流程配置错误"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/instances [post]
 func (wc *WorkflowController) StartWorkflowInstance(c *gin.Context) {
 	var req models.StartWorkflowInstanceRequest
@@ -44,6 +45,7 @@ func (wc *WorkflowController) StartWorkflowInstance(c *gin.Context) {
 // @Param pageSize query int false "每页大小"
 // @Param status query string false "实例状态，支持逗号分隔：0,1,2,3"
 // @Success 200 {object} models.Response{data=utils.PaginationResponse{items=[]models.WorkflowInstanceResponse}} "获取成功"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/instances [get]
 func (wc *WorkflowController) GetWorkflowInstances(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -63,6 +65,7 @@ func (wc *WorkflowController) GetWorkflowInstances(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param instanceId path string true "流程实例ID"
 // @Success 200 {object} models.Response{data=models.WorkflowInstanceDetailResponse} "获取成功"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/instances/{instanceId} [get]
 func (wc *WorkflowController) GetWorkflowInstanceDetail(c *gin.Context) {
 	result, err := services.GetWorkflowInstanceDetail(c.Param("instanceId"), c.GetString("userId"))
@@ -80,6 +83,7 @@ func (wc *WorkflowController) GetWorkflowInstanceDetail(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param instanceId path string true "流程实例ID"
 // @Success 200 {object} models.Response "撤销成功"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/instances/{instanceId}/cancel [put]
 func (wc *WorkflowController) CancelWorkflowInstance(c *gin.Context) {
 	if err := services.CancelWorkflowInstance(c.Param("instanceId"), c.GetString("userId")); err != nil {
@@ -98,6 +102,7 @@ func (wc *WorkflowController) CancelWorkflowInstance(c *gin.Context) {
 // @Param pageSize query int false "每页大小"
 // @Param status query string false "任务状态，支持逗号分隔：0,1,2,3"
 // @Success 200 {object} models.Response{data=utils.PaginationResponse{items=[]models.WorkflowTaskResponse}} "获取成功"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/tasks [get]
 func (wc *WorkflowController) GetWorkflowTasks(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -119,6 +124,7 @@ func (wc *WorkflowController) GetWorkflowTasks(c *gin.Context) {
 // @Param taskId path string true "任务ID"
 // @Param request body models.WorkflowTaskActionRequest true "审批意见"
 // @Success 200 {object} models.Response "审批成功"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/tasks/{taskId}/approve [put]
 func (wc *WorkflowController) ApproveWorkflowTask(c *gin.Context) {
 	var req models.WorkflowTaskActionRequest
@@ -142,6 +148,7 @@ func (wc *WorkflowController) ApproveWorkflowTask(c *gin.Context) {
 // @Param taskId path string true "任务ID"
 // @Param request body models.WorkflowTaskActionRequest true "审批意见"
 // @Success 200 {object} models.Response "驳回成功"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/tasks/{taskId}/reject [put]
 func (wc *WorkflowController) RejectWorkflowTask(c *gin.Context) {
 	var req models.WorkflowTaskActionRequest
@@ -165,6 +172,7 @@ func (wc *WorkflowController) RejectWorkflowTask(c *gin.Context) {
 // @Param taskId path string true "任务ID"
 // @Param request body models.WorkflowTaskTransferRequest true "转交信息"
 // @Success 200 {object} models.Response "转交成功"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/tasks/{taskId}/transfer [put]
 func (wc *WorkflowController) TransferWorkflowTask(c *gin.Context) {
 	var req models.WorkflowTaskTransferRequest
@@ -188,7 +196,8 @@ func (wc *WorkflowController) TransferWorkflowTask(c *gin.Context) {
 // @Param taskId path string true "任务ID"
 // @Param request body models.WorkflowTaskAddSignRequest true "加签信息"
 // @Success 200 {object} models.Response "加签成功"
-// @Router /workflow/tasks/{taskId}/add-sign [put]
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /workflow/tasks/{taskId}/addSign [put]
 func (wc *WorkflowController) AddWorkflowTaskSign(c *gin.Context) {
 	var req models.WorkflowTaskAddSignRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -211,7 +220,8 @@ func (wc *WorkflowController) AddWorkflowTaskSign(c *gin.Context) {
 // @Param taskId path string true "任务ID"
 // @Param request body models.WorkflowTaskRemoveSignRequest true "减签信息"
 // @Success 200 {object} models.Response "减签成功"
-// @Router /workflow/tasks/{taskId}/remove-sign [put]
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /workflow/tasks/{taskId}/removeSign [put]
 func (wc *WorkflowController) RemoveWorkflowTaskSign(c *gin.Context) {
 	var req models.WorkflowTaskRemoveSignRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -232,7 +242,8 @@ func (wc *WorkflowController) RemoveWorkflowTaskSign(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param taskId path string true "任务ID"
 // @Success 200 {object} models.Response{data=[]models.WorkflowReturnTargetResponse} "获取成功"
-// @Router /workflow/tasks/{taskId}/return-targets [get]
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /workflow/tasks/{taskId}/returnTargets [get]
 func (wc *WorkflowController) GetWorkflowTaskReturnTargets(c *gin.Context) {
 	result, err := services.GetWorkflowTaskReturnTargets(c.Param("taskId"), c.GetString("userId"))
 	if err != nil {
@@ -251,6 +262,7 @@ func (wc *WorkflowController) GetWorkflowTaskReturnTargets(c *gin.Context) {
 // @Param taskId path string true "任务ID"
 // @Param request body models.WorkflowTaskReturnRequest true "退回信息"
 // @Success 200 {object} models.Response "退回成功"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/tasks/{taskId}/return [put]
 func (wc *WorkflowController) ReturnWorkflowTask(c *gin.Context) {
 	var req models.WorkflowTaskReturnRequest
@@ -274,6 +286,7 @@ func (wc *WorkflowController) ReturnWorkflowTask(c *gin.Context) {
 // @Param pageSize query int false "每页大小"
 // @Param status query string false "已读状态，支持逗号分隔：0,1"
 // @Success 200 {object} models.Response{data=utils.PaginationResponse{items=[]models.WorkflowCopyResponse}} "获取成功"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/copies [get]
 func (wc *WorkflowController) GetWorkflowCopies(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -293,6 +306,7 @@ func (wc *WorkflowController) GetWorkflowCopies(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param copyId path string true "抄送ID"
 // @Success 200 {object} models.Response "操作成功"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/copies/{copyId}/read [put]
 func (wc *WorkflowController) ReadWorkflowCopy(c *gin.Context) {
 	if err := services.ReadWorkflowCopy(c.Param("copyId"), c.GetString("userId")); err != nil {

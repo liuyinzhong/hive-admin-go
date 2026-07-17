@@ -26,6 +26,7 @@ type FormSchemaController struct{}
 // @Param status query int false "状态"
 // @Param sorts query string false "排序"
 // @Success 200 {object} models.Response{data=utils.PaginationResponse}
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /form/schemas [get]
 func (FormSchemaController) GetFormSchemas(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -74,6 +75,7 @@ func (FormSchemaController) GetAllFormSchemas(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param formSchemaId path string true "表单 Schema ID"
 // @Success 200 {object} models.Response{data=models.FormSchemaResponse}
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /form/schemas/{formSchemaId} [get]
 func (FormSchemaController) GetFormSchema(c *gin.Context) {
 	result, err := services.GetFormSchema(c.Param("formSchemaId"))
@@ -92,6 +94,7 @@ func (FormSchemaController) GetFormSchema(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param request body models.UpsertFormSchemaRequest true "表单 Schema"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /form/schemas [post]
 func (FormSchemaController) CreateFormSchema(c *gin.Context) {
 	var req models.UpsertFormSchemaRequest
@@ -115,6 +118,7 @@ func (FormSchemaController) CreateFormSchema(c *gin.Context) {
 // @Param formSchemaId path string true "表单 Schema ID"
 // @Param request body models.UpsertFormSchemaRequest true "表单 Schema"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /form/schemas/{formSchemaId} [put]
 func (FormSchemaController) UpdateFormSchema(c *gin.Context) {
 	var req models.UpsertFormSchemaRequest
@@ -137,6 +141,7 @@ func (FormSchemaController) UpdateFormSchema(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param request body []string true "表单 Schema ID 数组"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /form/schemas [delete]
 func (FormSchemaController) DeleteFormSchemas(c *gin.Context) {
 	var ids []string

@@ -70,11 +70,11 @@ type SysMenu struct {
 	BadgeType                *string    `gorm:"column:badge_type;type:varchar(36)" json:"badgeType"`
 	BadgeVariants            *string    `gorm:"column:badge_variants;type:varchar(36)" json:"badgeVariants"`
 	ActivePath               *string    `gorm:"column:active_path;type:varchar(128)" json:"activePath"`
-	AuthCode                 *string    `gorm:"column:auth_code;type:varchar(128)" json:"authCode"`
+	AuthCode                 *string    `gorm:"column:auth_code;type:varchar(512)" json:"authCode"`
 	AffixTab                 int        `gorm:"column:affix_tab;type:tinyint;default:0" json:"affixTab"`
 	Component                *string    `gorm:"column:component;type:varchar(128)" json:"component"`
 	Title                    string     `gorm:"column:title;type:varchar(128)" json:"title"`
-	Name                     string     `gorm:"column:name;type:varchar(128)" json:"name"`
+	Name                     *string    `gorm:"column:name;type:varchar(128)" json:"name"`
 	Path                     *string    `gorm:"column:path;type:varchar(128)" json:"path"`
 	Status                   int        `gorm:"column:status;type:tinyint;default:1" json:"status"`
 	Link                     *string    `gorm:"column:link;type:varchar(1024)" json:"link"`

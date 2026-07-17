@@ -21,7 +21,8 @@ import (
 // @Param status query int false "状态 0停用 1启用"
 // @Param sorts query string false "排序"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.ScheduleTemplateResponse}}
-// @Router /medical/schedule-templates [get]
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /medical/scheduleTemplates [get]
 func (ctrl *MedicalController) GetScheduleTemplateList(c *gin.Context) {
 	var req models.ScheduleTemplateListRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -42,11 +43,12 @@ func (ctrl *MedicalController) GetScheduleTemplateList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param request body models.SaveScheduleTemplateRequest true "周期排班模板"
+// @Param request body models.CreateScheduleTemplateRequest true "周期排班模板"
 // @Success 200 {object} models.Response
-// @Router /medical/schedule-templates [post]
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /medical/scheduleTemplates [post]
 func (ctrl *MedicalController) CreateScheduleTemplate(c *gin.Context) {
-	var req models.SaveScheduleTemplateRequest
+	var req models.CreateScheduleTemplateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
@@ -67,7 +69,8 @@ func (ctrl *MedicalController) CreateScheduleTemplate(c *gin.Context) {
 // @Param templateId path string true "排班模板ID"
 // @Param request body models.SaveScheduleTemplateRequest true "周期排班模板"
 // @Success 200 {object} models.Response
-// @Router /medical/schedule-templates/{templateId} [put]
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /medical/scheduleTemplates/{templateId} [put]
 func (ctrl *MedicalController) UpdateScheduleTemplate(c *gin.Context) {
 	var req models.SaveScheduleTemplateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -90,7 +93,8 @@ func (ctrl *MedicalController) UpdateScheduleTemplate(c *gin.Context) {
 // @Param templateId path string true "排班模板ID"
 // @Param request body models.UpdateMedicalStatusRequest true "状态"
 // @Success 200 {object} models.Response
-// @Router /medical/schedule-templates/{templateId}/status [put]
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /medical/scheduleTemplates/{templateId}/status [put]
 func (ctrl *MedicalController) UpdateScheduleTemplateStatus(c *gin.Context) {
 	var req models.UpdateMedicalStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -98,6 +102,24 @@ func (ctrl *MedicalController) UpdateScheduleTemplateStatus(c *gin.Context) {
 		return
 	}
 	if err := ctrl.scheduleService.UpdateScheduleTemplateStatus(c.Param("templateId"), req.Status, medicalOperatorID(c)); err != nil {
+		writeMedicalError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+}
+
+// DeleteScheduleTemplate 删除周期排班模板。
+// @Summary 删除周期排班模板
+// @Description 逻辑删除周期排班模板，不影响已生成的实际排班
+// @Tags 医疗管理-排班
+// @Produce json
+// @Security ApiKeyAuth
+// @Param templateId path string true "排班模板ID"
+// @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /medical/scheduleTemplates/{templateId} [delete]
+func (ctrl *MedicalController) DeleteScheduleTemplate(c *gin.Context) {
+	if err := ctrl.scheduleService.DeleteScheduleTemplate(c.Param("templateId"), medicalOperatorID(c)); err != nil {
 		writeMedicalError(c, err)
 		return
 	}
@@ -119,6 +141,7 @@ func (ctrl *MedicalController) UpdateScheduleTemplateStatus(c *gin.Context) {
 // @Param status query int false "状态 0草稿 1已发布 2停诊 3结束"
 // @Param sorts query string false "排序"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.ScheduleResponse}}
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/schedules [get]
 func (ctrl *MedicalController) GetScheduleList(c *gin.Context) {
 	var req models.ScheduleListRequest
@@ -142,6 +165,7 @@ func (ctrl *MedicalController) GetScheduleList(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param request body models.SaveScheduleRequest true "实际排班"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/schedules [post]
 func (ctrl *MedicalController) CreateSchedule(c *gin.Context) {
 	var req models.SaveScheduleRequest
@@ -165,6 +189,7 @@ func (ctrl *MedicalController) CreateSchedule(c *gin.Context) {
 // @Param scheduleId path string true "排班ID"
 // @Param request body models.SaveScheduleRequest true "实际排班"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/schedules/{scheduleId} [put]
 func (ctrl *MedicalController) UpdateSchedule(c *gin.Context) {
 	var req models.SaveScheduleRequest
@@ -187,6 +212,7 @@ func (ctrl *MedicalController) UpdateSchedule(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param request body []string true "排班ID列表"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/schedules [delete]
 func (ctrl *MedicalController) DeleteDraftSchedules(c *gin.Context) {
 	var scheduleIDs []string
@@ -209,6 +235,7 @@ func (ctrl *MedicalController) DeleteDraftSchedules(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param request body models.GenerateSchedulesRequest true "生成范围和幂等键"
 // @Success 200 {object} models.Response{data=models.GenerateSchedulesResponse}
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/schedules/generate [post]
 func (ctrl *MedicalController) GenerateSchedules(c *gin.Context) {
 	var req models.GenerateSchedulesRequest
@@ -232,6 +259,7 @@ func (ctrl *MedicalController) GenerateSchedules(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param request body models.PublishSchedulesRequest true "排班ID列表"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/schedules/publish [post]
 func (ctrl *MedicalController) PublishSchedules(c *gin.Context) {
 	var req models.PublishSchedulesRequest
@@ -255,6 +283,7 @@ func (ctrl *MedicalController) PublishSchedules(c *gin.Context) {
 // @Param scheduleId path string true "排班ID"
 // @Param request body models.StopScheduleRequest true "停诊原因"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/schedules/{scheduleId}/stop [put]
 func (ctrl *MedicalController) StopSchedule(c *gin.Context) {
 	var req models.StopScheduleRequest
@@ -276,6 +305,7 @@ func (ctrl *MedicalController) StopSchedule(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param scheduleId path string true "排班ID"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/schedules/{scheduleId}/finish [put]
 func (ctrl *MedicalController) FinishSchedule(c *gin.Context) {
 	if err := ctrl.scheduleService.FinishSchedule(c.Param("scheduleId"), medicalOperatorID(c)); err != nil {
@@ -298,7 +328,8 @@ func (ctrl *MedicalController) FinishSchedule(c *gin.Context) {
 // @Param endDate query string false "目标周结束日期"
 // @Param sorts query string false "排序"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.ScheduleAutoTaskResponse}}
-// @Router /medical/schedule-tasks [get]
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /medical/scheduleTasks [get]
 func (ctrl *MedicalController) GetScheduleAutoTaskList(c *gin.Context) {
 	var req models.ScheduleAutoTaskListRequest
 	if err := c.ShouldBindQuery(&req); err != nil {

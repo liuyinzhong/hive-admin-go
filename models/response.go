@@ -70,11 +70,11 @@ type MenuTreeResponse struct {
 	ID          string              `json:"id" example:"UUID"`                              // 菜单ID
 	Pid         *string             `json:"pid" example:"UUID"`                             // 上级菜单ID
 	Type        string              `json:"type" example:"menu"`                            // 菜单类型 catalog=目录 menu=菜单
-	AuthCode    *string             `json:"authCode" example:"sys:analytics"`               // 权限标识
+	AuthCode    *string             `json:"authCode" example:"system:analytics:view"`       // 权限标识
 	Children    []*MenuTreeResponse `json:"children"`                                       // 子菜单
 	Component   *string             `json:"component" example:"/dashboard/analytics/index"` // 页面组件路径
 	Meta        MenuMeta            `json:"meta"`                                           // 菜单元数据
-	Name        string              `json:"name" example:"Analytics"`                       // 菜单名称
+	Name        *string             `json:"name" example:"Analytics"`                       // 路由名称，按钮为空
 	Path        *string             `json:"path" example:"/analytics"`                      // 路由地址
 	CreatorId   *string             `json:"creatorId" example:"UUID"`                       // 创建人id
 	CreatorName *string             `json:"creatorName" example:"管理员"`                      // 创建人姓名
@@ -138,9 +138,9 @@ type MenuListRequest struct {
 type CreateMenuRequest struct {
 	Pid       *string  `json:"pid" example:"UUID"`                             // 上级菜单ID，空表示顶级菜单
 	Type      string   `json:"type" binding:"required" example:"menu"`         // 菜单类型 catalog=目录 menu=菜单
-	AuthCode  *string  `json:"authCode" example:"sys:analytics"`               // 权限标识
+	AuthCode  *string  `json:"authCode" example:"system:analytics:view"`       // 权限标识
 	Component *string  `json:"component" example:"/dashboard/analytics/index"` // 页面组件路径
-	Name      string   `json:"name" binding:"required" example:"Analytics"`    // 菜单名称
+	Name      *string  `json:"name" example:"Analytics"`                       // 路由名称，按钮为空
 	Path      *string  `json:"path" example:"/analytics"`                      // 路由地址
 	Meta      MenuMeta `json:"meta" binding:"required"`                        // 菜单元数据
 	Status    int      `json:"status" example:"1"`                             // 状态 0=禁用 1=启用
@@ -149,9 +149,9 @@ type CreateMenuRequest struct {
 type UpdateMenuRequest struct {
 	Pid       *string  `json:"pid" example:"UUID"`                             // 上级菜单ID，空表示顶级菜单
 	Type      string   `json:"type" binding:"required" example:"menu"`         // 菜单类型 catalog=目录 menu=菜单
-	AuthCode  *string  `json:"authCode" example:"sys:analytics"`               // 权限标识
+	AuthCode  *string  `json:"authCode" example:"system:analytics:view"`       // 权限标识
 	Component *string  `json:"component" example:"/dashboard/analytics/index"` // 页面组件路径
-	Name      string   `json:"name" binding:"required" example:"Analytics"`    // 菜单名称
+	Name      *string  `json:"name" example:"Analytics"`                       // 路由名称，按钮为空
 	Path      *string  `json:"path" example:"/analytics"`                      // 路由地址
 	Meta      MenuMeta `json:"meta" binding:"required"`                        // 菜单元数据
 	Status    int      `json:"status" example:"1"`                             // 状态 0=禁用 1=启用

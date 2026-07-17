@@ -18,6 +18,7 @@ import (
 // @Param status query int false "状态"
 // @Success 200 {object} models.Response{data=[]models.DeptTreeResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/depts [get]
 func (ctrl *SystemController) GetDeptTree(c *gin.Context) {
 	var req models.DeptListRequest
@@ -66,6 +67,7 @@ func (ctrl *SystemController) GetAllDepts(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/depts [post]
 func (ctrl *SystemController) CreateDept(c *gin.Context) {
 	var req models.CreateDeptRequest
@@ -93,6 +95,7 @@ func (ctrl *SystemController) CreateDept(c *gin.Context) {
 // @Success 200 {object} models.Response{data=models.DeptTreeResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/depts/{deptId} [get]
 func (ctrl *SystemController) GetDeptDetail(c *gin.Context) {
 	deptId := c.Param("deptId")
@@ -122,6 +125,7 @@ func (ctrl *SystemController) GetDeptDetail(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/depts/{deptId} [put]
 func (ctrl *SystemController) UpdateDept(c *gin.Context) {
 	deptId := c.Param("deptId")
@@ -155,6 +159,7 @@ func (ctrl *SystemController) UpdateDept(c *gin.Context) {
 // @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/depts [delete]
 func (ctrl *SystemController) DeleteDepts(c *gin.Context) {
 	var ids []string

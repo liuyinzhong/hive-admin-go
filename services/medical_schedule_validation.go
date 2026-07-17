@@ -51,6 +51,26 @@ type preparedSchedule struct {
 	remark           *string
 }
 
+func normalizeScheduleTemplateWeekdays(values []int) ([]int, error) {
+	if len(values) == 0 || len(values) > 7 {
+		return nil, fmt.Errorf("%w: 星期至少选择1项且最多选择7项", ErrMedicalInvalidInput)
+	}
+	seen := make(map[int]struct{}, len(values))
+	weekdays := make([]int, 0, len(values))
+	for _, weekday := range values {
+		if weekday < 1 || weekday > 7 {
+			return nil, fmt.Errorf("%w: 星期必须在1到7之间", ErrMedicalInvalidInput)
+		}
+		if _, exists := seen[weekday]; exists {
+			return nil, fmt.Errorf("%w: 星期不能重复", ErrMedicalInvalidInput)
+		}
+		seen[weekday] = struct{}{}
+		weekdays = append(weekdays, weekday)
+	}
+	sort.Ints(weekdays)
+	return weekdays, nil
+}
+
 func prepareScheduleTemplateRequest(req models.SaveScheduleTemplateRequest) (*preparedScheduleTemplate, error) {
 	templateName := strings.TrimSpace(req.TemplateName)
 	if templateName == "" || len([]rune(templateName)) > 64 {

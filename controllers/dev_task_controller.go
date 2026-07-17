@@ -29,6 +29,7 @@ import (
 // @Param sorts query string false "排序参数 排序时仅支持：taskTitle、taskStatus、startDate、endDate 的排序"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.TaskResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/tasks [get]
 func (dc *DevController) GetTasks(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -124,6 +125,7 @@ func (dc *DevController) GetAllTasks(c *gin.Context) {
 // @Success 200 {object} models.Response{data=models.TaskResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/tasks/{taskNum} [get]
 func (dc *DevController) GetTask(c *gin.Context) {
 	taskNum, err := strconv.Atoi(c.Param("taskNum"))
@@ -151,6 +153,7 @@ func (dc *DevController) GetTask(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/tasks [post]
 func (dc *DevController) CreateTask(c *gin.Context) {
 	var req models.CreateTaskRequest
@@ -179,6 +182,7 @@ func (dc *DevController) CreateTask(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/tasks/batch [post]
 func (dc *DevController) CreateTasks(c *gin.Context) {
 	var reqs []models.CreateTaskRequest
@@ -208,6 +212,7 @@ func (dc *DevController) CreateTasks(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/tasks/{taskId} [put]
 func (dc *DevController) UpdateTask(c *gin.Context) {
 	taskID := c.Param("taskId")
@@ -239,6 +244,7 @@ func (dc *DevController) UpdateTask(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/tasks/{taskId}/field [put]
 func (dc *DevController) UpdateTaskField(c *gin.Context) {
 	taskID := c.Param("taskId")
@@ -270,6 +276,7 @@ func (dc *DevController) UpdateTaskField(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/tasks/{taskId}/next [put]
 func (dc *DevController) UpdateTaskNext(c *gin.Context) {
 	taskID := c.Param("taskId")
@@ -300,6 +307,7 @@ func (dc *DevController) UpdateTaskNext(c *gin.Context) {
 // @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/tasks [delete]
 func (dc *DevController) DeleteTasks(c *gin.Context) {
 	var ids []string

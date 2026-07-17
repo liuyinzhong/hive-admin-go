@@ -29,6 +29,7 @@ type WorkflowController struct{}
 // @Param sorts query string false "排序参数，支持：definitionKey、definitionName、category、status、version、createDate、updateDate"
 // @Success 200 {object} models.Response{data=utils.PaginationResponse{items=[]models.WorkflowDefinitionResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/definitions [get]
 func (wc *WorkflowController) GetWorkflowDefinitions(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -95,6 +96,7 @@ func (wc *WorkflowController) GetAllWorkflowDefinitions(c *gin.Context) {
 // @Success 200 {object} models.Response{data=models.WorkflowDefinitionResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/definitions/{definitionId} [get]
 func (wc *WorkflowController) GetWorkflowDefinition(c *gin.Context) {
 	definitionID := c.Param("definitionId")
@@ -117,6 +119,7 @@ func (wc *WorkflowController) GetWorkflowDefinition(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/definitions [post]
 func (wc *WorkflowController) CreateWorkflowDefinition(c *gin.Context) {
 	var req models.CreateWorkflowDefinitionRequest
@@ -145,6 +148,7 @@ func (wc *WorkflowController) CreateWorkflowDefinition(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/definitions/{definitionId} [put]
 func (wc *WorkflowController) UpdateWorkflowDefinition(c *gin.Context) {
 	definitionID := c.Param("definitionId")
@@ -174,6 +178,7 @@ func (wc *WorkflowController) UpdateWorkflowDefinition(c *gin.Context) {
 // @Success 200 {object} models.Response "保存成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/definitions/{definitionId}/canvas [put]
 func (wc *WorkflowController) UpdateWorkflowCanvas(c *gin.Context) {
 	definitionID := c.Param("definitionId")
@@ -202,7 +207,8 @@ func (wc *WorkflowController) UpdateWorkflowCanvas(c *gin.Context) {
 // @Param request body models.UpdateWorkflowFormSchemaRequest true "表单 Schema ID"
 // @Success 200 {object} models.Response "保存成功"
 // @Failure 400 {object} models.Response "参数或表单配置错误"
-// @Router /workflow/definitions/{definitionId}/form-schema [put]
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /workflow/definitions/{definitionId}/formSchema [put]
 func (wc *WorkflowController) UpdateWorkflowFormSchema(c *gin.Context) {
 	var req models.UpdateWorkflowFormSchemaRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -227,6 +233,7 @@ func (wc *WorkflowController) UpdateWorkflowFormSchema(c *gin.Context) {
 // @Success 200 {object} models.Response "发布成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/definitions/{definitionId}/publish [put]
 func (wc *WorkflowController) PublishWorkflowDefinition(c *gin.Context) {
 	definitionID := c.Param("definitionId")
@@ -249,6 +256,7 @@ func (wc *WorkflowController) PublishWorkflowDefinition(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/definitions/{definitionId}/status [put]
 func (wc *WorkflowController) UpdateWorkflowDefinitionStatus(c *gin.Context) {
 	definitionID := c.Param("definitionId")
@@ -283,6 +291,7 @@ func (wc *WorkflowController) UpdateWorkflowDefinitionStatus(c *gin.Context) {
 // @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /workflow/definitions [delete]
 func (wc *WorkflowController) DeleteWorkflowDefinitions(c *gin.Context) {
 	var definitionIDs []string

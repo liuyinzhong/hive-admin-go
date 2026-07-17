@@ -52,6 +52,7 @@ func (ctrl *SystemController) UploadFile(c *gin.Context) {
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.FileResponse}} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/files [get]
 func (ctrl *SystemController) GetFileList(c *gin.Context) {
 	var req models.FileListRequest

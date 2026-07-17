@@ -21,6 +21,7 @@ import (
 // @Param status query int false "状态"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.RoleSimpleResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/roles [get]
 func (ctrl *SystemController) GetRoleList(c *gin.Context) {
 	var req models.RoleListRequest
@@ -69,6 +70,7 @@ func (ctrl *SystemController) GetAllRoles(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/roles [post]
 func (ctrl *SystemController) CreateRole(c *gin.Context) {
 	var req models.CreateRoleRequest
@@ -96,6 +98,7 @@ func (ctrl *SystemController) CreateRole(c *gin.Context) {
 // @Success 200 {object} models.Response{data=models.RoleDetailResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/roles/{roleId} [get]
 func (ctrl *SystemController) GetRoleDetail(c *gin.Context) {
 	roleId := c.Param("roleId")
@@ -125,6 +128,7 @@ func (ctrl *SystemController) GetRoleDetail(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/roles/{roleId} [put]
 func (ctrl *SystemController) UpdateRole(c *gin.Context) {
 	roleId := c.Param("roleId")
@@ -159,6 +163,7 @@ func (ctrl *SystemController) UpdateRole(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/roles/{roleId}/status [put]
 func (ctrl *SystemController) UpdateRoleStatus(c *gin.Context) {
 	roleId := c.Param("roleId")
@@ -192,6 +197,7 @@ func (ctrl *SystemController) UpdateRoleStatus(c *gin.Context) {
 // @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/roles [delete]
 func (ctrl *SystemController) DeleteRoles(c *gin.Context) {
 	var ids []string

@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"hive-admin-go/models"
+	"hive-admin-go/services"
 )
 
 // GetMenuTree 获取菜单树
@@ -18,6 +20,7 @@ import (
 // @Param status query int false "状态"
 // @Success 200 {object} models.Response{data=[]models.MenuTreeResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/menus [get]
 func (ctrl *SystemController) GetMenuTree(c *gin.Context) {
 	var req models.MenuListRequest
@@ -47,7 +50,7 @@ func (ctrl *SystemController) GetMenuTree(c *gin.Context) {
 // @Success 200 {object} models.Response{data=bool} "检查结果"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
-// @Router /system/menus/name-exists [get]
+// @Router /system/menus/nameExists [get]
 func (ctrl *SystemController) CheckMenuNameExists(c *gin.Context) {
 	name := c.Query("name")
 	id := c.Query("id")
@@ -78,7 +81,7 @@ func (ctrl *SystemController) CheckMenuNameExists(c *gin.Context) {
 // @Success 200 {object} models.Response{data=bool} "检查结果"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
-// @Router /system/menus/path-exists [get]
+// @Router /system/menus/pathExists [get]
 func (ctrl *SystemController) CheckMenuPathExists(c *gin.Context) {
 	path := c.Query("path")
 	id := c.Query("id")
@@ -108,6 +111,7 @@ func (ctrl *SystemController) CheckMenuPathExists(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/menus [post]
 func (ctrl *SystemController) CreateMenu(c *gin.Context) {
 	var req models.CreateMenuRequest
@@ -117,7 +121,7 @@ func (ctrl *SystemController) CreateMenu(c *gin.Context) {
 	}
 
 	if err := ctrl.menuService.CreateMenu(req); err != nil {
-		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
+		writeMenuMutationError(c, err)
 		return
 	}
 
@@ -135,6 +139,7 @@ func (ctrl *SystemController) CreateMenu(c *gin.Context) {
 // @Success 200 {object} models.Response{data=models.MenuTreeResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/menus/{id} [get]
 func (ctrl *SystemController) GetMenuDetail(c *gin.Context) {
 	id := c.Param("id")
@@ -164,6 +169,7 @@ func (ctrl *SystemController) GetMenuDetail(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/menus/{id} [put]
 func (ctrl *SystemController) UpdateMenu(c *gin.Context) {
 	id := c.Param("id")
@@ -179,11 +185,22 @@ func (ctrl *SystemController) UpdateMenu(c *gin.Context) {
 	}
 
 	if err := ctrl.menuService.UpdateMenu(id, req); err != nil {
-		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
+		writeMenuMutationError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+}
+
+func writeMenuMutationError(c *gin.Context, err error) {
+	switch {
+	case errors.Is(err, services.ErrInvalidPermissionCode),
+		errors.Is(err, services.ErrPermissionCodeConflict),
+		errors.Is(err, services.ErrMenuNameRequired):
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+	default:
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, "菜单保存失败"))
+	}
 }
 
 // DeleteMenus 删除菜单
@@ -197,6 +214,7 @@ func (ctrl *SystemController) UpdateMenu(c *gin.Context) {
 // @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/menus [delete]
 func (ctrl *SystemController) DeleteMenus(c *gin.Context) {
 	var ids []string

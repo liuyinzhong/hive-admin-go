@@ -35,6 +35,7 @@ func NewMedicalController() *MedicalController {
 // @Param keyword query string false "科室编码或名称"
 // @Param status query int false "状态 0停用 1启用"
 // @Success 200 {object} models.Response{data=[]models.MedicalDepartmentTreeResponse}
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/departments [get]
 func (ctrl *MedicalController) GetMedicalDepartmentTree(c *gin.Context) {
 	var req models.MedicalDepartmentListRequest
@@ -74,6 +75,7 @@ func (ctrl *MedicalController) GetAllMedicalDepartments(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param request body models.CreateMedicalDepartmentRequest true "临床科室信息"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/departments [post]
 func (ctrl *MedicalController) CreateMedicalDepartment(c *gin.Context) {
 	var req models.CreateMedicalDepartmentRequest
@@ -95,6 +97,7 @@ func (ctrl *MedicalController) CreateMedicalDepartment(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param departmentId path string true "临床科室ID"
 // @Success 200 {object} models.Response{data=models.MedicalDepartmentTreeResponse}
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/departments/{departmentId} [get]
 func (ctrl *MedicalController) GetMedicalDepartmentDetail(c *gin.Context) {
 	result, err := ctrl.departmentService.GetDepartmentDetail(c.Param("departmentId"))
@@ -114,6 +117,7 @@ func (ctrl *MedicalController) GetMedicalDepartmentDetail(c *gin.Context) {
 // @Param departmentId path string true "临床科室ID"
 // @Param request body models.UpdateMedicalDepartmentRequest true "临床科室信息"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/departments/{departmentId} [put]
 func (ctrl *MedicalController) UpdateMedicalDepartment(c *gin.Context) {
 	var req models.UpdateMedicalDepartmentRequest
@@ -137,6 +141,7 @@ func (ctrl *MedicalController) UpdateMedicalDepartment(c *gin.Context) {
 // @Param departmentId path string true "临床科室ID"
 // @Param request body models.UpdateMedicalStatusRequest true "状态"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/departments/{departmentId}/status [put]
 func (ctrl *MedicalController) UpdateMedicalDepartmentStatus(c *gin.Context) {
 	var req models.UpdateMedicalStatusRequest
@@ -159,6 +164,7 @@ func (ctrl *MedicalController) UpdateMedicalDepartmentStatus(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param request body []string true "临床科室ID列表"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/departments [delete]
 func (ctrl *MedicalController) DeleteMedicalDepartments(c *gin.Context) {
 	var ids []string
@@ -187,6 +193,7 @@ func (ctrl *MedicalController) DeleteMedicalDepartments(c *gin.Context) {
 // @Param status query int false "状态 0停用 1启用"
 // @Param sorts query string false "排序"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.DoctorResponse}}
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/doctors [get]
 func (ctrl *MedicalController) GetDoctorList(c *gin.Context) {
 	var req models.DoctorListRequest
@@ -226,6 +233,7 @@ func (ctrl *MedicalController) GetAllDoctors(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param request body models.SaveDoctorRequest true "医生档案"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/doctors [post]
 func (ctrl *MedicalController) CreateDoctor(c *gin.Context) {
 	var req models.SaveDoctorRequest
@@ -247,6 +255,7 @@ func (ctrl *MedicalController) CreateDoctor(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param doctorId path string true "医生ID"
 // @Success 200 {object} models.Response{data=models.DoctorResponse}
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/doctors/{doctorId} [get]
 func (ctrl *MedicalController) GetDoctorDetail(c *gin.Context) {
 	result, err := ctrl.doctorService.GetDoctorDetail(c.Param("doctorId"))
@@ -266,6 +275,7 @@ func (ctrl *MedicalController) GetDoctorDetail(c *gin.Context) {
 // @Param doctorId path string true "医生ID"
 // @Param request body models.SaveDoctorRequest true "医生档案"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/doctors/{doctorId} [put]
 func (ctrl *MedicalController) UpdateDoctor(c *gin.Context) {
 	var req models.SaveDoctorRequest
@@ -289,6 +299,7 @@ func (ctrl *MedicalController) UpdateDoctor(c *gin.Context) {
 // @Param doctorId path string true "医生ID"
 // @Param request body models.UpdateMedicalStatusRequest true "状态"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/doctors/{doctorId}/status [put]
 func (ctrl *MedicalController) UpdateDoctorStatus(c *gin.Context) {
 	var req models.UpdateMedicalStatusRequest
@@ -311,6 +322,7 @@ func (ctrl *MedicalController) UpdateDoctorStatus(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param request body []string true "医生ID列表"
 // @Success 200 {object} models.Response
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/doctors [delete]
 func (ctrl *MedicalController) DeleteDoctors(c *gin.Context) {
 	var ids []string

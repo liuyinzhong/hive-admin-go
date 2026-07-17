@@ -20,6 +20,7 @@ import (
 // @Success 200 {object} models.Response{data=[]models.ChangeHistoryResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/changeHistory [get]
 func (dc *DevController) GetChangeHistory(c *gin.Context) {
 	businessID := c.Query("businessId")
@@ -47,6 +48,7 @@ func (dc *DevController) GetChangeHistory(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/changeHistory [post]
 func (dc *DevController) CreateChangeHistory(c *gin.Context) {
 	var req models.CreateChangeHistoryRequest

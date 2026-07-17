@@ -25,6 +25,7 @@ import (
 // @Param sorts query string false "排序参数"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.VersionResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/versions [get]
 func (dc *DevController) GetVersions(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -94,6 +95,7 @@ func (dc *DevController) GetAllVersions(c *gin.Context) {
 // @Success 200 {object} models.Response{data=models.VersionResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/versions/{versionId} [get]
 func (dc *DevController) GetVersion(c *gin.Context) {
 	versionID := c.Param("versionId")
@@ -115,6 +117,7 @@ func (dc *DevController) GetVersion(c *gin.Context) {
 // @Param projectId query string true "项目ID"
 // @Success 200 {object} models.Response{data=models.VersionResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/versions/getLastVersion [get]
 func (dc *DevController) GetLatestVersion(c *gin.Context) {
 	projectID := c.Query("projectId")
@@ -142,6 +145,7 @@ func (dc *DevController) GetLatestVersion(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/versions [post]
 func (dc *DevController) CreateVersion(c *gin.Context) {
 	var req models.CreateVersionRequest
@@ -180,6 +184,7 @@ func (dc *DevController) CreateVersion(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/versions/{versionId} [put]
 func (dc *DevController) UpdateVersion(c *gin.Context) {
 	versionID := c.Param("versionId")
@@ -220,6 +225,7 @@ func (dc *DevController) UpdateVersion(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/versions/{versionId}/next [put]
 func (dc *DevController) UpdateVersionNext(c *gin.Context) {
 	versionID := c.Param("versionId")
@@ -250,6 +256,7 @@ func (dc *DevController) UpdateVersionNext(c *gin.Context) {
 // @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/versions [delete]
 func (dc *DevController) DeleteVersions(c *gin.Context) {
 	var ids []string

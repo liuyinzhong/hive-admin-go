@@ -19,6 +19,7 @@ import (
 // @Param projectId query string false "项目ID"
 // @Success 200 {object} models.Response{data=[]models.ModuleResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/modules [get]
 func (dc *DevController) GetModules(c *gin.Context) {
 	params := make(map[string]interface{})
@@ -46,6 +47,7 @@ func (dc *DevController) GetModules(c *gin.Context) {
 // @Success 200 {object} models.Response{data=models.ModuleResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/modules/{moduleId} [get]
 func (dc *DevController) GetModule(c *gin.Context) {
 	moduleID := c.Param("moduleId")
@@ -68,6 +70,7 @@ func (dc *DevController) GetModule(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/modules [post]
 func (dc *DevController) CreateModule(c *gin.Context) {
 	var req models.CreateModuleRequest
@@ -97,6 +100,7 @@ func (dc *DevController) CreateModule(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/modules/{moduleId} [put]
 func (dc *DevController) UpdateModule(c *gin.Context) {
 	moduleID := c.Param("moduleId")
@@ -126,6 +130,7 @@ func (dc *DevController) UpdateModule(c *gin.Context) {
 // @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/modules [delete]
 func (dc *DevController) DeleteModules(c *gin.Context) {
 	var ids []string

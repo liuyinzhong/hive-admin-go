@@ -18,6 +18,7 @@ import (
 // @Security ApiKeyAuth
 // @Success 200 {object} models.Response{data=[]models.ProjectResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/projects [get]
 func (dc *DevController) GetProjects(c *gin.Context) {
 	projects, err := services.GetAllProjects()
@@ -39,6 +40,7 @@ func (dc *DevController) GetProjects(c *gin.Context) {
 // @Success 200 {object} models.Response{data=models.ProjectResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/projects/{projectId} [get]
 func (dc *DevController) GetProject(c *gin.Context) {
 	projectID := c.Param("projectId")
@@ -61,6 +63,7 @@ func (dc *DevController) GetProject(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/projects [post]
 func (dc *DevController) CreateProject(c *gin.Context) {
 	var req models.CreateProjectRequest
@@ -90,6 +93,7 @@ func (dc *DevController) CreateProject(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/projects/{projectId} [put]
 func (dc *DevController) UpdateProject(c *gin.Context) {
 	projectID := c.Param("projectId")

@@ -337,7 +337,7 @@ definitions:
     properties:
       authCode:
         description: 权限标识
-        example: sys:analytics
+        example: system:analytics:view
         type: string
       component:
         description: 页面组件路径
@@ -348,7 +348,7 @@ definitions:
         - $ref: '#/definitions/models.MenuMeta'
         description: 菜单元数据
       name:
-        description: 菜单名称
+        description: 路由名称，按钮为空
         example: Analytics
         type: string
       path:
@@ -369,7 +369,6 @@ definitions:
         type: string
     required:
     - meta
-    - name
     - type
     type: object
   models.CreateModuleRequest:
@@ -454,6 +453,60 @@ definitions:
         type: integer
     required:
     - roleTitle
+    type: object
+  models.CreateScheduleTemplateRequest:
+    properties:
+      defaultSlotQuota:
+        maximum: 99
+        minimum: 1
+        type: integer
+      departmentId:
+        type: string
+      doctorId:
+        type: string
+      effectiveDate:
+        type: string
+      endTime:
+        type: string
+      expiryDate:
+        type: string
+      registrationType:
+        type: string
+      remark:
+        maxLength: 512
+        type: string
+      slotQuotaConfig:
+        items:
+          $ref: '#/definitions/models.ScheduleSlotQuotaRequest'
+        maxItems: 48
+        type: array
+      startTime:
+        type: string
+      status:
+        enum:
+        - 0
+        - 1
+        type: integer
+      templateName:
+        maxLength: 64
+        type: string
+      weekdays:
+        description: Weekdays 星期多选值，每项范围为1（周一）至7（周日）。
+        items:
+          type: integer
+        maxItems: 7
+        minItems: 1
+        type: array
+    required:
+    - defaultSlotQuota
+    - departmentId
+    - doctorId
+    - effectiveDate
+    - endTime
+    - registrationType
+    - startTime
+    - templateName
+    - weekdays
     type: object
   models.CreateStoryRequest:
     properties:
@@ -1143,7 +1196,7 @@ definitions:
     properties:
       authCode:
         description: 权限标识
-        example: sys:analytics
+        example: system:analytics:view
         type: string
       children:
         description: 子菜单
@@ -1175,7 +1228,7 @@ definitions:
         - $ref: '#/definitions/models.MenuMeta'
         description: 菜单元数据
       name:
-        description: 菜单名称
+        description: 路由名称，按钮为空
         example: Analytics
         type: string
       path:
@@ -2170,7 +2223,7 @@ definitions:
     properties:
       authCode:
         description: 权限标识
-        example: sys:analytics
+        example: system:analytics:view
         type: string
       component:
         description: 页面组件路径
@@ -2181,7 +2234,7 @@ definitions:
         - $ref: '#/definitions/models.MenuMeta'
         description: 菜单元数据
       name:
-        description: 菜单名称
+        description: 路由名称，按钮为空
         example: Analytics
         type: string
       path:
@@ -2202,7 +2255,6 @@ definitions:
         type: string
     required:
     - meta
-    - name
     - type
     type: object
   models.UpdateModuleRequest:
@@ -3133,6 +3185,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 删除缺陷
@@ -3207,6 +3263,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取缺陷列表
@@ -3240,6 +3300,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建缺陷
@@ -3279,6 +3343,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新缺陷
@@ -3318,6 +3386,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 确认缺陷
@@ -3357,6 +3429,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新缺陷字段
@@ -3396,6 +3472,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 缺陷流转状态
@@ -3434,6 +3514,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取缺陷详情
@@ -3528,6 +3612,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 批量创建缺陷
@@ -3568,6 +3656,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取变更记录
@@ -3601,6 +3693,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建变更记录
@@ -3637,6 +3733,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 删除模块
@@ -3670,6 +3770,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取模块列表
@@ -3703,6 +3807,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建模块
@@ -3741,6 +3849,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取模块详情
@@ -3779,6 +3891,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新模块
@@ -3808,6 +3924,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取项目列表
@@ -3841,6 +3961,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建项目
@@ -3879,6 +4003,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取项目详情
@@ -3917,6 +4045,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新项目
@@ -3953,6 +4085,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 删除需求
@@ -4023,6 +4159,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取需求列表
@@ -4056,6 +4196,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建需求
@@ -4095,6 +4239,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新需求
@@ -4134,6 +4282,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新需求字段
@@ -4173,6 +4325,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 需求流转状态
@@ -4211,6 +4367,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取需求详情
@@ -4301,6 +4461,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 批量创建需求
@@ -4337,6 +4501,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 删除任务
@@ -4407,6 +4575,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取任务列表
@@ -4440,6 +4612,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建任务
@@ -4479,6 +4655,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新任务
@@ -4518,6 +4698,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新任务字段
@@ -4557,6 +4741,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 任务流转状态
@@ -4595,6 +4783,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取任务详情
@@ -4685,6 +4877,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 批量创建任务
@@ -4721,6 +4917,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 删除版本
@@ -4779,6 +4979,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取版本列表
@@ -4812,6 +5016,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建版本
@@ -4850,6 +5058,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取版本详情
@@ -4888,6 +5100,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新版本
@@ -4927,6 +5143,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 版本流转状态
@@ -5002,6 +5222,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取最新版本号
@@ -5025,6 +5249,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -5074,6 +5302,10 @@ paths:
                 data:
                   $ref: '#/definitions/utils.PaginationResponse'
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取表单 Schema 列表
@@ -5094,6 +5326,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -5121,6 +5357,10 @@ paths:
                 data:
                   $ref: '#/definitions/models.FormSchemaResponse'
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取表单 Schema 详情
@@ -5146,6 +5386,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -5194,6 +5438,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 批量删除临床科室
@@ -5223,6 +5471,10 @@ paths:
                     $ref: '#/definitions/models.MedicalDepartmentTreeResponse'
                   type: array
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取临床科室树
@@ -5243,6 +5495,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -5270,6 +5526,10 @@ paths:
                 data:
                   $ref: '#/definitions/models.MedicalDepartmentTreeResponse'
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取临床科室详情
@@ -5295,6 +5555,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -5323,6 +5587,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -5369,6 +5637,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -5429,6 +5701,10 @@ paths:
                         type: array
                     type: object
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取医生列表
@@ -5449,6 +5725,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -5476,6 +5756,10 @@ paths:
                 data:
                   $ref: '#/definitions/models.DoctorResponse'
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取医生详情
@@ -5501,6 +5785,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -5531,6 +5819,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新医生状态
@@ -5557,7 +5849,7 @@ paths:
       summary: 获取所有启用医生选项
       tags:
       - 医疗管理-医生档案
-  /medical/registration-fee-rules:
+  /medical/registrationFeeRules:
     get:
       parameters:
       - description: 页码
@@ -5611,6 +5903,10 @@ paths:
                         type: array
                     type: object
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取挂号费规则列表
@@ -5633,12 +5929,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建挂号费规则
       tags:
       - 医疗管理-挂号费
-  /medical/registration-fee-rules/{feeRuleId}/adjustments:
+  /medical/registrationFeeRules/{feeRuleId}/adjustments:
     post:
       consumes:
       - application/json
@@ -5661,12 +5961,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 调整挂号费并生成新版本
       tags:
       - 医疗管理-挂号费
-  /medical/schedule-tasks:
+  /medical/scheduleTasks:
     get:
       parameters:
       - description: 页码
@@ -5716,12 +6020,16 @@ paths:
                         type: array
                     type: object
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取自动任务执行记录
       tags:
       - 医疗管理-排班
-  /medical/schedule-templates:
+  /medical/scheduleTemplates:
     get:
       parameters:
       - description: 页码
@@ -5771,6 +6079,10 @@ paths:
                         type: array
                     type: object
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取周期排班模板列表
@@ -5785,7 +6097,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/models.SaveScheduleTemplateRequest'
+          $ref: '#/definitions/models.CreateScheduleTemplateRequest'
       produces:
       - application/json
       responses:
@@ -5793,12 +6105,40 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建周期排班模板
       tags:
       - 医疗管理-排班
-  /medical/schedule-templates/{templateId}:
+  /medical/scheduleTemplates/{templateId}:
+    delete:
+      description: 逻辑删除周期排班模板，不影响已生成的实际排班
+      parameters:
+      - description: 排班模板ID
+        in: path
+        name: templateId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除周期排班模板
+      tags:
+      - 医疗管理-排班
     put:
       consumes:
       - application/json
@@ -5821,12 +6161,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新周期排班模板
       tags:
       - 医疗管理-排班
-  /medical/schedule-templates/{templateId}/status:
+  /medical/scheduleTemplates/{templateId}/status:
     put:
       consumes:
       - application/json
@@ -5847,6 +6191,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -5872,6 +6220,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -5936,6 +6288,10 @@ paths:
                         type: array
                     type: object
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取实际排班列表
@@ -5956,6 +6312,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -5986,6 +6346,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 编辑草稿排班
@@ -6004,6 +6368,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6034,6 +6402,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 停诊
@@ -6062,6 +6434,10 @@ paths:
                 data:
                   $ref: '#/definitions/models.GenerateSchedulesResponse'
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 批量生成未来排班
@@ -6083,6 +6459,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6121,6 +6501,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 删除部门
@@ -6154,6 +6538,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取部门树
@@ -6187,6 +6575,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建部门
@@ -6225,6 +6617,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取部门详情
@@ -6263,6 +6659,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新部门
@@ -6328,6 +6728,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 删除字典
@@ -6361,6 +6765,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取字典树
@@ -6394,6 +6802,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建字典
@@ -6432,6 +6844,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取字典详情
@@ -6470,6 +6886,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新字典
@@ -6511,6 +6931,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新字典状态
@@ -6575,6 +6999,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取文件列表
@@ -6611,6 +7039,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 删除菜单
@@ -6644,6 +7076,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取菜单树
@@ -6677,6 +7113,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建菜单
@@ -6715,6 +7155,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取菜单详情
@@ -6753,12 +7197,16 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新菜单
       tags:
       - 系统管理-菜单管理
-  /system/menus/name-exists:
+  /system/menus/nameExists:
     get:
       consumes:
       - application/json
@@ -6800,7 +7248,7 @@ paths:
       summary: 检查菜单名称是否存在
       tags:
       - 系统管理-菜单管理
-  /system/menus/path-exists:
+  /system/menus/pathExists:
     get:
       consumes:
       - application/json
@@ -6873,6 +7321,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 删除角色
@@ -6923,6 +7375,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取角色列表
@@ -6956,6 +7412,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建角色
@@ -6994,6 +7454,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取角色详情
@@ -7032,6 +7496,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新角色
@@ -7073,6 +7541,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新角色状态
@@ -7176,6 +7648,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 删除用户
@@ -7238,6 +7714,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取用户列表
@@ -7271,6 +7751,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建用户
@@ -7309,6 +7793,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取用户详情
@@ -7347,6 +7835,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新用户
@@ -7388,6 +7880,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新用户状态
@@ -7461,6 +7957,10 @@ paths:
                         type: array
                     type: object
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取我的抄送
@@ -7479,6 +7979,10 @@ paths:
       responses:
         "200":
           description: 操作成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -7517,6 +8021,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 删除流程定义
@@ -7579,6 +8087,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取流程定义列表
@@ -7612,6 +8124,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 创建流程定义
@@ -7650,6 +8166,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取流程定义详情
@@ -7688,6 +8208,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新流程定义
@@ -7727,12 +8251,16 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 保存流程画布
       tags:
       - 流程管理-流程定义
-  /workflow/definitions/{definitionId}/form-schema:
+  /workflow/definitions/{definitionId}/formSchema:
     put:
       consumes:
       - application/json
@@ -7758,6 +8286,10 @@ paths:
             $ref: '#/definitions/models.Response'
         "400":
           description: 参数或表单配置错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -7793,6 +8325,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 发布流程定义
@@ -7832,6 +8368,10 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新流程定义状态
@@ -7913,6 +8453,10 @@ paths:
                         type: array
                     type: object
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取我发起的流程
@@ -7945,6 +8489,10 @@ paths:
           description: 参数或流程配置错误
           schema:
             $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 发起流程实例
@@ -7970,6 +8518,10 @@ paths:
                 data:
                   $ref: '#/definitions/models.WorkflowInstanceDetailResponse'
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取流程实例详情
@@ -7988,6 +8540,10 @@ paths:
       responses:
         "200":
           description: 撤销成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -8029,12 +8585,16 @@ paths:
                         type: array
                     type: object
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取我的待办和已办
       tags:
       - 流程管理-流程任务
-  /workflow/tasks/{taskId}/add-sign:
+  /workflow/tasks/{taskId}/addSign:
     put:
       consumes:
       - application/json
@@ -8055,6 +8615,10 @@ paths:
       responses:
         "200":
           description: 加签成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -8085,6 +8649,10 @@ paths:
           description: 审批成功
           schema:
             $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 审批通过
@@ -8113,12 +8681,16 @@ paths:
           description: 驳回成功
           schema:
             $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 审批驳回
       tags:
       - 流程管理-流程任务
-  /workflow/tasks/{taskId}/remove-sign:
+  /workflow/tasks/{taskId}/removeSign:
     put:
       consumes:
       - application/json
@@ -8139,6 +8711,10 @@ paths:
       responses:
         "200":
           description: 减签成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -8169,12 +8745,16 @@ paths:
           description: 退回成功
           schema:
             $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 退回审批任务
       tags:
       - 流程管理-流程任务
-  /workflow/tasks/{taskId}/return-targets:
+  /workflow/tasks/{taskId}/returnTargets:
     get:
       parameters:
       - description: 任务ID
@@ -8196,6 +8776,10 @@ paths:
                     $ref: '#/definitions/models.WorkflowReturnTargetResponse'
                   type: array
               type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 查询可退回节点
@@ -8222,6 +8806,10 @@ paths:
       responses:
         "200":
           description: 转交成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
       security:

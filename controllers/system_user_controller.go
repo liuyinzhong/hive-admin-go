@@ -24,6 +24,7 @@ import (
 // @Param deptId query string false "部门ID，查询该部门及子部门的用户"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.ProfileResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/users [get]
 func (ctrl *SystemController) GetUserList(c *gin.Context) {
 	var req models.UserListRequest
@@ -75,6 +76,7 @@ func (ctrl *SystemController) GetAllUsers(c *gin.Context) {
 // @Success 200 {object} models.Response "创建成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/users [post]
 func (ctrl *SystemController) CreateUser(c *gin.Context) {
 	var req models.CreateUserRequest
@@ -102,6 +104,7 @@ func (ctrl *SystemController) CreateUser(c *gin.Context) {
 // @Success 200 {object} models.Response{data=models.ProfileResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/users/{userId} [get]
 func (ctrl *SystemController) GetUserDetail(c *gin.Context) {
 	userId := c.Param("userId")
@@ -131,6 +134,7 @@ func (ctrl *SystemController) GetUserDetail(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/users/{userId} [put]
 func (ctrl *SystemController) UpdateUser(c *gin.Context) {
 	userId := c.Param("userId")
@@ -165,6 +169,7 @@ func (ctrl *SystemController) UpdateUser(c *gin.Context) {
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/users/{userId}/status [put]
 func (ctrl *SystemController) UpdateUserStatus(c *gin.Context) {
 	userId := c.Param("userId")
@@ -198,6 +203,7 @@ func (ctrl *SystemController) UpdateUserStatus(c *gin.Context) {
 // @Success 200 {object} models.Response "删除成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/users [delete]
 func (ctrl *SystemController) DeleteUsers(c *gin.Context) {
 	var userIds []string
