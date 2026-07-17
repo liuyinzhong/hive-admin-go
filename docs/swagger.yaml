@@ -1,5 +1,18 @@
 basePath: /api
 definitions:
+  models.AdjustRegistrationFeeRuleRequest:
+    properties:
+      effectiveDate:
+        type: string
+      feeAmount:
+        type: string
+      remark:
+        maxLength: 512
+        type: string
+    required:
+    - effectiveDate
+    - feeAmount
+    type: object
   models.BugResponse:
     properties:
       avatar:
@@ -393,6 +406,30 @@ definitions:
         type: string
     required:
     - projectTitle
+    type: object
+  models.CreateRegistrationFeeRuleRequest:
+    properties:
+      departmentId:
+        type: string
+      doctorId:
+        type: string
+      effectiveDate:
+        type: string
+      expiryDate:
+        type: string
+      feeAmount:
+        type: string
+      registrationType:
+        type: string
+      remark:
+        maxLength: 512
+        type: string
+    required:
+    - departmentId
+    - doctorId
+    - effectiveDate
+    - feeAmount
+    - registrationType
     type: object
   models.CreateRoleRequest:
     properties:
@@ -925,6 +962,42 @@ definitions:
         example: "2026-07-15 15:30:26"
         type: string
     type: object
+  models.GenerateSchedulesRequest:
+    properties:
+      endDate:
+        type: string
+      idempotencyKey:
+        maxLength: 64
+        type: string
+      startDate:
+        type: string
+      templateIds:
+        items:
+          type: string
+        maxItems: 100
+        minItems: 1
+        type: array
+    required:
+    - endDate
+    - idempotencyKey
+    - startDate
+    - templateIds
+    type: object
+  models.GenerateSchedulesResponse:
+    properties:
+      batchId:
+        type: string
+      generatedCount:
+        type: integer
+      idempotent:
+        type: boolean
+      scheduleIds:
+        items:
+          type: string
+        type: array
+      skippedCount:
+        type: integer
+    type: object
   models.LoginRequest:
     properties:
       password:
@@ -1255,6 +1328,52 @@ definitions:
         example: crudelis
         type: string
     type: object
+  models.PublishSchedulesRequest:
+    properties:
+      scheduleIds:
+        items:
+          type: string
+        maxItems: 100
+        minItems: 1
+        type: array
+    required:
+    - scheduleIds
+    type: object
+  models.RegistrationFeeRuleResponse:
+    properties:
+      createDate:
+        type: string
+      departmentCode:
+        type: string
+      departmentId:
+        type: string
+      departmentName:
+        type: string
+      doctorId:
+        type: string
+      doctorName:
+        type: string
+      doctorNo:
+        type: string
+      effectiveDate:
+        type: string
+      expiryDate:
+        type: string
+      feeAmount:
+        type: string
+      feeRuleId:
+        type: string
+      periodStatus:
+        type: string
+      registrationType:
+        type: string
+      remark:
+        type: string
+      updateDate:
+        type: string
+      version:
+        type: integer
+    type: object
   models.Response:
     properties:
       code:
@@ -1382,6 +1501,266 @@ definitions:
     - primaryDepartmentId
     - professionalTitle
     type: object
+  models.SaveScheduleRequest:
+    properties:
+      defaultSlotQuota:
+        maximum: 99
+        minimum: 1
+        type: integer
+      departmentId:
+        type: string
+      doctorId:
+        type: string
+      endTime:
+        type: string
+      registrationType:
+        type: string
+      remark:
+        maxLength: 512
+        type: string
+      scheduleDate:
+        type: string
+      slotQuotaConfig:
+        items:
+          $ref: '#/definitions/models.ScheduleSlotQuotaRequest'
+        maxItems: 48
+        type: array
+      startTime:
+        type: string
+    required:
+    - defaultSlotQuota
+    - departmentId
+    - doctorId
+    - endTime
+    - registrationType
+    - scheduleDate
+    - startTime
+    type: object
+  models.SaveScheduleTemplateRequest:
+    properties:
+      defaultSlotQuota:
+        maximum: 99
+        minimum: 1
+        type: integer
+      departmentId:
+        type: string
+      doctorId:
+        type: string
+      effectiveDate:
+        type: string
+      endTime:
+        type: string
+      expiryDate:
+        type: string
+      registrationType:
+        type: string
+      remark:
+        maxLength: 512
+        type: string
+      slotQuotaConfig:
+        items:
+          $ref: '#/definitions/models.ScheduleSlotQuotaRequest'
+        maxItems: 48
+        type: array
+      startTime:
+        type: string
+      status:
+        enum:
+        - 0
+        - 1
+        type: integer
+      templateName:
+        maxLength: 64
+        type: string
+      weekday:
+        maximum: 7
+        minimum: 1
+        type: integer
+    required:
+    - defaultSlotQuota
+    - departmentId
+    - doctorId
+    - effectiveDate
+    - endTime
+    - registrationType
+    - startTime
+    - templateName
+    - weekday
+    type: object
+  models.ScheduleAutoTaskFailure:
+    properties:
+      doctorId:
+        type: string
+      doctorName:
+        type: string
+      reason:
+        type: string
+    type: object
+  models.ScheduleAutoTaskResponse:
+    properties:
+      executedAt:
+        type: string
+      failureDoctorCount:
+        type: integer
+      failures:
+        items:
+          $ref: '#/definitions/models.ScheduleAutoTaskFailure'
+        type: array
+      status:
+        type: integer
+      successDoctorCount:
+        type: integer
+      targetWeekEnd:
+        type: string
+      targetWeekStart:
+        type: string
+      taskId:
+        type: string
+      taskType:
+        type: string
+    type: object
+  models.ScheduleResponse:
+    properties:
+      bookedQuota:
+        type: integer
+      createDate:
+        type: string
+      defaultSlotQuota:
+        type: integer
+      departmentCode:
+        type: string
+      departmentId:
+        type: string
+      departmentName:
+        type: string
+      doctorId:
+        type: string
+      doctorName:
+        type: string
+      doctorNo:
+        type: string
+      endTime:
+        type: string
+      feeAmount:
+        type: string
+      feeRuleId:
+        type: string
+      feeRuleVersion:
+        type: integer
+      feeSnapshotStatus:
+        type: string
+      finishedAt:
+        type: string
+      generationBatchId:
+        type: string
+      publishedAt:
+        type: string
+      registrationType:
+        type: string
+      remainingQuota:
+        type: integer
+      remark:
+        type: string
+      scheduleDate:
+        type: string
+      scheduleId:
+        type: string
+      slots:
+        items:
+          $ref: '#/definitions/models.ScheduleSlotResponse'
+        type: array
+      startTime:
+        type: string
+      status:
+        type: integer
+      stopReason:
+        type: string
+      stoppedAt:
+        type: string
+      templateId:
+        type: string
+      totalQuota:
+        type: integer
+      updateDate:
+        type: string
+    type: object
+  models.ScheduleSlotQuotaRequest:
+    properties:
+      quota:
+        maximum: 99
+        minimum: 0
+        type: integer
+      startTime:
+        type: string
+    required:
+    - startTime
+    type: object
+  models.ScheduleSlotResponse:
+    properties:
+      bookedQuota:
+        type: integer
+      bookingStatus:
+        type: string
+      canBook:
+        type: boolean
+      endTime:
+        type: string
+      quota:
+        type: integer
+      remainingQuota:
+        type: integer
+      slotId:
+        type: string
+      startTime:
+        type: string
+    type: object
+  models.ScheduleTemplateResponse:
+    properties:
+      createDate:
+        type: string
+      defaultSlotQuota:
+        type: integer
+      departmentCode:
+        type: string
+      departmentId:
+        type: string
+      departmentName:
+        type: string
+      doctorId:
+        type: string
+      doctorName:
+        type: string
+      doctorNo:
+        type: string
+      effectiveDate:
+        type: string
+      endTime:
+        type: string
+      expiryDate:
+        type: string
+      registrationType:
+        type: string
+      remark:
+        type: string
+      slotQuotaConfig:
+        items:
+          $ref: '#/definitions/models.ScheduleSlotQuotaRequest'
+        type: array
+      startTime:
+        type: string
+      status:
+        type: integer
+      templateId:
+        type: string
+      templateName:
+        type: string
+      totalQuota:
+        type: integer
+      updateDate:
+        type: string
+      weekday:
+        type: integer
+    type: object
   models.StartWorkflowInstanceRequest:
     properties:
       businessKey:
@@ -1398,6 +1777,14 @@ definitions:
         type: object
     required:
     - definitionId
+    type: object
+  models.StopScheduleRequest:
+    properties:
+      reason:
+        maxLength: 512
+        type: string
+    required:
+    - reason
     type: object
   models.StoryResponse:
     properties:
@@ -5170,6 +5557,539 @@ paths:
       summary: 获取所有启用医生选项
       tags:
       - 医疗管理-医生档案
+  /medical/registration-fee-rules:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 医生或科室关键词
+        in: query
+        name: keyword
+        type: string
+      - description: 医生ID
+        in: query
+        name: doctorId
+        type: string
+      - description: 临床科室ID
+        in: query
+        name: departmentId
+        type: string
+      - description: 挂号类型字典值
+        in: query
+        name: registrationType
+        type: string
+      - description: 有效期状态 current/future/expired
+        in: query
+        name: periodStatus
+        type: string
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.RegistrationFeeRuleResponse'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取挂号费规则列表
+      tags:
+      - 医疗管理-挂号费
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 挂号费规则
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateRegistrationFeeRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建挂号费规则
+      tags:
+      - 医疗管理-挂号费
+  /medical/registration-fee-rules/{feeRuleId}/adjustments:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 挂号费规则ID
+        in: path
+        name: feeRuleId
+        required: true
+        type: string
+      - description: 调价信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.AdjustRegistrationFeeRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 调整挂号费并生成新版本
+      tags:
+      - 医疗管理-挂号费
+  /medical/schedule-tasks:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 任务类型 publish/generate
+        in: query
+        name: taskType
+        type: string
+      - description: 状态 0成功 1部分成功 2失败 3执行中
+        in: query
+        name: status
+        type: integer
+      - description: 目标周开始日期
+        in: query
+        name: startDate
+        type: string
+      - description: 目标周结束日期
+        in: query
+        name: endDate
+        type: string
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ScheduleAutoTaskResponse'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取自动任务执行记录
+      tags:
+      - 医疗管理-排班
+  /medical/schedule-templates:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 医生ID
+        in: query
+        name: doctorId
+        type: string
+      - description: 临床科室ID
+        in: query
+        name: departmentId
+        type: string
+      - description: 星期 1周一至7周日
+        in: query
+        name: weekday
+        type: integer
+      - description: 状态 0停用 1启用
+        in: query
+        name: status
+        type: integer
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ScheduleTemplateResponse'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取周期排班模板列表
+      tags:
+      - 医疗管理-排班
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 周期排班模板
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveScheduleTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建周期排班模板
+      tags:
+      - 医疗管理-排班
+  /medical/schedule-templates/{templateId}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 排班模板ID
+        in: path
+        name: templateId
+        required: true
+        type: string
+      - description: 周期排班模板
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveScheduleTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新周期排班模板
+      tags:
+      - 医疗管理-排班
+  /medical/schedule-templates/{templateId}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 排班模板ID
+        in: path
+        name: templateId
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateMedicalStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新周期排班模板状态
+      tags:
+      - 医疗管理-排班
+  /medical/schedules:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 排班ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 批量删除草稿排班
+      tags:
+      - 医疗管理-排班
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小，最大200
+        in: query
+        name: pageSize
+        type: integer
+      - description: 医生ID
+        in: query
+        name: doctorId
+        type: string
+      - description: 临床科室ID
+        in: query
+        name: departmentId
+        type: string
+      - description: 挂号类型字典值
+        in: query
+        name: registrationType
+        type: string
+      - description: 开始日期 YYYY-MM-DD
+        in: query
+        name: startDate
+        type: string
+      - description: 结束日期 YYYY-MM-DD
+        in: query
+        name: endDate
+        type: string
+      - description: 状态 0草稿 1已发布 2停诊 3结束
+        in: query
+        name: status
+        type: integer
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ScheduleResponse'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取实际排班列表
+      tags:
+      - 医疗管理-排班
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 实际排班
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 手工创建实际排班
+      tags:
+      - 医疗管理-排班
+  /medical/schedules/{scheduleId}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 排班ID
+        in: path
+        name: scheduleId
+        required: true
+        type: string
+      - description: 实际排班
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 编辑草稿排班
+      tags:
+      - 医疗管理-排班
+  /medical/schedules/{scheduleId}/finish:
+    put:
+      parameters:
+      - description: 排班ID
+        in: path
+        name: scheduleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 结束已完成出诊的排班
+      tags:
+      - 医疗管理-排班
+  /medical/schedules/{scheduleId}/stop:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 排班ID
+        in: path
+        name: scheduleId
+        required: true
+        type: string
+      - description: 停诊原因
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.StopScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 停诊
+      tags:
+      - 医疗管理-排班
+  /medical/schedules/generate:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 生成范围和幂等键
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.GenerateSchedulesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GenerateSchedulesResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 批量生成未来排班
+      tags:
+      - 医疗管理-排班
+  /medical/schedules/publish:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 排班ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.PublishSchedulesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 批量发布草稿排班
+      tags:
+      - 医疗管理-排班
   /system/depts:
     delete:
       consumes:

@@ -8,6 +8,7 @@ import (
 	"hive-admin-go/database"
 	projectDocs "hive-admin-go/docs"
 	"hive-admin-go/router"
+	"hive-admin-go/services"
 	"hive-admin-go/utils"
 	"io"
 	"log"
@@ -53,6 +54,7 @@ func startServer() {
 	if err := database.InitDB(); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
+	services.StartMedicalScheduleAutoScheduler()
 
 	// 设置 GIN 为 release 模式，减少日志输出
 	gin.SetMode(gin.ReleaseMode)

@@ -199,6 +199,41 @@ func SetupRouter() *gin.Engine {
 				doctors.PUT("/:doctorId/status", medicalController.UpdateDoctorStatus)
 				doctors.DELETE("", medicalController.DeleteDoctors)
 			}
+
+			registrationFeeRules := medical.Group("/registration-fee-rules")
+			{
+				registrationFeeRules.GET("", medicalController.GetRegistrationFeeRuleList)
+				registrationFeeRules.POST("", medicalController.CreateRegistrationFeeRule)
+				registrationFeeRules.POST("/:feeRuleId/adjustments", medicalController.AdjustRegistrationFeeRule)
+			}
+
+			scheduleTemplates := medical.Group("/schedule-templates")
+			scheduleTemplates.Use(middleware.SystemUserMiddleware())
+			{
+				scheduleTemplates.GET("", medicalController.GetScheduleTemplateList)
+				scheduleTemplates.POST("", medicalController.CreateScheduleTemplate)
+				scheduleTemplates.PUT("/:templateId", medicalController.UpdateScheduleTemplate)
+				scheduleTemplates.PUT("/:templateId/status", medicalController.UpdateScheduleTemplateStatus)
+			}
+
+			schedules := medical.Group("/schedules")
+			schedules.Use(middleware.SystemUserMiddleware())
+			{
+				schedules.GET("", medicalController.GetScheduleList)
+				schedules.POST("", medicalController.CreateSchedule)
+				schedules.DELETE("", medicalController.DeleteDraftSchedules)
+				schedules.POST("/generate", medicalController.GenerateSchedules)
+				schedules.POST("/publish", medicalController.PublishSchedules)
+				schedules.PUT("/:scheduleId", medicalController.UpdateSchedule)
+				schedules.PUT("/:scheduleId/stop", medicalController.StopSchedule)
+				schedules.PUT("/:scheduleId/finish", medicalController.FinishSchedule)
+			}
+
+			scheduleTasks := medical.Group("/schedule-tasks")
+			scheduleTasks.Use(middleware.SystemUserMiddleware())
+			{
+				scheduleTasks.GET("", medicalController.GetScheduleAutoTaskList)
+			}
 		}
 
 		workflow := api.Group("/workflow", middleware.AuthMiddleware())

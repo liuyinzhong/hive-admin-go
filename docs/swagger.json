@@ -4215,6 +4215,897 @@
                 }
             }
         },
+        "/medical/registration-fee-rules": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-挂号费"
+                ],
+                "summary": "获取挂号费规则列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小，最大100",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "医生或科室关键词",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "医生ID",
+                        "name": "doctorId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "临床科室ID",
+                        "name": "departmentId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "挂号类型字典值",
+                        "name": "registrationType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "有效期状态 current/future/expired",
+                        "name": "periodStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.RegistrationFeeRuleResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-挂号费"
+                ],
+                "summary": "创建挂号费规则",
+                "parameters": [
+                    {
+                        "description": "挂号费规则",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateRegistrationFeeRuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/registration-fee-rules/{feeRuleId}/adjustments": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-挂号费"
+                ],
+                "summary": "调整挂号费并生成新版本",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "挂号费规则ID",
+                        "name": "feeRuleId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "调价信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AdjustRegistrationFeeRuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/schedule-tasks": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-排班"
+                ],
+                "summary": "获取自动任务执行记录",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小，最大100",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "任务类型 publish/generate",
+                        "name": "taskType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态 0成功 1部分成功 2失败 3执行中",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "目标周开始日期",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "目标周结束日期",
+                        "name": "endDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ScheduleAutoTaskResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/schedule-templates": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-排班"
+                ],
+                "summary": "获取周期排班模板列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小，最大100",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "医生ID",
+                        "name": "doctorId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "临床科室ID",
+                        "name": "departmentId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "星期 1周一至7周日",
+                        "name": "weekday",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态 0停用 1启用",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ScheduleTemplateResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-排班"
+                ],
+                "summary": "创建周期排班模板",
+                "parameters": [
+                    {
+                        "description": "周期排班模板",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveScheduleTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/schedule-templates/{templateId}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-排班"
+                ],
+                "summary": "更新周期排班模板",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排班模板ID",
+                        "name": "templateId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "周期排班模板",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveScheduleTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/schedule-templates/{templateId}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-排班"
+                ],
+                "summary": "更新周期排班模板状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排班模板ID",
+                        "name": "templateId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateMedicalStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/schedules": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-排班"
+                ],
+                "summary": "获取实际排班列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小，最大200",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "医生ID",
+                        "name": "doctorId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "临床科室ID",
+                        "name": "departmentId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "挂号类型字典值",
+                        "name": "registrationType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "开始日期 YYYY-MM-DD",
+                        "name": "startDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束日期 YYYY-MM-DD",
+                        "name": "endDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态 0草稿 1已发布 2停诊 3结束",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ScheduleResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-排班"
+                ],
+                "summary": "手工创建实际排班",
+                "parameters": [
+                    {
+                        "description": "实际排班",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveScheduleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-排班"
+                ],
+                "summary": "批量删除草稿排班",
+                "parameters": [
+                    {
+                        "description": "排班ID列表",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/schedules/generate": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-排班"
+                ],
+                "summary": "批量生成未来排班",
+                "parameters": [
+                    {
+                        "description": "生成范围和幂等键",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.GenerateSchedulesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.GenerateSchedulesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/schedules/publish": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-排班"
+                ],
+                "summary": "批量发布草稿排班",
+                "parameters": [
+                    {
+                        "description": "排班ID列表",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.PublishSchedulesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/schedules/{scheduleId}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-排班"
+                ],
+                "summary": "编辑草稿排班",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排班ID",
+                        "name": "scheduleId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "实际排班",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveScheduleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/schedules/{scheduleId}/finish": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-排班"
+                ],
+                "summary": "结束已完成出诊的排班",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排班ID",
+                        "name": "scheduleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/schedules/{scheduleId}/stop": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理-排班"
+                ],
+                "summary": "停诊",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排班ID",
+                        "name": "scheduleId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "停诊原因",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.StopScheduleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/system/depts": {
             "get": {
                 "security": [
@@ -7692,6 +8583,25 @@
         }
     },
     "definitions": {
+        "models.AdjustRegistrationFeeRuleRequest": {
+            "type": "object",
+            "required": [
+                "effectiveDate",
+                "feeAmount"
+            ],
+            "properties": {
+                "effectiveDate": {
+                    "type": "string"
+                },
+                "feeAmount": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512
+                }
+            }
+        },
         "models.BugResponse": {
             "type": "object",
             "properties": {
@@ -8203,6 +9113,40 @@
                     "description": "项目标题",
                     "type": "string",
                     "example": "crudelis"
+                }
+            }
+        },
+        "models.CreateRegistrationFeeRuleRequest": {
+            "type": "object",
+            "required": [
+                "departmentId",
+                "doctorId",
+                "effectiveDate",
+                "feeAmount",
+                "registrationType"
+            ],
+            "properties": {
+                "departmentId": {
+                    "type": "string"
+                },
+                "doctorId": {
+                    "type": "string"
+                },
+                "effectiveDate": {
+                    "type": "string"
+                },
+                "expiryDate": {
+                    "type": "string"
+                },
+                "feeAmount": {
+                    "type": "string"
+                },
+                "registrationType": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512
                 }
             }
         },
@@ -8922,6 +9866,58 @@
                 }
             }
         },
+        "models.GenerateSchedulesRequest": {
+            "type": "object",
+            "required": [
+                "endDate",
+                "idempotencyKey",
+                "startDate",
+                "templateIds"
+            ],
+            "properties": {
+                "endDate": {
+                    "type": "string"
+                },
+                "idempotencyKey": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "templateIds": {
+                    "type": "array",
+                    "maxItems": 100,
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.GenerateSchedulesResponse": {
+            "type": "object",
+            "properties": {
+                "batchId": {
+                    "type": "string"
+                },
+                "generatedCount": {
+                    "type": "integer"
+                },
+                "idempotent": {
+                    "type": "boolean"
+                },
+                "scheduleIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "skippedCount": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.LoginRequest": {
             "type": "object",
             "required": [
@@ -9357,6 +10353,75 @@
                 }
             }
         },
+        "models.PublishSchedulesRequest": {
+            "type": "object",
+            "required": [
+                "scheduleIds"
+            ],
+            "properties": {
+                "scheduleIds": {
+                    "type": "array",
+                    "maxItems": 100,
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.RegistrationFeeRuleResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "type": "string"
+                },
+                "departmentCode": {
+                    "type": "string"
+                },
+                "departmentId": {
+                    "type": "string"
+                },
+                "departmentName": {
+                    "type": "string"
+                },
+                "doctorId": {
+                    "type": "string"
+                },
+                "doctorName": {
+                    "type": "string"
+                },
+                "doctorNo": {
+                    "type": "string"
+                },
+                "effectiveDate": {
+                    "type": "string"
+                },
+                "expiryDate": {
+                    "type": "string"
+                },
+                "feeAmount": {
+                    "type": "string"
+                },
+                "feeRuleId": {
+                    "type": "string"
+                },
+                "periodStatus": {
+                    "type": "string"
+                },
+                "registrationType": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "updateDate": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.Response": {
             "type": "object",
             "properties": {
@@ -9535,6 +10600,386 @@
                 }
             }
         },
+        "models.SaveScheduleRequest": {
+            "type": "object",
+            "required": [
+                "defaultSlotQuota",
+                "departmentId",
+                "doctorId",
+                "endTime",
+                "registrationType",
+                "scheduleDate",
+                "startTime"
+            ],
+            "properties": {
+                "defaultSlotQuota": {
+                    "type": "integer",
+                    "maximum": 99,
+                    "minimum": 1
+                },
+                "departmentId": {
+                    "type": "string"
+                },
+                "doctorId": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "registrationType": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512
+                },
+                "scheduleDate": {
+                    "type": "string"
+                },
+                "slotQuotaConfig": {
+                    "type": "array",
+                    "maxItems": 48,
+                    "items": {
+                        "$ref": "#/definitions/models.ScheduleSlotQuotaRequest"
+                    }
+                },
+                "startTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SaveScheduleTemplateRequest": {
+            "type": "object",
+            "required": [
+                "defaultSlotQuota",
+                "departmentId",
+                "doctorId",
+                "effectiveDate",
+                "endTime",
+                "registrationType",
+                "startTime",
+                "templateName",
+                "weekday"
+            ],
+            "properties": {
+                "defaultSlotQuota": {
+                    "type": "integer",
+                    "maximum": 99,
+                    "minimum": 1
+                },
+                "departmentId": {
+                    "type": "string"
+                },
+                "doctorId": {
+                    "type": "string"
+                },
+                "effectiveDate": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "expiryDate": {
+                    "type": "string"
+                },
+                "registrationType": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512
+                },
+                "slotQuotaConfig": {
+                    "type": "array",
+                    "maxItems": 48,
+                    "items": {
+                        "$ref": "#/definitions/models.ScheduleSlotQuotaRequest"
+                    }
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
+                },
+                "templateName": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "weekday": {
+                    "type": "integer",
+                    "maximum": 7,
+                    "minimum": 1
+                }
+            }
+        },
+        "models.ScheduleAutoTaskFailure": {
+            "type": "object",
+            "properties": {
+                "doctorId": {
+                    "type": "string"
+                },
+                "doctorName": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ScheduleAutoTaskResponse": {
+            "type": "object",
+            "properties": {
+                "executedAt": {
+                    "type": "string"
+                },
+                "failureDoctorCount": {
+                    "type": "integer"
+                },
+                "failures": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ScheduleAutoTaskFailure"
+                    }
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "successDoctorCount": {
+                    "type": "integer"
+                },
+                "targetWeekEnd": {
+                    "type": "string"
+                },
+                "targetWeekStart": {
+                    "type": "string"
+                },
+                "taskId": {
+                    "type": "string"
+                },
+                "taskType": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ScheduleResponse": {
+            "type": "object",
+            "properties": {
+                "bookedQuota": {
+                    "type": "integer"
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "defaultSlotQuota": {
+                    "type": "integer"
+                },
+                "departmentCode": {
+                    "type": "string"
+                },
+                "departmentId": {
+                    "type": "string"
+                },
+                "departmentName": {
+                    "type": "string"
+                },
+                "doctorId": {
+                    "type": "string"
+                },
+                "doctorName": {
+                    "type": "string"
+                },
+                "doctorNo": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "feeAmount": {
+                    "type": "string"
+                },
+                "feeRuleId": {
+                    "type": "string"
+                },
+                "feeRuleVersion": {
+                    "type": "integer"
+                },
+                "feeSnapshotStatus": {
+                    "type": "string"
+                },
+                "finishedAt": {
+                    "type": "string"
+                },
+                "generationBatchId": {
+                    "type": "string"
+                },
+                "publishedAt": {
+                    "type": "string"
+                },
+                "registrationType": {
+                    "type": "string"
+                },
+                "remainingQuota": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "scheduleDate": {
+                    "type": "string"
+                },
+                "scheduleId": {
+                    "type": "string"
+                },
+                "slots": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ScheduleSlotResponse"
+                    }
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "stopReason": {
+                    "type": "string"
+                },
+                "stoppedAt": {
+                    "type": "string"
+                },
+                "templateId": {
+                    "type": "string"
+                },
+                "totalQuota": {
+                    "type": "integer"
+                },
+                "updateDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ScheduleSlotQuotaRequest": {
+            "type": "object",
+            "required": [
+                "startTime"
+            ],
+            "properties": {
+                "quota": {
+                    "type": "integer",
+                    "maximum": 99,
+                    "minimum": 0
+                },
+                "startTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ScheduleSlotResponse": {
+            "type": "object",
+            "properties": {
+                "bookedQuota": {
+                    "type": "integer"
+                },
+                "bookingStatus": {
+                    "type": "string"
+                },
+                "canBook": {
+                    "type": "boolean"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "quota": {
+                    "type": "integer"
+                },
+                "remainingQuota": {
+                    "type": "integer"
+                },
+                "slotId": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ScheduleTemplateResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "type": "string"
+                },
+                "defaultSlotQuota": {
+                    "type": "integer"
+                },
+                "departmentCode": {
+                    "type": "string"
+                },
+                "departmentId": {
+                    "type": "string"
+                },
+                "departmentName": {
+                    "type": "string"
+                },
+                "doctorId": {
+                    "type": "string"
+                },
+                "doctorName": {
+                    "type": "string"
+                },
+                "doctorNo": {
+                    "type": "string"
+                },
+                "effectiveDate": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "expiryDate": {
+                    "type": "string"
+                },
+                "registrationType": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "slotQuotaConfig": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ScheduleSlotQuotaRequest"
+                    }
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "templateId": {
+                    "type": "string"
+                },
+                "templateName": {
+                    "type": "string"
+                },
+                "totalQuota": {
+                    "type": "integer"
+                },
+                "updateDate": {
+                    "type": "string"
+                },
+                "weekday": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.StartWorkflowInstanceRequest": {
             "type": "object",
             "required": [
@@ -9555,6 +11000,18 @@
                     "description": "条件判断业务变量",
                     "type": "object",
                     "additionalProperties": true
+                }
+            }
+        },
+        "models.StopScheduleRequest": {
+            "type": "object",
+            "required": [
+                "reason"
+            ],
+            "properties": {
+                "reason": {
+                    "type": "string",
+                    "maxLength": 512
                 }
             }
         },

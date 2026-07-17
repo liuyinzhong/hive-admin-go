@@ -202,3 +202,68 @@ type DoctorOptionResponse struct {
 	PrimaryDepartmentID   *string `json:"primaryDepartmentId"`
 	PrimaryDepartmentName *string `json:"primaryDepartmentName"`
 }
+
+type MedRegistrationFeeRule struct {
+	FeeRuleID        string     `gorm:"column:fee_rule_id;type:char(36);primaryKey" json:"feeRuleId"`
+	DoctorID         string     `gorm:"column:doctor_id;type:char(36)" json:"doctorId"`
+	DepartmentID     string     `gorm:"column:department_id;type:char(36)" json:"departmentId"`
+	RegistrationType string     `gorm:"column:registration_type;type:varchar(36)" json:"registrationType"`
+	FeeAmount        string     `gorm:"column:fee_amount;type:decimal(10,2)" json:"feeAmount"`
+	EffectiveDate    time.Time  `gorm:"column:effective_date;type:date" json:"effectiveDate"`
+	ExpiryDate       *time.Time `gorm:"column:expiry_date;type:date" json:"expiryDate"`
+	Version          int        `gorm:"column:version;type:int" json:"version"`
+	Remark           *string    `gorm:"column:remark;type:varchar(512)" json:"remark"`
+	CreatorID        *string    `gorm:"column:creator_id;type:char(36)" json:"creatorId"`
+	UpdaterID        *string    `gorm:"column:updater_id;type:char(36)" json:"updaterId"`
+	CreateDate       *time.Time `gorm:"column:create_date" json:"createDate"`
+	UpdateDate       *time.Time `gorm:"column:update_date" json:"updateDate"`
+	DelFlag          int        `gorm:"column:del_flag;type:tinyint;default:0" json:"delFlag"`
+}
+
+func (MedRegistrationFeeRule) TableName() string { return "med_registration_fee_rule" }
+
+type RegistrationFeeRuleListRequest struct {
+	Page             int    `form:"page" example:"1"`
+	PageSize         int    `form:"pageSize" example:"20"`
+	Keyword          string `form:"keyword"`
+	DoctorID         string `form:"doctorId"`
+	DepartmentID     string `form:"departmentId"`
+	RegistrationType string `form:"registrationType"`
+	PeriodStatus     string `form:"periodStatus"`
+	Sorts            string `form:"sorts"`
+}
+
+type CreateRegistrationFeeRuleRequest struct {
+	DoctorID         string  `json:"doctorId" binding:"required"`
+	DepartmentID     string  `json:"departmentId" binding:"required"`
+	RegistrationType string  `json:"registrationType" binding:"required"`
+	FeeAmount        string  `json:"feeAmount" binding:"required"`
+	EffectiveDate    string  `json:"effectiveDate" binding:"required"`
+	ExpiryDate       *string `json:"expiryDate"`
+	Remark           *string `json:"remark" binding:"omitempty,max=512"`
+}
+
+type AdjustRegistrationFeeRuleRequest struct {
+	FeeAmount     string  `json:"feeAmount" binding:"required"`
+	EffectiveDate string  `json:"effectiveDate" binding:"required"`
+	Remark        *string `json:"remark" binding:"omitempty,max=512"`
+}
+
+type RegistrationFeeRuleResponse struct {
+	FeeRuleID        string  `json:"feeRuleId"`
+	DoctorID         string  `json:"doctorId"`
+	DoctorNo         string  `json:"doctorNo"`
+	DoctorName       string  `json:"doctorName"`
+	DepartmentID     string  `json:"departmentId"`
+	DepartmentCode   string  `json:"departmentCode"`
+	DepartmentName   string  `json:"departmentName"`
+	RegistrationType string  `json:"registrationType"`
+	FeeAmount        string  `json:"feeAmount"`
+	EffectiveDate    string  `json:"effectiveDate"`
+	ExpiryDate       *string `json:"expiryDate"`
+	Version          int     `json:"version"`
+	PeriodStatus     string  `json:"periodStatus"`
+	Remark           *string `json:"remark"`
+	CreateDate       *string `json:"createDate"`
+	UpdateDate       *string `json:"updateDate"`
+}
