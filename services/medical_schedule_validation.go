@@ -26,7 +26,7 @@ type preparedScheduleTemplate struct {
 	doctorID         string
 	departmentID     string
 	registrationType string
-	weekday          int
+	weekdays         []int
 	startTime        string
 	endTime          string
 	defaultSlotQuota int
@@ -76,8 +76,9 @@ func prepareScheduleTemplateRequest(req models.SaveScheduleTemplateRequest) (*pr
 	if templateName == "" || len([]rune(templateName)) > 64 {
 		return nil, fmt.Errorf("%w: 模板名称不能为空且最多64个字符", ErrMedicalInvalidInput)
 	}
-	if req.Weekday < 1 || req.Weekday > 7 {
-		return nil, fmt.Errorf("%w: 星期必须在1到7之间", ErrMedicalInvalidInput)
+	weekdays, err := normalizeScheduleTemplateWeekdays(req.Weekdays)
+	if err != nil {
+		return nil, err
 	}
 	if req.DefaultSlotQuota < 1 || req.DefaultSlotQuota > 99 {
 		return nil, fmt.Errorf("%w: 每半小时默认容量必须在1到99之间", ErrMedicalInvalidInput)
@@ -102,7 +103,7 @@ func prepareScheduleTemplateRequest(req models.SaveScheduleTemplateRequest) (*pr
 		doctorID:         req.DoctorID,
 		departmentID:     req.DepartmentID,
 		registrationType: strings.TrimSpace(req.RegistrationType),
-		weekday:          req.Weekday,
+		weekdays:         weekdays,
 		startTime:        startTime,
 		endTime:          endTime,
 		defaultSlotQuota: req.DefaultSlotQuota,
@@ -294,6 +295,33 @@ func scheduleDatePeriodsOverlap(leftStart time.Time, leftEnd *time.Time, rightSt
 		return false
 	}
 	return true
+}
+
+func scheduleTemplateConflicts(candidate models.MedScheduleTemplate, prepared *preparedScheduleTemplate) bool {
+	if !scheduleDatePeriodsOverlap(candidate.EffectiveDate, candidate.ExpiryDate, prepared.effectiveDate, prepared.expiryDate) ||
+		!scheduleTimesOverlap(candidate.StartTime, candidate.EndTime, prepared.startTime, prepared.endTime) {
+		return false
+	}
+	candidateWeekdays := make(map[int]struct{}, len(candidate.Weekdays))
+	for _, weekday := range candidate.Weekdays {
+		candidateWeekdays[weekday] = struct{}{}
+	}
+	for _, weekday := range prepared.weekdays {
+		if _, exists := candidateWeekdays[weekday]; exists {
+			return true
+		}
+	}
+	return false
+}
+
+func scheduleTemplateAppliesOn(template models.MedScheduleTemplate, date time.Time) bool {
+	weekday := isoWeekday(date)
+	for _, value := range template.Weekdays {
+		if value == weekday {
+			return true
+		}
+	}
+	return false
 }
 
 func isoWeekday(value time.Time) int {

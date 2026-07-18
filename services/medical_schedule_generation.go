@@ -152,11 +152,18 @@ func prepareScheduleGenerationData(tx *gorm.DB, templateIDs []string, startDate,
 			return nil, nil, nil, fmt.Errorf("%w: 停用的排班模板不能生成排班", ErrMedicalConflict)
 		}
 	}
+	weekdaysByTemplate, err := loadScheduleTemplateWeekdays(tx, templateIDs)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	for index := range templates {
+		templates[index].Weekdays = scheduleTemplateWeekdays(templates[index].TemplateID, templates[index].Weekday, weekdaysByTemplate)
+	}
 	sort.Slice(templates, func(i, j int) bool {
 		left := templates[i]
 		right := templates[j]
-		leftKey := left.DoctorID + "|" + left.DepartmentID + "|" + fmt.Sprintf("%d|%s|%s|%s", left.Weekday, left.StartTime, left.EndTime, left.TemplateID)
-		rightKey := right.DoctorID + "|" + right.DepartmentID + "|" + fmt.Sprintf("%d|%s|%s|%s", right.Weekday, right.StartTime, right.EndTime, right.TemplateID)
+		leftKey := left.DoctorID + "|" + left.DepartmentID + "|" + fmt.Sprintf("%v|%s|%s|%s", left.Weekdays, left.StartTime, left.EndTime, left.TemplateID)
+		rightKey := right.DoctorID + "|" + right.DepartmentID + "|" + fmt.Sprintf("%v|%s|%s|%s", right.Weekdays, right.StartTime, right.EndTime, right.TemplateID)
 		return leftKey < rightKey
 	})
 
@@ -256,7 +263,7 @@ func buildGeneratedSchedules(templates []models.MedScheduleTemplate, relations m
 		dimensionKey := scheduleDimensionKey(template.DoctorID, template.DepartmentID, template.RegistrationType)
 		relation := relations[dimensionKey]
 		for scheduleDate := startDate; !medicalDateAfter(scheduleDate, endDate); scheduleDate = scheduleDate.AddDate(0, 0, 1) {
-			if isoWeekday(scheduleDate) != template.Weekday || medicalDateBefore(scheduleDate, template.EffectiveDate) || (template.ExpiryDate != nil && medicalDateAfter(scheduleDate, *template.ExpiryDate)) {
+			if !scheduleTemplateAppliesOn(template, scheduleDate) || medicalDateBefore(scheduleDate, template.EffectiveDate) || (template.ExpiryDate != nil && medicalDateAfter(scheduleDate, *template.ExpiryDate)) {
 				continue
 			}
 			if relation.ValidFrom != nil && medicalDateBefore(scheduleDate, *relation.ValidFrom) {
@@ -270,7 +277,7 @@ func buildGeneratedSchedules(templates []models.MedScheduleTemplate, relations m
 			existing := schedulesByDoctorDate[doctorDateKey]
 			alreadyGenerated := false
 			for _, schedule := range existing {
-				if schedule.TemplateID != nil && *schedule.TemplateID == template.TemplateID {
+				if scheduleMatchesGeneratedTemplate(schedule, template) {
 					alreadyGenerated = true
 					break
 				}
@@ -320,6 +327,20 @@ func buildGeneratedSchedules(templates []models.MedScheduleTemplate, relations m
 		}
 	}
 	return created, createdSlots, skippedCount, nil
+}
+
+func scheduleMatchesGeneratedTemplate(schedule models.MedSchedule, template models.MedScheduleTemplate) bool {
+	if schedule.TemplateID == nil {
+		return false
+	}
+	if *schedule.TemplateID == template.TemplateID {
+		return true
+	}
+	return schedule.DoctorID == template.DoctorID &&
+		schedule.DepartmentID == template.DepartmentID &&
+		schedule.RegistrationType == template.RegistrationType &&
+		schedule.StartTime == template.StartTime &&
+		schedule.EndTime == template.EndTime
 }
 
 func selectGeneratedScheduleFeeRule(rules []models.MedRegistrationFeeRule, scheduleDate time.Time) (*models.MedRegistrationFeeRule, error) {

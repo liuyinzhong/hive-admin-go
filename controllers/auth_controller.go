@@ -37,7 +37,7 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 
 	token, err := ctrl.authService.Login(req.Username, req.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, models.NewErrorResponse(nil, err.Error()))
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
 		return
 	}
 

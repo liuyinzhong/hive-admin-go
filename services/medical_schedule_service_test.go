@@ -52,6 +52,163 @@ func TestScheduleTimeOverlapRules(t *testing.T) {
 	}
 }
 
+func TestScheduleTemplateConflictRequiresWeekdayDateAndTimeOverlap(t *testing.T) {
+	effectiveDate := time.Date(2026, 7, 1, 0, 0, 0, 0, medicalBusinessLocation)
+	expiryDate := time.Date(2026, 7, 31, 0, 0, 0, 0, medicalBusinessLocation)
+	prepared := &preparedScheduleTemplate{
+		weekdays:      []int{1, 3, 5},
+		startTime:     "08:00:00",
+		endTime:       "12:00:00",
+		effectiveDate: effectiveDate,
+		expiryDate:    &expiryDate,
+	}
+
+	tests := []struct {
+		name      string
+		candidate models.MedScheduleTemplate
+		want      bool
+	}{
+		{
+			name: "all three dimensions overlap",
+			candidate: models.MedScheduleTemplate{
+				Weekdays:      []int{3, 6},
+				StartTime:     "11:30:00",
+				EndTime:       "13:00:00",
+				EffectiveDate: effectiveDate,
+				ExpiryDate:    &expiryDate,
+			},
+			want: true,
+		},
+		{
+			name: "disjoint weekdays are allowed",
+			candidate: models.MedScheduleTemplate{
+				Weekdays:      []int{2, 4},
+				StartTime:     "11:30:00",
+				EndTime:       "13:00:00",
+				EffectiveDate: effectiveDate,
+				ExpiryDate:    &expiryDate,
+			},
+		},
+		{
+			name: "adjacent time is allowed",
+			candidate: models.MedScheduleTemplate{
+				Weekdays:      []int{1},
+				StartTime:     "12:00:00",
+				EndTime:       "13:00:00",
+				EffectiveDate: effectiveDate,
+				ExpiryDate:    &expiryDate,
+			},
+		},
+		{
+			name: "disjoint effective periods are allowed",
+			candidate: models.MedScheduleTemplate{
+				Weekdays:      []int{1},
+				StartTime:     "11:30:00",
+				EndTime:       "13:00:00",
+				EffectiveDate: expiryDate.AddDate(0, 0, 1),
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := scheduleTemplateConflicts(test.candidate, prepared); got != test.want {
+				t.Fatalf("scheduleTemplateConflicts() = %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestBuildGeneratedSchedulesUsesEverySelectedWeekday(t *testing.T) {
+	startDate := time.Date(2026, 7, 20, 0, 0, 0, 0, medicalBusinessLocation)
+	template := models.MedScheduleTemplate{
+		TemplateID:       scheduleTestUUID,
+		DoctorID:         scheduleTestUUID,
+		DepartmentID:     scheduleTestUUID,
+		RegistrationType: "1",
+		Weekdays:         []int{1, 3, 5},
+		StartTime:        "08:00:00",
+		EndTime:          "09:00:00",
+		DefaultSlotQuota: 1,
+		EffectiveDate:    startDate,
+		Status:           1,
+	}
+	relations := map[string]models.MedDoctorDepartment{
+		scheduleDimensionKey(template.DoctorID, template.DepartmentID, template.RegistrationType): {},
+	}
+
+	schedules, _, skipped, err := buildGeneratedSchedules(
+		[]models.MedScheduleTemplate{template},
+		relations,
+		nil,
+		"batch-id",
+		startDate,
+		startDate.AddDate(0, 0, 6),
+		"",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if skipped != 0 {
+		t.Fatalf("skipped count = %d, want 0", skipped)
+	}
+	if len(schedules) != 3 {
+		t.Fatalf("schedule count = %d, want 3", len(schedules))
+	}
+	wantDates := []string{"2026-07-20", "2026-07-22", "2026-07-24"}
+	for index, want := range wantDates {
+		if got := schedules[index].ScheduleDate.Format("2006-01-02"); got != want {
+			t.Fatalf("schedule %d date = %s, want %s", index, got, want)
+		}
+	}
+}
+
+func TestBuildGeneratedSchedulesSkipsScheduleFromMergedTemplate(t *testing.T) {
+	scheduleDate := time.Date(2026, 7, 20, 0, 0, 0, 0, medicalBusinessLocation)
+	template := models.MedScheduleTemplate{
+		TemplateID:       scheduleTestUUID,
+		DoctorID:         scheduleTestUUID,
+		DepartmentID:     scheduleTestUUID,
+		RegistrationType: "1",
+		Weekdays:         []int{1},
+		StartTime:        "08:00:00",
+		EndTime:          "09:00:00",
+		DefaultSlotQuota: 1,
+		EffectiveDate:    scheduleDate,
+		Status:           1,
+	}
+	legacyTemplateID := "00000000-0000-0000-0000-000000000002"
+	existingSchedules := []models.MedSchedule{{
+		TemplateID:       &legacyTemplateID,
+		DoctorID:         template.DoctorID,
+		DepartmentID:     template.DepartmentID,
+		RegistrationType: template.RegistrationType,
+		ScheduleDate:     scheduleDate,
+		StartTime:        template.StartTime,
+		EndTime:          template.EndTime,
+		Status:           models.MedScheduleStatusDraft,
+	}}
+	relations := map[string]models.MedDoctorDepartment{
+		scheduleDimensionKey(template.DoctorID, template.DepartmentID, template.RegistrationType): {},
+	}
+
+	schedules, _, skipped, err := buildGeneratedSchedules(
+		[]models.MedScheduleTemplate{template},
+		relations,
+		existingSchedules,
+		"batch-id",
+		scheduleDate,
+		scheduleDate,
+		"",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(schedules) != 0 || skipped != 1 {
+		t.Fatalf("generated = %d, skipped = %d, want generated 0 and skipped 1", len(schedules), skipped)
+	}
+}
+
 func TestBuildScheduleSlotDraftsUsesHalfHourStepsAndOverrides(t *testing.T) {
 	slots, totalQuota, _, err := buildScheduleSlotDrafts(
 		"schedule-id",
@@ -114,7 +271,7 @@ func TestScheduleAutomationWeekBoundaries(t *testing.T) {
 
 func TestMedicalScheduleServiceRejectsInvalidTimeRange(t *testing.T) {
 	service := NewMedicalScheduleService()
-	err := service.CreateScheduleTemplate(models.CreateScheduleTemplateRequest{
+	err := service.CreateScheduleTemplate(models.SaveScheduleTemplateRequest{
 		ScheduleTemplateBaseRequest: models.ScheduleTemplateBaseRequest{
 			TemplateName:     "上午门诊",
 			DoctorID:         scheduleTestUUID,

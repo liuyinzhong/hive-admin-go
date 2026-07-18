@@ -454,60 +454,6 @@ definitions:
     required:
     - roleTitle
     type: object
-  models.CreateScheduleTemplateRequest:
-    properties:
-      defaultSlotQuota:
-        maximum: 99
-        minimum: 1
-        type: integer
-      departmentId:
-        type: string
-      doctorId:
-        type: string
-      effectiveDate:
-        type: string
-      endTime:
-        type: string
-      expiryDate:
-        type: string
-      registrationType:
-        type: string
-      remark:
-        maxLength: 512
-        type: string
-      slotQuotaConfig:
-        items:
-          $ref: '#/definitions/models.ScheduleSlotQuotaRequest'
-        maxItems: 48
-        type: array
-      startTime:
-        type: string
-      status:
-        enum:
-        - 0
-        - 1
-        type: integer
-      templateName:
-        maxLength: 64
-        type: string
-      weekdays:
-        description: Weekdays 星期多选值，每项范围为1（周一）至7（周日）。
-        items:
-          type: integer
-        maxItems: 7
-        minItems: 1
-        type: array
-    required:
-    - defaultSlotQuota
-    - departmentId
-    - doctorId
-    - effectiveDate
-    - endTime
-    - registrationType
-    - startTime
-    - templateName
-    - weekdays
-    type: object
   models.CreateStoryRequest:
     properties:
       fileIds:
@@ -1739,10 +1685,13 @@ definitions:
       templateName:
         maxLength: 64
         type: string
-      weekday:
-        maximum: 7
-        minimum: 1
-        type: integer
+      weekdays:
+        description: Weekdays 星期多选值，每项范围为1（周一）至7（周日）。
+        items:
+          type: integer
+        maxItems: 7
+        minItems: 1
+        type: array
     required:
     - defaultSlotQuota
     - departmentId
@@ -1752,7 +1701,7 @@ definitions:
     - registrationType
     - startTime
     - templateName
-    - weekday
+    - weekdays
     type: object
   models.ScheduleAutoTaskFailure:
     properties:
@@ -1925,8 +1874,10 @@ definitions:
         type: integer
       updateDate:
         type: string
-      weekday:
-        type: integer
+      weekdays:
+        items:
+          type: integer
+        type: array
     type: object
   models.StartWorkflowInstanceRequest:
     properties:
@@ -6211,7 +6162,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/models.CreateScheduleTemplateRequest'
+          $ref: '#/definitions/models.SaveScheduleTemplateRequest'
       produces:
       - application/json
       responses:

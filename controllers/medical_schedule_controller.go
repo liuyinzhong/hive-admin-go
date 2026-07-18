@@ -43,12 +43,12 @@ func (ctrl *MedicalController) GetScheduleTemplateList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param request body models.CreateScheduleTemplateRequest true "周期排班模板"
+// @Param request body models.SaveScheduleTemplateRequest true "周期排班模板"
 // @Success 200 {object} models.Response
 // @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /medical/scheduleTemplates [post]
 func (ctrl *MedicalController) CreateScheduleTemplate(c *gin.Context) {
-	var req models.CreateScheduleTemplateRequest
+	var req models.SaveScheduleTemplateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return

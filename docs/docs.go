@@ -5001,7 +5001,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreateScheduleTemplateRequest"
+                            "$ref": "#/definitions/models.SaveScheduleTemplateRequest"
                         }
                     }
                 ],
@@ -10368,79 +10368,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.CreateScheduleTemplateRequest": {
-            "type": "object",
-            "required": [
-                "defaultSlotQuota",
-                "departmentId",
-                "doctorId",
-                "effectiveDate",
-                "endTime",
-                "registrationType",
-                "startTime",
-                "templateName",
-                "weekdays"
-            ],
-            "properties": {
-                "defaultSlotQuota": {
-                    "type": "integer",
-                    "maximum": 99,
-                    "minimum": 1
-                },
-                "departmentId": {
-                    "type": "string"
-                },
-                "doctorId": {
-                    "type": "string"
-                },
-                "effectiveDate": {
-                    "type": "string"
-                },
-                "endTime": {
-                    "type": "string"
-                },
-                "expiryDate": {
-                    "type": "string"
-                },
-                "registrationType": {
-                    "type": "string"
-                },
-                "remark": {
-                    "type": "string",
-                    "maxLength": 512
-                },
-                "slotQuotaConfig": {
-                    "type": "array",
-                    "maxItems": 48,
-                    "items": {
-                        "$ref": "#/definitions/models.ScheduleSlotQuotaRequest"
-                    }
-                },
-                "startTime": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "integer",
-                    "enum": [
-                        0,
-                        1
-                    ]
-                },
-                "templateName": {
-                    "type": "string",
-                    "maxLength": 64
-                },
-                "weekdays": {
-                    "description": "Weekdays 星期多选值，每项范围为1（周一）至7（周日）。",
-                    "type": "array",
-                    "maxItems": 7,
-                    "minItems": 1,
-                    "items": {
-                        "type": "integer"
-                    }
-                }
-            }
-        },
         "models.CreateStoryRequest": {
             "type": "object",
             "required": [
@@ -12090,7 +12017,7 @@ const docTemplate = `{
                 "registrationType",
                 "startTime",
                 "templateName",
-                "weekday"
+                "weekdays"
             ],
             "properties": {
                 "defaultSlotQuota": {
@@ -12141,10 +12068,14 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 64
                 },
-                "weekday": {
-                    "type": "integer",
-                    "maximum": 7,
-                    "minimum": 1
+                "weekdays": {
+                    "description": "Weekdays 星期多选值，每项范围为1（周一）至7（周日）。",
+                    "type": "array",
+                    "maxItems": 7,
+                    "minItems": 1,
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -12406,8 +12337,11 @@ const docTemplate = `{
                 "updateDate": {
                     "type": "string"
                 },
-                "weekday": {
-                    "type": "integer"
+                "weekdays": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },

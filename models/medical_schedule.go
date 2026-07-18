@@ -20,7 +20,8 @@ type MedScheduleTemplate struct {
 	DoctorID         string     `gorm:"column:doctor_id;type:char(36)" json:"doctorId"`
 	DepartmentID     string     `gorm:"column:department_id;type:char(36)" json:"departmentId"`
 	RegistrationType string     `gorm:"column:registration_type;type:varchar(36)" json:"registrationType"`
-	Weekday          int        `gorm:"column:weekday;type:tinyint" json:"weekday"`
+	Weekday          int        `gorm:"column:weekday;type:tinyint" json:"-"`
+	Weekdays         []int      `gorm:"-" json:"weekdays"`
 	StartTime        string     `gorm:"column:start_time;type:time" json:"startTime"`
 	EndTime          string     `gorm:"column:end_time;type:time" json:"endTime"`
 	DefaultSlotQuota int        `gorm:"column:default_slot_quota;type:int" json:"defaultSlotQuota"`
@@ -38,6 +39,14 @@ type MedScheduleTemplate struct {
 }
 
 func (MedScheduleTemplate) TableName() string { return "med_schedule_template" }
+
+type MedScheduleTemplateWeekday struct {
+	TemplateID string    `gorm:"column:template_id;type:char(36);primaryKey" json:"templateId"`
+	Weekday    int       `gorm:"column:weekday;type:tinyint;primaryKey" json:"weekday"`
+	CreateDate time.Time `gorm:"column:create_date" json:"createDate"`
+}
+
+func (MedScheduleTemplateWeekday) TableName() string { return "med_schedule_template_weekday" }
 
 type MedScheduleGenerationBatch struct {
 	BatchID        string     `gorm:"column:batch_id;type:char(36);primaryKey" json:"batchId"`
@@ -112,15 +121,10 @@ type ScheduleTemplateBaseRequest struct {
 	Remark           *string                    `json:"remark" binding:"omitempty,max=512"`
 }
 
-type CreateScheduleTemplateRequest struct {
+type SaveScheduleTemplateRequest struct {
 	ScheduleTemplateBaseRequest
 	// Weekdays 星期多选值，每项范围为1（周一）至7（周日）。
 	Weekdays []int `json:"weekdays" binding:"required,min=1,max=7,dive,min=1,max=7"`
-}
-
-type SaveScheduleTemplateRequest struct {
-	ScheduleTemplateBaseRequest
-	Weekday int `json:"weekday" binding:"required,min=1,max=7"`
 }
 
 type ScheduleTemplateResponse struct {
@@ -133,7 +137,7 @@ type ScheduleTemplateResponse struct {
 	DepartmentCode   string                     `json:"departmentCode"`
 	DepartmentName   string                     `json:"departmentName"`
 	RegistrationType string                     `json:"registrationType"`
-	Weekday          int                        `json:"weekday"`
+	Weekdays         []int                      `json:"weekdays"`
 	StartTime        string                     `json:"startTime"`
 	EndTime          string                     `json:"endTime"`
 	DefaultSlotQuota int                        `json:"defaultSlotQuota"`

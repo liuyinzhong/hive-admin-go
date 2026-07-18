@@ -26,6 +26,7 @@ type scheduleTemplateListRow struct {
 	DoctorName     string `gorm:"column:doctor_name"`
 	DepartmentCode string `gorm:"column:department_code"`
 	DepartmentName string `gorm:"column:department_name"`
+	FirstWeekday   int    `gorm:"column:first_weekday"`
 }
 
 type scheduleListRow struct {
@@ -38,9 +39,10 @@ type scheduleListRow struct {
 
 func (s *MedicalScheduleService) GetScheduleTemplateList(req models.ScheduleTemplateListRequest) (*utils.PageResult, error) {
 	query := database.DB.Table("med_schedule_template AS template").
-		Select("template.*, doctor.doctor_no, doctor.name AS doctor_name, department.department_code, department.department_name").
+		Select("template.*, doctor.doctor_no, doctor.name AS doctor_name, department.department_code, department.department_name, template_weekday.first_weekday").
 		Joins("JOIN med_doctor AS doctor ON doctor.doctor_id = template.doctor_id AND doctor.del_flag = 0").
 		Joins("JOIN med_department AS department ON department.department_id = template.department_id AND department.del_flag = 0").
+		Joins("JOIN (SELECT template_id, MIN(weekday) AS first_weekday FROM med_schedule_template_weekday GROUP BY template_id) AS template_weekday ON template_weekday.template_id = template.template_id").
 		Where("template.del_flag = 0")
 	if req.DoctorID != "" {
 		if err := validateMedicalUUID(req.DoctorID, "医生ID"); err != nil {
@@ -58,7 +60,7 @@ func (s *MedicalScheduleService) GetScheduleTemplateList(req models.ScheduleTemp
 		if *req.Weekday < 1 || *req.Weekday > 7 {
 			return nil, fmt.Errorf("%w: 星期必须在1到7之间", ErrMedicalInvalidInput)
 		}
-		query = query.Where("template.weekday = ?", *req.Weekday)
+		query = query.Where("EXISTS (SELECT 1 FROM med_schedule_template_weekday filter_weekday WHERE filter_weekday.template_id = template.template_id AND filter_weekday.weekday = ?)", *req.Weekday)
 	}
 	if req.Status != nil {
 		if err := validateMedicalStatus(*req.Status); err != nil {
@@ -69,14 +71,14 @@ func (s *MedicalScheduleService) GetScheduleTemplateList(req models.ScheduleTemp
 	order := utils.BuildOrderBy(req.Sorts, map[string]string{
 		"doctorName":     "doctor.name",
 		"departmentName": "department.department_name",
-		"weekday":        "template.weekday",
+		"weekday":        "template_weekday.first_weekday",
 		"startTime":      "template.start_time",
 		"effectiveDate":  "template.effective_date",
 		"status":         "template.status",
 		"createDate":     "template.create_date",
 	})
 	if order == "" {
-		order = "template.weekday asc, template.start_time asc, template.create_date desc, template.template_id asc"
+		order = "template_weekday.first_weekday asc, template.start_time asc, template.create_date desc, template.template_id asc"
 	} else {
 		order += ", template.template_id asc"
 	}
@@ -90,79 +92,68 @@ func (s *MedicalScheduleService) GetScheduleTemplateList(req models.ScheduleTemp
 	if err != nil {
 		return nil, err
 	}
+	templateIDs := make([]string, 0, len(rows))
+	for _, row := range rows {
+		templateIDs = append(templateIDs, row.TemplateID)
+	}
+	weekdaysByTemplate, err := loadScheduleTemplateWeekdays(database.DB, templateIDs)
+	if err != nil {
+		return nil, err
+	}
 	items := make([]*models.ScheduleTemplateResponse, 0, len(rows))
 	for _, row := range rows {
+		row.Weekdays = scheduleTemplateWeekdays(row.TemplateID, row.Weekday, weekdaysByTemplate)
 		items = append(items, scheduleTemplateToResponse(row))
 	}
 	pageResult.Items = items
 	return pageResult, nil
 }
 
-func (s *MedicalScheduleService) CreateScheduleTemplate(req models.CreateScheduleTemplateRequest, operatorID string) error {
-	weekdays, err := normalizeScheduleTemplateWeekdays(req.Weekdays)
+func (s *MedicalScheduleService) CreateScheduleTemplate(req models.SaveScheduleTemplateRequest, operatorID string) error {
+	prepared, err := prepareScheduleTemplateRequest(req)
 	if err != nil {
 		return err
 	}
-	preparedTemplates := make([]*preparedScheduleTemplate, 0, len(weekdays))
-	for _, weekday := range weekdays {
-		weekdayRequest := models.SaveScheduleTemplateRequest{
-			ScheduleTemplateBaseRequest: req.ScheduleTemplateBaseRequest,
-			Weekday:                     weekday,
-		}
-		prepared, prepareErr := prepareScheduleTemplateRequest(weekdayRequest)
-		if prepareErr != nil {
-			return prepareErr
-		}
-		preparedTemplates = append(preparedTemplates, prepared)
-	}
-	slotQuotaConfig, err := marshalScheduleSlotQuotaConfig(preparedTemplates[0].slotQuotaConfig)
+	slotQuotaConfig, err := marshalScheduleSlotQuotaConfig(prepared.slotQuotaConfig)
 	if err != nil {
 		return err
 	}
 	return database.DB.Transaction(func(tx *gorm.DB) error {
-		first := preparedTemplates[0]
-		if err := lockScheduleDoctors(tx, []string{first.doctorID}); err != nil {
+		if err := lockScheduleDoctors(tx, []string{prepared.doctorID}); err != nil {
 			return err
 		}
-		if _, err := validateScheduleDimension(tx, first.doctorID, first.departmentID, first.registrationType, nil); err != nil {
+		if _, err := validateScheduleDimension(tx, prepared.doctorID, prepared.departmentID, prepared.registrationType, nil); err != nil {
 			return err
 		}
-		for _, prepared := range preparedTemplates {
-			if prepared.status == 1 {
-				if err := ensureScheduleTemplateAvailable(tx, prepared, ""); err != nil {
-					return err
-				}
-			}
+		if err := ensureScheduleTemplateAvailable(tx, prepared, ""); err != nil {
+			return err
 		}
 		now := time.Now()
-		templates := make([]models.MedScheduleTemplate, 0, len(preparedTemplates))
-		for _, prepared := range preparedTemplates {
-			templates = append(templates, models.MedScheduleTemplate{
-				TemplateID:       utils.GenerateUUID(),
-				TemplateName:     prepared.templateName,
-				DoctorID:         prepared.doctorID,
-				DepartmentID:     prepared.departmentID,
-				RegistrationType: prepared.registrationType,
-				Weekday:          prepared.weekday,
-				StartTime:        prepared.startTime,
-				EndTime:          prepared.endTime,
-				DefaultSlotQuota: prepared.defaultSlotQuota,
-				SlotQuotaConfig:  slotQuotaConfig,
-				TotalQuota:       prepared.totalQuota,
-				EffectiveDate:    prepared.effectiveDate,
-				ExpiryDate:       prepared.expiryDate,
-				Status:           prepared.status,
-				Remark:           prepared.remark,
-				CreatorID:        optionalOperatorID(operatorID),
-				UpdaterID:        optionalOperatorID(operatorID),
-				CreateDate:       &now,
-				UpdateDate:       &now,
-			})
+		template := models.MedScheduleTemplate{
+			TemplateID:       utils.GenerateUUID(),
+			TemplateName:     prepared.templateName,
+			DoctorID:         prepared.doctorID,
+			DepartmentID:     prepared.departmentID,
+			RegistrationType: prepared.registrationType,
+			Weekday:          prepared.weekdays[0],
+			StartTime:        prepared.startTime,
+			EndTime:          prepared.endTime,
+			DefaultSlotQuota: prepared.defaultSlotQuota,
+			SlotQuotaConfig:  slotQuotaConfig,
+			TotalQuota:       prepared.totalQuota,
+			EffectiveDate:    prepared.effectiveDate,
+			ExpiryDate:       prepared.expiryDate,
+			Status:           prepared.status,
+			Remark:           prepared.remark,
+			CreatorID:        optionalOperatorID(operatorID),
+			UpdaterID:        optionalOperatorID(operatorID),
+			CreateDate:       &now,
+			UpdateDate:       &now,
 		}
-		if err := tx.Create(&templates).Error; err != nil {
+		if err := tx.Create(&template).Error; err != nil {
 			return err
 		}
-		return nil
+		return replaceScheduleTemplateWeekdays(tx, template.TemplateID, prepared.weekdays, now)
 	})
 }
 
@@ -197,19 +188,17 @@ func (s *MedicalScheduleService) UpdateScheduleTemplate(templateID string, req m
 		if _, err := validateScheduleDimension(tx, prepared.doctorID, prepared.departmentID, prepared.registrationType, nil); err != nil {
 			return err
 		}
-		if prepared.status == 1 {
-			if err := ensureScheduleTemplateAvailable(tx, prepared, templateID); err != nil {
-				return err
-			}
+		if err := ensureScheduleTemplateAvailable(tx, prepared, templateID); err != nil {
+			return err
 		}
-		return tx.Model(&models.MedScheduleTemplate{}).
+		if err := tx.Model(&models.MedScheduleTemplate{}).
 			Where("template_id = ? AND del_flag = 0", templateID).
 			Updates(map[string]interface{}{
 				"template_name":      prepared.templateName,
 				"doctor_id":          prepared.doctorID,
 				"department_id":      prepared.departmentID,
 				"registration_type":  prepared.registrationType,
-				"weekday":            prepared.weekday,
+				"weekday":            prepared.weekdays[0],
 				"start_time":         prepared.startTime,
 				"end_time":           prepared.endTime,
 				"default_slot_quota": prepared.defaultSlotQuota,
@@ -221,7 +210,10 @@ func (s *MedicalScheduleService) UpdateScheduleTemplate(templateID string, req m
 				"remark":             prepared.remark,
 				"updater_id":         optionalOperatorID(operatorID),
 				"update_date":        time.Now(),
-			}).Error
+			}).Error; err != nil {
+			return err
+		}
+		return replaceScheduleTemplateWeekdays(tx, templateID, prepared.weekdays, time.Now())
 	})
 }
 
@@ -248,6 +240,11 @@ func (s *MedicalScheduleService) UpdateScheduleTemplateStatus(templateID string,
 			return fmt.Errorf("%w: 排班模板已被并发修改，请重试", ErrMedicalConflict)
 		}
 		if status == 1 {
+			weekdaysByTemplate, err := loadScheduleTemplateWeekdays(tx, []string{templateID})
+			if err != nil {
+				return err
+			}
+			current.Weekdays = scheduleTemplateWeekdays(current.TemplateID, current.Weekday, weekdaysByTemplate)
 			prepared, err := templateToPrepared(current)
 			if err != nil {
 				return err
@@ -693,7 +690,7 @@ func (s *MedicalScheduleService) FinishSchedule(scheduleID string, operatorID st
 
 func ensureScheduleTemplateAvailable(tx *gorm.DB, prepared *preparedScheduleTemplate, excludeTemplateID string) error {
 	query := tx.Model(&models.MedScheduleTemplate{}).
-		Where("doctor_id = ? AND weekday = ? AND status = 1 AND del_flag = 0", prepared.doctorID, prepared.weekday).
+		Where("doctor_id = ? AND del_flag = 0", prepared.doctorID).
 		Where("start_time < ? AND end_time > ?", prepared.endTime, prepared.startTime).
 		Where("expiry_date IS NULL OR expiry_date >= ?", prepared.effectiveDate)
 	if prepared.expiryDate != nil {
@@ -702,12 +699,23 @@ func ensureScheduleTemplateAvailable(tx *gorm.DB, prepared *preparedScheduleTemp
 	if excludeTemplateID != "" {
 		query = query.Where("template_id != ?", excludeTemplateID)
 	}
-	var count int64
-	if err := query.Count(&count).Error; err != nil {
+	var candidates []models.MedScheduleTemplate
+	if err := query.Order("template_id asc").Find(&candidates).Error; err != nil {
 		return err
 	}
-	if count > 0 {
-		return fmt.Errorf("%w: 医生存在有效期和时间段重叠的周期模板", ErrMedicalConflict)
+	templateIDs := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		templateIDs = append(templateIDs, candidate.TemplateID)
+	}
+	weekdaysByTemplate, err := loadScheduleTemplateWeekdays(tx, templateIDs)
+	if err != nil {
+		return err
+	}
+	for _, candidate := range candidates {
+		candidate.Weekdays = scheduleTemplateWeekdays(candidate.TemplateID, candidate.Weekday, weekdaysByTemplate)
+		if scheduleTemplateConflicts(candidate, prepared) {
+			return fmt.Errorf("%w: 医生存在星期、有效期和时间段重叠的周期模板", ErrMedicalConflict)
+		}
 	}
 	return nil
 }
@@ -722,7 +730,7 @@ func templateToPrepared(template models.MedScheduleTemplate) (*preparedScheduleT
 		doctorID:         template.DoctorID,
 		departmentID:     template.DepartmentID,
 		registrationType: template.RegistrationType,
-		weekday:          template.Weekday,
+		weekdays:         append([]int(nil), template.Weekdays...),
 		startTime:        template.StartTime,
 		endTime:          template.EndTime,
 		defaultSlotQuota: template.DefaultSlotQuota,
@@ -747,7 +755,7 @@ func scheduleTemplateToResponse(row scheduleTemplateListRow) *models.ScheduleTem
 		DepartmentCode:   row.DepartmentCode,
 		DepartmentName:   row.DepartmentName,
 		RegistrationType: row.RegistrationType,
-		Weekday:          row.Weekday,
+		Weekdays:         append([]int(nil), row.Weekdays...),
 		StartTime:        trimScheduleTime(row.StartTime),
 		EndTime:          trimScheduleTime(row.EndTime),
 		DefaultSlotQuota: row.DefaultSlotQuota,
@@ -760,6 +768,48 @@ func scheduleTemplateToResponse(row scheduleTemplateListRow) *models.ScheduleTem
 		CreateDate:       models.TimeToStringPtr(row.CreateDate),
 		UpdateDate:       models.TimeToStringPtr(row.UpdateDate),
 	}
+}
+
+func loadScheduleTemplateWeekdays(tx *gorm.DB, templateIDs []string) (map[string][]int, error) {
+	result := make(map[string][]int, len(templateIDs))
+	if len(templateIDs) == 0 {
+		return result, nil
+	}
+	var rows []models.MedScheduleTemplateWeekday
+	if err := tx.Where("template_id IN ?", uniqueScheduleStrings(templateIDs)).
+		Order("template_id asc, weekday asc").
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	for _, row := range rows {
+		result[row.TemplateID] = append(result[row.TemplateID], row.Weekday)
+	}
+	return result, nil
+}
+
+func scheduleTemplateWeekdays(templateID string, legacyWeekday int, values map[string][]int) []int {
+	if weekdays := values[templateID]; len(weekdays) > 0 {
+		return append([]int(nil), weekdays...)
+	}
+	if legacyWeekday >= 1 && legacyWeekday <= 7 {
+		return []int{legacyWeekday}
+	}
+	return []int{}
+}
+
+func replaceScheduleTemplateWeekdays(tx *gorm.DB, templateID string, weekdays []int, now time.Time) error {
+	if err := tx.Where("template_id = ?", templateID).Delete(&models.MedScheduleTemplateWeekday{}).Error; err != nil {
+		return err
+	}
+	rows := make([]models.MedScheduleTemplateWeekday, 0, len(weekdays))
+	for _, weekday := range weekdays {
+		rows = append(rows, models.MedScheduleTemplateWeekday{
+			TemplateID: templateID,
+			Weekday:    weekday,
+			CreateDate: now,
+		})
+	}
+	return tx.Create(&rows).Error
 }
 
 func scheduleToResponse(row scheduleListRow, slots []models.MedScheduleSlot) *models.ScheduleResponse {
