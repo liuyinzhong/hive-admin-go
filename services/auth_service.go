@@ -164,7 +164,7 @@ func (s *AuthService) Logout(token string) error {
 
 func buildMenuTree(menus []models.SysMenu) []*models.MenuTreeResponse {
 	menuMap := make(map[string]*models.MenuTreeResponse)
-	var roots []*models.MenuTreeResponse
+	roots := []*models.MenuTreeResponse{}
 
 	for _, menu := range menus {
 		treeNode := &models.MenuTreeResponse{
