@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"hive-admin-go/config"
 	"hive-admin-go/database"
-	projectDocs "hive-admin-go/docs"
 	"hive-admin-go/router"
 	"hive-admin-go/services"
 	"hive-admin-go/utils"
@@ -55,6 +54,7 @@ func startServer() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	services.StartMedicalScheduleAutoScheduler()
+	services.StartAuditLogCleanupScheduler(config.AppConfig.AuditLog.RetentionDays, config.AppConfig.AuditLog.CleanupHour)
 
 	// 设置 GIN 为 release 模式，减少日志输出
 	gin.SetMode(gin.ReleaseMode)
@@ -66,7 +66,12 @@ func startServer() {
 	swaggerHandler := ginSwagger.WrapHandler(swaggerFiles.Handler)
 	r.GET("/swagger/*any", func(c *gin.Context) {
 		if c.Param("any") == "/doc.json" {
-			doc := projectDocs.SwaggerInfo.ReadDoc()
+			doc, err := loadLatestSwaggerDoc()
+			if err != nil {
+				log.Printf("⚠️ 读取 Swagger 文档失败: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"message": "读取 Swagger 文档失败"})
+				return
+			}
 
 			var buf bytes.Buffer
 			if err := json.Compact(&buf, []byte(doc)); err != nil {
@@ -93,7 +98,17 @@ func startServer() {
 
 // syncToApify 同步接口文档到 Apifox
 func syncToApify() {
-	swaggerDoc := projectDocs.SwaggerInfo.ReadDoc()
+	swaggerDoc, err := loadLatestSwaggerDoc()
+	if err != nil {
+		log.Printf("❌ 读取 Swagger 文档失败: %v", err)
+		return
+	}
+
+	apifoxSwaggerDoc, err := buildApifoxSwaggerDoc(swaggerDoc)
+	if err != nil {
+		log.Printf("❌ 构建 Apifox Swagger 文档失败: %v", err)
+		return
+	}
 
 	options := map[string]interface{}{
 		"endpointOverwriteBehavior":     "OVERWRITE_EXISTING",
@@ -104,7 +119,7 @@ func syncToApify() {
 	}
 
 	payloadMap := map[string]interface{}{
-		"input":   swaggerDoc,
+		"input":   apifoxSwaggerDoc,
 		"options": options,
 	}
 
@@ -158,6 +173,7 @@ func autoGenerateSwagger() {
 		log.Println("🔄 Swagger 文档不存在，正在自动生成...")
 		if success := generateSwagger(); success {
 			log.Println("✅ Swagger 文档自动生成成功!")
+			go syncToApify()
 		}
 		return
 	}
@@ -170,6 +186,7 @@ func autoGenerateSwagger() {
 				log.Println("🔄 检测到 controllers 有更新，正在重新生成 Swagger 文档...")
 				if success := generateSwagger(); success {
 					log.Println("✅ Swagger 文档已自动更新!")
+					go syncToApify()
 				}
 				return
 			}

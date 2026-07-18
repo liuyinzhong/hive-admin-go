@@ -1051,6 +1051,56 @@ definitions:
       skippedCount:
         type: integer
     type: object
+  models.LoginLogDetailResponse:
+    properties:
+      contentType:
+        type: string
+      createDate:
+        type: string
+      durationMs:
+        type: integer
+      eventType:
+        type: string
+      httpStatus:
+        type: integer
+      ip:
+        type: string
+      logId:
+        type: string
+      responseBody:
+        type: string
+      responseTruncated:
+        type: boolean
+      status:
+        type: integer
+      userAgent:
+        type: string
+      userId:
+        type: string
+      username:
+        type: string
+    type: object
+  models.LoginLogListResponse:
+    properties:
+      createDate:
+        type: string
+      durationMs:
+        type: integer
+      eventType:
+        type: string
+      httpStatus:
+        type: integer
+      ip:
+        type: string
+      logId:
+        type: string
+      status:
+        type: integer
+      userAgent:
+        type: string
+      username:
+        type: string
+    type: object
   models.LoginRequest:
     properties:
       password:
@@ -1281,6 +1331,70 @@ definitions:
       updateDate:
         description: 更新时间
         example: "2024-01-01 12:00:00"
+        type: string
+    type: object
+  models.OperationLogDetailResponse:
+    properties:
+      contentType:
+        type: string
+      createDate:
+        type: string
+      durationMs:
+        type: integer
+      httpStatus:
+        type: integer
+      ip:
+        type: string
+      logId:
+        type: string
+      queryParams:
+        type: string
+      queryTruncated:
+        type: boolean
+      realName:
+        type: string
+      requestBody:
+        type: string
+      requestMethod:
+        type: string
+      requestTruncated:
+        type: boolean
+      requestUrl:
+        type: string
+      responseBody:
+        type: string
+      responseTruncated:
+        type: boolean
+      status:
+        type: integer
+      userAgent:
+        type: string
+      userId:
+        type: string
+      username:
+        type: string
+    type: object
+  models.OperationLogListResponse:
+    properties:
+      createDate:
+        type: string
+      durationMs:
+        type: integer
+      httpStatus:
+        type: integer
+      ip:
+        type: string
+      logId:
+        type: string
+      realName:
+        type: string
+      requestMethod:
+        type: string
+      requestUrl:
+        type: string
+      status:
+        type: integer
+      username:
         type: string
     type: object
   models.ProfileResponse:
@@ -7008,6 +7122,119 @@ paths:
       summary: 获取文件列表
       tags:
       - 系统管理-文件管理
+  /system/loginLogs:
+    get:
+      description: 分页查询最近七天的登录和退出日志
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 用户名
+        in: query
+        name: username
+        type: string
+      - description: 客户端IP
+        in: query
+        name: ip
+        type: string
+      - description: 类型，login或logout
+        in: query
+        name: eventType
+        type: string
+      - description: 状态，0失败 1成功
+        in: query
+        name: status
+        type: integer
+      - description: 开始时间
+        in: query
+        name: startDate
+        type: string
+      - description: 结束时间
+        in: query
+        name: endDate
+        type: string
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.LoginLogListResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取登录日志列表
+      tags:
+      - 系统管理-日志管理
+  /system/loginLogs/{logId}:
+    get:
+      parameters:
+      - description: 日志ID
+        in: path
+        name: logId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.LoginLogDetailResponse'
+              type: object
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 日志不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取登录日志详情
+      tags:
+      - 系统管理-日志管理
   /system/menus:
     delete:
       consumes:
@@ -7290,6 +7517,119 @@ paths:
       summary: 检查菜单路径是否存在
       tags:
       - 系统管理-菜单管理
+  /system/operationLogs:
+    get:
+      description: 分页查询最近七天的操作日志
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 用户名
+        in: query
+        name: username
+        type: string
+      - description: 请求URL
+        in: query
+        name: requestUrl
+        type: string
+      - description: 请求方法
+        in: query
+        name: requestMethod
+        type: string
+      - description: 状态，0失败 1成功
+        in: query
+        name: status
+        type: integer
+      - description: 开始时间
+        in: query
+        name: startDate
+        type: string
+      - description: 结束时间
+        in: query
+        name: endDate
+        type: string
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.OperationLogListResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取操作日志列表
+      tags:
+      - 系统管理-日志管理
+  /system/operationLogs/{logId}:
+    get:
+      parameters:
+      - description: 日志ID
+        in: path
+        name: logId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.OperationLogDetailResponse'
+              type: object
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 日志不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取操作日志详情
+      tags:
+      - 系统管理-日志管理
   /system/roles:
     delete:
       consumes:

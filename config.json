@@ -1,4 +1,8 @@
 {
+  "auditLog": {
+    "retentionDays": 180,
+    "cleanupHour": 3
+  },
   "server": {
     "port": 9191,
     "mode": "debug"

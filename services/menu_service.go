@@ -122,7 +122,7 @@ func (s *MenuService) CreateMenu(req models.CreateMenuRequest) error {
 	}
 
 	return database.DB.Transaction(func(tx *gorm.DB) error {
-		authCode, err := s.normalizeAndValidateAuthCode(tx, req.AuthCode, "")
+		authCode, err := s.normalizeAndValidateAuthCode(tx, req.Type, req.AuthCode, "")
 		if err != nil {
 			return err
 		}
@@ -148,7 +148,7 @@ func (s *MenuService) UpdateMenu(id string, req models.UpdateMenuRequest) error 
 	}
 
 	return database.DB.Transaction(func(tx *gorm.DB) error {
-		authCode, err := s.normalizeAndValidateAuthCode(tx, req.AuthCode, id)
+		authCode, err := s.normalizeAndValidateAuthCode(tx, req.Type, req.AuthCode, id)
 		if err != nil {
 			return err
 		}
@@ -206,7 +206,10 @@ func normalizeMenuName(menuType string, raw *string) (*string, error) {
 	return &name, nil
 }
 
-func (s *MenuService) normalizeAndValidateAuthCode(tx *gorm.DB, raw *string, excludeID string) (*string, error) {
+func (s *MenuService) normalizeAndValidateAuthCode(tx *gorm.DB, menuType string, raw *string, excludeID string) (*string, error) {
+	if menuType != "button" {
+		return nil, nil
+	}
 	if raw == nil || strings.TrimSpace(*raw) == "" {
 		return nil, nil
 	}

@@ -19,8 +19,10 @@ func SetupRouter() *gin.Engine {
 	formSchemaController := controllers.FormSchemaController{}
 	medicalController := controllers.NewMedicalController()
 	permissionGuard := middleware.NewPermissionGuard(services.NewPermissionService())
+	auditLogService := services.NewAuditLogService()
 
 	api := router.Group("/api")
+	api.Use(middleware.AuditLogMiddleware(auditLogService))
 	{
 		auth := api.Group("/auth")
 		{
@@ -87,6 +89,18 @@ func SetupRouter() *gin.Engine {
 				dicts.PUT("/:id", permissionGuard.Require("system:dict:update"), systemController.UpdateDict)
 				dicts.PUT("/:id/status", permissionGuard.Require("system:dict:status"), systemController.UpdateDictStatus)
 				dicts.DELETE("", permissionGuard.Require("system:dict:delete"), systemController.DeleteDicts)
+			}
+
+			operationLogs := system.Group("/operationLogs")
+			{
+				operationLogs.GET("", permissionGuard.Require("system:operationLog:list"), systemController.GetOperationLogs)
+				operationLogs.GET("/:logId", permissionGuard.Require("system:operationLog:detail"), systemController.GetOperationLog)
+			}
+
+			loginLogs := system.Group("/loginLogs")
+			{
+				loginLogs.GET("", permissionGuard.Require("system:loginLog:list"), systemController.GetLoginLogs)
+				loginLogs.GET("/:logId", permissionGuard.Require("system:loginLog:detail"), systemController.GetLoginLog)
 			}
 		}
 

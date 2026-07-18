@@ -32,3 +32,20 @@ func TestNormalizeMenuNameTrimsNonButtonName(t *testing.T) {
 		t.Fatalf("normalizeMenuName() = %v, want SystemMenu", name)
 	}
 }
+
+func TestNormalizeAndValidateAuthCodeClearsNonButtonAuthCode(t *testing.T) {
+	service := &MenuService{}
+	raw := "dev:project:home"
+
+	for _, menuType := range []string{"catalog", "menu"} {
+		t.Run(menuType, func(t *testing.T) {
+			authCode, err := service.normalizeAndValidateAuthCode(nil, menuType, &raw, "")
+			if err != nil {
+				t.Fatalf("normalizeAndValidateAuthCode() error = %v", err)
+			}
+			if authCode != nil {
+				t.Fatalf("normalizeAndValidateAuthCode() = %q, want nil", *authCode)
+			}
+		})
+	}
+}
