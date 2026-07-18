@@ -12,7 +12,7 @@ import (
 // GetModules 获取模块列表
 // @Summary 获取模块列表
 // @Description 获取所有模块（不分页），可根据项目ID筛选
-// @Tags 开发管理-模块管理
+// @Tags 开发管理/模块管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -39,7 +39,7 @@ func (dc *DevController) GetModules(c *gin.Context) {
 // GetModule 获取模块详情
 // @Summary 获取模块详情
 // @Description 根据模块ID获取模块详情
-// @Tags 开发管理-模块管理
+// @Tags 开发管理/模块管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -62,7 +62,7 @@ func (dc *DevController) GetModule(c *gin.Context) {
 // CreateModule 创建模块
 // @Summary 创建模块
 // @Description 创建新模块
-// @Tags 开发管理-模块管理
+// @Tags 开发管理/模块管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -91,7 +91,7 @@ func (dc *DevController) CreateModule(c *gin.Context) {
 // UpdateModule 更新模块
 // @Summary 更新模块
 // @Description 更新模块信息
-// @Tags 开发管理-模块管理
+// @Tags 开发管理/模块管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -122,7 +122,7 @@ func (dc *DevController) UpdateModule(c *gin.Context) {
 // DeleteModules 删除模块
 // @Summary 删除模块
 // @Description 批量删除模块
-// @Tags 开发管理-模块管理
+// @Tags 开发管理/模块管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

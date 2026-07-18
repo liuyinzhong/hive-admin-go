@@ -12,7 +12,7 @@ import (
 // GetChangeHistory 获取变更记录
 // @Summary 获取变更记录
 // @Description 根据业务ID获取变更记录
-// @Tags 开发管理-变更记录
+// @Tags 开发管理/变更记录
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -40,7 +40,7 @@ func (dc *DevController) GetChangeHistory(c *gin.Context) {
 // CreateChangeHistory 创建变更记录（评论）
 // @Summary 创建变更记录
 // @Description 创建新的变更记录或评论
-// @Tags 开发管理-变更记录
+// @Tags 开发管理/变更记录
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

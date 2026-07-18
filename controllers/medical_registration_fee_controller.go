@@ -10,7 +10,7 @@ import (
 
 // GetRegistrationFeeRuleList 获取挂号费规则列表。
 // @Summary 获取挂号费规则列表
-// @Tags 医疗管理-挂号费
+// @Tags 医疗管理/挂号费
 // @Produce json
 // @Security ApiKeyAuth
 // @Param page query int false "页码"
@@ -40,7 +40,7 @@ func (ctrl *MedicalController) GetRegistrationFeeRuleList(c *gin.Context) {
 
 // CreateRegistrationFeeRule 创建挂号费规则。
 // @Summary 创建挂号费规则
-// @Tags 医疗管理-挂号费
+// @Tags 医疗管理/挂号费
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -63,7 +63,7 @@ func (ctrl *MedicalController) CreateRegistrationFeeRule(c *gin.Context) {
 
 // AdjustRegistrationFeeRule 调整挂号费并生成新版本。
 // @Summary 调整挂号费并生成新版本
-// @Tags 医疗管理-挂号费
+// @Tags 医疗管理/挂号费
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

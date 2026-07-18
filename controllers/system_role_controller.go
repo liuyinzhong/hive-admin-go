@@ -11,7 +11,7 @@ import (
 // GetRoleList 获取角色列表
 // @Summary 获取角色列表
 // @Description 分页获取角色列表
-// @Tags 系统管理-角色管理
+// @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -42,7 +42,7 @@ func (ctrl *SystemController) GetRoleList(c *gin.Context) {
 // GetAllRoles 获取所有角色
 // @Summary 获取所有角色
 // @Description 获取所有角色（不分页）
-// @Tags 系统管理-角色管理
+// @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -62,7 +62,7 @@ func (ctrl *SystemController) GetAllRoles(c *gin.Context) {
 // CreateRole 创建角色
 // @Summary 创建角色
 // @Description 创建新角色
-// @Tags 系统管理-角色管理
+// @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -90,7 +90,7 @@ func (ctrl *SystemController) CreateRole(c *gin.Context) {
 // GetRoleDetail 获取角色详情
 // @Summary 获取角色详情
 // @Description 根据角色ID获取角色详情
-// @Tags 系统管理-角色管理
+// @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -119,7 +119,7 @@ func (ctrl *SystemController) GetRoleDetail(c *gin.Context) {
 // UpdateRole 更新角色
 // @Summary 更新角色
 // @Description 更新角色信息
-// @Tags 系统管理-角色管理
+// @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -154,7 +154,7 @@ func (ctrl *SystemController) UpdateRole(c *gin.Context) {
 // UpdateRoleStatus 更新角色状态
 // @Summary 更新角色状态
 // @Description 更新角色启用/禁用状态
-// @Tags 系统管理-角色管理
+// @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -189,7 +189,7 @@ func (ctrl *SystemController) UpdateRoleStatus(c *gin.Context) {
 // DeleteRoles 删除角色
 // @Summary 删除角色
 // @Description 批量删除角色
-// @Tags 系统管理-角色管理
+// @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

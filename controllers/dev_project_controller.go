@@ -12,7 +12,7 @@ import (
 // GetProjects 获取项目列表
 // @Summary 获取项目列表
 // @Description 获取所有项目（不分页）
-// @Tags 开发管理-项目管理
+// @Tags 开发管理/项目管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -32,7 +32,7 @@ func (dc *DevController) GetProjects(c *gin.Context) {
 // GetProject 获取项目详情
 // @Summary 获取项目详情
 // @Description 根据项目ID获取项目详情
-// @Tags 开发管理-项目管理
+// @Tags 开发管理/项目管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -55,7 +55,7 @@ func (dc *DevController) GetProject(c *gin.Context) {
 // CreateProject 创建项目
 // @Summary 创建项目
 // @Description 创建新项目
-// @Tags 开发管理-项目管理
+// @Tags 开发管理/项目管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -84,7 +84,7 @@ func (dc *DevController) CreateProject(c *gin.Context) {
 // UpdateProject 更新项目
 // @Summary 更新项目
 // @Description 更新项目信息
-// @Tags 开发管理-项目管理
+// @Tags 开发管理/项目管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

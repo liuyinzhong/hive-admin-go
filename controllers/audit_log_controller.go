@@ -13,7 +13,7 @@ import (
 // GetOperationLogs 获取操作日志列表
 // @Summary 获取操作日志列表
 // @Description 分页查询最近七天的操作日志
-// @Tags 系统管理-日志管理
+// @Tags 系统管理/日志管理
 // @Produce json
 // @Security ApiKeyAuth
 // @Param page query int false "页码"
@@ -46,7 +46,7 @@ func (ctrl *SystemController) GetOperationLogs(c *gin.Context) {
 
 // GetOperationLog 获取操作日志详情
 // @Summary 获取操作日志详情
-// @Tags 系统管理-日志管理
+// @Tags 系统管理/日志管理
 // @Produce json
 // @Security ApiKeyAuth
 // @Param logId path string true "日志ID"
@@ -67,7 +67,7 @@ func (ctrl *SystemController) GetOperationLog(c *gin.Context) {
 // GetLoginLogs 获取登录日志列表
 // @Summary 获取登录日志列表
 // @Description 分页查询最近七天的登录和退出日志
-// @Tags 系统管理-日志管理
+// @Tags 系统管理/日志管理
 // @Produce json
 // @Security ApiKeyAuth
 // @Param page query int false "页码"
@@ -100,7 +100,7 @@ func (ctrl *SystemController) GetLoginLogs(c *gin.Context) {
 
 // GetLoginLog 获取登录日志详情
 // @Summary 获取登录日志详情
-// @Tags 系统管理-日志管理
+// @Tags 系统管理/日志管理
 // @Produce json
 // @Security ApiKeyAuth
 // @Param logId path string true "日志ID"

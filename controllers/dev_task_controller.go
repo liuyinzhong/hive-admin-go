@@ -14,7 +14,7 @@ import (
 // GetTasks 获取任务列表
 // @Summary 获取任务列表
 // @Description 分页获取任务列表
-// @Tags 开发管理-任务管理
+// @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -74,7 +74,7 @@ func (dc *DevController) GetTasks(c *gin.Context) {
 // GetAllTasks 获取所有任务
 // @Summary 获取所有任务
 // @Description 获取所有任务（不分页）
-// @Tags 开发管理-任务管理
+// @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -117,7 +117,7 @@ func (dc *DevController) GetAllTasks(c *gin.Context) {
 // GetTask 获取任务详情
 // @Summary 获取任务详情
 // @Description 根据任务编号获取任务详情
-// @Tags 开发管理-任务管理
+// @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -145,7 +145,7 @@ func (dc *DevController) GetTask(c *gin.Context) {
 // CreateTask 创建任务
 // @Summary 创建任务
 // @Description 创建新任务
-// @Tags 开发管理-任务管理
+// @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -174,7 +174,7 @@ func (dc *DevController) CreateTask(c *gin.Context) {
 // CreateTasks 批量创建任务
 // @Summary 批量创建任务
 // @Description 批量创建任务
-// @Tags 开发管理-任务管理
+// @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -203,7 +203,7 @@ func (dc *DevController) CreateTasks(c *gin.Context) {
 // UpdateTask 更新任务
 // @Summary 更新任务
 // @Description 更新任务信息
-// @Tags 开发管理-任务管理
+// @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -235,7 +235,7 @@ func (dc *DevController) UpdateTask(c *gin.Context) {
 // UpdateTaskField 更新任务字段
 // @Summary 更新任务字段
 // @Description 更新任务的单个字段，仅可修改：userId、taskType、startDate、endDate
-// @Tags 开发管理-任务管理
+// @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -267,7 +267,7 @@ func (dc *DevController) UpdateTaskField(c *gin.Context) {
 // UpdateTaskNext 任务流转状态
 // @Summary 任务流转状态
 // @Description 更新任务状态
-// @Tags 开发管理-任务管理
+// @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -299,7 +299,7 @@ func (dc *DevController) UpdateTaskNext(c *gin.Context) {
 // DeleteTasks 删除任务
 // @Summary 删除任务
 // @Description 批量删除任务
-// @Tags 开发管理-任务管理
+// @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

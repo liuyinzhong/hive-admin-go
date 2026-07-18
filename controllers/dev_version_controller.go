@@ -13,7 +13,7 @@ import (
 // GetVersions 获取版本列表
 // @Summary 获取版本列表
 // @Description 分页获取版本列表
-// @Tags 开发管理-版本管理
+// @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -54,7 +54,7 @@ func (dc *DevController) GetVersions(c *gin.Context) {
 // GetAllVersions 获取所有版本
 // @Summary 获取所有版本
 // @Description 获取所有版本（不分页）
-// @Tags 开发管理-版本管理
+// @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -87,7 +87,7 @@ func (dc *DevController) GetAllVersions(c *gin.Context) {
 // GetVersion 获取版本详情
 // @Summary 获取版本详情
 // @Description 根据版本ID获取版本详情
-// @Tags 开发管理-版本管理
+// @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -110,7 +110,7 @@ func (dc *DevController) GetVersion(c *gin.Context) {
 // GetLatestVersion 获取最新版本号
 // @Summary 获取最新版本号
 // @Description 获取指定项目下按版本号排序后的最大版本号
-// @Tags 开发管理-版本管理
+// @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -137,7 +137,7 @@ func (dc *DevController) GetLatestVersion(c *gin.Context) {
 // CreateVersion 创建版本
 // @Summary 创建版本
 // @Description 创建新版本
-// @Tags 开发管理-版本管理
+// @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -175,7 +175,7 @@ func (dc *DevController) CreateVersion(c *gin.Context) {
 // UpdateVersion 更新版本
 // @Summary 更新版本
 // @Description 更新版本信息
-// @Tags 开发管理-版本管理
+// @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -216,7 +216,7 @@ func (dc *DevController) UpdateVersion(c *gin.Context) {
 // UpdateVersionNext 版本流转状态
 // @Summary 版本流转状态
 // @Description 更新版本状态并记录变更历史
-// @Tags 开发管理-版本管理
+// @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -248,7 +248,7 @@ func (dc *DevController) UpdateVersionNext(c *gin.Context) {
 // DeleteVersions 删除版本
 // @Summary 删除版本
 // @Description 批量删除版本
-// @Tags 开发管理-版本管理
+// @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

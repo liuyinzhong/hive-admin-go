@@ -11,7 +11,7 @@ import (
 // GetDictTree 获取字典树
 // @Summary 获取字典树
 // @Description 获取字典树结构
-// @Tags 系统管理-字典管理
+// @Tags 系统管理/字典管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -39,7 +39,7 @@ func (ctrl *SystemController) GetDictTree(c *gin.Context) {
 // CreateDict 创建字典
 // @Summary 创建字典
 // @Description 创建新字典
-// @Tags 系统管理-字典管理
+// @Tags 系统管理/字典管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -67,7 +67,7 @@ func (ctrl *SystemController) CreateDict(c *gin.Context) {
 // GetDictDetail 获取字典详情
 // @Summary 获取字典详情
 // @Description 根据字典ID获取字典详情
-// @Tags 系统管理-字典管理
+// @Tags 系统管理/字典管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -96,7 +96,7 @@ func (ctrl *SystemController) GetDictDetail(c *gin.Context) {
 // UpdateDict 更新字典
 // @Summary 更新字典
 // @Description 更新字典信息
-// @Tags 系统管理-字典管理
+// @Tags 系统管理/字典管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -131,7 +131,7 @@ func (ctrl *SystemController) UpdateDict(c *gin.Context) {
 // UpdateDictStatus 更新字典状态
 // @Summary 更新字典状态
 // @Description 更新字典启用/禁用状态
-// @Tags 系统管理-字典管理
+// @Tags 系统管理/字典管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -166,7 +166,7 @@ func (ctrl *SystemController) UpdateDictStatus(c *gin.Context) {
 // DeleteDicts 删除字典
 // @Summary 删除字典
 // @Description 批量删除字典
-// @Tags 系统管理-字典管理
+// @Tags 系统管理/字典管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

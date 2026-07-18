@@ -29,7 +29,7 @@ func NewMedicalController() *MedicalController {
 
 // GetMedicalDepartmentTree 获取临床科室树。
 // @Summary 获取临床科室树
-// @Tags 医疗管理-临床科室
+// @Tags 医疗管理/临床科室
 // @Produce json
 // @Security ApiKeyAuth
 // @Param keyword query string false "科室编码或名称"
@@ -53,7 +53,7 @@ func (ctrl *MedicalController) GetMedicalDepartmentTree(c *gin.Context) {
 
 // GetAllMedicalDepartments 获取所有启用的临床科室。
 // @Summary 获取所有启用的临床科室
-// @Tags 医疗管理-临床科室
+// @Tags 医疗管理/临床科室
 // @Produce json
 // @Security ApiKeyAuth
 // @Success 200 {object} models.Response{data=[]models.MedicalDepartmentTreeResponse}
@@ -69,7 +69,7 @@ func (ctrl *MedicalController) GetAllMedicalDepartments(c *gin.Context) {
 
 // CreateMedicalDepartment 创建临床科室。
 // @Summary 创建临床科室
-// @Tags 医疗管理-临床科室
+// @Tags 医疗管理/临床科室
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -92,7 +92,7 @@ func (ctrl *MedicalController) CreateMedicalDepartment(c *gin.Context) {
 
 // GetMedicalDepartmentDetail 获取临床科室详情。
 // @Summary 获取临床科室详情
-// @Tags 医疗管理-临床科室
+// @Tags 医疗管理/临床科室
 // @Produce json
 // @Security ApiKeyAuth
 // @Param departmentId path string true "临床科室ID"
@@ -110,7 +110,7 @@ func (ctrl *MedicalController) GetMedicalDepartmentDetail(c *gin.Context) {
 
 // UpdateMedicalDepartment 更新临床科室。
 // @Summary 更新临床科室
-// @Tags 医疗管理-临床科室
+// @Tags 医疗管理/临床科室
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -134,7 +134,7 @@ func (ctrl *MedicalController) UpdateMedicalDepartment(c *gin.Context) {
 
 // UpdateMedicalDepartmentStatus 更新临床科室状态。
 // @Summary 更新临床科室状态
-// @Tags 医疗管理-临床科室
+// @Tags 医疗管理/临床科室
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -158,7 +158,7 @@ func (ctrl *MedicalController) UpdateMedicalDepartmentStatus(c *gin.Context) {
 
 // DeleteMedicalDepartments 删除临床科室。
 // @Summary 批量删除临床科室
-// @Tags 医疗管理-临床科室
+// @Tags 医疗管理/临床科室
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -181,7 +181,7 @@ func (ctrl *MedicalController) DeleteMedicalDepartments(c *gin.Context) {
 
 // GetDoctorList 获取医生列表。
 // @Summary 获取医生列表
-// @Tags 医疗管理-医生档案
+// @Tags 医疗管理/医生档案
 // @Produce json
 // @Security ApiKeyAuth
 // @Param page query int false "页码"
@@ -211,7 +211,7 @@ func (ctrl *MedicalController) GetDoctorList(c *gin.Context) {
 
 // GetAllDoctors 获取所有启用医生选项。
 // @Summary 获取所有启用医生选项
-// @Tags 医疗管理-医生档案
+// @Tags 医疗管理/医生档案
 // @Produce json
 // @Security ApiKeyAuth
 // @Success 200 {object} models.Response{data=[]models.DoctorOptionResponse}
@@ -227,7 +227,7 @@ func (ctrl *MedicalController) GetAllDoctors(c *gin.Context) {
 
 // CreateDoctor 创建医生档案。
 // @Summary 创建医生档案
-// @Tags 医疗管理-医生档案
+// @Tags 医疗管理/医生档案
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -250,7 +250,7 @@ func (ctrl *MedicalController) CreateDoctor(c *gin.Context) {
 
 // GetDoctorDetail 获取医生详情。
 // @Summary 获取医生详情
-// @Tags 医疗管理-医生档案
+// @Tags 医疗管理/医生档案
 // @Produce json
 // @Security ApiKeyAuth
 // @Param doctorId path string true "医生ID"
@@ -268,7 +268,7 @@ func (ctrl *MedicalController) GetDoctorDetail(c *gin.Context) {
 
 // UpdateDoctor 更新医生档案。
 // @Summary 更新医生档案
-// @Tags 医疗管理-医生档案
+// @Tags 医疗管理/医生档案
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -292,7 +292,7 @@ func (ctrl *MedicalController) UpdateDoctor(c *gin.Context) {
 
 // UpdateDoctorStatus 更新医生状态。
 // @Summary 更新医生状态
-// @Tags 医疗管理-医生档案
+// @Tags 医疗管理/医生档案
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -316,7 +316,7 @@ func (ctrl *MedicalController) UpdateDoctorStatus(c *gin.Context) {
 
 // DeleteDoctors 删除医生档案。
 // @Summary 批量删除医生档案
-// @Tags 医疗管理-医生档案
+// @Tags 医疗管理/医生档案
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

@@ -13,7 +13,7 @@ import (
 // GetMenuTree 获取菜单树
 // @Summary 获取菜单树
 // @Description 获取菜单树结构
-// @Tags 系统管理-菜单管理
+// @Tags 系统管理/菜单管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -41,7 +41,7 @@ func (ctrl *SystemController) GetMenuTree(c *gin.Context) {
 // CheckMenuNameExists 检查菜单名称是否存在
 // @Summary 检查菜单名称是否存在
 // @Description 检查菜单名称是否已存在
-// @Tags 系统管理-菜单管理
+// @Tags 系统管理/菜单管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -72,7 +72,7 @@ func (ctrl *SystemController) CheckMenuNameExists(c *gin.Context) {
 // CheckMenuPathExists 检查菜单路径是否存在
 // @Summary 检查菜单路径是否存在
 // @Description 检查菜单路径是否已存在
-// @Tags 系统管理-菜单管理
+// @Tags 系统管理/菜单管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -103,7 +103,7 @@ func (ctrl *SystemController) CheckMenuPathExists(c *gin.Context) {
 // CreateMenu 创建菜单
 // @Summary 创建菜单
 // @Description 创建新菜单
-// @Tags 系统管理-菜单管理
+// @Tags 系统管理/菜单管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -131,7 +131,7 @@ func (ctrl *SystemController) CreateMenu(c *gin.Context) {
 // GetMenuDetail 获取菜单详情
 // @Summary 获取菜单详情
 // @Description 根据菜单ID获取菜单详情
-// @Tags 系统管理-菜单管理
+// @Tags 系统管理/菜单管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -160,7 +160,7 @@ func (ctrl *SystemController) GetMenuDetail(c *gin.Context) {
 // UpdateMenu 更新菜单
 // @Summary 更新菜单
 // @Description 更新菜单信息
-// @Tags 系统管理-菜单管理
+// @Tags 系统管理/菜单管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -206,7 +206,7 @@ func writeMenuMutationError(c *gin.Context, err error) {
 // DeleteMenus 删除菜单
 // @Summary 删除菜单
 // @Description 批量删除菜单
-// @Tags 系统管理-菜单管理
+// @Tags 系统管理/菜单管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

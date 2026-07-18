@@ -11,7 +11,7 @@ import (
 // GetUserList 获取用户列表
 // @Summary 获取用户列表
 // @Description 分页获取用户列表
-// @Tags 系统管理-用户管理
+// @Tags 系统管理/用户管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -45,7 +45,7 @@ func (ctrl *SystemController) GetUserList(c *gin.Context) {
 // GetAllUsers 获取所有用户
 // @Summary 获取所有用户
 // @Description 获取所有用户（不分页）
-// @Tags 系统管理-用户管理
+// @Tags 系统管理/用户管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -68,7 +68,7 @@ func (ctrl *SystemController) GetAllUsers(c *gin.Context) {
 // CreateUser 创建用户
 // @Summary 创建用户
 // @Description 创建新用户
-// @Tags 系统管理-用户管理
+// @Tags 系统管理/用户管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -96,7 +96,7 @@ func (ctrl *SystemController) CreateUser(c *gin.Context) {
 // GetUserDetail 获取用户详情
 // @Summary 获取用户详情
 // @Description 根据用户ID获取用户详情
-// @Tags 系统管理-用户管理
+// @Tags 系统管理/用户管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -125,7 +125,7 @@ func (ctrl *SystemController) GetUserDetail(c *gin.Context) {
 // UpdateUser 更新用户
 // @Summary 更新用户
 // @Description 更新用户信息
-// @Tags 系统管理-用户管理
+// @Tags 系统管理/用户管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -160,7 +160,7 @@ func (ctrl *SystemController) UpdateUser(c *gin.Context) {
 // UpdateUserStatus 更新用户状态
 // @Summary 更新用户状态
 // @Description 更新用户启用/禁用状态
-// @Tags 系统管理-用户管理
+// @Tags 系统管理/用户管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -195,7 +195,7 @@ func (ctrl *SystemController) UpdateUserStatus(c *gin.Context) {
 // DeleteUsers 删除用户
 // @Summary 删除用户
 // @Description 批量删除用户
-// @Tags 系统管理-用户管理
+// @Tags 系统管理/用户管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

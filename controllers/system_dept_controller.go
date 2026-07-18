@@ -11,7 +11,7 @@ import (
 // GetDeptTree 获取部门树
 // @Summary 获取部门树
 // @Description 获取部门树结构
-// @Tags 系统管理-部门管理
+// @Tags 系统管理/部门管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -39,7 +39,7 @@ func (ctrl *SystemController) GetDeptTree(c *gin.Context) {
 // GetAllDepts 获取所有部门
 // @Summary 获取所有部门
 // @Description 获取所有部门（不分页）
-// @Tags 系统管理-部门管理
+// @Tags 系统管理/部门管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -59,7 +59,7 @@ func (ctrl *SystemController) GetAllDepts(c *gin.Context) {
 // CreateDept 创建部门
 // @Summary 创建部门
 // @Description 创建新部门
-// @Tags 系统管理-部门管理
+// @Tags 系统管理/部门管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -87,7 +87,7 @@ func (ctrl *SystemController) CreateDept(c *gin.Context) {
 // GetDeptDetail 获取部门详情
 // @Summary 获取部门详情
 // @Description 根据部门ID获取部门详情
-// @Tags 系统管理-部门管理
+// @Tags 系统管理/部门管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -116,7 +116,7 @@ func (ctrl *SystemController) GetDeptDetail(c *gin.Context) {
 // UpdateDept 更新部门
 // @Summary 更新部门
 // @Description 更新部门信息
-// @Tags 系统管理-部门管理
+// @Tags 系统管理/部门管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -151,7 +151,7 @@ func (ctrl *SystemController) UpdateDept(c *gin.Context) {
 // DeleteDepts 删除部门
 // @Summary 删除部门
 // @Description 批量删除部门
-// @Tags 系统管理-部门管理
+// @Tags 系统管理/部门管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

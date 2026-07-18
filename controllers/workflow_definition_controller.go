@@ -16,7 +16,7 @@ type WorkflowController struct{}
 // GetWorkflowDefinitions 获取流程定义列表
 // @Summary 获取流程定义列表
 // @Description 分页获取流程定义列表
-// @Tags 流程管理-流程定义
+// @Tags 流程管理/流程定义
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -55,7 +55,7 @@ func (wc *WorkflowController) GetWorkflowDefinitions(c *gin.Context) {
 // GetAllWorkflowDefinitions 获取所有流程定义
 // @Summary 获取所有流程定义
 // @Description 获取所有流程定义（不分页）
-// @Tags 流程管理-流程定义
+// @Tags 流程管理/流程定义
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -88,7 +88,7 @@ func (wc *WorkflowController) GetAllWorkflowDefinitions(c *gin.Context) {
 // GetWorkflowDefinition 获取流程定义详情
 // @Summary 获取流程定义详情
 // @Description 根据流程定义ID获取流程定义详情
-// @Tags 流程管理-流程定义
+// @Tags 流程管理/流程定义
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -111,7 +111,7 @@ func (wc *WorkflowController) GetWorkflowDefinition(c *gin.Context) {
 // CreateWorkflowDefinition 创建流程定义
 // @Summary 创建流程定义
 // @Description 创建新的流程定义
-// @Tags 流程管理-流程定义
+// @Tags 流程管理/流程定义
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -139,7 +139,7 @@ func (wc *WorkflowController) CreateWorkflowDefinition(c *gin.Context) {
 // UpdateWorkflowDefinition 更新流程定义
 // @Summary 更新流程定义
 // @Description 更新流程定义基础信息和画布数据
-// @Tags 流程管理-流程定义
+// @Tags 流程管理/流程定义
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -169,7 +169,7 @@ func (wc *WorkflowController) UpdateWorkflowDefinition(c *gin.Context) {
 // UpdateWorkflowCanvas 保存流程画布
 // @Summary 保存流程画布
 // @Description 保存 LogicFlow 画布JSON数据
-// @Tags 流程管理-流程定义
+// @Tags 流程管理/流程定义
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -199,7 +199,7 @@ func (wc *WorkflowController) UpdateWorkflowCanvas(c *gin.Context) {
 // UpdateWorkflowFormSchema 绑定流程使用的独立表单 Schema。
 // @Summary 绑定流程表单 Schema
 // @Description 保存流程定义关联的表单 Schema ID，并将流程恢复为草稿状态
-// @Tags 流程管理-流程定义
+// @Tags 流程管理/流程定义
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -225,7 +225,7 @@ func (wc *WorkflowController) UpdateWorkflowFormSchema(c *gin.Context) {
 // PublishWorkflowDefinition 发布流程定义
 // @Summary 发布流程定义
 // @Description 发布流程定义并递增版本号
-// @Tags 流程管理-流程定义
+// @Tags 流程管理/流程定义
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -247,7 +247,7 @@ func (wc *WorkflowController) PublishWorkflowDefinition(c *gin.Context) {
 // UpdateWorkflowDefinitionStatus 更新流程定义状态
 // @Summary 更新流程定义状态
 // @Description 更新流程定义状态：0草稿 1已发布 2已停用
-// @Tags 流程管理-流程定义
+// @Tags 流程管理/流程定义
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -283,7 +283,7 @@ func (wc *WorkflowController) UpdateWorkflowDefinitionStatus(c *gin.Context) {
 // DeleteWorkflowDefinitions 删除流程定义
 // @Summary 删除流程定义
 // @Description 批量删除流程定义
-// @Tags 流程管理-流程定义
+// @Tags 流程管理/流程定义
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

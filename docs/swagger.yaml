@@ -3307,7 +3307,7 @@ paths:
       - ApiKeyAuth: []
       summary: 删除缺陷
       tags:
-      - 开发管理-缺陷管理
+      - 开发管理/缺陷管理
     get:
       consumes:
       - application/json
@@ -3385,7 +3385,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取缺陷列表
       tags:
-      - 开发管理-缺陷管理
+      - 开发管理/缺陷管理
     post:
       consumes:
       - application/json
@@ -3422,7 +3422,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建缺陷
       tags:
-      - 开发管理-缺陷管理
+      - 开发管理/缺陷管理
   /dev/bugs/{bugId}:
     put:
       consumes:
@@ -3465,7 +3465,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新缺陷
       tags:
-      - 开发管理-缺陷管理
+      - 开发管理/缺陷管理
   /dev/bugs/{bugId}/confirm:
     put:
       consumes:
@@ -3508,7 +3508,7 @@ paths:
       - ApiKeyAuth: []
       summary: 确认缺陷
       tags:
-      - 开发管理-缺陷管理
+      - 开发管理/缺陷管理
   /dev/bugs/{bugId}/field:
     put:
       consumes:
@@ -3551,7 +3551,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新缺陷字段
       tags:
-      - 开发管理-缺陷管理
+      - 开发管理/缺陷管理
   /dev/bugs/{bugId}/next:
     put:
       consumes:
@@ -3594,7 +3594,7 @@ paths:
       - ApiKeyAuth: []
       summary: 缺陷流转状态
       tags:
-      - 开发管理-缺陷管理
+      - 开发管理/缺陷管理
   /dev/bugs/{bugNum}:
     get:
       consumes:
@@ -3636,7 +3636,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取缺陷详情
       tags:
-      - 开发管理-缺陷管理
+      - 开发管理/缺陷管理
   /dev/bugs/all:
     get:
       consumes:
@@ -3694,7 +3694,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取所有缺陷
       tags:
-      - 开发管理-缺陷管理
+      - 开发管理/缺陷管理
   /dev/bugs/batch:
     post:
       consumes:
@@ -3734,7 +3734,7 @@ paths:
       - ApiKeyAuth: []
       summary: 批量创建缺陷
       tags:
-      - 开发管理-缺陷管理
+      - 开发管理/缺陷管理
   /dev/changeHistory:
     get:
       consumes:
@@ -3778,7 +3778,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取变更记录
       tags:
-      - 开发管理-变更记录
+      - 开发管理/变更记录
     post:
       consumes:
       - application/json
@@ -3815,7 +3815,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建变更记录
       tags:
-      - 开发管理-变更记录
+      - 开发管理/变更记录
   /dev/modules:
     delete:
       consumes:
@@ -3855,7 +3855,7 @@ paths:
       - ApiKeyAuth: []
       summary: 删除模块
       tags:
-      - 开发管理-模块管理
+      - 开发管理/模块管理
     get:
       consumes:
       - application/json
@@ -3892,7 +3892,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取模块列表
       tags:
-      - 开发管理-模块管理
+      - 开发管理/模块管理
     post:
       consumes:
       - application/json
@@ -3929,7 +3929,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建模块
       tags:
-      - 开发管理-模块管理
+      - 开发管理/模块管理
   /dev/modules/{moduleId}:
     get:
       consumes:
@@ -3971,7 +3971,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取模块详情
       tags:
-      - 开发管理-模块管理
+      - 开发管理/模块管理
     put:
       consumes:
       - application/json
@@ -4013,7 +4013,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新模块
       tags:
-      - 开发管理-模块管理
+      - 开发管理/模块管理
   /dev/projects:
     get:
       consumes:
@@ -4046,7 +4046,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取项目列表
       tags:
-      - 开发管理-项目管理
+      - 开发管理/项目管理
     post:
       consumes:
       - application/json
@@ -4083,7 +4083,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建项目
       tags:
-      - 开发管理-项目管理
+      - 开发管理/项目管理
   /dev/projects/{projectId}:
     get:
       consumes:
@@ -4125,7 +4125,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取项目详情
       tags:
-      - 开发管理-项目管理
+      - 开发管理/项目管理
     put:
       consumes:
       - application/json
@@ -4167,7 +4167,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新项目
       tags:
-      - 开发管理-项目管理
+      - 开发管理/项目管理
   /dev/storys:
     delete:
       consumes:
@@ -4207,7 +4207,7 @@ paths:
       - ApiKeyAuth: []
       summary: 删除需求
       tags:
-      - 开发管理-需求管理
+      - 开发管理/需求管理
     get:
       consumes:
       - application/json
@@ -4281,7 +4281,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取需求列表
       tags:
-      - 开发管理-需求管理
+      - 开发管理/需求管理
     post:
       consumes:
       - application/json
@@ -4318,7 +4318,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建需求
       tags:
-      - 开发管理-需求管理
+      - 开发管理/需求管理
   /dev/storys/{storyId}:
     put:
       consumes:
@@ -4361,7 +4361,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新需求
       tags:
-      - 开发管理-需求管理
+      - 开发管理/需求管理
   /dev/storys/{storyId}/field:
     put:
       consumes:
@@ -4404,7 +4404,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新需求字段
       tags:
-      - 开发管理-需求管理
+      - 开发管理/需求管理
   /dev/storys/{storyId}/next:
     put:
       consumes:
@@ -4447,7 +4447,7 @@ paths:
       - ApiKeyAuth: []
       summary: 需求流转状态
       tags:
-      - 开发管理-需求管理
+      - 开发管理/需求管理
   /dev/storys/{storyNum}:
     get:
       consumes:
@@ -4489,7 +4489,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取需求详情
       tags:
-      - 开发管理-需求管理
+      - 开发管理/需求管理
   /dev/storys/all:
     get:
       consumes:
@@ -4543,7 +4543,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取所有需求
       tags:
-      - 开发管理-需求管理
+      - 开发管理/需求管理
   /dev/storys/batch:
     post:
       consumes:
@@ -4583,7 +4583,7 @@ paths:
       - ApiKeyAuth: []
       summary: 批量创建需求
       tags:
-      - 开发管理-需求管理
+      - 开发管理/需求管理
   /dev/tasks:
     delete:
       consumes:
@@ -4623,7 +4623,7 @@ paths:
       - ApiKeyAuth: []
       summary: 删除任务
       tags:
-      - 开发管理-任务管理
+      - 开发管理/任务管理
     get:
       consumes:
       - application/json
@@ -4697,7 +4697,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取任务列表
       tags:
-      - 开发管理-任务管理
+      - 开发管理/任务管理
     post:
       consumes:
       - application/json
@@ -4734,7 +4734,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建任务
       tags:
-      - 开发管理-任务管理
+      - 开发管理/任务管理
   /dev/tasks/{taskId}:
     put:
       consumes:
@@ -4777,7 +4777,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新任务
       tags:
-      - 开发管理-任务管理
+      - 开发管理/任务管理
   /dev/tasks/{taskId}/field:
     put:
       consumes:
@@ -4820,7 +4820,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新任务字段
       tags:
-      - 开发管理-任务管理
+      - 开发管理/任务管理
   /dev/tasks/{taskId}/next:
     put:
       consumes:
@@ -4863,7 +4863,7 @@ paths:
       - ApiKeyAuth: []
       summary: 任务流转状态
       tags:
-      - 开发管理-任务管理
+      - 开发管理/任务管理
   /dev/tasks/{taskNum}:
     get:
       consumes:
@@ -4905,7 +4905,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取任务详情
       tags:
-      - 开发管理-任务管理
+      - 开发管理/任务管理
   /dev/tasks/all:
     get:
       consumes:
@@ -4959,7 +4959,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取所有任务
       tags:
-      - 开发管理-任务管理
+      - 开发管理/任务管理
   /dev/tasks/batch:
     post:
       consumes:
@@ -4999,7 +4999,7 @@ paths:
       - ApiKeyAuth: []
       summary: 批量创建任务
       tags:
-      - 开发管理-任务管理
+      - 开发管理/任务管理
   /dev/versions:
     delete:
       consumes:
@@ -5039,7 +5039,7 @@ paths:
       - ApiKeyAuth: []
       summary: 删除版本
       tags:
-      - 开发管理-版本管理
+      - 开发管理/版本管理
     get:
       consumes:
       - application/json
@@ -5101,7 +5101,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取版本列表
       tags:
-      - 开发管理-版本管理
+      - 开发管理/版本管理
     post:
       consumes:
       - application/json
@@ -5138,7 +5138,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建版本
       tags:
-      - 开发管理-版本管理
+      - 开发管理/版本管理
   /dev/versions/{versionId}:
     get:
       consumes:
@@ -5180,7 +5180,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取版本详情
       tags:
-      - 开发管理-版本管理
+      - 开发管理/版本管理
     put:
       consumes:
       - application/json
@@ -5222,7 +5222,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新版本
       tags:
-      - 开发管理-版本管理
+      - 开发管理/版本管理
   /dev/versions/{versionId}/next:
     put:
       consumes:
@@ -5265,7 +5265,7 @@ paths:
       - ApiKeyAuth: []
       summary: 版本流转状态
       tags:
-      - 开发管理-版本管理
+      - 开发管理/版本管理
   /dev/versions/all:
     get:
       consumes:
@@ -5307,7 +5307,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取所有版本
       tags:
-      - 开发管理-版本管理
+      - 开发管理/版本管理
   /dev/versions/getLastVersion:
     get:
       consumes:
@@ -5344,7 +5344,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取最新版本号
       tags:
-      - 开发管理-版本管理
+      - 开发管理/版本管理
   /form/schemas:
     delete:
       consumes:
@@ -5560,7 +5560,7 @@ paths:
       - ApiKeyAuth: []
       summary: 批量删除临床科室
       tags:
-      - 医疗管理-临床科室
+      - 医疗管理/临床科室
     get:
       parameters:
       - description: 科室编码或名称
@@ -5593,7 +5593,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取临床科室树
       tags:
-      - 医疗管理-临床科室
+      - 医疗管理/临床科室
     post:
       consumes:
       - application/json
@@ -5619,7 +5619,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建临床科室
       tags:
-      - 医疗管理-临床科室
+      - 医疗管理/临床科室
   /medical/departments/{departmentId}:
     get:
       parameters:
@@ -5648,7 +5648,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取临床科室详情
       tags:
-      - 医疗管理-临床科室
+      - 医疗管理/临床科室
     put:
       consumes:
       - application/json
@@ -5679,7 +5679,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新临床科室
       tags:
-      - 医疗管理-临床科室
+      - 医疗管理/临床科室
   /medical/departments/{departmentId}/status:
     put:
       consumes:
@@ -5711,7 +5711,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新临床科室状态
       tags:
-      - 医疗管理-临床科室
+      - 医疗管理/临床科室
   /medical/departments/all:
     get:
       produces:
@@ -5732,7 +5732,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取所有启用的临床科室
       tags:
-      - 医疗管理-临床科室
+      - 医疗管理/临床科室
   /medical/doctors:
     delete:
       consumes:
@@ -5761,7 +5761,7 @@ paths:
       - ApiKeyAuth: []
       summary: 批量删除医生档案
       tags:
-      - 医疗管理-医生档案
+      - 医疗管理/医生档案
     get:
       parameters:
       - description: 页码
@@ -5823,7 +5823,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取医生列表
       tags:
-      - 医疗管理-医生档案
+      - 医疗管理/医生档案
     post:
       consumes:
       - application/json
@@ -5849,7 +5849,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建医生档案
       tags:
-      - 医疗管理-医生档案
+      - 医疗管理/医生档案
   /medical/doctors/{doctorId}:
     get:
       parameters:
@@ -5878,7 +5878,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取医生详情
       tags:
-      - 医疗管理-医生档案
+      - 医疗管理/医生档案
     put:
       consumes:
       - application/json
@@ -5909,7 +5909,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新医生档案
       tags:
-      - 医疗管理-医生档案
+      - 医疗管理/医生档案
   /medical/doctors/{doctorId}/status:
     put:
       consumes:
@@ -5941,7 +5941,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新医生状态
       tags:
-      - 医疗管理-医生档案
+      - 医疗管理/医生档案
   /medical/doctors/all:
     get:
       produces:
@@ -5962,7 +5962,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取所有启用医生选项
       tags:
-      - 医疗管理-医生档案
+      - 医疗管理/医生档案
   /medical/registrationFeeRules:
     get:
       parameters:
@@ -6025,7 +6025,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取挂号费规则列表
       tags:
-      - 医疗管理-挂号费
+      - 医疗管理/挂号费
     post:
       consumes:
       - application/json
@@ -6051,7 +6051,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建挂号费规则
       tags:
-      - 医疗管理-挂号费
+      - 医疗管理/挂号费
   /medical/registrationFeeRules/{feeRuleId}/adjustments:
     post:
       consumes:
@@ -6083,7 +6083,7 @@ paths:
       - ApiKeyAuth: []
       summary: 调整挂号费并生成新版本
       tags:
-      - 医疗管理-挂号费
+      - 医疗管理/挂号费
   /medical/scheduleTasks:
     get:
       parameters:
@@ -6142,7 +6142,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取自动任务执行记录
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
   /medical/scheduleTemplates:
     get:
       parameters:
@@ -6201,7 +6201,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取周期排班模板列表
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
     post:
       consumes:
       - application/json
@@ -6227,7 +6227,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建周期排班模板
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
   /medical/scheduleTemplates/{templateId}:
     delete:
       description: 逻辑删除周期排班模板，不影响已生成的实际排班
@@ -6252,7 +6252,7 @@ paths:
       - ApiKeyAuth: []
       summary: 删除周期排班模板
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
     put:
       consumes:
       - application/json
@@ -6283,7 +6283,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新周期排班模板
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
   /medical/scheduleTemplates/{templateId}/status:
     put:
       consumes:
@@ -6315,7 +6315,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新周期排班模板状态
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
   /medical/schedules:
     delete:
       consumes:
@@ -6344,7 +6344,7 @@ paths:
       - ApiKeyAuth: []
       summary: 批量删除草稿排班
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
     get:
       parameters:
       - description: 页码
@@ -6410,7 +6410,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取实际排班列表
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
     post:
       consumes:
       - application/json
@@ -6436,7 +6436,7 @@ paths:
       - ApiKeyAuth: []
       summary: 手工创建实际排班
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
   /medical/schedules/{scheduleId}:
     put:
       consumes:
@@ -6468,7 +6468,7 @@ paths:
       - ApiKeyAuth: []
       summary: 编辑草稿排班
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
   /medical/schedules/{scheduleId}/finish:
     put:
       parameters:
@@ -6492,7 +6492,7 @@ paths:
       - ApiKeyAuth: []
       summary: 结束已完成出诊的排班
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
   /medical/schedules/{scheduleId}/stop:
     put:
       consumes:
@@ -6524,7 +6524,7 @@ paths:
       - ApiKeyAuth: []
       summary: 停诊
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
   /medical/schedules/generate:
     post:
       consumes:
@@ -6556,7 +6556,7 @@ paths:
       - ApiKeyAuth: []
       summary: 批量生成未来排班
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
   /medical/schedules/publish:
     post:
       consumes:
@@ -6583,7 +6583,7 @@ paths:
       - ApiKeyAuth: []
       summary: 批量发布草稿排班
       tags:
-      - 医疗管理-排班
+      - 医疗管理/排班
   /system/depts:
     delete:
       consumes:
@@ -6623,7 +6623,7 @@ paths:
       - ApiKeyAuth: []
       summary: 删除部门
       tags:
-      - 系统管理-部门管理
+      - 系统管理/部门管理
     get:
       consumes:
       - application/json
@@ -6660,7 +6660,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取部门树
       tags:
-      - 系统管理-部门管理
+      - 系统管理/部门管理
     post:
       consumes:
       - application/json
@@ -6697,7 +6697,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建部门
       tags:
-      - 系统管理-部门管理
+      - 系统管理/部门管理
   /system/depts/{deptId}:
     get:
       consumes:
@@ -6739,7 +6739,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取部门详情
       tags:
-      - 系统管理-部门管理
+      - 系统管理/部门管理
     put:
       consumes:
       - application/json
@@ -6781,7 +6781,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新部门
       tags:
-      - 系统管理-部门管理
+      - 系统管理/部门管理
   /system/depts/all:
     get:
       consumes:
@@ -6810,7 +6810,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取所有部门
       tags:
-      - 系统管理-部门管理
+      - 系统管理/部门管理
   /system/dicts:
     delete:
       consumes:
@@ -6850,7 +6850,7 @@ paths:
       - ApiKeyAuth: []
       summary: 删除字典
       tags:
-      - 系统管理-字典管理
+      - 系统管理/字典管理
     get:
       consumes:
       - application/json
@@ -6887,7 +6887,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取字典树
       tags:
-      - 系统管理-字典管理
+      - 系统管理/字典管理
     post:
       consumes:
       - application/json
@@ -6924,7 +6924,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建字典
       tags:
-      - 系统管理-字典管理
+      - 系统管理/字典管理
   /system/dicts/{id}:
     get:
       consumes:
@@ -6966,7 +6966,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取字典详情
       tags:
-      - 系统管理-字典管理
+      - 系统管理/字典管理
     put:
       consumes:
       - application/json
@@ -7008,7 +7008,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新字典
       tags:
-      - 系统管理-字典管理
+      - 系统管理/字典管理
   /system/dicts/{id}/status:
     put:
       consumes:
@@ -7053,7 +7053,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新字典状态
       tags:
-      - 系统管理-字典管理
+      - 系统管理/字典管理
   /system/files:
     get:
       consumes:
@@ -7121,7 +7121,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取文件列表
       tags:
-      - 系统管理-文件管理
+      - 系统管理/文件管理
   /system/loginLogs:
     get:
       description: 分页查询最近七天的登录和退出日志
@@ -7197,7 +7197,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取登录日志列表
       tags:
-      - 系统管理-日志管理
+      - 系统管理/日志管理
   /system/loginLogs/{logId}:
     get:
       parameters:
@@ -7234,7 +7234,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取登录日志详情
       tags:
-      - 系统管理-日志管理
+      - 系统管理/日志管理
   /system/menus:
     delete:
       consumes:
@@ -7274,7 +7274,7 @@ paths:
       - ApiKeyAuth: []
       summary: 删除菜单
       tags:
-      - 系统管理-菜单管理
+      - 系统管理/菜单管理
     get:
       consumes:
       - application/json
@@ -7311,7 +7311,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取菜单树
       tags:
-      - 系统管理-菜单管理
+      - 系统管理/菜单管理
     post:
       consumes:
       - application/json
@@ -7348,7 +7348,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建菜单
       tags:
-      - 系统管理-菜单管理
+      - 系统管理/菜单管理
   /system/menus/{id}:
     get:
       consumes:
@@ -7390,7 +7390,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取菜单详情
       tags:
-      - 系统管理-菜单管理
+      - 系统管理/菜单管理
     put:
       consumes:
       - application/json
@@ -7432,7 +7432,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新菜单
       tags:
-      - 系统管理-菜单管理
+      - 系统管理/菜单管理
   /system/menus/nameExists:
     get:
       consumes:
@@ -7474,7 +7474,7 @@ paths:
       - ApiKeyAuth: []
       summary: 检查菜单名称是否存在
       tags:
-      - 系统管理-菜单管理
+      - 系统管理/菜单管理
   /system/menus/pathExists:
     get:
       consumes:
@@ -7516,7 +7516,7 @@ paths:
       - ApiKeyAuth: []
       summary: 检查菜单路径是否存在
       tags:
-      - 系统管理-菜单管理
+      - 系统管理/菜单管理
   /system/operationLogs:
     get:
       description: 分页查询最近七天的操作日志
@@ -7592,7 +7592,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取操作日志列表
       tags:
-      - 系统管理-日志管理
+      - 系统管理/日志管理
   /system/operationLogs/{logId}:
     get:
       parameters:
@@ -7629,7 +7629,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取操作日志详情
       tags:
-      - 系统管理-日志管理
+      - 系统管理/日志管理
   /system/roles:
     delete:
       consumes:
@@ -7669,7 +7669,7 @@ paths:
       - ApiKeyAuth: []
       summary: 删除角色
       tags:
-      - 系统管理-角色管理
+      - 系统管理/角色管理
     get:
       consumes:
       - application/json
@@ -7723,7 +7723,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取角色列表
       tags:
-      - 系统管理-角色管理
+      - 系统管理/角色管理
     post:
       consumes:
       - application/json
@@ -7760,7 +7760,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建角色
       tags:
-      - 系统管理-角色管理
+      - 系统管理/角色管理
   /system/roles/{roleId}:
     get:
       consumes:
@@ -7802,7 +7802,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取角色详情
       tags:
-      - 系统管理-角色管理
+      - 系统管理/角色管理
     put:
       consumes:
       - application/json
@@ -7844,7 +7844,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新角色
       tags:
-      - 系统管理-角色管理
+      - 系统管理/角色管理
   /system/roles/{roleId}/status:
     put:
       consumes:
@@ -7889,7 +7889,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新角色状态
       tags:
-      - 系统管理-角色管理
+      - 系统管理/角色管理
   /system/roles/all:
     get:
       consumes:
@@ -7918,7 +7918,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取所有角色
       tags:
-      - 系统管理-角色管理
+      - 系统管理/角色管理
   /system/upload:
     post:
       consumes:
@@ -7956,7 +7956,7 @@ paths:
       - ApiKeyAuth: []
       summary: 上传文件
       tags:
-      - 系统管理-文件管理
+      - 系统管理/文件管理
   /system/users:
     delete:
       consumes:
@@ -7996,7 +7996,7 @@ paths:
       - ApiKeyAuth: []
       summary: 删除用户
       tags:
-      - 系统管理-用户管理
+      - 系统管理/用户管理
     get:
       consumes:
       - application/json
@@ -8062,7 +8062,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取用户列表
       tags:
-      - 系统管理-用户管理
+      - 系统管理/用户管理
     post:
       consumes:
       - application/json
@@ -8099,7 +8099,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建用户
       tags:
-      - 系统管理-用户管理
+      - 系统管理/用户管理
   /system/users/{userId}:
     get:
       consumes:
@@ -8141,7 +8141,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取用户详情
       tags:
-      - 系统管理-用户管理
+      - 系统管理/用户管理
     put:
       consumes:
       - application/json
@@ -8183,7 +8183,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新用户
       tags:
-      - 系统管理-用户管理
+      - 系统管理/用户管理
   /system/users/{userId}/status:
     put:
       consumes:
@@ -8228,7 +8228,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新用户状态
       tags:
-      - 系统管理-用户管理
+      - 系统管理/用户管理
   /system/users/all:
     get:
       consumes:
@@ -8262,7 +8262,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取所有用户
       tags:
-      - 系统管理-用户管理
+      - 系统管理/用户管理
   /workflow/copies:
     get:
       parameters:
@@ -8305,7 +8305,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取我的抄送
       tags:
-      - 流程管理-流程抄送
+      - 流程管理/流程抄送
   /workflow/copies/{copyId}/read:
     put:
       parameters:
@@ -8329,7 +8329,7 @@ paths:
       - ApiKeyAuth: []
       summary: 标记抄送已读
       tags:
-      - 流程管理-流程抄送
+      - 流程管理/流程抄送
   /workflow/definitions:
     delete:
       consumes:
@@ -8369,7 +8369,7 @@ paths:
       - ApiKeyAuth: []
       summary: 删除流程定义
       tags:
-      - 流程管理-流程定义
+      - 流程管理/流程定义
     get:
       consumes:
       - application/json
@@ -8435,7 +8435,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取流程定义列表
       tags:
-      - 流程管理-流程定义
+      - 流程管理/流程定义
     post:
       consumes:
       - application/json
@@ -8472,7 +8472,7 @@ paths:
       - ApiKeyAuth: []
       summary: 创建流程定义
       tags:
-      - 流程管理-流程定义
+      - 流程管理/流程定义
   /workflow/definitions/{definitionId}:
     get:
       consumes:
@@ -8514,7 +8514,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取流程定义详情
       tags:
-      - 流程管理-流程定义
+      - 流程管理/流程定义
     put:
       consumes:
       - application/json
@@ -8556,7 +8556,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新流程定义
       tags:
-      - 流程管理-流程定义
+      - 流程管理/流程定义
   /workflow/definitions/{definitionId}/canvas:
     put:
       consumes:
@@ -8599,7 +8599,7 @@ paths:
       - ApiKeyAuth: []
       summary: 保存流程画布
       tags:
-      - 流程管理-流程定义
+      - 流程管理/流程定义
   /workflow/definitions/{definitionId}/formSchema:
     put:
       consumes:
@@ -8636,7 +8636,7 @@ paths:
       - ApiKeyAuth: []
       summary: 绑定流程表单 Schema
       tags:
-      - 流程管理-流程定义
+      - 流程管理/流程定义
   /workflow/definitions/{definitionId}/publish:
     put:
       consumes:
@@ -8673,7 +8673,7 @@ paths:
       - ApiKeyAuth: []
       summary: 发布流程定义
       tags:
-      - 流程管理-流程定义
+      - 流程管理/流程定义
   /workflow/definitions/{definitionId}/status:
     put:
       consumes:
@@ -8716,7 +8716,7 @@ paths:
       - ApiKeyAuth: []
       summary: 更新流程定义状态
       tags:
-      - 流程管理-流程定义
+      - 流程管理/流程定义
   /workflow/definitions/all:
     get:
       consumes:
@@ -8758,7 +8758,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取所有流程定义
       tags:
-      - 流程管理-流程定义
+      - 流程管理/流程定义
   /workflow/instances:
     get:
       parameters:
@@ -8801,7 +8801,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取我发起的流程
       tags:
-      - 流程管理-流程运行
+      - 流程管理/流程运行
     post:
       consumes:
       - application/json
@@ -8837,7 +8837,7 @@ paths:
       - ApiKeyAuth: []
       summary: 发起流程实例
       tags:
-      - 流程管理-流程运行
+      - 流程管理/流程运行
   /workflow/instances/{instanceId}:
     get:
       parameters:
@@ -8866,7 +8866,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取流程实例详情
       tags:
-      - 流程管理-流程运行
+      - 流程管理/流程运行
   /workflow/instances/{instanceId}/cancel:
     put:
       parameters:
@@ -8890,7 +8890,7 @@ paths:
       - ApiKeyAuth: []
       summary: 撤销流程实例
       tags:
-      - 流程管理-流程运行
+      - 流程管理/流程运行
   /workflow/tasks:
     get:
       parameters:
@@ -8933,7 +8933,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取我的待办和已办
       tags:
-      - 流程管理-流程任务
+      - 流程管理/流程任务
   /workflow/tasks/{taskId}/addSign:
     put:
       consumes:
@@ -8965,7 +8965,7 @@ paths:
       - ApiKeyAuth: []
       summary: 并行加签
       tags:
-      - 流程管理-流程任务
+      - 流程管理/流程任务
   /workflow/tasks/{taskId}/approve:
     put:
       consumes:
@@ -8997,7 +8997,7 @@ paths:
       - ApiKeyAuth: []
       summary: 审批通过
       tags:
-      - 流程管理-流程任务
+      - 流程管理/流程任务
   /workflow/tasks/{taskId}/reject:
     put:
       consumes:
@@ -9029,7 +9029,7 @@ paths:
       - ApiKeyAuth: []
       summary: 审批驳回
       tags:
-      - 流程管理-流程任务
+      - 流程管理/流程任务
   /workflow/tasks/{taskId}/removeSign:
     put:
       consumes:
@@ -9061,7 +9061,7 @@ paths:
       - ApiKeyAuth: []
       summary: 减签
       tags:
-      - 流程管理-流程任务
+      - 流程管理/流程任务
   /workflow/tasks/{taskId}/return:
     put:
       consumes:
@@ -9093,7 +9093,7 @@ paths:
       - ApiKeyAuth: []
       summary: 退回审批任务
       tags:
-      - 流程管理-流程任务
+      - 流程管理/流程任务
   /workflow/tasks/{taskId}/returnTargets:
     get:
       parameters:
@@ -9124,7 +9124,7 @@ paths:
       - ApiKeyAuth: []
       summary: 查询可退回节点
       tags:
-      - 流程管理-流程任务
+      - 流程管理/流程任务
   /workflow/tasks/{taskId}/transfer:
     put:
       consumes:
@@ -9156,7 +9156,7 @@ paths:
       - ApiKeyAuth: []
       summary: 转交审批任务
       tags:
-      - 流程管理-流程任务
+      - 流程管理/流程任务
 schemes:
 - http
 - https

@@ -14,7 +14,7 @@ import (
 // GetStorys 获取需求列表
 // @Summary 获取需求列表
 // @Description 分页获取需求列表
-// @Tags 开发管理-需求管理
+// @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -75,7 +75,7 @@ func (dc *DevController) GetStorys(c *gin.Context) {
 // GetAllStorys 获取所有需求
 // @Summary 获取所有需求
 // @Description 获取所有需求（不分页）
-// @Tags 开发管理-需求管理
+// @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -118,7 +118,7 @@ func (dc *DevController) GetAllStorys(c *gin.Context) {
 // GetStory 获取需求详情
 // @Summary 获取需求详情
 // @Description 根据需求编号获取需求详情
-// @Tags 开发管理-需求管理
+// @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -146,7 +146,7 @@ func (dc *DevController) GetStory(c *gin.Context) {
 // CreateStory 创建需求
 // @Summary 创建需求
 // @Description 创建新需求
-// @Tags 开发管理-需求管理
+// @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -175,7 +175,7 @@ func (dc *DevController) CreateStory(c *gin.Context) {
 // CreateStorys 批量创建需求
 // @Summary 批量创建需求
 // @Description 批量创建需求
-// @Tags 开发管理-需求管理
+// @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -204,7 +204,7 @@ func (dc *DevController) CreateStorys(c *gin.Context) {
 // UpdateStory 更新需求
 // @Summary 更新需求
 // @Description 更新需求信息
-// @Tags 开发管理-需求管理
+// @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -236,7 +236,7 @@ func (dc *DevController) UpdateStory(c *gin.Context) {
 // UpdateStoryField 更新需求字段
 // @Summary 更新需求字段
 // @Description 更新需求的单个字段
-// @Tags 开发管理-需求管理
+// @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -268,7 +268,7 @@ func (dc *DevController) UpdateStoryField(c *gin.Context) {
 // UpdateStoryNext 需求流转状态
 // @Summary 需求流转状态
 // @Description 更新需求状态
-// @Tags 开发管理-需求管理
+// @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -300,7 +300,7 @@ func (dc *DevController) UpdateStoryNext(c *gin.Context) {
 // DeleteStorys 删除需求
 // @Summary 删除需求
 // @Description 批量删除需求
-// @Tags 开发管理-需求管理
+// @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

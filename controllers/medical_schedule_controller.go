@@ -10,7 +10,7 @@ import (
 
 // GetScheduleTemplateList 获取周期排班模板列表。
 // @Summary 获取周期排班模板列表
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Produce json
 // @Security ApiKeyAuth
 // @Param page query int false "页码"
@@ -39,7 +39,7 @@ func (ctrl *MedicalController) GetScheduleTemplateList(c *gin.Context) {
 
 // CreateScheduleTemplate 创建周期排班模板。
 // @Summary 创建周期排班模板
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -62,7 +62,7 @@ func (ctrl *MedicalController) CreateScheduleTemplate(c *gin.Context) {
 
 // UpdateScheduleTemplate 更新周期排班模板。
 // @Summary 更新周期排班模板
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -86,7 +86,7 @@ func (ctrl *MedicalController) UpdateScheduleTemplate(c *gin.Context) {
 
 // UpdateScheduleTemplateStatus 更新周期排班模板状态。
 // @Summary 更新周期排班模板状态
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -111,7 +111,7 @@ func (ctrl *MedicalController) UpdateScheduleTemplateStatus(c *gin.Context) {
 // DeleteScheduleTemplate 删除周期排班模板。
 // @Summary 删除周期排班模板
 // @Description 逻辑删除周期排班模板，不影响已生成的实际排班
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Produce json
 // @Security ApiKeyAuth
 // @Param templateId path string true "排班模板ID"
@@ -128,7 +128,7 @@ func (ctrl *MedicalController) DeleteScheduleTemplate(c *gin.Context) {
 
 // GetScheduleList 获取实际排班列表。
 // @Summary 获取实际排班列表
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Produce json
 // @Security ApiKeyAuth
 // @Param page query int false "页码"
@@ -159,7 +159,7 @@ func (ctrl *MedicalController) GetScheduleList(c *gin.Context) {
 
 // CreateSchedule 手工创建实际排班。
 // @Summary 手工创建实际排班
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -182,7 +182,7 @@ func (ctrl *MedicalController) CreateSchedule(c *gin.Context) {
 
 // UpdateSchedule 编辑草稿排班。
 // @Summary 编辑草稿排班
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -206,7 +206,7 @@ func (ctrl *MedicalController) UpdateSchedule(c *gin.Context) {
 
 // DeleteDraftSchedules 删除草稿排班。
 // @Summary 批量删除草稿排班
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -229,7 +229,7 @@ func (ctrl *MedicalController) DeleteDraftSchedules(c *gin.Context) {
 
 // GenerateSchedules 根据周期模板批量生成未来排班。
 // @Summary 批量生成未来排班
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -253,7 +253,7 @@ func (ctrl *MedicalController) GenerateSchedules(c *gin.Context) {
 
 // PublishSchedules 批量发布草稿排班。
 // @Summary 批量发布草稿排班
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -276,7 +276,7 @@ func (ctrl *MedicalController) PublishSchedules(c *gin.Context) {
 
 // StopSchedule 停诊。
 // @Summary 停诊
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -300,7 +300,7 @@ func (ctrl *MedicalController) StopSchedule(c *gin.Context) {
 
 // FinishSchedule 结束已完成出诊的排班。
 // @Summary 结束已完成出诊的排班
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Produce json
 // @Security ApiKeyAuth
 // @Param scheduleId path string true "排班ID"
@@ -317,7 +317,7 @@ func (ctrl *MedicalController) FinishSchedule(c *gin.Context) {
 
 // GetScheduleAutoTaskList 获取自动任务执行记录。
 // @Summary 获取自动任务执行记录
-// @Tags 医疗管理-排班
+// @Tags 医疗管理/排班
 // @Produce json
 // @Security ApiKeyAuth
 // @Param page query int false "页码"

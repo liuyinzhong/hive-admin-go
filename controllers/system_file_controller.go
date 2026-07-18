@@ -11,7 +11,7 @@ import (
 // UploadFile 上传文件
 // @Summary 上传文件
 // @Description 上传文件到系统文件表
-// @Tags 系统管理-文件管理
+// @Tags 系统管理/文件管理
 // @Accept mpfd
 // @Produce json
 // @Security ApiKeyAuth
@@ -39,7 +39,7 @@ func (ctrl *SystemController) UploadFile(c *gin.Context) {
 // GetFileList 获取文件列表
 // @Summary 获取文件列表
 // @Description 分页获取文件列表
-// @Tags 系统管理-文件管理
+// @Tags 系统管理/文件管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

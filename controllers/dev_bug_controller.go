@@ -14,7 +14,7 @@ import (
 // GetBugs 获取缺陷列表
 // @Summary 获取缺陷列表
 // @Description 分页获取缺陷列表
-// @Tags 开发管理-缺陷管理
+// @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -76,7 +76,7 @@ func (dc *DevController) GetBugs(c *gin.Context) {
 // GetAllBugs 获取所有缺陷
 // @Summary 获取所有缺陷
 // @Description 获取所有缺陷（不分页）
-// @Tags 开发管理-缺陷管理
+// @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -121,7 +121,7 @@ func (dc *DevController) GetAllBugs(c *gin.Context) {
 // GetBug 获取缺陷详情
 // @Summary 获取缺陷详情
 // @Description 根据缺陷编号获取缺陷详情
-// @Tags 开发管理-缺陷管理
+// @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -149,7 +149,7 @@ func (dc *DevController) GetBug(c *gin.Context) {
 // CreateBug 创建缺陷
 // @Summary 创建缺陷
 // @Description 创建新缺陷
-// @Tags 开发管理-缺陷管理
+// @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -178,7 +178,7 @@ func (dc *DevController) CreateBug(c *gin.Context) {
 // ConfirmBug 确认缺陷
 // @Summary 确认缺陷
 // @Description 确认缺陷并更新缺陷状态
-// @Tags 开发管理-缺陷管理
+// @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -210,7 +210,7 @@ func (dc *DevController) ConfirmBug(c *gin.Context) {
 // CreateBugs 批量创建缺陷
 // @Summary 批量创建缺陷
 // @Description 批量创建缺陷
-// @Tags 开发管理-缺陷管理
+// @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -239,7 +239,7 @@ func (dc *DevController) CreateBugs(c *gin.Context) {
 // UpdateBug 更新缺陷
 // @Summary 更新缺陷
 // @Description 更新缺陷信息
-// @Tags 开发管理-缺陷管理
+// @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -271,7 +271,7 @@ func (dc *DevController) UpdateBug(c *gin.Context) {
 // UpdateBugField 更新缺陷字段
 // @Summary 更新缺陷字段
 // @Description 更新缺陷的单个字段
-// @Tags 开发管理-缺陷管理
+// @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -303,7 +303,7 @@ func (dc *DevController) UpdateBugField(c *gin.Context) {
 // UpdateBugNext 缺陷流转状态
 // @Summary 缺陷流转状态
 // @Description 更新缺陷状态
-// @Tags 开发管理-缺陷管理
+// @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -335,7 +335,7 @@ func (dc *DevController) UpdateBugNext(c *gin.Context) {
 // DeleteBugs 删除缺陷
 // @Summary 删除缺陷
 // @Description 批量删除缺陷
-// @Tags 开发管理-缺陷管理
+// @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

@@ -13,7 +13,7 @@ import (
 // StartWorkflowInstance 发起流程实例。
 // @Summary 发起流程实例
 // @Description 根据已发布流程定义创建运行实例
-// @Tags 流程管理-流程运行
+// @Tags 流程管理/流程运行
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -38,7 +38,7 @@ func (wc *WorkflowController) StartWorkflowInstance(c *gin.Context) {
 
 // GetWorkflowInstances 获取当前用户发起的流程实例。
 // @Summary 获取我发起的流程
-// @Tags 流程管理-流程运行
+// @Tags 流程管理/流程运行
 // @Produce json
 // @Security ApiKeyAuth
 // @Param page query int false "页码"
@@ -60,7 +60,7 @@ func (wc *WorkflowController) GetWorkflowInstances(c *gin.Context) {
 
 // GetWorkflowInstanceDetail 获取流程实例详情。
 // @Summary 获取流程实例详情
-// @Tags 流程管理-流程运行
+// @Tags 流程管理/流程运行
 // @Produce json
 // @Security ApiKeyAuth
 // @Param instanceId path string true "流程实例ID"
@@ -78,7 +78,7 @@ func (wc *WorkflowController) GetWorkflowInstanceDetail(c *gin.Context) {
 
 // CancelWorkflowInstance 撤销流程实例。
 // @Summary 撤销流程实例
-// @Tags 流程管理-流程运行
+// @Tags 流程管理/流程运行
 // @Produce json
 // @Security ApiKeyAuth
 // @Param instanceId path string true "流程实例ID"
@@ -95,7 +95,7 @@ func (wc *WorkflowController) CancelWorkflowInstance(c *gin.Context) {
 
 // GetWorkflowTasks 获取当前用户审批任务。
 // @Summary 获取我的待办和已办
-// @Tags 流程管理-流程任务
+// @Tags 流程管理/流程任务
 // @Produce json
 // @Security ApiKeyAuth
 // @Param page query int false "页码"
@@ -117,7 +117,7 @@ func (wc *WorkflowController) GetWorkflowTasks(c *gin.Context) {
 
 // ApproveWorkflowTask 审批通过任务。
 // @Summary 审批通过
-// @Tags 流程管理-流程任务
+// @Tags 流程管理/流程任务
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -141,7 +141,7 @@ func (wc *WorkflowController) ApproveWorkflowTask(c *gin.Context) {
 
 // RejectWorkflowTask 审批驳回任务。
 // @Summary 审批驳回
-// @Tags 流程管理-流程任务
+// @Tags 流程管理/流程任务
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -165,7 +165,7 @@ func (wc *WorkflowController) RejectWorkflowTask(c *gin.Context) {
 
 // TransferWorkflowTask 转交当前用户的待办任务。
 // @Summary 转交审批任务
-// @Tags 流程管理-流程任务
+// @Tags 流程管理/流程任务
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -189,7 +189,7 @@ func (wc *WorkflowController) TransferWorkflowTask(c *gin.Context) {
 
 // AddWorkflowTaskSign 向当前审批组并行加签。
 // @Summary 并行加签
-// @Tags 流程管理-流程任务
+// @Tags 流程管理/流程任务
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -213,7 +213,7 @@ func (wc *WorkflowController) AddWorkflowTaskSign(c *gin.Context) {
 
 // RemoveWorkflowTaskSign 从当前审批组减签未处理任务。
 // @Summary 减签
-// @Tags 流程管理-流程任务
+// @Tags 流程管理/流程任务
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -237,7 +237,7 @@ func (wc *WorkflowController) RemoveWorkflowTaskSign(c *gin.Context) {
 
 // GetWorkflowTaskReturnTargets 查询当前任务可退回的历史审批节点。
 // @Summary 查询可退回节点
-// @Tags 流程管理-流程任务
+// @Tags 流程管理/流程任务
 // @Produce json
 // @Security ApiKeyAuth
 // @Param taskId path string true "任务ID"
@@ -255,7 +255,7 @@ func (wc *WorkflowController) GetWorkflowTaskReturnTargets(c *gin.Context) {
 
 // ReturnWorkflowTask 将当前任务退回历史审批节点。
 // @Summary 退回审批任务
-// @Tags 流程管理-流程任务
+// @Tags 流程管理/流程任务
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -279,7 +279,7 @@ func (wc *WorkflowController) ReturnWorkflowTask(c *gin.Context) {
 
 // GetWorkflowCopies 获取当前用户抄送记录。
 // @Summary 获取我的抄送
-// @Tags 流程管理-流程抄送
+// @Tags 流程管理/流程抄送
 // @Produce json
 // @Security ApiKeyAuth
 // @Param page query int false "页码"
@@ -301,7 +301,7 @@ func (wc *WorkflowController) GetWorkflowCopies(c *gin.Context) {
 
 // ReadWorkflowCopy 标记抄送为已读。
 // @Summary 标记抄送已读
-// @Tags 流程管理-流程抄送
+// @Tags 流程管理/流程抄送
 // @Produce json
 // @Security ApiKeyAuth
 // @Param copyId path string true "抄送ID"

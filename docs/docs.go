@@ -265,7 +265,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-缺陷管理"
+                    "开发管理/缺陷管理"
                 ],
                 "summary": "获取缺陷列表",
                 "parameters": [
@@ -393,7 +393,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-缺陷管理"
+                    "开发管理/缺陷管理"
                 ],
                 "summary": "创建缺陷",
                 "parameters": [
@@ -450,7 +450,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-缺陷管理"
+                    "开发管理/缺陷管理"
                 ],
                 "summary": "删除缺陷",
                 "parameters": [
@@ -512,7 +512,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-缺陷管理"
+                    "开发管理/缺陷管理"
                 ],
                 "summary": "获取所有缺陷",
                 "parameters": [
@@ -606,7 +606,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-缺陷管理"
+                    "开发管理/缺陷管理"
                 ],
                 "summary": "批量创建缺陷",
                 "parameters": [
@@ -668,7 +668,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-缺陷管理"
+                    "开发管理/缺陷管理"
                 ],
                 "summary": "更新缺陷",
                 "parameters": [
@@ -734,7 +734,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-缺陷管理"
+                    "开发管理/缺陷管理"
                 ],
                 "summary": "确认缺陷",
                 "parameters": [
@@ -800,7 +800,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-缺陷管理"
+                    "开发管理/缺陷管理"
                 ],
                 "summary": "更新缺陷字段",
                 "parameters": [
@@ -866,7 +866,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-缺陷管理"
+                    "开发管理/缺陷管理"
                 ],
                 "summary": "缺陷流转状态",
                 "parameters": [
@@ -932,7 +932,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-缺陷管理"
+                    "开发管理/缺陷管理"
                 ],
                 "summary": "获取缺陷详情",
                 "parameters": [
@@ -1001,7 +1001,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-变更记录"
+                    "开发管理/变更记录"
                 ],
                 "summary": "获取变更记录",
                 "parameters": [
@@ -1071,7 +1071,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-变更记录"
+                    "开发管理/变更记录"
                 ],
                 "summary": "创建变更记录",
                 "parameters": [
@@ -1130,7 +1130,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-模块管理"
+                    "开发管理/模块管理"
                 ],
                 "summary": "获取模块列表",
                 "parameters": [
@@ -1192,7 +1192,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-模块管理"
+                    "开发管理/模块管理"
                 ],
                 "summary": "创建模块",
                 "parameters": [
@@ -1249,7 +1249,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-模块管理"
+                    "开发管理/模块管理"
                 ],
                 "summary": "删除模块",
                 "parameters": [
@@ -1311,7 +1311,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-模块管理"
+                    "开发管理/模块管理"
                 ],
                 "summary": "获取模块详情",
                 "parameters": [
@@ -1378,7 +1378,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-模块管理"
+                    "开发管理/模块管理"
                 ],
                 "summary": "更新模块",
                 "parameters": [
@@ -1444,7 +1444,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-项目管理"
+                    "开发管理/项目管理"
                 ],
                 "summary": "获取项目列表",
                 "responses": {
@@ -1498,7 +1498,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-项目管理"
+                    "开发管理/项目管理"
                 ],
                 "summary": "创建项目",
                 "parameters": [
@@ -1557,7 +1557,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-项目管理"
+                    "开发管理/项目管理"
                 ],
                 "summary": "获取项目详情",
                 "parameters": [
@@ -1624,7 +1624,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-项目管理"
+                    "开发管理/项目管理"
                 ],
                 "summary": "更新项目",
                 "parameters": [
@@ -1690,7 +1690,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-需求管理"
+                    "开发管理/需求管理"
                 ],
                 "summary": "获取需求列表",
                 "parameters": [
@@ -1812,7 +1812,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-需求管理"
+                    "开发管理/需求管理"
                 ],
                 "summary": "创建需求",
                 "parameters": [
@@ -1869,7 +1869,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-需求管理"
+                    "开发管理/需求管理"
                 ],
                 "summary": "删除需求",
                 "parameters": [
@@ -1931,7 +1931,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-需求管理"
+                    "开发管理/需求管理"
                 ],
                 "summary": "获取所有需求",
                 "parameters": [
@@ -2019,7 +2019,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-需求管理"
+                    "开发管理/需求管理"
                 ],
                 "summary": "批量创建需求",
                 "parameters": [
@@ -2081,7 +2081,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-需求管理"
+                    "开发管理/需求管理"
                 ],
                 "summary": "更新需求",
                 "parameters": [
@@ -2147,7 +2147,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-需求管理"
+                    "开发管理/需求管理"
                 ],
                 "summary": "更新需求字段",
                 "parameters": [
@@ -2213,7 +2213,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-需求管理"
+                    "开发管理/需求管理"
                 ],
                 "summary": "需求流转状态",
                 "parameters": [
@@ -2279,7 +2279,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-需求管理"
+                    "开发管理/需求管理"
                 ],
                 "summary": "获取需求详情",
                 "parameters": [
@@ -2348,7 +2348,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-任务管理"
+                    "开发管理/任务管理"
                 ],
                 "summary": "获取任务列表",
                 "parameters": [
@@ -2470,7 +2470,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-任务管理"
+                    "开发管理/任务管理"
                 ],
                 "summary": "创建任务",
                 "parameters": [
@@ -2527,7 +2527,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-任务管理"
+                    "开发管理/任务管理"
                 ],
                 "summary": "删除任务",
                 "parameters": [
@@ -2589,7 +2589,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-任务管理"
+                    "开发管理/任务管理"
                 ],
                 "summary": "获取所有任务",
                 "parameters": [
@@ -2677,7 +2677,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-任务管理"
+                    "开发管理/任务管理"
                 ],
                 "summary": "批量创建任务",
                 "parameters": [
@@ -2739,7 +2739,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-任务管理"
+                    "开发管理/任务管理"
                 ],
                 "summary": "更新任务",
                 "parameters": [
@@ -2805,7 +2805,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-任务管理"
+                    "开发管理/任务管理"
                 ],
                 "summary": "更新任务字段",
                 "parameters": [
@@ -2871,7 +2871,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-任务管理"
+                    "开发管理/任务管理"
                 ],
                 "summary": "任务流转状态",
                 "parameters": [
@@ -2937,7 +2937,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-任务管理"
+                    "开发管理/任务管理"
                 ],
                 "summary": "获取任务详情",
                 "parameters": [
@@ -3006,7 +3006,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-版本管理"
+                    "开发管理/版本管理"
                 ],
                 "summary": "获取版本列表",
                 "parameters": [
@@ -3110,7 +3110,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-版本管理"
+                    "开发管理/版本管理"
                 ],
                 "summary": "创建版本",
                 "parameters": [
@@ -3167,7 +3167,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-版本管理"
+                    "开发管理/版本管理"
                 ],
                 "summary": "删除版本",
                 "parameters": [
@@ -3229,7 +3229,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-版本管理"
+                    "开发管理/版本管理"
                 ],
                 "summary": "获取所有版本",
                 "parameters": [
@@ -3299,7 +3299,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-版本管理"
+                    "开发管理/版本管理"
                 ],
                 "summary": "获取最新版本号",
                 "parameters": [
@@ -3361,7 +3361,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-版本管理"
+                    "开发管理/版本管理"
                 ],
                 "summary": "获取版本详情",
                 "parameters": [
@@ -3428,7 +3428,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-版本管理"
+                    "开发管理/版本管理"
                 ],
                 "summary": "更新版本",
                 "parameters": [
@@ -3494,7 +3494,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理-版本管理"
+                    "开发管理/版本管理"
                 ],
                 "summary": "版本流转状态",
                 "parameters": [
@@ -3868,7 +3868,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-临床科室"
+                    "医疗管理/临床科室"
                 ],
                 "summary": "获取临床科室树",
                 "parameters": [
@@ -3928,7 +3928,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-临床科室"
+                    "医疗管理/临床科室"
                 ],
                 "summary": "创建临床科室",
                 "parameters": [
@@ -3970,7 +3970,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-临床科室"
+                    "医疗管理/临床科室"
                 ],
                 "summary": "批量删除临床科室",
                 "parameters": [
@@ -4014,7 +4014,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-临床科室"
+                    "医疗管理/临床科室"
                 ],
                 "summary": "获取所有启用的临床科室",
                 "responses": {
@@ -4053,7 +4053,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-临床科室"
+                    "医疗管理/临床科室"
                 ],
                 "summary": "获取临床科室详情",
                 "parameters": [
@@ -4105,7 +4105,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-临床科室"
+                    "医疗管理/临床科室"
                 ],
                 "summary": "更新临床科室",
                 "parameters": [
@@ -4156,7 +4156,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-临床科室"
+                    "医疗管理/临床科室"
                 ],
                 "summary": "更新临床科室状态",
                 "parameters": [
@@ -4204,7 +4204,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-医生档案"
+                    "医疗管理/医生档案"
                 ],
                 "summary": "获取医生列表",
                 "parameters": [
@@ -4312,7 +4312,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-医生档案"
+                    "医疗管理/医生档案"
                 ],
                 "summary": "创建医生档案",
                 "parameters": [
@@ -4354,7 +4354,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-医生档案"
+                    "医疗管理/医生档案"
                 ],
                 "summary": "批量删除医生档案",
                 "parameters": [
@@ -4398,7 +4398,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-医生档案"
+                    "医疗管理/医生档案"
                 ],
                 "summary": "获取所有启用医生选项",
                 "responses": {
@@ -4437,7 +4437,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-医生档案"
+                    "医疗管理/医生档案"
                 ],
                 "summary": "获取医生详情",
                 "parameters": [
@@ -4489,7 +4489,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-医生档案"
+                    "医疗管理/医生档案"
                 ],
                 "summary": "更新医生档案",
                 "parameters": [
@@ -4540,7 +4540,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-医生档案"
+                    "医疗管理/医生档案"
                 ],
                 "summary": "更新医生状态",
                 "parameters": [
@@ -4588,7 +4588,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-挂号费"
+                    "医疗管理/挂号费"
                 ],
                 "summary": "获取挂号费规则列表",
                 "parameters": [
@@ -4696,7 +4696,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-挂号费"
+                    "医疗管理/挂号费"
                 ],
                 "summary": "创建挂号费规则",
                 "parameters": [
@@ -4740,7 +4740,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-挂号费"
+                    "医疗管理/挂号费"
                 ],
                 "summary": "调整挂号费并生成新版本",
                 "parameters": [
@@ -4788,7 +4788,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "获取自动任务执行记录",
                 "parameters": [
@@ -4889,7 +4889,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "获取周期排班模板列表",
                 "parameters": [
@@ -4991,7 +4991,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "创建周期排班模板",
                 "parameters": [
@@ -5035,7 +5035,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "更新周期排班模板",
                 "parameters": [
@@ -5082,7 +5082,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "删除周期排班模板",
                 "parameters": [
@@ -5124,7 +5124,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "更新周期排班模板状态",
                 "parameters": [
@@ -5172,7 +5172,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "获取实际排班列表",
                 "parameters": [
@@ -5286,7 +5286,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "手工创建实际排班",
                 "parameters": [
@@ -5328,7 +5328,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "批量删除草稿排班",
                 "parameters": [
@@ -5375,7 +5375,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "批量生成未来排班",
                 "parameters": [
@@ -5431,7 +5431,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "批量发布草稿排班",
                 "parameters": [
@@ -5475,7 +5475,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "编辑草稿排班",
                 "parameters": [
@@ -5523,7 +5523,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "结束已完成出诊的排班",
                 "parameters": [
@@ -5565,7 +5565,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "医疗管理-排班"
+                    "医疗管理/排班"
                 ],
                 "summary": "停诊",
                 "parameters": [
@@ -5617,7 +5617,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-部门管理"
+                    "系统管理/部门管理"
                 ],
                 "summary": "获取部门树",
                 "parameters": [
@@ -5679,7 +5679,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-部门管理"
+                    "系统管理/部门管理"
                 ],
                 "summary": "创建部门",
                 "parameters": [
@@ -5736,7 +5736,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-部门管理"
+                    "系统管理/部门管理"
                 ],
                 "summary": "删除部门",
                 "parameters": [
@@ -5798,7 +5798,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-部门管理"
+                    "系统管理/部门管理"
                 ],
                 "summary": "获取所有部门",
                 "responses": {
@@ -5848,7 +5848,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-部门管理"
+                    "系统管理/部门管理"
                 ],
                 "summary": "获取部门详情",
                 "parameters": [
@@ -5915,7 +5915,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-部门管理"
+                    "系统管理/部门管理"
                 ],
                 "summary": "更新部门",
                 "parameters": [
@@ -5981,7 +5981,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-字典管理"
+                    "系统管理/字典管理"
                 ],
                 "summary": "获取字典树",
                 "parameters": [
@@ -6043,7 +6043,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-字典管理"
+                    "系统管理/字典管理"
                 ],
                 "summary": "创建字典",
                 "parameters": [
@@ -6100,7 +6100,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-字典管理"
+                    "系统管理/字典管理"
                 ],
                 "summary": "删除字典",
                 "parameters": [
@@ -6162,7 +6162,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-字典管理"
+                    "系统管理/字典管理"
                 ],
                 "summary": "获取字典详情",
                 "parameters": [
@@ -6229,7 +6229,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-字典管理"
+                    "系统管理/字典管理"
                 ],
                 "summary": "更新字典",
                 "parameters": [
@@ -6295,7 +6295,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-字典管理"
+                    "系统管理/字典管理"
                 ],
                 "summary": "更新字典状态",
                 "parameters": [
@@ -6364,7 +6364,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-文件管理"
+                    "系统管理/文件管理"
                 ],
                 "summary": "获取文件列表",
                 "parameters": [
@@ -6474,7 +6474,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-日志管理"
+                    "系统管理/日志管理"
                 ],
                 "summary": "获取登录日志列表",
                 "parameters": [
@@ -6599,7 +6599,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-日志管理"
+                    "系统管理/日志管理"
                 ],
                 "summary": "获取登录日志详情",
                 "parameters": [
@@ -6666,7 +6666,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-菜单管理"
+                    "系统管理/菜单管理"
                 ],
                 "summary": "获取菜单树",
                 "parameters": [
@@ -6728,7 +6728,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-菜单管理"
+                    "系统管理/菜单管理"
                 ],
                 "summary": "创建菜单",
                 "parameters": [
@@ -6785,7 +6785,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-菜单管理"
+                    "系统管理/菜单管理"
                 ],
                 "summary": "删除菜单",
                 "parameters": [
@@ -6847,7 +6847,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-菜单管理"
+                    "系统管理/菜单管理"
                 ],
                 "summary": "检查菜单名称是否存在",
                 "parameters": [
@@ -6916,7 +6916,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-菜单管理"
+                    "系统管理/菜单管理"
                 ],
                 "summary": "检查菜单路径是否存在",
                 "parameters": [
@@ -6985,7 +6985,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-菜单管理"
+                    "系统管理/菜单管理"
                 ],
                 "summary": "获取菜单详情",
                 "parameters": [
@@ -7052,7 +7052,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-菜单管理"
+                    "系统管理/菜单管理"
                 ],
                 "summary": "更新菜单",
                 "parameters": [
@@ -7115,7 +7115,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-日志管理"
+                    "系统管理/日志管理"
                 ],
                 "summary": "获取操作日志列表",
                 "parameters": [
@@ -7240,7 +7240,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-日志管理"
+                    "系统管理/日志管理"
                 ],
                 "summary": "获取操作日志详情",
                 "parameters": [
@@ -7307,7 +7307,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-角色管理"
+                    "系统管理/角色管理"
                 ],
                 "summary": "获取角色列表",
                 "parameters": [
@@ -7399,7 +7399,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-角色管理"
+                    "系统管理/角色管理"
                 ],
                 "summary": "创建角色",
                 "parameters": [
@@ -7456,7 +7456,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-角色管理"
+                    "系统管理/角色管理"
                 ],
                 "summary": "删除角色",
                 "parameters": [
@@ -7518,7 +7518,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-角色管理"
+                    "系统管理/角色管理"
                 ],
                 "summary": "获取所有角色",
                 "responses": {
@@ -7568,7 +7568,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-角色管理"
+                    "系统管理/角色管理"
                 ],
                 "summary": "获取角色详情",
                 "parameters": [
@@ -7635,7 +7635,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-角色管理"
+                    "系统管理/角色管理"
                 ],
                 "summary": "更新角色",
                 "parameters": [
@@ -7701,7 +7701,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-角色管理"
+                    "系统管理/角色管理"
                 ],
                 "summary": "更新角色状态",
                 "parameters": [
@@ -7770,7 +7770,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-文件管理"
+                    "系统管理/文件管理"
                 ],
                 "summary": "上传文件",
                 "parameters": [
@@ -7833,7 +7833,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-用户管理"
+                    "系统管理/用户管理"
                 ],
                 "summary": "获取用户列表",
                 "parameters": [
@@ -7943,7 +7943,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-用户管理"
+                    "系统管理/用户管理"
                 ],
                 "summary": "创建用户",
                 "parameters": [
@@ -8000,7 +8000,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-用户管理"
+                    "系统管理/用户管理"
                 ],
                 "summary": "删除用户",
                 "parameters": [
@@ -8062,7 +8062,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-用户管理"
+                    "系统管理/用户管理"
                 ],
                 "summary": "获取所有用户",
                 "parameters": [
@@ -8120,7 +8120,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-用户管理"
+                    "系统管理/用户管理"
                 ],
                 "summary": "获取用户详情",
                 "parameters": [
@@ -8187,7 +8187,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-用户管理"
+                    "系统管理/用户管理"
                 ],
                 "summary": "更新用户",
                 "parameters": [
@@ -8253,7 +8253,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "系统管理-用户管理"
+                    "系统管理/用户管理"
                 ],
                 "summary": "更新用户状态",
                 "parameters": [
@@ -8318,7 +8318,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程抄送"
+                    "流程管理/流程抄送"
                 ],
                 "summary": "获取我的抄送",
                 "parameters": [
@@ -8395,7 +8395,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程抄送"
+                    "流程管理/流程抄送"
                 ],
                 "summary": "标记抄送已读",
                 "parameters": [
@@ -8438,7 +8438,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程定义"
+                    "流程管理/流程定义"
                 ],
                 "summary": "获取流程定义列表",
                 "parameters": [
@@ -8548,7 +8548,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程定义"
+                    "流程管理/流程定义"
                 ],
                 "summary": "创建流程定义",
                 "parameters": [
@@ -8605,7 +8605,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程定义"
+                    "流程管理/流程定义"
                 ],
                 "summary": "删除流程定义",
                 "parameters": [
@@ -8667,7 +8667,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程定义"
+                    "流程管理/流程定义"
                 ],
                 "summary": "获取所有流程定义",
                 "parameters": [
@@ -8737,7 +8737,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程定义"
+                    "流程管理/流程定义"
                 ],
                 "summary": "获取流程定义详情",
                 "parameters": [
@@ -8804,7 +8804,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程定义"
+                    "流程管理/流程定义"
                 ],
                 "summary": "更新流程定义",
                 "parameters": [
@@ -8870,7 +8870,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程定义"
+                    "流程管理/流程定义"
                 ],
                 "summary": "保存流程画布",
                 "parameters": [
@@ -8936,7 +8936,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程定义"
+                    "流程管理/流程定义"
                 ],
                 "summary": "绑定流程表单 Schema",
                 "parameters": [
@@ -8994,7 +8994,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程定义"
+                    "流程管理/流程定义"
                 ],
                 "summary": "发布流程定义",
                 "parameters": [
@@ -9051,7 +9051,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程定义"
+                    "流程管理/流程定义"
                 ],
                 "summary": "更新流程定义状态",
                 "parameters": [
@@ -9113,7 +9113,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程运行"
+                    "流程管理/流程运行"
                 ],
                 "summary": "获取我发起的流程",
                 "parameters": [
@@ -9192,7 +9192,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程运行"
+                    "流程管理/流程运行"
                 ],
                 "summary": "发起流程实例",
                 "parameters": [
@@ -9251,7 +9251,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程运行"
+                    "流程管理/流程运行"
                 ],
                 "summary": "获取流程实例详情",
                 "parameters": [
@@ -9302,7 +9302,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程运行"
+                    "流程管理/流程运行"
                 ],
                 "summary": "撤销流程实例",
                 "parameters": [
@@ -9341,7 +9341,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程任务"
+                    "流程管理/流程任务"
                 ],
                 "summary": "获取我的待办和已办",
                 "parameters": [
@@ -9421,7 +9421,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程任务"
+                    "流程管理/流程任务"
                 ],
                 "summary": "并行加签",
                 "parameters": [
@@ -9472,7 +9472,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程任务"
+                    "流程管理/流程任务"
                 ],
                 "summary": "审批通过",
                 "parameters": [
@@ -9523,7 +9523,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程任务"
+                    "流程管理/流程任务"
                 ],
                 "summary": "审批驳回",
                 "parameters": [
@@ -9574,7 +9574,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程任务"
+                    "流程管理/流程任务"
                 ],
                 "summary": "减签",
                 "parameters": [
@@ -9625,7 +9625,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程任务"
+                    "流程管理/流程任务"
                 ],
                 "summary": "退回审批任务",
                 "parameters": [
@@ -9673,7 +9673,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程任务"
+                    "流程管理/流程任务"
                 ],
                 "summary": "查询可退回节点",
                 "parameters": [
@@ -9730,7 +9730,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理-流程任务"
+                    "流程管理/流程任务"
                 ],
                 "summary": "转交审批任务",
                 "parameters": [

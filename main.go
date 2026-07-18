@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"hive-admin-go/config"
 	"hive-admin-go/database"
+	projectDocs "hive-admin-go/docs"
 	"hive-admin-go/router"
 	"hive-admin-go/services"
 	"hive-admin-go/utils"
@@ -104,12 +105,6 @@ func syncToApify() {
 		return
 	}
 
-	apifoxSwaggerDoc, err := buildApifoxSwaggerDoc(swaggerDoc)
-	if err != nil {
-		log.Printf("❌ 构建 Apifox Swagger 文档失败: %v", err)
-		return
-	}
-
 	options := map[string]interface{}{
 		"endpointOverwriteBehavior":     "OVERWRITE_EXISTING",
 		"schemaOverwriteBehavior":       "OVERWRITE_EXISTING",
@@ -119,7 +114,7 @@ func syncToApify() {
 	}
 
 	payloadMap := map[string]interface{}{
-		"input":   apifoxSwaggerDoc,
+		"input":   swaggerDoc,
 		"options": options,
 	}
 
@@ -161,6 +156,20 @@ func syncToApify() {
 	} else {
 		log.Printf("⚠️ 同步到 Apifox 失败，状态码: %d, 响应: %s", res.StatusCode, string(body))
 	}
+}
+
+func loadLatestSwaggerDoc() (string, error) {
+	data, err := os.ReadFile(filepath.Clean("docs/swagger.json"))
+	if err == nil {
+		return string(data), nil
+	}
+
+	doc := projectDocs.SwaggerInfo.ReadDoc()
+	if strings.TrimSpace(doc) == "" {
+		return "", fmt.Errorf("Swagger 文档为空，且读取 docs/swagger.json 失败: %w", err)
+	}
+
+	return doc, nil
 }
 
 // autoGenerateSwagger 自动生成 Swagger 文档
