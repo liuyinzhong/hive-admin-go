@@ -14,6 +14,7 @@ func SetupRouter() *gin.Engine {
 
 	authController := controllers.NewAuthController()
 	systemController := controllers.NewSystemController()
+	externalPageController := controllers.NewExternalPageController()
 	devController := controllers.DevController{}
 	workflowController := controllers.WorkflowController{}
 	formSchemaController := controllers.FormSchemaController{}
@@ -24,6 +25,11 @@ func SetupRouter() *gin.Engine {
 	api := router.Group("/api")
 	api.Use(middleware.AuditLogMiddleware(auditLogService))
 	{
+		public := api.Group("/public")
+		{
+			public.GET("/externalPages/:name", externalPageController.GetPublicExternalPage)
+		}
+
 		auth := api.Group("/auth")
 		{
 			auth.POST("/login", authController.Login)
@@ -58,6 +64,16 @@ func SetupRouter() *gin.Engine {
 				menus.GET("/:id", permissionGuard.Require("system:menu:detail"), systemController.GetMenuDetail)
 				menus.PUT("/:id", permissionGuard.Require("system:menu:update"), systemController.UpdateMenu)
 				menus.DELETE("", permissionGuard.Require("system:menu:delete"), systemController.DeleteMenus)
+			}
+
+			externalPages := system.Group("/externalPages")
+			{
+				externalPages.GET("", permissionGuard.Require("system:externalPage:list"), externalPageController.GetExternalPages)
+				externalPages.POST("", permissionGuard.Require("system:externalPage:create"), externalPageController.CreateExternalPage)
+				externalPages.GET("/:id", permissionGuard.Require("system:externalPage:detail"), externalPageController.GetExternalPage)
+				externalPages.PUT("/:id", permissionGuard.Require("system:externalPage:update"), externalPageController.UpdateExternalPage)
+				externalPages.PUT("/:id/status", permissionGuard.Require("system:externalPage:status"), externalPageController.UpdateExternalPageStatus)
+				externalPages.DELETE("", permissionGuard.Require("system:externalPage:delete"), externalPageController.DeleteExternalPages)
 			}
 
 			roles := system.Group("/roles")

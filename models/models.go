@@ -83,6 +83,7 @@ type SysMenu struct {
 	MaxNumOfOpenTab          int        `gorm:"column:max_num_of_open_tab;type:tinyint;default:-1" json:"maxNumOfOpenTab"`
 	AffixTabOrder            int        `gorm:"column:affix_tab_order;type:tinyint;default:0" json:"affixTabOrder"`
 	NoBasicLayout            int        `gorm:"column:no_basic_layout;type:tinyint;default:0" json:"noBasicLayout"`
+	IgnoreAccess             int        `gorm:"column:ignore_access;type:tinyint;default:0" json:"ignoreAccess"`
 	OpenInNewWindow          int        `gorm:"column:open_in_new_window;type:tinyint;default:0" json:"openInNewWindow"`
 	DomCached                int        `gorm:"column:dom_cached;type:tinyint;default:0" json:"domCached"`
 	Query                    *string    `gorm:"column:query;type:varchar(512)" json:"query"`

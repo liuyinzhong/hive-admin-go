@@ -109,7 +109,7 @@ func (s *AuthService) GetMenus(userID string) ([]*models.MenuTreeResponse, error
 	var menus []models.SysMenu
 
 	if user.IsSys == 1 {
-		database.DB.Where("del_flag = 0 AND status = 1 AND type != 'button'").Find(&menus)
+		database.DB.Where("del_flag = 0 AND status = 1 AND type IN ?", []string{"menu", "catalog", "embedded", "link"}).Find(&menus)
 	} else {
 		var userRoles []models.SysUserRole
 		database.DB.Where("user_id = ? AND del_flag = 0", userID).Find(&userRoles)
@@ -146,7 +146,7 @@ func (s *AuthService) GetMenus(userID string) ([]*models.MenuTreeResponse, error
 			menuIDs = append(menuIDs, id)
 		}
 
-		database.DB.Where("id IN ? AND del_flag = 0 AND status = 1 AND type != 'button'", menuIDs).Find(&menus)
+		database.DB.Where("id IN ? AND del_flag = 0 AND status = 1 AND type IN ?", menuIDs, []string{"menu", "catalog", "embedded", "link"}).Find(&menus)
 	}
 
 	menuTree := buildMenuTree(menus)

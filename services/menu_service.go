@@ -17,14 +17,18 @@ import (
 
 type MenuService struct{}
 
-var ErrMenuNameRequired = errors.New("非按钮菜单的路由名称不能为空")
+var (
+	ErrMenuNameRequired    = errors.New("非按钮菜单的路由名称不能为空")
+	ErrUnsupportedMenuType = errors.New("不支持的菜单类型")
+)
 
 func NewMenuService() *MenuService {
 	return &MenuService{}
 }
 
 func (s *MenuService) GetMenuTree(req models.MenuListRequest) ([]*models.MenuTreeResponse, error) {
-	query := database.DB.Model(&models.SysMenu{}).Where("del_flag = 0")
+	query := database.DB.Model(&models.SysMenu{}).
+		Where("del_flag = 0 AND type != ?", externalPageType)
 
 	if req.Name != "" {
 		query = query.Where("name LIKE ?", "%"+req.Name+"%")
@@ -49,7 +53,8 @@ func (s *MenuService) GetMenuTree(req models.MenuListRequest) ([]*models.MenuTre
 }
 
 func (s *MenuService) CheckNameExists(name string, excludeId *string) (bool, error) {
-	query := database.DB.Model(&models.SysMenu{}).Where("name = ? AND del_flag = 0", name)
+	query := database.DB.Model(&models.SysMenu{}).
+		Where("name = ? AND type != ? AND del_flag = 0", name, "button")
 	if excludeId != nil && *excludeId != "" {
 		query = query.Where("id != ?", *excludeId)
 	}
@@ -64,7 +69,8 @@ func (s *MenuService) CheckNameExists(name string, excludeId *string) (bool, err
 }
 
 func (s *MenuService) CheckPathExists(path string, excludeId *string) (bool, error) {
-	query := database.DB.Model(&models.SysMenu{}).Where("path = ? AND del_flag = 0", path)
+	query := database.DB.Model(&models.SysMenu{}).
+		Where("path = ? AND type != ? AND del_flag = 0", path, "button")
 	if excludeId != nil && *excludeId != "" {
 		query = query.Where("id != ?", *excludeId)
 	}
@@ -79,6 +85,9 @@ func (s *MenuService) CheckPathExists(path string, excludeId *string) (bool, err
 }
 
 func (s *MenuService) CreateMenu(req models.CreateMenuRequest) error {
+	if !isSystemMenuType(req.Type) {
+		return ErrUnsupportedMenuType
+	}
 	name, err := normalizeMenuName(req.Type, req.Name)
 	if err != nil {
 		return err
@@ -122,6 +131,11 @@ func (s *MenuService) CreateMenu(req models.CreateMenuRequest) error {
 	}
 
 	return database.DB.Transaction(func(tx *gorm.DB) error {
+		if req.Type != "button" {
+			if err := ensureActiveRouteIdentityUnique(tx, pointerValue(name), pointerValue(req.Path), ""); err != nil {
+				return err
+			}
+		}
 		authCode, err := s.normalizeAndValidateAuthCode(tx, req.Type, req.AuthCode, "")
 		if err != nil {
 			return err
@@ -133,7 +147,7 @@ func (s *MenuService) CreateMenu(req models.CreateMenuRequest) error {
 
 func (s *MenuService) GetMenuDetail(id string) (*models.MenuTreeResponse, error) {
 	var menu models.SysMenu
-	err := database.DB.Where("id = ? AND del_flag = 0", id).First(&menu).Error
+	err := database.DB.Where("id = ? AND type != ? AND del_flag = 0", id, externalPageType).First(&menu).Error
 	if err != nil {
 		return nil, errors.New("菜单不存在")
 	}
@@ -142,6 +156,9 @@ func (s *MenuService) GetMenuDetail(id string) (*models.MenuTreeResponse, error)
 }
 
 func (s *MenuService) UpdateMenu(id string, req models.UpdateMenuRequest) error {
+	if !isSystemMenuType(req.Type) {
+		return ErrUnsupportedMenuType
+	}
 	name, err := normalizeMenuName(req.Type, req.Name)
 	if err != nil {
 		return err
@@ -154,8 +171,15 @@ func (s *MenuService) UpdateMenu(id string, req models.UpdateMenuRequest) error 
 		}
 
 		var menu models.SysMenu
-		if err := tx.Where("id = ? AND del_flag = 0", id).First(&menu).Error; err != nil {
+		if err := tx.Where("id = ? AND type != ? AND del_flag = 0", id, externalPageType).
+			Clauses(clause.Locking{Strength: "UPDATE"}).
+			First(&menu).Error; err != nil {
 			return errors.New("菜单不存在")
+		}
+		if req.Type != "button" {
+			if err := ensureActiveRouteIdentityUnique(tx, pointerValue(name), pointerValue(req.Path), id); err != nil {
+				return err
+			}
 		}
 
 		now := time.Now()
@@ -180,6 +204,7 @@ func (s *MenuService) UpdateMenu(id string, req models.UpdateMenuRequest) error 
 		menu.AffixTabOrder = req.Meta.AffixTabOrder
 		menu.MaxNumOfOpenTab = req.Meta.MaxNumOfOpenTab
 		menu.NoBasicLayout = btoi(req.Meta.NoBasicLayout)
+		menu.IgnoreAccess = 0
 		menu.OpenInNewWindow = btoi(req.Meta.OpenInNewWindow)
 		menu.DomCached = btoi(req.Meta.DomCached)
 		menu.Query = req.Meta.Query
@@ -204,6 +229,22 @@ func normalizeMenuName(menuType string, raw *string) (*string, error) {
 	}
 	name := strings.TrimSpace(*raw)
 	return &name, nil
+}
+
+func isSystemMenuType(menuType string) bool {
+	switch menuType {
+	case "button", "catalog", "embedded", "link", "menu":
+		return true
+	default:
+		return false
+	}
+}
+
+func pointerValue(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return strings.TrimSpace(*value)
 }
 
 func (s *MenuService) normalizeAndValidateAuthCode(tx *gorm.DB, menuType string, raw *string, excludeID string) (*string, error) {
@@ -245,13 +286,13 @@ func (s *MenuService) normalizeAndValidateAuthCode(tx *gorm.DB, menuType string,
 func (s *MenuService) DeleteMenus(ids []string) error {
 	for _, id := range ids {
 		var childrenCount int64
-		database.DB.Model(&models.SysMenu{}).Where("pid = ? AND del_flag = 0", id).Count(&childrenCount)
+		database.DB.Model(&models.SysMenu{}).Where("pid = ? AND type != ? AND del_flag = 0", id, externalPageType).Count(&childrenCount)
 		if childrenCount > 0 {
 			return errors.New("菜单存在子菜单，不能删除")
 		}
 
 		var menu models.SysMenu
-		err := database.DB.Where("id = ? AND del_flag = 0", id).First(&menu).Error
+		err := database.DB.Where("id = ? AND type != ? AND del_flag = 0", id, externalPageType).First(&menu).Error
 		if err != nil {
 			continue
 		}

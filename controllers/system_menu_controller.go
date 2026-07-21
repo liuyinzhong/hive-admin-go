@@ -196,7 +196,10 @@ func writeMenuMutationError(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, services.ErrInvalidPermissionCode),
 		errors.Is(err, services.ErrPermissionCodeConflict),
-		errors.Is(err, services.ErrMenuNameRequired):
+		errors.Is(err, services.ErrMenuNameRequired),
+		errors.Is(err, services.ErrUnsupportedMenuType),
+		errors.Is(err, services.ErrRouteNameConflict),
+		errors.Is(err, services.ErrRoutePathConflict):
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
 	default:
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, "菜单保存失败"))

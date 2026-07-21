@@ -313,6 +313,25 @@ definitions:
     - label
     - type
     type: object
+  models.CreateExternalPageRequest:
+    properties:
+      name:
+        example: externalDemo
+        type: string
+      path:
+        example: /external/demo
+        type: string
+      status:
+        example: 1
+        type: integer
+      title:
+        example: 外部演示页面
+        type: string
+    required:
+    - name
+    - path
+    - title
+    type: object
   models.CreateMedicalDepartmentRequest:
     properties:
       departmentCode:
@@ -673,6 +692,18 @@ definitions:
     - definitionKey
     - definitionName
     type: object
+  models.DeleteExternalPagesRequest:
+    properties:
+      ids:
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - ids
+    type: object
   models.DeptTreeResponse:
     properties:
       children:
@@ -860,6 +891,36 @@ definitions:
       userId:
         type: string
       userName:
+        type: string
+    type: object
+  models.ExternalPageResponse:
+    properties:
+      createDate:
+        example: "2026-07-18 12:00:00"
+        type: string
+      creatorId:
+        example: UUID
+        type: string
+      creatorName:
+        example: 管理员
+        type: string
+      id:
+        example: UUID
+        type: string
+      name:
+        example: externalDemo
+        type: string
+      path:
+        example: /external/demo
+        type: string
+      status:
+        example: 1
+        type: integer
+      title:
+        example: 外部演示页面
+        type: string
+      updateDate:
+        example: "2026-07-18 12:00:00"
         type: string
     type: object
   models.FileResponse:
@@ -1439,6 +1500,15 @@ definitions:
       projectTitle:
         description: 项目标题
         example: crudelis
+        type: string
+    type: object
+  models.PublicExternalPageResponse:
+    properties:
+      name:
+        example: externalDemo
+        type: string
+      path:
+        example: /external/demo
         type: string
     type: object
   models.PublishSchedulesRequest:
@@ -2255,6 +2325,24 @@ definitions:
     required:
     - label
     - type
+    type: object
+  models.UpdateExternalPageRequest:
+    properties:
+      path:
+        example: /external/demo
+        type: string
+      title:
+        example: 外部演示页面
+        type: string
+    required:
+    - path
+    - title
+    type: object
+  models.UpdateExternalPageStatusRequest:
+    properties:
+      status:
+        example: 1
+        type: integer
     type: object
   models.UpdateMedicalDepartmentRequest:
     properties:
@@ -6535,6 +6623,37 @@ paths:
       summary: 批量发布草稿排班
       tags:
       - 医疗管理/排班
+  /public/externalPages/{name}:
+    get:
+      parameters:
+      - description: 路由名称
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PublicExternalPageResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: 检查外部页面是否可访问
+      tags:
+      - 公共接口/外部页面
   /system/depts:
     delete:
       consumes:
@@ -7005,6 +7124,265 @@ paths:
       summary: 更新字典状态
       tags:
       - 系统管理/字典管理
+  /system/externalPages:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 外部页面ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeleteExternalPagesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除外部页面
+      tags:
+      - 系统管理/外部页面
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 管理名称
+        in: query
+        name: title
+        type: string
+      - description: 路由名称
+        in: query
+        name: name
+        type: string
+      - description: 路由地址
+        in: query
+        name: path
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ExternalPageResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取外部页面列表
+      tags:
+      - 系统管理/外部页面
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 外部页面信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateExternalPageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建外部页面
+      tags:
+      - 系统管理/外部页面
+  /system/externalPages/{id}:
+    get:
+      parameters:
+      - description: 外部页面ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ExternalPageResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取外部页面详情
+      tags:
+      - 系统管理/外部页面
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 外部页面ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 外部页面信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateExternalPageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 修改外部页面
+      tags:
+      - 系统管理/外部页面
+  /system/externalPages/{id}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 外部页面ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateExternalPageStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 修改外部页面状态
+      tags:
+      - 系统管理/外部页面
   /system/files:
     get:
       consumes:
