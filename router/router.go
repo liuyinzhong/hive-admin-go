@@ -63,6 +63,7 @@ func SetupRouter() *gin.Engine {
 				menus.POST("", permissionGuard.Require("system:menu:create"), systemController.CreateMenu)
 				menus.GET("/:id", permissionGuard.Require("system:menu:detail"), systemController.GetMenuDetail)
 				menus.PUT("/:id", permissionGuard.Require("system:menu:update"), systemController.UpdateMenu)
+				menus.PUT("/:id/status", permissionGuard.Require("system:menu:status"), systemController.UpdateMenuStatus)
 				menus.DELETE("", permissionGuard.Require("system:menu:delete"), systemController.DeleteMenus)
 			}
 

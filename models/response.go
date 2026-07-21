@@ -129,10 +129,11 @@ type UpdateUserStatusRequest struct {
 }
 
 type MenuListRequest struct {
-	Name   string `form:"name" example:"Analytics"`  // 菜单名称，模糊搜索
-	Path   string `form:"path" example:"/analytics"` // 路由路径，模糊搜索
-	Type   string `form:"type" example:""`           // 菜单类型
-	Status *int   `form:"status" example:"1"`        // 状态 0=禁用 1=启用
+	Name      string `form:"name" example:"Analytics"`  // 菜单名称，模糊搜索
+	Path      string `form:"path" example:"/analytics"` // 路由路径，模糊搜索
+	Type      string `form:"type" example:""`           // 菜单类型
+	Status    *int   `form:"status" example:"1"`        // 状态 0=禁用 1=启用
+	HasButton int    `form:"hasButton" example:"0"`     // 是否包含按钮 0=不包含 1=包含
 }
 
 type CreateMenuRequest struct {

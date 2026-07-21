@@ -18,6 +18,7 @@ import (
 // @Produce json
 // @Security ApiKeyAuth
 // @Param status query int false "状态"
+// @Param hasButton query int false "是否包含按钮，0=不包含 1=包含，默认0"
 // @Success 200 {object} models.Response{data=[]models.MenuTreeResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Failure 403 {object} models.Response "无接口访问权限"
@@ -186,6 +187,41 @@ func (ctrl *SystemController) UpdateMenu(c *gin.Context) {
 
 	if err := ctrl.menuService.UpdateMenu(id, req); err != nil {
 		writeMenuMutationError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+}
+
+// UpdateMenuStatus 更新菜单状态
+// @Summary 更新菜单状态
+// @Description 更新菜单启用/禁用状态
+// @Tags 系统管理/菜单管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "菜单ID"
+// @Param request body models.UpdateStatusRequest true "状态"
+// @Success 200 {object} models.Response "更新成功"
+// @Failure 400 {object} map[string]interface{} "参数错误"
+// @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /system/menus/{id}/status [put]
+func (ctrl *SystemController) UpdateMenuStatus(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "菜单ID不能为空"))
+		return
+	}
+
+	var req models.UpdateStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
+		return
+	}
+
+	if err := ctrl.menuService.UpdateMenuStatus(id, req.Status); err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
 		return
 	}
 

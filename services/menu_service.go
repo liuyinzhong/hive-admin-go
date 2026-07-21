@@ -42,6 +42,9 @@ func (s *MenuService) GetMenuTree(req models.MenuListRequest) ([]*models.MenuTre
 	if req.Status != nil {
 		query = query.Where("status = ?", *req.Status)
 	}
+	if req.HasButton != 1 {
+		query = query.Where("type != ?", "button")
+	}
 
 	var menus []models.SysMenu
 	err := query.Order("`order` asc, create_date desc").Find(&menus).Error
@@ -218,6 +221,20 @@ func (s *MenuService) UpdateMenu(id string, req models.UpdateMenuRequest) error 
 
 		return tx.Save(&menu).Error
 	}, &sql.TxOptions{Isolation: sql.LevelSerializable})
+}
+
+func (s *MenuService) UpdateMenuStatus(id string, status int) error {
+	var menu models.SysMenu
+	err := database.DB.Where("id = ? AND type != ? AND del_flag = 0", id, externalPageType).First(&menu).Error
+	if err != nil {
+		return errors.New("菜单不存在")
+	}
+
+	now := time.Now()
+	menu.Status = status
+	menu.UpdateDate = &now
+
+	return database.DB.Save(&menu).Error
 }
 
 func normalizeMenuName(menuType string, raw *string) (*string, error) {

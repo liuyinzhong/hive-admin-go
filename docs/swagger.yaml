@@ -2464,6 +2464,13 @@ definitions:
     required:
     - roleTitle
     type: object
+  models.UpdateStatusRequest:
+    properties:
+      status:
+        description: 状态 0=禁用 1=启用
+        example: 1
+        type: integer
+    type: object
   models.UpdateStoryFieldRequest:
     type: object
   models.UpdateStoryNextRequest:
@@ -7613,6 +7620,10 @@ paths:
         in: query
         name: status
         type: integer
+      - description: 是否包含按钮，0=不包含 1=包含，默认0
+        in: query
+        name: hasButton
+        type: integer
       produces:
       - application/json
       responses:
@@ -7760,6 +7771,49 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 更新菜单
+      tags:
+      - 系统管理/菜单管理
+  /system/menus/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: 更新菜单启用/禁用状态
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新菜单状态
       tags:
       - 系统管理/菜单管理
   /system/menus/nameExists:

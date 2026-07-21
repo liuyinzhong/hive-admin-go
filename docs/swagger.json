@@ -7145,6 +7145,12 @@
                         "description": "状态",
                         "name": "status",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "是否包含按钮，0=不包含 1=包含，默认0",
+                        "name": "hasButton",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -7540,6 +7546,72 @@
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/models.UpdateMenuRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/menus/{id}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "更新菜单启用/禁用状态",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/菜单管理"
+                ],
+                "summary": "更新菜单状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "菜单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateStatusRequest"
                         }
                     }
                 ],
@@ -13589,6 +13661,16 @@
                     "type": "string",
                     "example": "编辑员"
                 },
+                "status": {
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "models.UpdateStatusRequest": {
+            "type": "object",
+            "properties": {
                 "status": {
                     "description": "状态 0=禁用 1=启用",
                     "type": "integer",
