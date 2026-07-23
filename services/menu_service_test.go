@@ -26,13 +26,23 @@ func TestNormalizeMenuNameAllowsCatalogNameToBeEmpty(t *testing.T) {
 	}
 }
 
-func TestNormalizeMenuNameRequiresRoutableMenuName(t *testing.T) {
-	for _, menuType := range []string{"embedded", "link", "menu"} {
+func TestNormalizeMenuNameAllowsEmbeddedAndLinkNameToBeEmpty(t *testing.T) {
+	for _, menuType := range []string{"embedded", "link"} {
 		t.Run(menuType, func(t *testing.T) {
-			if _, err := normalizeMenuName(menuType, nil); !errors.Is(err, ErrMenuNameRequired) {
-				t.Fatalf("normalizeMenuName() error = %v, want ErrMenuNameRequired", err)
+			name, err := normalizeMenuName(menuType, nil)
+			if err != nil {
+				t.Fatalf("normalizeMenuName() error = %v", err)
+			}
+			if name != nil {
+				t.Fatalf("normalizeMenuName() = %q, want nil", *name)
 			}
 		})
+	}
+}
+
+func TestNormalizeMenuNameRequiresMenuName(t *testing.T) {
+	if _, err := normalizeMenuName("menu", nil); !errors.Is(err, ErrMenuNameRequired) {
+		t.Fatalf("normalizeMenuName() error = %v, want ErrMenuNameRequired", err)
 	}
 }
 
@@ -44,6 +54,36 @@ func TestNormalizeMenuNameTrimsNonButtonName(t *testing.T) {
 	}
 	if name == nil || *name != "SystemMenu" {
 		t.Fatalf("normalizeMenuName() = %v, want SystemMenu", name)
+	}
+}
+
+func TestNormalizeMenuRouteIdentityGeneratesEmbeddedIdentity(t *testing.T) {
+	rawName := "UserInputName"
+	rawPath := "/user/input/path"
+	name, path, err := normalizeMenuRouteIdentity("embedded", "menu-id", &rawName, &rawPath)
+	if err != nil {
+		t.Fatalf("normalizeMenuRouteIdentity() error = %v", err)
+	}
+	if name == nil || *name != "embedded_menu-id" {
+		t.Fatalf("name = %v, want embedded_menu-id", name)
+	}
+	if path == nil || *path != "/embedded/menu-id" {
+		t.Fatalf("path = %v, want /embedded/menu-id", path)
+	}
+}
+
+func TestNormalizeMenuRouteIdentityGeneratesLinkIdentity(t *testing.T) {
+	rawName := "UserInputName"
+	rawPath := "/user/input/path"
+	name, path, err := normalizeMenuRouteIdentity("link", "menu-id", &rawName, &rawPath)
+	if err != nil {
+		t.Fatalf("normalizeMenuRouteIdentity() error = %v", err)
+	}
+	if name == nil || *name != "link_menu-id" {
+		t.Fatalf("name = %v, want link_menu-id", name)
+	}
+	if path == nil || *path != "/link/menu-id" {
+		t.Fatalf("path = %v, want /link/menu-id", path)
 	}
 }
 

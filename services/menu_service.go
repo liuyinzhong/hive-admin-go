@@ -18,7 +18,7 @@ import (
 type MenuService struct{}
 
 var (
-	ErrMenuNameRequired    = errors.New("菜单、内嵌和外链的路由名称不能为空")
+	ErrMenuNameRequired    = errors.New("菜单的路由名称不能为空")
 	ErrUnsupportedMenuType = errors.New("不支持的菜单类型")
 )
 
@@ -91,18 +91,19 @@ func (s *MenuService) CreateMenu(req models.CreateMenuRequest) error {
 	if !isSystemMenuType(req.Type) {
 		return ErrUnsupportedMenuType
 	}
-	name, err := normalizeMenuName(req.Type, req.Name)
+	id := utils.GenerateUUID()
+	name, path, err := normalizeMenuRouteIdentity(req.Type, id, req.Name, req.Path)
 	if err != nil {
 		return err
 	}
 
 	now := time.Now()
 	menu := models.SysMenu{
-		ID:                       utils.GenerateUUID(),
+		ID:                       id,
 		Pid:                      req.Pid,
 		Type:                     req.Type,
 		Name:                     name,
-		Path:                     req.Path,
+		Path:                     path,
 		Component:                req.Component,
 		Icon:                     req.Meta.Icon,
 		ActiveIcon:               req.Meta.ActiveIcon,
@@ -135,7 +136,7 @@ func (s *MenuService) CreateMenu(req models.CreateMenuRequest) error {
 
 	return database.DB.Transaction(func(tx *gorm.DB) error {
 		if req.Type != "button" {
-			if err := ensureActiveRouteIdentityUnique(tx, pointerValue(name), pointerValue(req.Path), ""); err != nil {
+			if err := ensureActiveRouteIdentityUnique(tx, pointerValue(name), pointerValue(path), ""); err != nil {
 				return err
 			}
 		}
@@ -162,7 +163,7 @@ func (s *MenuService) UpdateMenu(id string, req models.UpdateMenuRequest) error 
 	if !isSystemMenuType(req.Type) {
 		return ErrUnsupportedMenuType
 	}
-	name, err := normalizeMenuName(req.Type, req.Name)
+	name, path, err := normalizeMenuRouteIdentity(req.Type, id, req.Name, req.Path)
 	if err != nil {
 		return err
 	}
@@ -180,7 +181,7 @@ func (s *MenuService) UpdateMenu(id string, req models.UpdateMenuRequest) error 
 			return errors.New("菜单不存在")
 		}
 		if req.Type != "button" {
-			if err := ensureActiveRouteIdentityUnique(tx, pointerValue(name), pointerValue(req.Path), id); err != nil {
+			if err := ensureActiveRouteIdentityUnique(tx, pointerValue(name), pointerValue(path), id); err != nil {
 				return err
 			}
 		}
@@ -189,7 +190,7 @@ func (s *MenuService) UpdateMenu(id string, req models.UpdateMenuRequest) error 
 		menu.Pid = req.Pid
 		menu.Type = req.Type
 		menu.Name = name
-		menu.Path = req.Path
+		menu.Path = path
 		menu.Component = req.Component
 		menu.AuthCode = authCode
 		menu.Icon = req.Meta.Icon
@@ -237,11 +238,39 @@ func (s *MenuService) UpdateMenuStatus(id string, status int) error {
 	return database.DB.Save(&menu).Error
 }
 
+func normalizeMenuRouteIdentity(menuType, menuID string, rawName, rawPath *string) (*string, *string, error) {
+	if menuType == "embedded" || menuType == "link" {
+		name, path := generatedMenuRouteIdentity(menuType, menuID)
+		return name, path, nil
+	}
+
+	name, err := normalizeMenuName(menuType, rawName)
+	if err != nil {
+		return nil, nil, err
+	}
+	return name, rawPath, nil
+}
+
+func generatedMenuRouteIdentity(menuType, menuID string) (*string, *string) {
+	switch menuType {
+	case "embedded":
+		name := "embedded_" + menuID
+		path := "/embedded/" + menuID
+		return &name, &path
+	case "link":
+		name := "link_" + menuID
+		path := "/link/" + menuID
+		return &name, &path
+	default:
+		return nil, nil
+	}
+}
+
 func normalizeMenuName(menuType string, raw *string) (*string, error) {
 	if menuType == "button" {
 		return nil, nil
 	}
-	if !isRouteNameRequiredMenuType(menuType) {
+	if menuType != "menu" {
 		return nil, nil
 	}
 	if raw == nil || strings.TrimSpace(*raw) == "" {
@@ -249,15 +278,6 @@ func normalizeMenuName(menuType string, raw *string) (*string, error) {
 	}
 	name := strings.TrimSpace(*raw)
 	return &name, nil
-}
-
-func isRouteNameRequiredMenuType(menuType string) bool {
-	switch menuType {
-	case "embedded", "link", "menu":
-		return true
-	default:
-		return false
-	}
 }
 
 func isSystemMenuType(menuType string) bool {
