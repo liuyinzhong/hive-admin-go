@@ -16,9 +16,23 @@ func TestNormalizeMenuNameClearsButtonName(t *testing.T) {
 	}
 }
 
-func TestNormalizeMenuNameRequiresNonButtonName(t *testing.T) {
-	if _, err := normalizeMenuName("menu", nil); !errors.Is(err, ErrMenuNameRequired) {
-		t.Fatalf("normalizeMenuName() error = %v, want ErrMenuNameRequired", err)
+func TestNormalizeMenuNameAllowsCatalogNameToBeEmpty(t *testing.T) {
+	name, err := normalizeMenuName("catalog", nil)
+	if err != nil {
+		t.Fatalf("normalizeMenuName() error = %v", err)
+	}
+	if name != nil {
+		t.Fatalf("normalizeMenuName() = %q, want nil", *name)
+	}
+}
+
+func TestNormalizeMenuNameRequiresRoutableMenuName(t *testing.T) {
+	for _, menuType := range []string{"embedded", "link", "menu"} {
+		t.Run(menuType, func(t *testing.T) {
+			if _, err := normalizeMenuName(menuType, nil); !errors.Is(err, ErrMenuNameRequired) {
+				t.Fatalf("normalizeMenuName() error = %v, want ErrMenuNameRequired", err)
+			}
+		})
 	}
 }
 

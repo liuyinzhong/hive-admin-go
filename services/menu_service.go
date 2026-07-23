@@ -18,7 +18,7 @@ import (
 type MenuService struct{}
 
 var (
-	ErrMenuNameRequired    = errors.New("非按钮菜单的路由名称不能为空")
+	ErrMenuNameRequired    = errors.New("菜单、内嵌和外链的路由名称不能为空")
 	ErrUnsupportedMenuType = errors.New("不支持的菜单类型")
 )
 
@@ -241,11 +241,23 @@ func normalizeMenuName(menuType string, raw *string) (*string, error) {
 	if menuType == "button" {
 		return nil, nil
 	}
+	if !isRouteNameRequiredMenuType(menuType) {
+		return nil, nil
+	}
 	if raw == nil || strings.TrimSpace(*raw) == "" {
 		return nil, ErrMenuNameRequired
 	}
 	name := strings.TrimSpace(*raw)
 	return &name, nil
+}
+
+func isRouteNameRequiredMenuType(menuType string) bool {
+	switch menuType {
+	case "embedded", "link", "menu":
+		return true
+	default:
+		return false
+	}
 }
 
 func isSystemMenuType(menuType string) bool {
