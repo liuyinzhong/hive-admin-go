@@ -347,20 +347,16 @@ func medicalOperatorID(c *gin.Context) string {
 }
 
 func writeMedicalError(c *gin.Context, err error) {
-	status := http.StatusInternalServerError
 	message := "医疗管理操作失败"
 	switch {
 	case errors.Is(err, services.ErrMedicalInvalidInput):
-		status = http.StatusBadRequest
 		message = err.Error()
 	case errors.Is(err, services.ErrMedicalNotFound):
-		status = http.StatusNotFound
 		message = err.Error()
 	case errors.Is(err, services.ErrMedicalConflict):
-		status = http.StatusConflict
 		message = err.Error()
 	default:
 		log.Printf("医疗管理操作失败: %v", err)
 	}
-	c.JSON(status, models.NewErrorResponse(nil, message))
+	c.JSON(http.StatusOK, models.NewErrorResponse(nil, message))
 }
