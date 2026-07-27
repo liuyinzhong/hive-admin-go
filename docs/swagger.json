@@ -248,6 +248,350 @@
                 }
             }
         },
+        "/base/enterprises": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/企业主体"
+                ],
+                "summary": "获取企业主体列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "名称、简称、编码或信用代码",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "企业类型",
+                        "name": "enterpriseType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "企业角色，逗号分隔，OR逻辑",
+                        "name": "roleTypes",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态：0停用 1启用",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/utils.PaginationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/企业主体"
+                ],
+                "summary": "新增企业主体",
+                "parameters": [
+                    {
+                        "description": "企业主体",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveEnterpriseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.EnterpriseResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/base/enterprises/options": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/企业主体"
+                ],
+                "summary": "获取启用企业主体选项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "名称、简称、编码或信用代码",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "企业角色",
+                        "name": "roleType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "返回数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.EnterpriseOptionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/base/enterprises/{enterpriseId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/企业主体"
+                ],
+                "summary": "获取企业主体详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "企业主体ID",
+                        "name": "enterpriseId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.EnterpriseResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/企业主体"
+                ],
+                "summary": "更新企业主体",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "企业主体ID",
+                        "name": "enterpriseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "企业主体",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveEnterpriseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.EnterpriseResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/base/enterprises/{enterpriseId}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/企业主体"
+                ],
+                "summary": "更新企业主体启停状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "企业主体ID",
+                        "name": "enterpriseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateEnterpriseStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.EnterpriseResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/dev/bugs": {
             "get": {
                 "security": [
@@ -11507,6 +11851,85 @@
                 }
             }
         },
+        "models.EnterpriseOptionResponse": {
+            "type": "object",
+            "properties": {
+                "enterpriseCode": {
+                    "type": "string"
+                },
+                "enterpriseId": {
+                    "type": "string"
+                },
+                "enterpriseName": {
+                    "type": "string"
+                },
+                "enterpriseType": {
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "shortName": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.EnterpriseResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "contactName": {
+                    "type": "string"
+                },
+                "contactPhone": {
+                    "type": "string"
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "enterpriseCode": {
+                    "type": "string"
+                },
+                "enterpriseId": {
+                    "type": "string"
+                },
+                "enterpriseName": {
+                    "type": "string"
+                },
+                "enterpriseType": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "rowVersion": {
+                    "type": "integer"
+                },
+                "shortName": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "unifiedCreditCode": {
+                    "type": "string"
+                },
+                "updateDate": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ExternalPageResponse": {
             "type": "object",
             "properties": {
@@ -12598,6 +13021,65 @@
                 }
             }
         },
+        "models.SaveEnterpriseRequest": {
+            "type": "object",
+            "required": [
+                "enterpriseName",
+                "enterpriseType",
+                "roles"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "maxLength": 512
+                },
+                "contactName": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "contactPhone": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "enterpriseName": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "enterpriseType": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "expectedRowVersion": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512
+                },
+                "roles": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "shortName": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
+                },
+                "unifiedCreditCode": {
+                    "type": "string",
+                    "maxLength": 32
+                }
+            }
+        },
         "models.SaveScheduleRequest": {
             "type": "object",
             "required": [
@@ -13472,6 +13954,25 @@
                     "description": "字典值",
                     "type": "string",
                     "example": "0"
+                }
+            }
+        },
+        "models.UpdateEnterpriseStatusRequest": {
+            "type": "object",
+            "required": [
+                "expectedRowVersion"
+            ],
+            "properties": {
+                "expectedRowVersion": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
                 }
             }
         },

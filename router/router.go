@@ -19,6 +19,7 @@ func SetupRouter() *gin.Engine {
 	workflowController := controllers.WorkflowController{}
 	formSchemaController := controllers.FormSchemaController{}
 	medicalController := controllers.NewMedicalController()
+	baseEnterpriseController := controllers.NewBaseEnterpriseController()
 	permissionGuard := middleware.NewPermissionGuard(services.NewPermissionService())
 	auditLogService := services.NewAuditLogService()
 
@@ -206,6 +207,19 @@ func SetupRouter() *gin.Engine {
 				schemas.GET("/:formSchemaId", permissionGuard.Require("form:schema:detail"), formSchemaController.GetFormSchema)
 				schemas.PUT("/:formSchemaId", permissionGuard.Require("form:schema:update"), formSchemaController.UpdateFormSchema)
 				schemas.DELETE("", permissionGuard.Require("form:schema:delete"), formSchemaController.DeleteFormSchemas)
+			}
+		}
+
+		base := api.Group("/base", middleware.AuthMiddleware())
+		{
+			enterprises := base.Group("/enterprises")
+			{
+				enterprises.GET("", permissionGuard.Require("base:enterprise:list"), baseEnterpriseController.GetEnterpriseList)
+				enterprises.GET("/options", baseEnterpriseController.GetEnterpriseOptions)
+				enterprises.POST("", permissionGuard.Require("base:enterprise:create"), baseEnterpriseController.CreateEnterprise)
+				enterprises.GET("/:enterpriseId", permissionGuard.Require("base:enterprise:detail"), baseEnterpriseController.GetEnterprise)
+				enterprises.PUT("/:enterpriseId", permissionGuard.Require("base:enterprise:update"), baseEnterpriseController.UpdateEnterprise)
+				enterprises.PUT("/:enterpriseId/status", permissionGuard.Require("base:enterprise:status"), baseEnterpriseController.UpdateEnterpriseStatus)
 			}
 		}
 

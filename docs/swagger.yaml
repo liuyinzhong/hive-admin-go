@@ -893,6 +893,58 @@ definitions:
       userName:
         type: string
     type: object
+  models.EnterpriseOptionResponse:
+    properties:
+      enterpriseCode:
+        type: string
+      enterpriseId:
+        type: string
+      enterpriseName:
+        type: string
+      enterpriseType:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+      shortName:
+        type: string
+    type: object
+  models.EnterpriseResponse:
+    properties:
+      address:
+        type: string
+      contactName:
+        type: string
+      contactPhone:
+        type: string
+      createDate:
+        type: string
+      enterpriseCode:
+        type: string
+      enterpriseId:
+        type: string
+      enterpriseName:
+        type: string
+      enterpriseType:
+        type: string
+      remark:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+      rowVersion:
+        type: integer
+      shortName:
+        type: string
+      status:
+        type: integer
+      unifiedCreditCode:
+        type: string
+      updateDate:
+        type: string
+    type: object
   models.ExternalPageResponse:
     properties:
       createDate:
@@ -1684,6 +1736,49 @@ definitions:
     - primaryDepartmentId
     - professionalTitle
     type: object
+  models.SaveEnterpriseRequest:
+    properties:
+      address:
+        maxLength: 512
+        type: string
+      contactName:
+        maxLength: 64
+        type: string
+      contactPhone:
+        maxLength: 32
+        type: string
+      enterpriseName:
+        maxLength: 128
+        type: string
+      enterpriseType:
+        maxLength: 32
+        type: string
+      expectedRowVersion:
+        type: integer
+      remark:
+        maxLength: 512
+        type: string
+      roles:
+        items:
+          type: string
+        minItems: 1
+        type: array
+      shortName:
+        maxLength: 64
+        type: string
+      status:
+        enum:
+        - 0
+        - 1
+        type: integer
+      unifiedCreditCode:
+        maxLength: 32
+        type: string
+    required:
+    - enterpriseName
+    - enterpriseType
+    - roles
+    type: object
   models.SaveScheduleRequest:
     properties:
       defaultSlotQuota:
@@ -2325,6 +2420,19 @@ definitions:
     required:
     - label
     - type
+    type: object
+  models.UpdateEnterpriseStatusRequest:
+    properties:
+      expectedRowVersion:
+        minimum: 1
+        type: integer
+      status:
+        enum:
+        - 0
+        - 1
+        type: integer
+    required:
+    - expectedRowVersion
     type: object
   models.UpdateExternalPageRequest:
     properties:
@@ -3314,6 +3422,205 @@ paths:
       summary: 获取用户信息
       tags:
       - 认证管理
+  /base/enterprises:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 名称、简称、编码或信用代码
+        in: query
+        name: keyword
+        type: string
+      - description: 企业类型
+        in: query
+        name: enterpriseType
+        type: string
+      - description: 企业角色，逗号分隔，OR逻辑
+        in: query
+        name: roleTypes
+        type: string
+      - description: 状态：0停用 1启用
+        in: query
+        name: status
+        type: integer
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/utils.PaginationResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取企业主体列表
+      tags:
+      - 基础资料/企业主体
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 企业主体
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveEnterpriseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.EnterpriseResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 新增企业主体
+      tags:
+      - 基础资料/企业主体
+  /base/enterprises/{enterpriseId}:
+    get:
+      parameters:
+      - description: 企业主体ID
+        in: path
+        name: enterpriseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.EnterpriseResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取企业主体详情
+      tags:
+      - 基础资料/企业主体
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 企业主体ID
+        in: path
+        name: enterpriseId
+        required: true
+        type: string
+      - description: 企业主体
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveEnterpriseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.EnterpriseResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新企业主体
+      tags:
+      - 基础资料/企业主体
+  /base/enterprises/{enterpriseId}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 企业主体ID
+        in: path
+        name: enterpriseId
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateEnterpriseStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.EnterpriseResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新企业主体启停状态
+      tags:
+      - 基础资料/企业主体
+  /base/enterprises/options:
+    get:
+      parameters:
+      - description: 名称、简称、编码或信用代码
+        in: query
+        name: keyword
+        type: string
+      - description: 企业角色
+        in: query
+        name: roleType
+        type: string
+      - description: 返回数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.EnterpriseOptionResponse'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取启用企业主体选项
+      tags:
+      - 基础资料/企业主体
   /dev/bugs:
     delete:
       consumes:
