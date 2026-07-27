@@ -390,45 +390,7 @@ func (s *BaseEnterpriseService) ensureEnterpriseUnique(tx *gorm.DB, nameNormaliz
 }
 
 func (s *BaseEnterpriseService) nextEnterpriseCode(tx *gorm.DB) (string, error) {
-	return s.nextBusinessCode(tx, "ENTERPRISE", "ENT", 6)
-}
-
-func (s *BaseEnterpriseService) nextBusinessCode(tx *gorm.DB, sequenceType, defaultPrefix string, defaultNumberLength int) (string, error) {
-	now := time.Now()
-	var sequence models.BaseCodeSequence
-	err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
-		Where("sequence_type = ?", sequenceType).
-		First(&sequence).Error
-	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", err
-		}
-		sequence = models.BaseCodeSequence{
-			SequenceType: sequenceType,
-			Prefix:       defaultPrefix,
-			CurrentValue: 1,
-			NumberLength: defaultNumberLength,
-			UpdateDate:   &now,
-		}
-		if err := tx.Create(&sequence).Error; err != nil {
-			return "", err
-		}
-		return formatBusinessCode(sequence.Prefix, sequence.NumberLength, sequence.CurrentValue), nil
-	}
-
-	sequence.CurrentValue++
-	sequence.UpdateDate = &now
-	if err := tx.Save(&sequence).Error; err != nil {
-		return "", err
-	}
-	return formatBusinessCode(sequence.Prefix, sequence.NumberLength, sequence.CurrentValue), nil
-}
-
-func formatBusinessCode(prefix string, numberLength, currentValue int) string {
-	if numberLength <= 0 {
-		numberLength = 6
-	}
-	return fmt.Sprintf("%s%0*d", prefix, numberLength, currentValue)
+	return NewBaseCodeSequenceService().NextBusinessCode(tx, "ENTERPRISE", "ENT", 6)
 }
 
 func (s *BaseEnterpriseService) replaceEnterpriseRoles(tx *gorm.DB, enterpriseID string, roles []string, now time.Time) error {

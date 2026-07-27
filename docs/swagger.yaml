@@ -1456,6 +1456,42 @@ definitions:
       username:
         type: string
     type: object
+  models.ProductSpuOptionResponse:
+    properties:
+      productName:
+        type: string
+      productType:
+        type: string
+      shortName:
+        type: string
+      spuCode:
+        type: string
+      spuId:
+        type: string
+    type: object
+  models.ProductSpuResponse:
+    properties:
+      createDate:
+        type: string
+      description:
+        type: string
+      productName:
+        type: string
+      productType:
+        type: string
+      rowVersion:
+        type: integer
+      shortName:
+        type: string
+      spuCode:
+        type: string
+      spuId:
+        type: string
+      status:
+        type: integer
+      updateDate:
+        type: string
+    type: object
   models.ProfileResponse:
     properties:
       avatar:
@@ -1778,6 +1814,31 @@ definitions:
     - enterpriseName
     - enterpriseType
     - roles
+    type: object
+  models.SaveProductSpuRequest:
+    properties:
+      description:
+        maxLength: 2000
+        type: string
+      expectedRowVersion:
+        type: integer
+      productName:
+        maxLength: 128
+        type: string
+      productType:
+        maxLength: 32
+        type: string
+      shortName:
+        maxLength: 64
+        type: string
+      status:
+        enum:
+        - 0
+        - 1
+        type: integer
+    required:
+    - productName
+    - productType
     type: object
   models.SaveScheduleRequest:
     properties:
@@ -2530,6 +2591,19 @@ definitions:
         type: integer
     required:
     - moduleTitle
+    type: object
+  models.UpdateProductSpuStatusRequest:
+    properties:
+      expectedRowVersion:
+        minimum: 1
+        type: integer
+      status:
+        enum:
+        - 0
+        - 1
+        type: integer
+    required:
+    - expectedRowVersion
     type: object
   models.UpdateProjectRequest:
     properties:
@@ -6937,6 +7011,201 @@ paths:
       summary: 批量发布草稿排班
       tags:
       - 医疗管理/排班
+  /product/spus:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 编码、通用名称或简称
+        in: query
+        name: keyword
+        type: string
+      - description: 产品类型
+        in: query
+        name: productType
+        type: string
+      - description: 状态：0停用 1启用
+        in: query
+        name: status
+        type: integer
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/utils.PaginationResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取通用产品列表
+      tags:
+      - 产品档案/通用产品
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 通用产品
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveProductSpuRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductSpuResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 新增通用产品
+      tags:
+      - 产品档案/通用产品
+  /product/spus/{spuId}:
+    get:
+      parameters:
+      - description: 通用产品ID
+        in: path
+        name: spuId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductSpuResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取通用产品详情
+      tags:
+      - 产品档案/通用产品
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 通用产品ID
+        in: path
+        name: spuId
+        required: true
+        type: string
+      - description: 通用产品
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveProductSpuRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductSpuResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新通用产品
+      tags:
+      - 产品档案/通用产品
+  /product/spus/{spuId}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 通用产品ID
+        in: path
+        name: spuId
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateProductSpuStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductSpuResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新通用产品启停状态
+      tags:
+      - 产品档案/通用产品
+  /product/spus/options:
+    get:
+      parameters:
+      - description: 编码、通用名称或简称
+        in: query
+        name: keyword
+        type: string
+      - description: 产品类型
+        in: query
+        name: productType
+        type: string
+      - description: 返回数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ProductSpuOptionResponse'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取启用通用产品选项
+      tags:
+      - 产品档案/通用产品
   /public/externalPages/{name}:
     get:
       parameters:

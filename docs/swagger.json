@@ -5944,6 +5944,344 @@
                 }
             }
         },
+        "/product/spus": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/通用产品"
+                ],
+                "summary": "获取通用产品列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "编码、通用名称或简称",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "产品类型",
+                        "name": "productType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态：0停用 1启用",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/utils.PaginationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/通用产品"
+                ],
+                "summary": "新增通用产品",
+                "parameters": [
+                    {
+                        "description": "通用产品",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveProductSpuRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductSpuResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/spus/options": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/通用产品"
+                ],
+                "summary": "获取启用通用产品选项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "编码、通用名称或简称",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "产品类型",
+                        "name": "productType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "返回数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ProductSpuOptionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/spus/{spuId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/通用产品"
+                ],
+                "summary": "获取通用产品详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "通用产品ID",
+                        "name": "spuId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductSpuResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/通用产品"
+                ],
+                "summary": "更新通用产品",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "通用产品ID",
+                        "name": "spuId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "通用产品",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveProductSpuRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductSpuResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/spus/{spuId}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/通用产品"
+                ],
+                "summary": "更新通用产品启停状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "通用产品ID",
+                        "name": "spuId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateProductSpuStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductSpuResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/public/externalPages/{name}": {
             "get": {
                 "produces": [
@@ -12633,6 +12971,61 @@
                 }
             }
         },
+        "models.ProductSpuOptionResponse": {
+            "type": "object",
+            "properties": {
+                "productName": {
+                    "type": "string"
+                },
+                "productType": {
+                    "type": "string"
+                },
+                "shortName": {
+                    "type": "string"
+                },
+                "spuCode": {
+                    "type": "string"
+                },
+                "spuId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ProductSpuResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "productType": {
+                    "type": "string"
+                },
+                "rowVersion": {
+                    "type": "integer"
+                },
+                "shortName": {
+                    "type": "string"
+                },
+                "spuCode": {
+                    "type": "string"
+                },
+                "spuId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "updateDate": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ProfileResponse": {
             "type": "object",
             "properties": {
@@ -13077,6 +13470,41 @@
                 "unifiedCreditCode": {
                     "type": "string",
                     "maxLength": 32
+                }
+            }
+        },
+        "models.SaveProductSpuRequest": {
+            "type": "object",
+            "required": [
+                "productName",
+                "productType"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 2000
+                },
+                "expectedRowVersion": {
+                    "type": "integer"
+                },
+                "productName": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "productType": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "shortName": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
                 }
             }
         },
@@ -14110,6 +14538,25 @@
                     "description": "排序",
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "models.UpdateProductSpuStatusRequest": {
+            "type": "object",
+            "required": [
+                "expectedRowVersion"
+            ],
+            "properties": {
+                "expectedRowVersion": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
                 }
             }
         },
