@@ -6546,6 +6546,333 @@ const docTemplate = `{
                 }
             }
         },
+        "/product/skus": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/SKU"
+                ],
+                "summary": "获取SKU列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "所属厂家产品ID",
+                        "name": "mpId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/utils.PaginationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/SKU"
+                ],
+                "summary": "新增SKU",
+                "parameters": [
+                    {
+                        "description": "SKU",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveProductSkuRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductSkuResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/skus/options": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/SKU"
+                ],
+                "summary": "获取启用SKU选项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "所属厂家产品ID",
+                        "name": "mpId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "关键字",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "返回数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ProductSkuOptionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/skus/{skuId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/SKU"
+                ],
+                "summary": "获取SKU详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "SKU ID",
+                        "name": "skuId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductSkuResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/SKU"
+                ],
+                "summary": "更新SKU",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "SKU ID",
+                        "name": "skuId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "SKU",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveProductSkuRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductSkuResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/skus/{skuId}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/SKU"
+                ],
+                "summary": "更新SKU启停状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "SKU ID",
+                        "name": "skuId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateProductSkuStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductSkuResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/product/spus": {
             "get": {
                 "security": [
@@ -13708,6 +14035,151 @@ const docTemplate = `{
                 }
             }
         },
+        "models.ProductSkuOptionResponse": {
+            "type": "object",
+            "properties": {
+                "approvalNo": {
+                    "type": "string"
+                },
+                "brandName": {
+                    "type": "string"
+                },
+                "enterpriseId": {
+                    "type": "string"
+                },
+                "enterpriseName": {
+                    "type": "string"
+                },
+                "mpCode": {
+                    "type": "string"
+                },
+                "mpId": {
+                    "type": "string"
+                },
+                "packageSpecName": {
+                    "type": "string"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "productType": {
+                    "type": "string"
+                },
+                "rpCode": {
+                    "type": "string"
+                },
+                "rpId": {
+                    "type": "string"
+                },
+                "skuCode": {
+                    "type": "string"
+                },
+                "skuId": {
+                    "type": "string"
+                },
+                "specName": {
+                    "type": "string"
+                },
+                "spuCode": {
+                    "type": "string"
+                },
+                "spuId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ProductSkuResponse": {
+            "type": "object",
+            "properties": {
+                "allowSplit": {
+                    "type": "integer"
+                },
+                "approvalNo": {
+                    "type": "string"
+                },
+                "barcode": {
+                    "type": "string"
+                },
+                "brandName": {
+                    "type": "string"
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "enterpriseCode": {
+                    "type": "string"
+                },
+                "enterpriseId": {
+                    "type": "string"
+                },
+                "enterpriseName": {
+                    "type": "string"
+                },
+                "gtin": {
+                    "type": "string"
+                },
+                "minUnitName": {
+                    "type": "string"
+                },
+                "mpCode": {
+                    "type": "string"
+                },
+                "mpId": {
+                    "type": "string"
+                },
+                "packageQuantity": {
+                    "type": "integer"
+                },
+                "packageSpecName": {
+                    "type": "string"
+                },
+                "packageUnitName": {
+                    "type": "string"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "productType": {
+                    "type": "string"
+                },
+                "rowVersion": {
+                    "type": "integer"
+                },
+                "rpCode": {
+                    "type": "string"
+                },
+                "rpId": {
+                    "type": "string"
+                },
+                "skuCode": {
+                    "type": "string"
+                },
+                "skuId": {
+                    "type": "string"
+                },
+                "specName": {
+                    "type": "string"
+                },
+                "spuCode": {
+                    "type": "string"
+                },
+                "spuId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "udiDi": {
+                    "type": "string"
+                },
+                "updateDate": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ProductSpuOptionResponse": {
             "type": "object",
             "properties": {
@@ -14281,6 +14753,71 @@ const docTemplate = `{
                     ]
                 },
                 "strengthText": {
+                    "type": "string",
+                    "maxLength": 128
+                }
+            }
+        },
+        "models.SaveProductSkuRequest": {
+            "type": "object",
+            "required": [
+                "minUnitName",
+                "mpId",
+                "packageQuantity",
+                "packageSpecName",
+                "packageUnitName"
+            ],
+            "properties": {
+                "allowSplit": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
+                },
+                "barcode": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 2000
+                },
+                "expectedRowVersion": {
+                    "type": "integer"
+                },
+                "gtin": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "minUnitName": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "mpId": {
+                    "type": "string"
+                },
+                "packageQuantity": {
+                    "type": "integer",
+                    "maximum": 999999,
+                    "minimum": 1
+                },
+                "packageSpecName": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "packageUnitName": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
+                },
+                "udiDi": {
                     "type": "string",
                     "maxLength": 128
                 }
@@ -15374,6 +15911,25 @@ const docTemplate = `{
             }
         },
         "models.UpdateProductRpStatusRequest": {
+            "type": "object",
+            "required": [
+                "expectedRowVersion"
+            ],
+            "properties": {
+                "expectedRowVersion": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
+                }
+            }
+        },
+        "models.UpdateProductSkuStatusRequest": {
             "type": "object",
             "required": [
                 "expectedRowVersion"

@@ -23,6 +23,7 @@ func SetupRouter() *gin.Engine {
 	productSpuController := controllers.NewProductSpuController()
 	productRpController := controllers.NewProductRpController()
 	productMpController := controllers.NewProductMpController()
+	productSkuController := controllers.NewProductSkuController()
 	permissionGuard := middleware.NewPermissionGuard(services.NewPermissionService())
 	auditLogService := services.NewAuditLogService()
 
@@ -253,6 +254,15 @@ func SetupRouter() *gin.Engine {
 				mps.GET("/:mpId", permissionGuard.Require("product:mp:detail"), productMpController.GetProductMp)
 				mps.PUT("/:mpId", permissionGuard.Require("product:mp:update"), productMpController.UpdateProductMp)
 				mps.PUT("/:mpId/status", permissionGuard.Require("product:mp:status"), productMpController.UpdateProductMpStatus)
+			}
+			skus := product.Group("/skus")
+			{
+				skus.GET("", permissionGuard.Require("product:sku:list"), productSkuController.GetProductSkuList)
+				skus.GET("/options", productSkuController.GetProductSkuOptions)
+				skus.POST("", permissionGuard.Require("product:sku:create"), productSkuController.CreateProductSku)
+				skus.GET("/:skuId", permissionGuard.Require("product:sku:detail"), productSkuController.GetProductSku)
+				skus.PUT("/:skuId", permissionGuard.Require("product:sku:update"), productSkuController.UpdateProductSku)
+				skus.PUT("/:skuId/status", permissionGuard.Require("product:sku:status"), productSkuController.UpdateProductSkuStatus)
 			}
 		}
 
