@@ -5944,6 +5944,256 @@
                 }
             }
         },
+        "/product/mps": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/厂家产品"
+                ],
+                "summary": "获取厂家产品列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "所属规格产品ID",
+                        "name": "rpId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/utils.PaginationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/厂家产品"
+                ],
+                "summary": "新增厂家产品",
+                "parameters": [
+                    {
+                        "description": "厂家产品",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveProductMpRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductMpResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/mps/{mpId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/厂家产品"
+                ],
+                "summary": "获取厂家产品详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "厂家产品ID",
+                        "name": "mpId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductMpResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/厂家产品"
+                ],
+                "summary": "更新厂家产品",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "厂家产品ID",
+                        "name": "mpId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "厂家产品",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveProductMpRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductMpResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/mps/{mpId}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/厂家产品"
+                ],
+                "summary": "更新厂家产品启停状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "厂家产品ID",
+                        "name": "mpId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateProductMpStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductMpResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/product/rps": {
             "get": {
                 "security": [
@@ -13321,6 +13571,68 @@
                 }
             }
         },
+        "models.ProductMpResponse": {
+            "type": "object",
+            "properties": {
+                "approvalNo": {
+                    "type": "string"
+                },
+                "brandName": {
+                    "type": "string"
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "enterpriseCode": {
+                    "type": "string"
+                },
+                "enterpriseId": {
+                    "type": "string"
+                },
+                "enterpriseName": {
+                    "type": "string"
+                },
+                "mpCode": {
+                    "type": "string"
+                },
+                "mpId": {
+                    "type": "string"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "productType": {
+                    "type": "string"
+                },
+                "rowVersion": {
+                    "type": "integer"
+                },
+                "rpCode": {
+                    "type": "string"
+                },
+                "rpId": {
+                    "type": "string"
+                },
+                "specName": {
+                    "type": "string"
+                },
+                "spuCode": {
+                    "type": "string"
+                },
+                "spuId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "updateDate": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ProductRpOptionResponse": {
             "type": "object",
             "properties": {
@@ -13893,6 +14205,44 @@
                 "unifiedCreditCode": {
                     "type": "string",
                     "maxLength": 32
+                }
+            }
+        },
+        "models.SaveProductMpRequest": {
+            "type": "object",
+            "required": [
+                "approvalNo",
+                "enterpriseId",
+                "rpId"
+            ],
+            "properties": {
+                "approvalNo": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "brandName": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 2000
+                },
+                "enterpriseId": {
+                    "type": "string"
+                },
+                "expectedRowVersion": {
+                    "type": "integer"
+                },
+                "rpId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
                 }
             }
         },
@@ -14999,6 +15349,25 @@
                     "description": "排序",
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "models.UpdateProductMpStatusRequest": {
+            "type": "object",
+            "required": [
+                "expectedRowVersion"
+            ],
+            "properties": {
+                "expectedRowVersion": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
                 }
             }
         },

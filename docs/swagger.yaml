@@ -1456,6 +1456,47 @@ definitions:
       username:
         type: string
     type: object
+  models.ProductMpResponse:
+    properties:
+      approvalNo:
+        type: string
+      brandName:
+        type: string
+      createDate:
+        type: string
+      description:
+        type: string
+      enterpriseCode:
+        type: string
+      enterpriseId:
+        type: string
+      enterpriseName:
+        type: string
+      mpCode:
+        type: string
+      mpId:
+        type: string
+      productName:
+        type: string
+      productType:
+        type: string
+      rowVersion:
+        type: integer
+      rpCode:
+        type: string
+      rpId:
+        type: string
+      specName:
+        type: string
+      spuCode:
+        type: string
+      spuId:
+        type: string
+      status:
+        type: integer
+      updateDate:
+        type: string
+    type: object
   models.ProductRpOptionResponse:
     properties:
       productName:
@@ -1862,6 +1903,33 @@ definitions:
     - enterpriseName
     - enterpriseType
     - roles
+    type: object
+  models.SaveProductMpRequest:
+    properties:
+      approvalNo:
+        maxLength: 128
+        type: string
+      brandName:
+        maxLength: 128
+        type: string
+      description:
+        maxLength: 2000
+        type: string
+      enterpriseId:
+        type: string
+      expectedRowVersion:
+        type: integer
+      rpId:
+        type: string
+      status:
+        enum:
+        - 0
+        - 1
+        type: integer
+    required:
+    - approvalNo
+    - enterpriseId
+    - rpId
     type: object
   models.SaveProductRpRequest:
     properties:
@@ -2666,6 +2734,19 @@ definitions:
         type: integer
     required:
     - moduleTitle
+    type: object
+  models.UpdateProductMpStatusRequest:
+    properties:
+      expectedRowVersion:
+        minimum: 1
+        type: integer
+      status:
+        enum:
+        - 0
+        - 1
+        type: integer
+    required:
+    - expectedRowVersion
     type: object
   models.UpdateProductRpStatusRequest:
     properties:
@@ -7099,6 +7180,148 @@ paths:
       summary: 批量发布草稿排班
       tags:
       - 医疗管理/排班
+  /product/mps:
+    get:
+      parameters:
+      - description: 所属规格产品ID
+        in: query
+        name: rpId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/utils.PaginationResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取厂家产品列表
+      tags:
+      - 产品档案/厂家产品
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 厂家产品
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveProductMpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductMpResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 新增厂家产品
+      tags:
+      - 产品档案/厂家产品
+  /product/mps/{mpId}:
+    get:
+      parameters:
+      - description: 厂家产品ID
+        in: path
+        name: mpId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductMpResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取厂家产品详情
+      tags:
+      - 产品档案/厂家产品
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 厂家产品ID
+        in: path
+        name: mpId
+        required: true
+        type: string
+      - description: 厂家产品
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveProductMpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductMpResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新厂家产品
+      tags:
+      - 产品档案/厂家产品
+  /product/mps/{mpId}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 厂家产品ID
+        in: path
+        name: mpId
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateProductMpStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductMpResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新厂家产品启停状态
+      tags:
+      - 产品档案/厂家产品
   /product/rps:
     get:
       parameters:
