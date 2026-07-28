@@ -21,6 +21,7 @@ func SetupRouter() *gin.Engine {
 	medicalController := controllers.NewMedicalController()
 	baseEnterpriseController := controllers.NewBaseEnterpriseController()
 	productSpuController := controllers.NewProductSpuController()
+	productRpController := controllers.NewProductRpController()
 	permissionGuard := middleware.NewPermissionGuard(services.NewPermissionService())
 	auditLogService := services.NewAuditLogService()
 
@@ -234,6 +235,15 @@ func SetupRouter() *gin.Engine {
 				spus.GET("/:spuId", permissionGuard.Require("product:spu:detail"), productSpuController.GetProductSpu)
 				spus.PUT("/:spuId", permissionGuard.Require("product:spu:update"), productSpuController.UpdateProductSpu)
 				spus.PUT("/:spuId/status", permissionGuard.Require("product:spu:status"), productSpuController.UpdateProductSpuStatus)
+			}
+			rps := product.Group("/rps")
+			{
+				rps.GET("", permissionGuard.Require("product:rp:list"), productRpController.GetProductRpList)
+				rps.GET("/options", productRpController.GetProductRpOptions)
+				rps.POST("", permissionGuard.Require("product:rp:create"), productRpController.CreateProductRp)
+				rps.GET("/:rpId", permissionGuard.Require("product:rp:detail"), productRpController.GetProductRp)
+				rps.PUT("/:rpId", permissionGuard.Require("product:rp:update"), productRpController.UpdateProductRp)
+				rps.PUT("/:rpId/status", permissionGuard.Require("product:rp:status"), productRpController.UpdateProductRpStatus)
 			}
 		}
 

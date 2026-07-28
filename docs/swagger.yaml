@@ -1456,6 +1456,54 @@ definitions:
       username:
         type: string
     type: object
+  models.ProductRpOptionResponse:
+    properties:
+      productName:
+        type: string
+      productType:
+        type: string
+      rpCode:
+        type: string
+      rpId:
+        type: string
+      specName:
+        type: string
+      spuCode:
+        type: string
+      spuId:
+        type: string
+    type: object
+  models.ProductRpResponse:
+    properties:
+      createDate:
+        type: string
+      description:
+        type: string
+      dosageForm:
+        type: string
+      productName:
+        type: string
+      productType:
+        type: string
+      rowVersion:
+        type: integer
+      rpCode:
+        type: string
+      rpId:
+        type: string
+      specName:
+        type: string
+      spuCode:
+        type: string
+      spuId:
+        type: string
+      status:
+        type: integer
+      strengthText:
+        type: string
+      updateDate:
+        type: string
+    type: object
   models.ProductSpuOptionResponse:
     properties:
       productName:
@@ -1814,6 +1862,33 @@ definitions:
     - enterpriseName
     - enterpriseType
     - roles
+    type: object
+  models.SaveProductRpRequest:
+    properties:
+      description:
+        maxLength: 2000
+        type: string
+      dosageForm:
+        maxLength: 64
+        type: string
+      expectedRowVersion:
+        type: integer
+      specName:
+        maxLength: 128
+        type: string
+      spuId:
+        type: string
+      status:
+        enum:
+        - 0
+        - 1
+        type: integer
+      strengthText:
+        maxLength: 128
+        type: string
+    required:
+    - specName
+    - spuId
     type: object
   models.SaveProductSpuRequest:
     properties:
@@ -2591,6 +2666,19 @@ definitions:
         type: integer
     required:
     - moduleTitle
+    type: object
+  models.UpdateProductRpStatusRequest:
+    properties:
+      expectedRowVersion:
+        minimum: 1
+        type: integer
+      status:
+        enum:
+        - 0
+        - 1
+        type: integer
+    required:
+    - expectedRowVersion
     type: object
   models.UpdateProductSpuStatusRequest:
     properties:
@@ -7011,6 +7099,209 @@ paths:
       summary: 批量发布草稿排班
       tags:
       - 医疗管理/排班
+  /product/rps:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: RP编码、规格名称、剂型、规格文本、SPU编码或通用名称
+        in: query
+        name: keyword
+        type: string
+      - description: 所属通用产品ID
+        in: query
+        name: spuId
+        type: string
+      - description: 产品类型
+        in: query
+        name: productType
+        type: string
+      - description: 状态：0停用 1启用
+        in: query
+        name: status
+        type: integer
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/utils.PaginationResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取规格产品列表
+      tags:
+      - 产品档案/规格产品
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 规格产品
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveProductRpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductRpResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 新增规格产品
+      tags:
+      - 产品档案/规格产品
+  /product/rps/{rpId}:
+    get:
+      parameters:
+      - description: 规格产品ID
+        in: path
+        name: rpId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductRpResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取规格产品详情
+      tags:
+      - 产品档案/规格产品
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 规格产品ID
+        in: path
+        name: rpId
+        required: true
+        type: string
+      - description: 规格产品
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveProductRpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductRpResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新规格产品
+      tags:
+      - 产品档案/规格产品
+  /product/rps/{rpId}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 规格产品ID
+        in: path
+        name: rpId
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateProductRpStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductRpResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新规格产品启停状态
+      tags:
+      - 产品档案/规格产品
+  /product/rps/options:
+    get:
+      parameters:
+      - description: RP编码、规格名称、剂型、规格文本、SPU编码或通用名称
+        in: query
+        name: keyword
+        type: string
+      - description: 所属通用产品ID
+        in: query
+        name: spuId
+        type: string
+      - description: 产品类型
+        in: query
+        name: productType
+        type: string
+      - description: 返回数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ProductRpOptionResponse'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取启用规格产品选项
+      tags:
+      - 产品档案/规格产品
   /product/spus:
     get:
       parameters:

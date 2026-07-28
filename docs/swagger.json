@@ -5944,6 +5944,356 @@
                 }
             }
         },
+        "/product/rps": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/规格产品"
+                ],
+                "summary": "获取规格产品列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "RP编码、规格名称、剂型、规格文本、SPU编码或通用名称",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "所属通用产品ID",
+                        "name": "spuId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "产品类型",
+                        "name": "productType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态：0停用 1启用",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/utils.PaginationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/规格产品"
+                ],
+                "summary": "新增规格产品",
+                "parameters": [
+                    {
+                        "description": "规格产品",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveProductRpRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductRpResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/rps/options": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/规格产品"
+                ],
+                "summary": "获取启用规格产品选项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "RP编码、规格名称、剂型、规格文本、SPU编码或通用名称",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "所属通用产品ID",
+                        "name": "spuId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "产品类型",
+                        "name": "productType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "返回数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ProductRpOptionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/rps/{rpId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/规格产品"
+                ],
+                "summary": "获取规格产品详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "规格产品ID",
+                        "name": "rpId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductRpResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/规格产品"
+                ],
+                "summary": "更新规格产品",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "规格产品ID",
+                        "name": "rpId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "规格产品",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveProductRpRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductRpResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/rps/{rpId}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/规格产品"
+                ],
+                "summary": "更新规格产品启停状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "规格产品ID",
+                        "name": "rpId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateProductRpStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductRpResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/product/spus": {
             "get": {
                 "security": [
@@ -12971,6 +13321,79 @@
                 }
             }
         },
+        "models.ProductRpOptionResponse": {
+            "type": "object",
+            "properties": {
+                "productName": {
+                    "type": "string"
+                },
+                "productType": {
+                    "type": "string"
+                },
+                "rpCode": {
+                    "type": "string"
+                },
+                "rpId": {
+                    "type": "string"
+                },
+                "specName": {
+                    "type": "string"
+                },
+                "spuCode": {
+                    "type": "string"
+                },
+                "spuId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ProductRpResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "dosageForm": {
+                    "type": "string"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "productType": {
+                    "type": "string"
+                },
+                "rowVersion": {
+                    "type": "integer"
+                },
+                "rpCode": {
+                    "type": "string"
+                },
+                "rpId": {
+                    "type": "string"
+                },
+                "specName": {
+                    "type": "string"
+                },
+                "spuCode": {
+                    "type": "string"
+                },
+                "spuId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "strengthText": {
+                    "type": "string"
+                },
+                "updateDate": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ProductSpuOptionResponse": {
             "type": "object",
             "properties": {
@@ -13470,6 +13893,44 @@
                 "unifiedCreditCode": {
                     "type": "string",
                     "maxLength": 32
+                }
+            }
+        },
+        "models.SaveProductRpRequest": {
+            "type": "object",
+            "required": [
+                "specName",
+                "spuId"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 2000
+                },
+                "dosageForm": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "expectedRowVersion": {
+                    "type": "integer"
+                },
+                "specName": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "spuId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
+                },
+                "strengthText": {
+                    "type": "string",
+                    "maxLength": 128
                 }
             }
         },
@@ -14538,6 +14999,25 @@
                     "description": "排序",
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "models.UpdateProductRpStatusRequest": {
+            "type": "object",
+            "required": [
+                "expectedRowVersion"
+            ],
+            "properties": {
+                "expectedRowVersion": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
                 }
             }
         },
