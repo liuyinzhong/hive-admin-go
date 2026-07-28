@@ -23,6 +23,7 @@ func NewProductRpController() *ProductRpController {
 
 // GetProductRpList 获取规格产品列表
 // @Summary 获取规格产品列表
+// @Description 分页查询规格产品列表，支持按编码、名称、剂型、规格、SPU、产品类型、状态筛选及排序
 // @Tags 产品档案/规格产品
 // @Produce json
 // @Security ApiKeyAuth
@@ -33,7 +34,9 @@ func NewProductRpController() *ProductRpController {
 // @Param productType query string false "产品类型"
 // @Param status query int false "状态：0停用 1启用"
 // @Param sorts query string false "排序"
-// @Success 200 {object} models.Response{data=utils.PaginationResponse}
+// @Success 200 {object} models.Response{data=utils.PaginationResponse{items=[]models.ProductRpResponse}} "获取成功"
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /product/rps [get]
 func (ctrl *ProductRpController) GetProductRpList(c *gin.Context) {
 	var req models.ProductRpListRequest
@@ -51,11 +54,14 @@ func (ctrl *ProductRpController) GetProductRpList(c *gin.Context) {
 
 // GetProductRp 获取规格产品详情
 // @Summary 获取规格产品详情
+// @Description 根据RP ID查询规格产品详细信息
 // @Tags 产品档案/规格产品
 // @Produce json
 // @Security ApiKeyAuth
 // @Param rpId path string true "规格产品ID"
 // @Success 200 {object} models.Response{data=models.ProductRpResponse}
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /product/rps/{rpId} [get]
 func (ctrl *ProductRpController) GetProductRp(c *gin.Context) {
 	result, err := ctrl.productRpService.GetProductRpDetail(c.Param("rpId"))
@@ -68,12 +74,15 @@ func (ctrl *ProductRpController) GetProductRp(c *gin.Context) {
 
 // CreateProductRp 新增规格产品
 // @Summary 新增规格产品
+// @Description 新增规格产品记录
 // @Tags 产品档案/规格产品
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.SaveProductRpRequest true "规格产品"
 // @Success 200 {object} models.Response{data=models.ProductRpResponse}
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /product/rps [post]
 func (ctrl *ProductRpController) CreateProductRp(c *gin.Context) {
 	var req models.SaveProductRpRequest
@@ -91,6 +100,7 @@ func (ctrl *ProductRpController) CreateProductRp(c *gin.Context) {
 
 // UpdateProductRp 更新规格产品
 // @Summary 更新规格产品
+// @Description 根据RP ID更新规格产品信息
 // @Tags 产品档案/规格产品
 // @Accept json
 // @Produce json
@@ -98,6 +108,8 @@ func (ctrl *ProductRpController) CreateProductRp(c *gin.Context) {
 // @Param rpId path string true "规格产品ID"
 // @Param request body models.SaveProductRpRequest true "规格产品"
 // @Success 200 {object} models.Response{data=models.ProductRpResponse}
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /product/rps/{rpId} [put]
 func (ctrl *ProductRpController) UpdateProductRp(c *gin.Context) {
 	var req models.SaveProductRpRequest
@@ -115,6 +127,7 @@ func (ctrl *ProductRpController) UpdateProductRp(c *gin.Context) {
 
 // UpdateProductRpStatus 更新规格产品启停状态
 // @Summary 更新规格产品启停状态
+// @Description 更新规格产品的启用/停用状态
 // @Tags 产品档案/规格产品
 // @Accept json
 // @Produce json
@@ -122,6 +135,8 @@ func (ctrl *ProductRpController) UpdateProductRp(c *gin.Context) {
 // @Param rpId path string true "规格产品ID"
 // @Param request body models.UpdateProductRpStatusRequest true "状态"
 // @Success 200 {object} models.Response{data=models.ProductRpResponse}
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /product/rps/{rpId}/status [put]
 func (ctrl *ProductRpController) UpdateProductRpStatus(c *gin.Context) {
 	var req models.UpdateProductRpStatusRequest
@@ -139,6 +154,7 @@ func (ctrl *ProductRpController) UpdateProductRpStatus(c *gin.Context) {
 
 // GetProductRpOptions 获取启用规格产品选项
 // @Summary 获取启用规格产品选项
+// @Description 获取已启用的规格产品选项列表，用于下拉选择等场景
 // @Tags 产品档案/规格产品
 // @Produce json
 // @Security ApiKeyAuth
@@ -147,6 +163,8 @@ func (ctrl *ProductRpController) UpdateProductRpStatus(c *gin.Context) {
 // @Param productType query string false "产品类型"
 // @Param pageSize query int false "返回数量"
 // @Success 200 {object} models.Response{data=[]models.ProductRpOptionResponse}
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /product/rps/options [get]
 func (ctrl *ProductRpController) GetProductRpOptions(c *gin.Context) {
 	var req models.ProductRpOptionsRequest

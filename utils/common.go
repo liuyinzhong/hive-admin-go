@@ -24,7 +24,7 @@ func ParseSortParams(sorts string) (map[string]string, error) {
 	if sorts == "" {
 		return result, nil
 	}
-	
+
 	pairs := strings.Split(sorts, ";")
 	for _, pair := range pairs {
 		parts := strings.Split(pair, ",")
@@ -36,32 +36,32 @@ func ParseSortParams(sorts string) (map[string]string, error) {
 }
 
 type PageResult struct {
-	Items interface{} `json:"items"`
-	Total int64       `json:"total"`
+	Items interface{} `json:"items"`               // 分页数据列表
+	Total int64       `json:"total" example:"100"` // 数据总条数
 }
 
 type PaginationResponse struct {
-	Items interface{} `json:"items"`
-	Total int64       `json:"total"`
+	Items interface{} `json:"items"`               // 分页数据列表
+	Total int64       `json:"total" example:"100"` // 数据总条数
 }
 
 func Paginate(db *gorm.DB, page int, pageSize int, dest interface{}) (*PageResult, error) {
 	var total int64
 	db.Count(&total)
-	
+
 	if page <= 0 {
 		page = 1
 	}
 	if pageSize <= 0 {
 		pageSize = 20
 	}
-	
+
 	offset := (page - 1) * pageSize
 	err := db.Offset(offset).Limit(pageSize).Find(dest).Error
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &PageResult{
 		Items: dest,
 		Total: total,
@@ -71,22 +71,22 @@ func Paginate(db *gorm.DB, page int, pageSize int, dest interface{}) (*PageResul
 func PaginateWithTransform[T any](db *gorm.DB, page int, pageSize int, order string, transform func(items []T) interface{}) (*PaginationResponse, error) {
 	var total int64
 	db.Count(&total)
-	
+
 	if page <= 0 {
 		page = 1
 	}
 	if pageSize <= 0 {
 		pageSize = 20
 	}
-	
+
 	offset := (page - 1) * pageSize
-	
+
 	var items []T
 	err := db.Order(order).Offset(offset).Limit(pageSize).Find(&items).Error
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &PaginationResponse{
 		Items: transform(items),
 		Total: total,
@@ -100,7 +100,7 @@ func ApplySorting(db *gorm.DB, sorts map[string]string, defaultSort string) *gor
 		}
 		return db
 	}
-	
+
 	var orderClauses []string
 	for field, direction := range sorts {
 		if direction == "desc" {
@@ -109,11 +109,11 @@ func ApplySorting(db *gorm.DB, sorts map[string]string, defaultSort string) *gor
 			orderClauses = append(orderClauses, field+" asc")
 		}
 	}
-	
+
 	if len(orderClauses) > 0 {
 		db = db.Order(strings.Join(orderClauses, ", "))
 	}
-	
+
 	return db
 }
 
@@ -121,7 +121,7 @@ func BuildOrderBy(sorts string, fieldMap map[string]string) string {
 	if sorts == "" {
 		return ""
 	}
-	
+
 	result := make([]string, 0)
 	pairs := strings.Split(sorts, ";")
 	for _, pair := range pairs {
@@ -136,7 +136,7 @@ func BuildOrderBy(sorts string, fieldMap map[string]string) string {
 			}
 		}
 	}
-	
+
 	return strings.Join(result, ", ")
 }
 

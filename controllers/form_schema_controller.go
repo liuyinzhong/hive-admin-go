@@ -15,6 +15,7 @@ type FormSchemaController struct{}
 
 // GetFormSchemas 获取表单 Schema 分页列表。
 // @Summary 获取表单 Schema 列表
+// @Description 分页查询表单 Schema 列表，支持按 Schema 标识、名称、分类、状态筛选及排序。
 // @Tags 表单管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -25,8 +26,10 @@ type FormSchemaController struct{}
 // @Param category query string false "分类"
 // @Param status query int false "状态"
 // @Param sorts query string false "排序"
-// @Success 200 {object} models.Response{data=utils.PaginationResponse}
+// @Success 200 {object} models.Response{data=utils.PaginationResponse{items=[]models.FormSchemaResponse}} "获取成功"
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /form/schemas [get]
 func (FormSchemaController) GetFormSchemas(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -48,10 +51,14 @@ func (FormSchemaController) GetFormSchemas(c *gin.Context) {
 
 // GetAllFormSchemas 获取全部可选表单 Schema。
 // @Summary 获取全部表单 Schema
+// @Description 获取全部表单 Schema，用于下拉选择等场景，支持按名称和状态筛选。
 // @Tags 表单管理
 // @Produce json
 // @Security ApiKeyAuth
 // @Success 200 {object} models.Response{data=[]models.FormSchemaResponse}
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /form/schemas/all [get]
 func (FormSchemaController) GetAllFormSchemas(c *gin.Context) {
 	status := -1
@@ -70,12 +77,15 @@ func (FormSchemaController) GetAllFormSchemas(c *gin.Context) {
 
 // GetFormSchema 获取表单 Schema 详情。
 // @Summary 获取表单 Schema 详情
+// @Description 根据表单 Schema ID 获取单个表单 Schema 的完整配置信息。
 // @Tags 表单管理
 // @Produce json
 // @Security ApiKeyAuth
 // @Param formSchemaId path string true "表单 Schema ID"
 // @Success 200 {object} models.Response{data=models.FormSchemaResponse}
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /form/schemas/{formSchemaId} [get]
 func (FormSchemaController) GetFormSchema(c *gin.Context) {
 	result, err := services.GetFormSchema(c.Param("formSchemaId"))
@@ -88,13 +98,16 @@ func (FormSchemaController) GetFormSchema(c *gin.Context) {
 
 // CreateFormSchema 创建表单 Schema。
 // @Summary 创建表单 Schema
+// @Description 创建新的表单 Schema 配置，包含表单字段定义、布局、校验规则等完整配置信息。
 // @Tags 表单管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.UpsertFormSchemaRequest true "表单 Schema"
 // @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /form/schemas [post]
 func (FormSchemaController) CreateFormSchema(c *gin.Context) {
 	var req models.UpsertFormSchemaRequest
@@ -111,6 +124,7 @@ func (FormSchemaController) CreateFormSchema(c *gin.Context) {
 
 // UpdateFormSchema 更新表单 Schema。
 // @Summary 更新表单 Schema
+// @Description 根据表单 Schema ID 更新指定表单 Schema 的配置信息，包括字段定义、布局、校验规则等。
 // @Tags 表单管理
 // @Accept json
 // @Produce json
@@ -118,7 +132,9 @@ func (FormSchemaController) CreateFormSchema(c *gin.Context) {
 // @Param formSchemaId path string true "表单 Schema ID"
 // @Param request body models.UpsertFormSchemaRequest true "表单 Schema"
 // @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /form/schemas/{formSchemaId} [put]
 func (FormSchemaController) UpdateFormSchema(c *gin.Context) {
 	var req models.UpsertFormSchemaRequest
@@ -135,13 +151,16 @@ func (FormSchemaController) UpdateFormSchema(c *gin.Context) {
 
 // DeleteFormSchemas 删除表单 Schema。
 // @Summary 删除表单 Schema
+// @Description 批量删除表单 Schema，支持一次删除多个，传入表单 Schema ID 数组。
 // @Tags 表单管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []string true "表单 Schema ID 数组"
 // @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /form/schemas [delete]
 func (FormSchemaController) DeleteFormSchemas(c *gin.Context) {
 	var ids []string

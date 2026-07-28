@@ -29,13 +29,16 @@ func NewMedicalController() *MedicalController {
 
 // GetMedicalDepartmentTree 获取临床科室树。
 // @Summary 获取临床科室树
+// @Description 获取临床科室树形结构数据，支持按关键字和状态筛选
 // @Tags 医疗管理/临床科室
 // @Produce json
 // @Security ApiKeyAuth
 // @Param keyword query string false "科室编码或名称"
 // @Param status query int false "状态 0停用 1启用"
 // @Success 200 {object} models.Response{data=[]models.MedicalDepartmentTreeResponse}
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/departments [get]
 func (ctrl *MedicalController) GetMedicalDepartmentTree(c *gin.Context) {
 	var req models.MedicalDepartmentListRequest
@@ -53,10 +56,12 @@ func (ctrl *MedicalController) GetMedicalDepartmentTree(c *gin.Context) {
 
 // GetAllMedicalDepartments 获取所有启用的临床科室。
 // @Summary 获取所有启用的临床科室
+// @Description 获取所有启用状态的临床科室选项列表
 // @Tags 医疗管理/临床科室
 // @Produce json
 // @Security ApiKeyAuth
 // @Success 200 {object} models.Response{data=[]models.MedicalDepartmentTreeResponse}
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/departments/all [get]
 func (ctrl *MedicalController) GetAllMedicalDepartments(c *gin.Context) {
 	result, err := ctrl.departmentService.GetAllDepartments()
@@ -69,13 +74,16 @@ func (ctrl *MedicalController) GetAllMedicalDepartments(c *gin.Context) {
 
 // CreateMedicalDepartment 创建临床科室。
 // @Summary 创建临床科室
+// @Description 创建临床科室，支持设置父级科室形成树形结构
 // @Tags 医疗管理/临床科室
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateMedicalDepartmentRequest true "临床科室信息"
 // @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/departments [post]
 func (ctrl *MedicalController) CreateMedicalDepartment(c *gin.Context) {
 	var req models.CreateMedicalDepartmentRequest
@@ -92,12 +100,15 @@ func (ctrl *MedicalController) CreateMedicalDepartment(c *gin.Context) {
 
 // GetMedicalDepartmentDetail 获取临床科室详情。
 // @Summary 获取临床科室详情
+// @Description 根据科室ID获取临床科室详细信息
 // @Tags 医疗管理/临床科室
 // @Produce json
 // @Security ApiKeyAuth
 // @Param departmentId path string true "临床科室ID"
 // @Success 200 {object} models.Response{data=models.MedicalDepartmentTreeResponse}
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/departments/{departmentId} [get]
 func (ctrl *MedicalController) GetMedicalDepartmentDetail(c *gin.Context) {
 	result, err := ctrl.departmentService.GetDepartmentDetail(c.Param("departmentId"))
@@ -110,6 +121,7 @@ func (ctrl *MedicalController) GetMedicalDepartmentDetail(c *gin.Context) {
 
 // UpdateMedicalDepartment 更新临床科室。
 // @Summary 更新临床科室
+// @Description 更新临床科室基本信息
 // @Tags 医疗管理/临床科室
 // @Accept json
 // @Produce json
@@ -117,7 +129,9 @@ func (ctrl *MedicalController) GetMedicalDepartmentDetail(c *gin.Context) {
 // @Param departmentId path string true "临床科室ID"
 // @Param request body models.UpdateMedicalDepartmentRequest true "临床科室信息"
 // @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/departments/{departmentId} [put]
 func (ctrl *MedicalController) UpdateMedicalDepartment(c *gin.Context) {
 	var req models.UpdateMedicalDepartmentRequest
@@ -134,6 +148,7 @@ func (ctrl *MedicalController) UpdateMedicalDepartment(c *gin.Context) {
 
 // UpdateMedicalDepartmentStatus 更新临床科室状态。
 // @Summary 更新临床科室状态
+// @Description 启用或停用临床科室
 // @Tags 医疗管理/临床科室
 // @Accept json
 // @Produce json
@@ -141,7 +156,9 @@ func (ctrl *MedicalController) UpdateMedicalDepartment(c *gin.Context) {
 // @Param departmentId path string true "临床科室ID"
 // @Param request body models.UpdateMedicalStatusRequest true "状态"
 // @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/departments/{departmentId}/status [put]
 func (ctrl *MedicalController) UpdateMedicalDepartmentStatus(c *gin.Context) {
 	var req models.UpdateMedicalStatusRequest
@@ -158,13 +175,16 @@ func (ctrl *MedicalController) UpdateMedicalDepartmentStatus(c *gin.Context) {
 
 // DeleteMedicalDepartments 删除临床科室。
 // @Summary 批量删除临床科室
+// @Description 批量删除临床科室及其子科室
 // @Tags 医疗管理/临床科室
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []string true "临床科室ID列表"
 // @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/departments [delete]
 func (ctrl *MedicalController) DeleteMedicalDepartments(c *gin.Context) {
 	var ids []string
@@ -181,6 +201,7 @@ func (ctrl *MedicalController) DeleteMedicalDepartments(c *gin.Context) {
 
 // GetDoctorList 获取医生列表。
 // @Summary 获取医生列表
+// @Description 分页查询医生档案列表，支持按姓名、科室、职称、用工类型、状态等条件筛选
 // @Tags 医疗管理/医生档案
 // @Produce json
 // @Security ApiKeyAuth
@@ -193,7 +214,9 @@ func (ctrl *MedicalController) DeleteMedicalDepartments(c *gin.Context) {
 // @Param status query int false "状态 0停用 1启用"
 // @Param sorts query string false "排序"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.DoctorResponse}}
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/doctors [get]
 func (ctrl *MedicalController) GetDoctorList(c *gin.Context) {
 	var req models.DoctorListRequest
@@ -211,10 +234,12 @@ func (ctrl *MedicalController) GetDoctorList(c *gin.Context) {
 
 // GetAllDoctors 获取所有启用医生选项。
 // @Summary 获取所有启用医生选项
+// @Description 获取所有启用状态的医生选项列表
 // @Tags 医疗管理/医生档案
 // @Produce json
 // @Security ApiKeyAuth
 // @Success 200 {object} models.Response{data=[]models.DoctorOptionResponse}
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/doctors/all [get]
 func (ctrl *MedicalController) GetAllDoctors(c *gin.Context) {
 	result, err := ctrl.doctorService.GetAllDoctors()
@@ -227,13 +252,16 @@ func (ctrl *MedicalController) GetAllDoctors(c *gin.Context) {
 
 // CreateDoctor 创建医生档案。
 // @Summary 创建医生档案
+// @Description 创建医生档案，包含基本信息、职称、用工类型、执业范围等
 // @Tags 医疗管理/医生档案
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.SaveDoctorRequest true "医生档案"
 // @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/doctors [post]
 func (ctrl *MedicalController) CreateDoctor(c *gin.Context) {
 	var req models.SaveDoctorRequest
@@ -250,12 +278,15 @@ func (ctrl *MedicalController) CreateDoctor(c *gin.Context) {
 
 // GetDoctorDetail 获取医生详情。
 // @Summary 获取医生详情
+// @Description 根据医生ID获取医生档案详细信息
 // @Tags 医疗管理/医生档案
 // @Produce json
 // @Security ApiKeyAuth
 // @Param doctorId path string true "医生ID"
 // @Success 200 {object} models.Response{data=models.DoctorResponse}
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/doctors/{doctorId} [get]
 func (ctrl *MedicalController) GetDoctorDetail(c *gin.Context) {
 	result, err := ctrl.doctorService.GetDoctorDetail(c.Param("doctorId"))
@@ -268,6 +299,7 @@ func (ctrl *MedicalController) GetDoctorDetail(c *gin.Context) {
 
 // UpdateDoctor 更新医生档案。
 // @Summary 更新医生档案
+// @Description 更新医生档案信息
 // @Tags 医疗管理/医生档案
 // @Accept json
 // @Produce json
@@ -275,7 +307,9 @@ func (ctrl *MedicalController) GetDoctorDetail(c *gin.Context) {
 // @Param doctorId path string true "医生ID"
 // @Param request body models.SaveDoctorRequest true "医生档案"
 // @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/doctors/{doctorId} [put]
 func (ctrl *MedicalController) UpdateDoctor(c *gin.Context) {
 	var req models.SaveDoctorRequest
@@ -292,6 +326,7 @@ func (ctrl *MedicalController) UpdateDoctor(c *gin.Context) {
 
 // UpdateDoctorStatus 更新医生状态。
 // @Summary 更新医生状态
+// @Description 启用或停用医生档案
 // @Tags 医疗管理/医生档案
 // @Accept json
 // @Produce json
@@ -299,7 +334,9 @@ func (ctrl *MedicalController) UpdateDoctor(c *gin.Context) {
 // @Param doctorId path string true "医生ID"
 // @Param request body models.UpdateMedicalStatusRequest true "状态"
 // @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/doctors/{doctorId}/status [put]
 func (ctrl *MedicalController) UpdateDoctorStatus(c *gin.Context) {
 	var req models.UpdateMedicalStatusRequest
@@ -316,13 +353,16 @@ func (ctrl *MedicalController) UpdateDoctorStatus(c *gin.Context) {
 
 // DeleteDoctors 删除医生档案。
 // @Summary 批量删除医生档案
+// @Description 批量删除医生档案
 // @Tags 医疗管理/医生档案
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body []string true "医生ID列表"
 // @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/doctors [delete]
 func (ctrl *MedicalController) DeleteDoctors(c *gin.Context) {
 	var ids []string

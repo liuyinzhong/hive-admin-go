@@ -257,6 +257,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "分页查询企业主体列表，支持按名称、简称、编码、信用代码、企业类型、角色类型和状态进行筛选",
                 "produces": [
                     "application/json"
                 ],
@@ -310,7 +311,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "获取成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -320,11 +321,38 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/utils.PaginationResponse"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.EnterpriseResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         }
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -335,6 +363,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "创建新的企业主体记录",
                 "consumes": [
                     "application/json"
                 ],
@@ -374,6 +403,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -385,6 +426,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "获取已启用的企业主体选项列表，用于下拉选择等场景",
                 "produces": [
                     "application/json"
                 ],
@@ -433,6 +475,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -444,6 +498,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据企业主体ID获取企业主体的详细信息",
                 "produces": [
                     "application/json"
                 ],
@@ -478,6 +533,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             },
@@ -487,6 +554,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据企业主体ID更新企业主体信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -533,6 +601,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -544,6 +624,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据企业主体ID更新企业主体的启用/停用状态",
                 "consumes": [
                     "application/json"
                 ],
@@ -589,6 +670,18 @@ const docTemplate = `{
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -3896,6 +3989,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "分页查询表单 Schema 列表，支持按 Schema 标识、名称、分类、状态筛选及排序。",
                 "produces": [
                     "application/json"
                 ],
@@ -3949,7 +4043,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "获取成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -3959,15 +4053,42 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/utils.PaginationResponse"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.FormSchemaResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         }
                                     }
                                 }
                             ]
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -3980,6 +4101,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "创建新的表单 Schema 配置，包含表单字段定义、布局、校验规则等完整配置信息。",
                 "consumes": [
                     "application/json"
                 ],
@@ -4008,8 +4130,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4022,6 +4156,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "批量删除表单 Schema，支持一次删除多个，传入表单 Schema ID 数组。",
                 "consumes": [
                     "application/json"
                 ],
@@ -4053,8 +4188,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4069,6 +4216,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "获取全部表单 Schema，用于下拉选择等场景，支持按名称和状态筛选。",
                 "produces": [
                     "application/json"
                 ],
@@ -4097,6 +4245,24 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -4108,6 +4274,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据表单 Schema ID 获取单个表单 Schema 的完整配置信息。",
                 "produces": [
                     "application/json"
                 ],
@@ -4143,8 +4310,20 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4157,6 +4336,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据表单 Schema ID 更新指定表单 Schema 的配置信息，包括字段定义、布局、校验规则等。",
                 "consumes": [
                     "application/json"
                 ],
@@ -4192,8 +4372,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4208,6 +4400,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "获取临床科室树形结构数据，支持按关键字和状态筛选",
                 "produces": [
                     "application/json"
                 ],
@@ -4251,8 +4444,20 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4265,6 +4470,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "创建临床科室，支持设置父级科室形成树形结构",
                 "consumes": [
                     "application/json"
                 ],
@@ -4293,8 +4499,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4307,6 +4525,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "批量删除临床科室及其子科室",
                 "consumes": [
                     "application/json"
                 ],
@@ -4338,8 +4557,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4354,6 +4585,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "获取所有启用状态的临床科室选项列表",
                 "produces": [
                     "application/json"
                 ],
@@ -4382,6 +4614,12 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -4393,6 +4631,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据科室ID获取临床科室详细信息",
                 "produces": [
                     "application/json"
                 ],
@@ -4428,8 +4667,20 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4442,6 +4693,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "更新临床科室基本信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -4477,8 +4729,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4493,6 +4757,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "启用或停用临床科室",
                 "consumes": [
                     "application/json"
                 ],
@@ -4528,8 +4793,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4544,6 +4821,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "分页查询医生档案列表，支持按姓名、科室、职称、用工类型、状态等条件筛选",
                 "produces": [
                     "application/json"
                 ],
@@ -4635,8 +4913,20 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4649,6 +4939,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "创建医生档案，包含基本信息、职称、用工类型、执业范围等",
                 "consumes": [
                     "application/json"
                 ],
@@ -4677,8 +4968,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4691,6 +4994,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "批量删除医生档案",
                 "consumes": [
                     "application/json"
                 ],
@@ -4722,8 +5026,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4738,6 +5054,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "获取所有启用状态的医生选项列表",
                 "produces": [
                     "application/json"
                 ],
@@ -4766,6 +5083,12 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -4777,6 +5100,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据医生ID获取医生档案详细信息",
                 "produces": [
                     "application/json"
                 ],
@@ -4812,8 +5136,20 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4826,6 +5162,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "更新医生档案信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -4861,8 +5198,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4877,6 +5226,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "启用或停用医生档案",
                 "consumes": [
                     "application/json"
                 ],
@@ -4912,8 +5262,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -4928,6 +5290,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "分页查询挂号费规则列表，支持按医生、科室、挂号类型、有效期状态等条件筛选",
                 "produces": [
                     "application/json"
                 ],
@@ -5019,8 +5382,20 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5033,6 +5408,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "创建挂号费规则，支持配置费用、生效日期和失效日期",
                 "consumes": [
                     "application/json"
                 ],
@@ -5061,8 +5437,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5077,6 +5465,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "对已有挂号费规则进行调价，生成新版本挂号费记录",
                 "consumes": [
                     "application/json"
                 ],
@@ -5112,8 +5501,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5128,6 +5529,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "分页查询自动任务执行记录，支持按任务类型、状态、日期范围等条件筛选",
                 "produces": [
                     "application/json"
                 ],
@@ -5213,8 +5615,20 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5229,6 +5643,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "分页查询周期排班模板列表，支持按医生、科室、星期、状态等条件筛选",
                 "produces": [
                     "application/json"
                 ],
@@ -5314,8 +5729,20 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5328,6 +5755,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "创建周期排班模板，定义医生在每周固定时间的出诊安排",
                 "consumes": [
                     "application/json"
                 ],
@@ -5356,8 +5784,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5372,6 +5812,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "更新周期排班模板信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -5407,8 +5848,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5445,8 +5898,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5461,6 +5926,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "启用或停用周期排班模板",
                 "consumes": [
                     "application/json"
                 ],
@@ -5496,8 +5962,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5512,6 +5990,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "分页查询实际排班列表，支持按医生、科室、挂号类型、日期范围、状态等条件筛选",
                 "produces": [
                     "application/json"
                 ],
@@ -5609,8 +6088,20 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5623,6 +6114,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "手工创建实际排班记录",
                 "consumes": [
                     "application/json"
                 ],
@@ -5651,8 +6143,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5665,6 +6169,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "批量删除草稿状态的排班记录",
                 "consumes": [
                     "application/json"
                 ],
@@ -5696,8 +6201,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5712,6 +6229,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据启用的周期排班模板，批量生成指定日期范围内的实际排班",
                 "consumes": [
                     "application/json"
                 ],
@@ -5752,8 +6270,20 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5768,6 +6298,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "批量发布草稿排班，将其状态变更为已发布",
                 "consumes": [
                     "application/json"
                 ],
@@ -5796,8 +6327,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5812,6 +6355,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "编辑草稿状态的排班记录",
                 "consumes": [
                     "application/json"
                 ],
@@ -5847,8 +6391,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5863,6 +6419,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "将已完成出诊的排班标记为结束状态",
                 "produces": [
                     "application/json"
                 ],
@@ -5886,8 +6443,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5902,6 +6471,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "将已发布的排班标记为停诊状态，需提供停诊原因",
                 "consumes": [
                     "application/json"
                 ],
@@ -5937,8 +6507,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -5953,6 +6535,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "分页查询厂家产品列表，支持按所属规格产品筛选",
                 "produces": [
                     "application/json"
                 ],
@@ -5971,7 +6554,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "获取成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -5981,11 +6564,38 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/utils.PaginationResponse"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ProductMpResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         }
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -5996,6 +6606,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "新增厂家产品记录",
                 "consumes": [
                     "application/json"
                 ],
@@ -6035,6 +6646,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -6046,6 +6669,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据MP ID查询厂家产品详细信息",
                 "produces": [
                     "application/json"
                 ],
@@ -6080,6 +6704,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             },
@@ -6089,6 +6725,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据MP ID更新厂家产品信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -6135,6 +6772,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -6146,6 +6795,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "更新厂家产品的启用/停用状态",
                 "consumes": [
                     "application/json"
                 ],
@@ -6192,6 +6842,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -6203,6 +6865,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "分页查询规格产品列表，支持按编码、名称、剂型、规格、SPU、产品类型、状态筛选及排序",
                 "produces": [
                     "application/json"
                 ],
@@ -6256,7 +6919,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "获取成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -6266,11 +6929,38 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/utils.PaginationResponse"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ProductRpResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         }
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -6281,6 +6971,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "新增规格产品记录",
                 "consumes": [
                     "application/json"
                 ],
@@ -6320,6 +7011,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -6331,6 +7034,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "获取已启用的规格产品选项列表，用于下拉选择等场景",
                 "produces": [
                     "application/json"
                 ],
@@ -6385,6 +7089,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -6396,6 +7112,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据RP ID查询规格产品详细信息",
                 "produces": [
                     "application/json"
                 ],
@@ -6430,6 +7147,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             },
@@ -6439,6 +7168,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据RP ID更新规格产品信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -6485,6 +7215,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -6496,6 +7238,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "更新规格产品的启用/停用状态",
                 "consumes": [
                     "application/json"
                 ],
@@ -6542,6 +7285,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -6553,6 +7308,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "分页查询SKU列表，按所属厂家产品ID筛选及排序",
                 "produces": [
                     "application/json"
                 ],
@@ -6589,7 +7345,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "获取成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -6599,11 +7355,38 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/utils.PaginationResponse"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ProductSkuResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         }
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -6614,6 +7397,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "新增SKU记录",
                 "consumes": [
                     "application/json"
                 ],
@@ -6653,6 +7437,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -6664,6 +7460,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "获取已启用的SKU选项列表，用于下拉选择等场景",
                 "produces": [
                     "application/json"
                 ],
@@ -6712,6 +7509,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -6723,6 +7532,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据SKU ID查询SKU详细信息",
                 "produces": [
                     "application/json"
                 ],
@@ -6757,6 +7567,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             },
@@ -6766,6 +7588,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据SKU ID更新SKU信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -6812,6 +7635,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -6823,6 +7658,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "更新SKU的启用/停用状态",
                 "consumes": [
                     "application/json"
                 ],
@@ -6869,6 +7705,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -6880,6 +7728,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "分页查询通用产品列表，支持按编码、名称、产品类型、状态筛选及排序",
                 "produces": [
                     "application/json"
                 ],
@@ -6927,7 +7776,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "获取成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -6937,11 +7786,38 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/utils.PaginationResponse"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ProductSpuResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         }
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -6952,6 +7828,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "新增通用产品记录",
                 "consumes": [
                     "application/json"
                 ],
@@ -6991,6 +7868,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -7002,6 +7891,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "获取已启用的通用产品选项列表，用于下拉选择等场景",
                 "produces": [
                     "application/json"
                 ],
@@ -7050,6 +7940,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -7061,6 +7963,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据SPU ID查询通用产品详细信息",
                 "produces": [
                     "application/json"
                 ],
@@ -7095,6 +7998,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             },
@@ -7104,6 +8019,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据SPU ID更新通用产品信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -7150,6 +8066,18 @@ const docTemplate = `{
                                 }
                             ]
                         }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -7161,6 +8089,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "更新通用产品的启用/停用状态",
                 "consumes": [
                     "application/json"
                 ],
@@ -7206,6 +8135,18 @@ const docTemplate = `{
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -12957,28 +13898,44 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "appointmentEnabled": {
-                    "type": "integer"
+                    "description": "是否开启预约",
+                    "type": "integer",
+                    "example": 1
                 },
                 "departmentCode": {
-                    "type": "string"
+                    "description": "科室编码",
+                    "type": "string",
+                    "example": "NK"
                 },
                 "departmentId": {
-                    "type": "string"
+                    "description": "科室ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "departmentName": {
-                    "type": "string"
+                    "description": "科室名称",
+                    "type": "string",
+                    "example": "内科"
                 },
                 "departmentPosition": {
-                    "type": "string"
+                    "description": "科室职务",
+                    "type": "string",
+                    "example": "主任"
                 },
                 "doctorDepartmentId": {
-                    "type": "string"
+                    "description": "医生科室关联ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "isPrimary": {
-                    "type": "integer"
+                    "description": "是否主科室",
+                    "type": "integer",
+                    "example": 1
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态",
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -12986,22 +13943,34 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "doctorId": {
-                    "type": "string"
+                    "description": "医生ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "doctorNo": {
-                    "type": "string"
+                    "description": "医生编号",
+                    "type": "string",
+                    "example": "DOC001"
                 },
                 "name": {
-                    "type": "string"
+                    "description": "姓名",
+                    "type": "string",
+                    "example": "张三"
                 },
                 "primaryDepartmentId": {
-                    "type": "string"
+                    "description": "主科室ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "primaryDepartmentName": {
-                    "type": "string"
+                    "description": "主科室名称",
+                    "type": "string",
+                    "example": "内科"
                 },
                 "professionalTitle": {
-                    "type": "string"
+                    "description": "职称",
+                    "type": "string",
+                    "example": "主任医师"
                 }
             }
         },
@@ -13009,112 +13978,182 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "administrativePosition": {
-                    "type": "string"
+                    "description": "行政职务",
+                    "type": "string",
+                    "example": "科室主任"
                 },
                 "appointmentEnabled": {
-                    "type": "integer"
+                    "description": "预约开启(0-关闭 1-开启)",
+                    "type": "integer",
+                    "example": 1
                 },
                 "avatar": {
-                    "type": "string"
+                    "description": "头像",
+                    "type": "string",
+                    "example": "https://example.com/avatar.jpg"
                 },
                 "birthDate": {
-                    "type": "string"
+                    "description": "出生日期",
+                    "type": "string",
+                    "example": "1985-06-15"
                 },
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "defaultVisitMinutes": {
-                    "type": "integer"
+                    "description": "默认就诊时长(分钟)",
+                    "type": "integer",
+                    "example": 15
                 },
                 "departmentIds": {
+                    "description": "科室ID列表",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "[\"550e8400-e29b-41d4-a716-446655440000\"]"
+                    ]
                 },
                 "departmentNames": {
+                    "description": "科室名称列表",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "[\"内科\"",
+                        "\"外科\"]"
+                    ]
                 },
                 "departments": {
+                    "description": "科室列表",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.DoctorDepartmentResponse"
                     }
                 },
                 "departureDate": {
-                    "type": "string"
+                    "description": "离职日期",
+                    "type": "string",
+                    "example": "2024-12-31"
                 },
                 "doctorId": {
-                    "type": "string"
+                    "description": "医生ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "doctorNo": {
-                    "type": "string"
+                    "description": "医生编号",
+                    "type": "string",
+                    "example": "DOC001"
                 },
                 "email": {
-                    "type": "string"
+                    "description": "邮箱",
+                    "type": "string",
+                    "example": "zhangsan@example.com"
                 },
                 "employmentDate": {
-                    "type": "string"
+                    "description": "入职日期",
+                    "type": "string",
+                    "example": "2010-03-15"
                 },
                 "employmentType": {
-                    "type": "string"
+                    "description": "执业类型",
+                    "type": "string",
+                    "example": "full-time"
                 },
                 "expertise": {
-                    "type": "string"
+                    "description": "专长",
+                    "type": "string",
+                    "example": "心内科常见疾病诊治"
                 },
                 "gender": {
-                    "type": "string"
+                    "description": "性别",
+                    "type": "string",
+                    "example": "male"
                 },
                 "introduction": {
-                    "type": "string"
+                    "description": "简介",
+                    "type": "string",
+                    "example": "从事心内科临床工作二十年，具有丰富的临床经验"
                 },
                 "name": {
-                    "type": "string"
+                    "description": "姓名",
+                    "type": "string",
+                    "example": "张三"
                 },
                 "namePinyin": {
-                    "type": "string"
+                    "description": "姓名拼音",
+                    "type": "string",
+                    "example": "zhangsan"
                 },
                 "onlineConsultation": {
-                    "type": "integer"
+                    "description": "在线咨询(0-关闭 1-开启)",
+                    "type": "integer",
+                    "example": 1
                 },
                 "phone": {
-                    "type": "string"
+                    "description": "手机号",
+                    "type": "string",
+                    "example": "13800138000"
                 },
                 "practiceStartDate": {
-                    "type": "string"
+                    "description": "执业开始日期",
+                    "type": "string",
+                    "example": "2005-07-01"
                 },
                 "primaryDepartmentId": {
-                    "type": "string"
+                    "description": "主科室ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "primaryDepartmentName": {
-                    "type": "string"
+                    "description": "主科室名称",
+                    "type": "string",
+                    "example": "内科"
                 },
                 "professionalTitle": {
-                    "type": "string"
+                    "description": "职称",
+                    "type": "string",
+                    "example": "主任医师"
                 },
                 "profileVisible": {
-                    "type": "integer"
+                    "description": "资料可见(0-隐藏 1-可见)",
+                    "type": "integer",
+                    "example": 1
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "备注信息"
                 },
                 "sort": {
-                    "type": "integer"
+                    "description": "排序",
+                    "type": "integer",
+                    "example": 0
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态(0-禁用 1-启用)",
+                    "type": "integer",
+                    "example": 1
                 },
                 "updateDate": {
-                    "type": "string"
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "userId": {
-                    "type": "string"
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "userName": {
-                    "type": "string"
+                    "description": "用户名",
+                    "type": "string",
+                    "example": "张三"
                 }
             }
         },
@@ -13122,25 +14161,40 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "enterpriseCode": {
-                    "type": "string"
+                    "description": "企业编码",
+                    "type": "string",
+                    "example": "ENT001"
                 },
                 "enterpriseId": {
-                    "type": "string"
+                    "description": "企业主体ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "enterpriseName": {
-                    "type": "string"
+                    "description": "企业名称",
+                    "type": "string",
+                    "example": "张三企业"
                 },
                 "enterpriseType": {
-                    "type": "string"
+                    "description": "企业类型",
+                    "type": "string",
+                    "example": "ENTERPRISE"
                 },
                 "roles": {
+                    "description": "企业角色列表",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "[\"id1\"",
+                        "\"id2\"]"
+                    ]
                 },
                 "shortName": {
-                    "type": "string"
+                    "description": "企业简称",
+                    "type": "string",
+                    "example": "张企"
                 }
             }
         },
@@ -13148,52 +14202,85 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "address": {
-                    "type": "string"
+                    "description": "地址",
+                    "type": "string",
+                    "example": "北京市朝阳区"
                 },
                 "contactName": {
-                    "type": "string"
+                    "description": "联系人姓名",
+                    "type": "string",
+                    "example": "张三"
                 },
                 "contactPhone": {
-                    "type": "string"
+                    "description": "联系人电话",
+                    "type": "string",
+                    "example": "13800138000"
                 },
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "enterpriseCode": {
-                    "type": "string"
+                    "description": "企业编码",
+                    "type": "string",
+                    "example": "ENT001"
                 },
                 "enterpriseId": {
-                    "type": "string"
+                    "description": "企业主体ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "enterpriseName": {
-                    "type": "string"
+                    "description": "企业名称",
+                    "type": "string",
+                    "example": "张三企业"
                 },
                 "enterpriseType": {
-                    "type": "string"
+                    "description": "企业类型",
+                    "type": "string",
+                    "example": "ENTERPRISE"
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "备注信息"
                 },
                 "roles": {
+                    "description": "企业角色列表",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "[\"id1\"",
+                        "\"id2\"]"
+                    ]
                 },
                 "rowVersion": {
-                    "type": "integer"
+                    "description": "版本号",
+                    "type": "integer",
+                    "example": 1
                 },
                 "shortName": {
-                    "type": "string"
+                    "description": "企业简称",
+                    "type": "string",
+                    "example": "张企"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态",
+                    "type": "integer",
+                    "example": 1
                 },
                 "unifiedCreditCode": {
-                    "type": "string"
+                    "description": "统一社会信用代码",
+                    "type": "string",
+                    "example": "91110108MA01XXXXXX"
                 },
                 "updateDate": {
-                    "type": "string"
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 }
             }
         },
@@ -13401,22 +14488,34 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "batchId": {
-                    "type": "string"
+                    "description": "批次ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "generatedCount": {
-                    "type": "integer"
+                    "description": "生成数量",
+                    "type": "integer",
+                    "example": 30
                 },
                 "idempotent": {
-                    "type": "boolean"
+                    "description": "是否幂等",
+                    "type": "boolean",
+                    "example": true
                 },
                 "scheduleIds": {
+                    "description": "排班ID列表",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "[\"550e8400-e29b-41d4-a716-446655440000\"]"
+                    ]
                 },
                 "skippedCount": {
-                    "type": "integer"
+                    "description": "跳过数量",
+                    "type": "integer",
+                    "example": 5
                 }
             }
         },
@@ -13529,37 +14628,56 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "children": {
+                    "description": "子级科室列表",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.MedicalDepartmentTreeResponse"
                     }
                 },
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "departmentCode": {
-                    "type": "string"
+                    "description": "科室编码",
+                    "type": "string",
+                    "example": "DEPT001"
                 },
                 "departmentId": {
-                    "type": "string"
+                    "description": "科室ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "departmentName": {
-                    "type": "string"
+                    "description": "科室名称",
+                    "type": "string",
+                    "example": "内科"
                 },
                 "pid": {
-                    "type": "string"
+                    "description": "父级科室ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "备注信息"
                 },
                 "sort": {
-                    "type": "integer"
+                    "description": "排序号",
+                    "type": "integer",
+                    "example": 1
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态(0-禁用 1-启用)",
+                    "type": "integer",
+                    "example": 1
                 },
                 "updateDate": {
-                    "type": "string"
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 }
             }
         },
@@ -13904,61 +15022,99 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "approvalNo": {
-                    "type": "string"
+                    "description": "批准文号",
+                    "type": "string",
+                    "example": "国药准字H20260001"
                 },
                 "brandName": {
-                    "type": "string"
+                    "description": "品牌名",
+                    "type": "string",
+                    "example": "品牌名"
                 },
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "description": {
-                    "type": "string"
+                    "description": "产品描述",
+                    "type": "string",
+                    "example": "产品描述"
                 },
                 "enterpriseCode": {
-                    "type": "string"
+                    "description": "企业编码",
+                    "type": "string",
+                    "example": "ENT001"
                 },
                 "enterpriseId": {
-                    "type": "string"
+                    "description": "企业主体ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "enterpriseName": {
-                    "type": "string"
+                    "description": "企业名称",
+                    "type": "string",
+                    "example": "张三企业"
                 },
                 "mpCode": {
-                    "type": "string"
+                    "description": "MP编码",
+                    "type": "string",
+                    "example": "MP001"
                 },
                 "mpId": {
-                    "type": "string"
+                    "description": "产品MP ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "productName": {
-                    "type": "string"
+                    "description": "产品名称",
+                    "type": "string",
+                    "example": "阿莫西林胶囊"
                 },
                 "productType": {
-                    "type": "string"
+                    "description": "产品类型",
+                    "type": "string",
+                    "example": "DRUG"
                 },
                 "rowVersion": {
-                    "type": "integer"
+                    "description": "版本号",
+                    "type": "integer",
+                    "example": 1
                 },
                 "rpCode": {
-                    "type": "string"
+                    "description": "规格编码",
+                    "type": "string",
+                    "example": "RP001"
                 },
                 "rpId": {
-                    "type": "string"
+                    "description": "产品规格ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "specName": {
-                    "type": "string"
+                    "description": "规格名称",
+                    "type": "string",
+                    "example": "0.25g"
                 },
                 "spuCode": {
-                    "type": "string"
+                    "description": "SPU编码",
+                    "type": "string",
+                    "example": "SPU001"
                 },
                 "spuId": {
-                    "type": "string"
+                    "description": "产品SPU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态",
+                    "type": "integer",
+                    "example": 1
                 },
                 "updateDate": {
-                    "type": "string"
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 }
             }
         },
@@ -13966,25 +15122,39 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "productName": {
-                    "type": "string"
+                    "description": "产品名称",
+                    "type": "string",
+                    "example": "阿莫西林胶囊"
                 },
                 "productType": {
-                    "type": "string"
+                    "description": "产品类型",
+                    "type": "string",
+                    "example": "DRUG"
                 },
                 "rpCode": {
-                    "type": "string"
+                    "description": "规格编码",
+                    "type": "string",
+                    "example": "RP001"
                 },
                 "rpId": {
-                    "type": "string"
+                    "description": "产品规格ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "specName": {
-                    "type": "string"
+                    "description": "规格名称",
+                    "type": "string",
+                    "example": "0.25g"
                 },
                 "spuCode": {
-                    "type": "string"
+                    "description": "SPU编码",
+                    "type": "string",
+                    "example": "SPU001"
                 },
                 "spuId": {
-                    "type": "string"
+                    "description": "产品SPU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 }
             }
         },
@@ -13992,46 +15162,74 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "description": {
-                    "type": "string"
+                    "description": "规格描述",
+                    "type": "string",
+                    "example": "规格描述"
                 },
                 "dosageForm": {
-                    "type": "string"
+                    "description": "剂型",
+                    "type": "string",
+                    "example": "胶囊剂"
                 },
                 "productName": {
-                    "type": "string"
+                    "description": "产品名称",
+                    "type": "string",
+                    "example": "阿莫西林胶囊"
                 },
                 "productType": {
-                    "type": "string"
+                    "description": "产品类型",
+                    "type": "string",
+                    "example": "DRUG"
                 },
                 "rowVersion": {
-                    "type": "integer"
+                    "description": "版本号",
+                    "type": "integer",
+                    "example": 1
                 },
                 "rpCode": {
-                    "type": "string"
+                    "description": "规格编码",
+                    "type": "string",
+                    "example": "RP001"
                 },
                 "rpId": {
-                    "type": "string"
+                    "description": "产品规格ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "specName": {
-                    "type": "string"
+                    "description": "规格名称",
+                    "type": "string",
+                    "example": "0.25g"
                 },
                 "spuCode": {
-                    "type": "string"
+                    "description": "SPU编码",
+                    "type": "string",
+                    "example": "SPU001"
                 },
                 "spuId": {
-                    "type": "string"
+                    "description": "产品SPU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态",
+                    "type": "integer",
+                    "example": 1
                 },
                 "strengthText": {
-                    "type": "string"
+                    "description": "规格含量",
+                    "type": "string",
+                    "example": "0.25g"
                 },
                 "updateDate": {
-                    "type": "string"
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 }
             }
         },
@@ -14039,52 +15237,84 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "approvalNo": {
-                    "type": "string"
+                    "description": "批准文号",
+                    "type": "string",
+                    "example": "国药准字H20260001"
                 },
                 "brandName": {
-                    "type": "string"
+                    "description": "品牌名",
+                    "type": "string",
+                    "example": "品牌名"
                 },
                 "enterpriseId": {
-                    "type": "string"
+                    "description": "企业主体ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "enterpriseName": {
-                    "type": "string"
+                    "description": "企业名称",
+                    "type": "string",
+                    "example": "张三企业"
                 },
                 "mpCode": {
-                    "type": "string"
+                    "description": "MP编码",
+                    "type": "string",
+                    "example": "MP001"
                 },
                 "mpId": {
-                    "type": "string"
+                    "description": "产品MP ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "packageSpecName": {
-                    "type": "string"
+                    "description": "包装规格名称",
+                    "type": "string",
+                    "example": "10粒/盒"
                 },
                 "productName": {
-                    "type": "string"
+                    "description": "产品名称",
+                    "type": "string",
+                    "example": "阿莫西林胶囊"
                 },
                 "productType": {
-                    "type": "string"
+                    "description": "产品类型",
+                    "type": "string",
+                    "example": "DRUG"
                 },
                 "rpCode": {
-                    "type": "string"
+                    "description": "规格编码",
+                    "type": "string",
+                    "example": "RP001"
                 },
                 "rpId": {
-                    "type": "string"
+                    "description": "产品规格ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "skuCode": {
-                    "type": "string"
+                    "description": "SKU编码",
+                    "type": "string",
+                    "example": "SKU001"
                 },
                 "skuId": {
-                    "type": "string"
+                    "description": "产品SKU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "specName": {
-                    "type": "string"
+                    "description": "规格名称",
+                    "type": "string",
+                    "example": "0.25g"
                 },
                 "spuCode": {
-                    "type": "string"
+                    "description": "SPU编码",
+                    "type": "string",
+                    "example": "SPU001"
                 },
                 "spuId": {
-                    "type": "string"
+                    "description": "产品SPU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 }
             }
         },
@@ -14092,91 +15322,149 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "allowSplit": {
-                    "type": "integer"
+                    "description": "是否允许拆零",
+                    "type": "integer",
+                    "example": 0
                 },
                 "approvalNo": {
-                    "type": "string"
+                    "description": "批准文号",
+                    "type": "string",
+                    "example": "国药准字H20260001"
                 },
                 "barcode": {
-                    "type": "string"
+                    "description": "条形码",
+                    "type": "string",
+                    "example": "6901234567890"
                 },
                 "brandName": {
-                    "type": "string"
+                    "description": "品牌名",
+                    "type": "string",
+                    "example": "品牌名"
                 },
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "description": {
-                    "type": "string"
+                    "description": "包装描述",
+                    "type": "string",
+                    "example": "包装描述"
                 },
                 "enterpriseCode": {
-                    "type": "string"
+                    "description": "企业编码",
+                    "type": "string",
+                    "example": "ENT001"
                 },
                 "enterpriseId": {
-                    "type": "string"
+                    "description": "企业主体ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "enterpriseName": {
-                    "type": "string"
+                    "description": "企业名称",
+                    "type": "string",
+                    "example": "张三企业"
                 },
                 "gtin": {
-                    "type": "string"
+                    "description": "GTIN码",
+                    "type": "string",
+                    "example": "06901234567890"
                 },
                 "minUnitName": {
-                    "type": "string"
+                    "description": "最小单位名称",
+                    "type": "string",
+                    "example": "粒"
                 },
                 "mpCode": {
-                    "type": "string"
+                    "description": "MP编码",
+                    "type": "string",
+                    "example": "MP001"
                 },
                 "mpId": {
-                    "type": "string"
+                    "description": "产品MP ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "packageQuantity": {
-                    "type": "integer"
+                    "description": "包装数量",
+                    "type": "integer",
+                    "example": 10
                 },
                 "packageSpecName": {
-                    "type": "string"
+                    "description": "包装规格名称",
+                    "type": "string",
+                    "example": "10粒/盒"
                 },
                 "packageUnitName": {
-                    "type": "string"
+                    "description": "包装单位名称",
+                    "type": "string",
+                    "example": "盒"
                 },
                 "productName": {
-                    "type": "string"
+                    "description": "产品名称",
+                    "type": "string",
+                    "example": "阿莫西林胶囊"
                 },
                 "productType": {
-                    "type": "string"
+                    "description": "产品类型",
+                    "type": "string",
+                    "example": "DRUG"
                 },
                 "rowVersion": {
-                    "type": "integer"
+                    "description": "版本号",
+                    "type": "integer",
+                    "example": 1
                 },
                 "rpCode": {
-                    "type": "string"
+                    "description": "规格编码",
+                    "type": "string",
+                    "example": "RP001"
                 },
                 "rpId": {
-                    "type": "string"
+                    "description": "产品规格ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "skuCode": {
-                    "type": "string"
+                    "description": "SKU编码",
+                    "type": "string",
+                    "example": "SKU001"
                 },
                 "skuId": {
-                    "type": "string"
+                    "description": "产品SKU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "specName": {
-                    "type": "string"
+                    "description": "规格名称",
+                    "type": "string",
+                    "example": "0.25g"
                 },
                 "spuCode": {
-                    "type": "string"
+                    "description": "SPU编码",
+                    "type": "string",
+                    "example": "SPU001"
                 },
                 "spuId": {
-                    "type": "string"
+                    "description": "产品SPU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态",
+                    "type": "integer",
+                    "example": 1
                 },
                 "udiDi": {
-                    "type": "string"
+                    "description": "UDI-DI码",
+                    "type": "string",
+                    "example": "(01)06901234567890"
                 },
                 "updateDate": {
-                    "type": "string"
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 }
             }
         },
@@ -14184,19 +15472,29 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "productName": {
-                    "type": "string"
+                    "description": "产品名称",
+                    "type": "string",
+                    "example": "阿莫西林胶囊"
                 },
                 "productType": {
-                    "type": "string"
+                    "description": "产品类型",
+                    "type": "string",
+                    "example": "DRUG"
                 },
                 "shortName": {
-                    "type": "string"
+                    "description": "产品简称",
+                    "type": "string",
+                    "example": "阿莫西林"
                 },
                 "spuCode": {
-                    "type": "string"
+                    "description": "SPU编码",
+                    "type": "string",
+                    "example": "SPU001"
                 },
                 "spuId": {
-                    "type": "string"
+                    "description": "产品SPU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 }
             }
         },
@@ -14204,34 +15502,54 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "description": {
-                    "type": "string"
+                    "description": "产品描述",
+                    "type": "string",
+                    "example": "产品描述"
                 },
                 "productName": {
-                    "type": "string"
+                    "description": "产品名称",
+                    "type": "string",
+                    "example": "阿莫西林胶囊"
                 },
                 "productType": {
-                    "type": "string"
+                    "description": "产品类型",
+                    "type": "string",
+                    "example": "DRUG"
                 },
                 "rowVersion": {
-                    "type": "integer"
+                    "description": "版本号",
+                    "type": "integer",
+                    "example": 1
                 },
                 "shortName": {
-                    "type": "string"
+                    "description": "产品简称",
+                    "type": "string",
+                    "example": "阿莫西林"
                 },
                 "spuCode": {
-                    "type": "string"
+                    "description": "SPU编码",
+                    "type": "string",
+                    "example": "SPU001"
                 },
                 "spuId": {
-                    "type": "string"
+                    "description": "产品SPU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态",
+                    "type": "integer",
+                    "example": 1
                 },
                 "updateDate": {
-                    "type": "string"
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 }
             }
         },
@@ -14396,52 +15714,84 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "departmentCode": {
-                    "type": "string"
+                    "description": "科室编码",
+                    "type": "string",
+                    "example": "DEPT001"
                 },
                 "departmentId": {
-                    "type": "string"
+                    "description": "科室ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "departmentName": {
-                    "type": "string"
+                    "description": "科室名称",
+                    "type": "string",
+                    "example": "内科"
                 },
                 "doctorId": {
-                    "type": "string"
+                    "description": "医生ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "doctorName": {
-                    "type": "string"
+                    "description": "医生姓名",
+                    "type": "string",
+                    "example": "张医生"
                 },
                 "doctorNo": {
-                    "type": "string"
+                    "description": "医生工号",
+                    "type": "string",
+                    "example": "DOC001"
                 },
                 "effectiveDate": {
-                    "type": "string"
+                    "description": "生效日期",
+                    "type": "string",
+                    "example": "2026-01-15"
                 },
                 "expiryDate": {
-                    "type": "string"
+                    "description": "失效日期",
+                    "type": "string",
+                    "example": "2026-12-31"
                 },
                 "feeAmount": {
-                    "type": "string"
+                    "description": "费用金额",
+                    "type": "string",
+                    "example": "100.00"
                 },
                 "feeRuleId": {
-                    "type": "string"
+                    "description": "费用规则ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "periodStatus": {
-                    "type": "string"
+                    "description": "期间状态",
+                    "type": "string",
+                    "example": "active"
                 },
                 "registrationType": {
-                    "type": "string"
+                    "description": "挂号类型",
+                    "type": "string",
+                    "example": "普通"
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "备注信息"
                 },
                 "updateDate": {
-                    "type": "string"
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "version": {
-                    "type": "integer"
+                    "description": "版本号",
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -14632,53 +15982,78 @@ const docTemplate = `{
             ],
             "properties": {
                 "address": {
+                    "description": "地址",
                     "type": "string",
-                    "maxLength": 512
+                    "maxLength": 512,
+                    "example": "北京市朝阳区"
                 },
                 "contactName": {
+                    "description": "联系人姓名",
                     "type": "string",
-                    "maxLength": 64
+                    "maxLength": 64,
+                    "example": "张三"
                 },
                 "contactPhone": {
+                    "description": "联系人电话",
                     "type": "string",
-                    "maxLength": 32
+                    "maxLength": 32,
+                    "example": "13800138000"
                 },
                 "enterpriseName": {
+                    "description": "企业名称",
                     "type": "string",
-                    "maxLength": 128
+                    "maxLength": 128,
+                    "example": "张三企业"
                 },
                 "enterpriseType": {
+                    "description": "企业类型",
                     "type": "string",
-                    "maxLength": 32
+                    "maxLength": 32,
+                    "example": "ENTERPRISE"
                 },
                 "expectedRowVersion": {
-                    "type": "integer"
+                    "description": "期望行版本号",
+                    "type": "integer",
+                    "example": 1
                 },
                 "remark": {
+                    "description": "备注",
                     "type": "string",
-                    "maxLength": 512
+                    "maxLength": 512,
+                    "example": "备注信息"
                 },
                 "roles": {
+                    "description": "企业角色列表",
                     "type": "array",
                     "minItems": 1,
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "[\"MANUFACTURER\"",
+                        "\"MAH\"]"
+                    ]
                 },
                 "shortName": {
+                    "description": "企业简称",
                     "type": "string",
-                    "maxLength": 64
+                    "maxLength": 64,
+                    "example": "张企"
                 },
                 "status": {
+                    "description": "状态",
                     "type": "integer",
                     "enum": [
                         0,
                         1
-                    ]
+                    ],
+                    "example": 1
                 },
                 "unifiedCreditCode": {
+                    "description": "统一社会信用代码",
                     "type": "string",
-                    "maxLength": 32
+                    "maxLength": 32,
+                    "example": "91110108MA01XXXXXX"
                 }
             }
         },
@@ -14691,32 +16066,46 @@ const docTemplate = `{
             ],
             "properties": {
                 "approvalNo": {
+                    "description": "批准文号",
                     "type": "string",
-                    "maxLength": 128
+                    "maxLength": 128,
+                    "example": "国药准字H20260001"
                 },
                 "brandName": {
+                    "description": "品牌名",
                     "type": "string",
-                    "maxLength": 128
+                    "maxLength": 128,
+                    "example": "品牌名"
                 },
                 "description": {
+                    "description": "产品描述",
                     "type": "string",
-                    "maxLength": 2000
+                    "maxLength": 2000,
+                    "example": "产品描述"
                 },
                 "enterpriseId": {
-                    "type": "string"
+                    "description": "企业主体ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "expectedRowVersion": {
-                    "type": "integer"
+                    "description": "期望行版本号",
+                    "type": "integer",
+                    "example": 1
                 },
                 "rpId": {
-                    "type": "string"
+                    "description": "产品规格ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "status": {
+                    "description": "状态",
                     "type": "integer",
                     "enum": [
                         0,
                         1
-                    ]
+                    ],
+                    "example": 1
                 }
             }
         },
@@ -14728,33 +16117,47 @@ const docTemplate = `{
             ],
             "properties": {
                 "description": {
+                    "description": "规格描述",
                     "type": "string",
-                    "maxLength": 2000
+                    "maxLength": 2000,
+                    "example": "规格描述"
                 },
                 "dosageForm": {
+                    "description": "剂型",
                     "type": "string",
-                    "maxLength": 64
+                    "maxLength": 64,
+                    "example": "胶囊剂"
                 },
                 "expectedRowVersion": {
-                    "type": "integer"
+                    "description": "期望行版本号",
+                    "type": "integer",
+                    "example": 1
                 },
                 "specName": {
+                    "description": "规格名称",
                     "type": "string",
-                    "maxLength": 128
+                    "maxLength": 128,
+                    "example": "0.25g"
                 },
                 "spuId": {
-                    "type": "string"
+                    "description": "产品SPU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "status": {
+                    "description": "状态",
                     "type": "integer",
                     "enum": [
                         0,
                         1
-                    ]
+                    ],
+                    "example": 1
                 },
                 "strengthText": {
+                    "description": "规格含量",
                     "type": "string",
-                    "maxLength": 128
+                    "maxLength": 128,
+                    "example": "0.25g"
                 }
             }
         },
@@ -14769,57 +16172,81 @@ const docTemplate = `{
             ],
             "properties": {
                 "allowSplit": {
+                    "description": "是否允许拆零",
                     "type": "integer",
                     "enum": [
                         0,
                         1
-                    ]
+                    ],
+                    "example": 0
                 },
                 "barcode": {
+                    "description": "条形码",
                     "type": "string",
-                    "maxLength": 64
+                    "maxLength": 64,
+                    "example": "6901234567890"
                 },
                 "description": {
+                    "description": "包装描述",
                     "type": "string",
-                    "maxLength": 2000
+                    "maxLength": 2000,
+                    "example": "包装描述"
                 },
                 "expectedRowVersion": {
-                    "type": "integer"
+                    "description": "期望行版本号",
+                    "type": "integer",
+                    "example": 1
                 },
                 "gtin": {
+                    "description": "GTIN码",
                     "type": "string",
-                    "maxLength": 64
+                    "maxLength": 64,
+                    "example": "06901234567890"
                 },
                 "minUnitName": {
+                    "description": "最小单位名称",
                     "type": "string",
-                    "maxLength": 32
+                    "maxLength": 32,
+                    "example": "粒"
                 },
                 "mpId": {
-                    "type": "string"
+                    "description": "产品MP ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "packageQuantity": {
+                    "description": "包装数量",
                     "type": "integer",
                     "maximum": 999999,
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 10
                 },
                 "packageSpecName": {
+                    "description": "包装规格名称",
                     "type": "string",
-                    "maxLength": 128
+                    "maxLength": 128,
+                    "example": "10粒/盒"
                 },
                 "packageUnitName": {
+                    "description": "包装单位名称",
                     "type": "string",
-                    "maxLength": 32
+                    "maxLength": 32,
+                    "example": "盒"
                 },
                 "status": {
+                    "description": "状态",
                     "type": "integer",
                     "enum": [
                         0,
                         1
-                    ]
+                    ],
+                    "example": 1
                 },
                 "udiDi": {
+                    "description": "UDI-DI码",
                     "type": "string",
-                    "maxLength": 128
+                    "maxLength": 128,
+                    "example": "(01)06901234567890"
                 }
             }
         },
@@ -14831,30 +16258,42 @@ const docTemplate = `{
             ],
             "properties": {
                 "description": {
+                    "description": "产品描述",
                     "type": "string",
-                    "maxLength": 2000
+                    "maxLength": 2000,
+                    "example": "产品描述"
                 },
                 "expectedRowVersion": {
-                    "type": "integer"
+                    "description": "期望行版本号",
+                    "type": "integer",
+                    "example": 1
                 },
                 "productName": {
+                    "description": "产品名称",
                     "type": "string",
-                    "maxLength": 128
+                    "maxLength": 128,
+                    "example": "阿莫西林胶囊"
                 },
                 "productType": {
+                    "description": "产品类型",
                     "type": "string",
-                    "maxLength": 32
+                    "maxLength": 32,
+                    "example": "DRUG"
                 },
                 "shortName": {
+                    "description": "产品简称",
                     "type": "string",
-                    "maxLength": 64
+                    "maxLength": 64,
+                    "example": "阿莫西林"
                 },
                 "status": {
+                    "description": "状态",
                     "type": "integer",
                     "enum": [
                         0,
                         1
-                    ]
+                    ],
+                    "example": 1
                 }
             }
         },
@@ -14983,13 +16422,19 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "doctorId": {
-                    "type": "string"
+                    "description": "医生ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "doctorName": {
-                    "type": "string"
+                    "description": "医生姓名",
+                    "type": "string",
+                    "example": "张医生"
                 },
                 "reason": {
-                    "type": "string"
+                    "description": "失败原因",
+                    "type": "string",
+                    "example": "该医生该时段已有排班"
                 }
             }
         },
@@ -14997,34 +16442,51 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "executedAt": {
-                    "type": "string"
+                    "description": "执行时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "failureDoctorCount": {
-                    "type": "integer"
+                    "description": "失败医生数",
+                    "type": "integer",
+                    "example": 1
                 },
                 "failures": {
+                    "description": "失败详情",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.ScheduleAutoTaskFailure"
                     }
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态(0-成功 1-部分成功 2-失败 3-处理中)",
+                    "type": "integer",
+                    "example": 0
                 },
                 "successDoctorCount": {
-                    "type": "integer"
+                    "description": "成功医生数",
+                    "type": "integer",
+                    "example": 10
                 },
                 "targetWeekEnd": {
-                    "type": "string"
+                    "description": "目标周结束日期",
+                    "type": "string",
+                    "example": "2026-01-19"
                 },
                 "targetWeekStart": {
-                    "type": "string"
+                    "description": "目标周起始日期",
+                    "type": "string",
+                    "example": "2026-01-13"
                 },
                 "taskId": {
-                    "type": "string"
+                    "description": "任务ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "taskType": {
-                    "type": "string"
+                    "description": "任务类型",
+                    "type": "string",
+                    "example": "publish"
                 }
             }
         },
@@ -15032,97 +16494,156 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "bookedQuota": {
-                    "type": "integer"
+                    "description": "已预约号源",
+                    "type": "integer",
+                    "example": 5
                 },
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "defaultSlotQuota": {
-                    "type": "integer"
+                    "description": "默认号源配额",
+                    "type": "integer",
+                    "example": 15
                 },
                 "departmentCode": {
-                    "type": "string"
+                    "description": "科室编码",
+                    "type": "string",
+                    "example": "NK"
                 },
                 "departmentId": {
-                    "type": "string"
+                    "description": "科室ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "departmentName": {
-                    "type": "string"
+                    "description": "科室名称",
+                    "type": "string",
+                    "example": "内科"
                 },
                 "doctorId": {
-                    "type": "string"
+                    "description": "医生ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "doctorName": {
-                    "type": "string"
+                    "description": "医生姓名",
+                    "type": "string",
+                    "example": "张三"
                 },
                 "doctorNo": {
-                    "type": "string"
+                    "description": "医生编号",
+                    "type": "string",
+                    "example": "DOC001"
                 },
                 "endTime": {
-                    "type": "string"
+                    "description": "结束时间",
+                    "type": "string",
+                    "example": "17:00"
                 },
                 "feeAmount": {
-                    "type": "string"
+                    "description": "费用金额",
+                    "type": "string",
+                    "example": "50.00"
                 },
                 "feeRuleId": {
-                    "type": "string"
+                    "description": "费用规则ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "feeRuleVersion": {
-                    "type": "integer"
+                    "description": "费用规则版本",
+                    "type": "integer",
+                    "example": 1
                 },
                 "feeSnapshotStatus": {
-                    "type": "string"
+                    "description": "费用快照状态",
+                    "type": "string",
+                    "example": "valid"
                 },
                 "finishedAt": {
-                    "type": "string"
+                    "description": "结束时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "generationBatchId": {
-                    "type": "string"
+                    "description": "生成批次ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "publishedAt": {
-                    "type": "string"
+                    "description": "发布时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "registrationType": {
-                    "type": "string"
+                    "description": "号别",
+                    "type": "string",
+                    "example": "普通"
                 },
                 "remainingQuota": {
-                    "type": "integer"
+                    "description": "剩余号源",
+                    "type": "integer",
+                    "example": 55
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "备注信息"
                 },
                 "scheduleDate": {
-                    "type": "string"
+                    "description": "排班日期",
+                    "type": "string",
+                    "example": "2026-01-15"
                 },
                 "scheduleId": {
-                    "type": "string"
+                    "description": "排班ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "slots": {
+                    "description": "时段列表",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.ScheduleSlotResponse"
                     }
                 },
                 "startTime": {
-                    "type": "string"
+                    "description": "开始时间",
+                    "type": "string",
+                    "example": "09:00"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态(0-草稿 1-已发布 2-已停诊 3-已结束)",
+                    "type": "integer",
+                    "example": 1
                 },
                 "stopReason": {
-                    "type": "string"
+                    "description": "停诊原因",
+                    "type": "string",
+                    "example": "医生请假"
                 },
                 "stoppedAt": {
-                    "type": "string"
+                    "description": "停诊时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "templateId": {
-                    "type": "string"
+                    "description": "模板ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "totalQuota": {
-                    "type": "integer"
+                    "description": "总号源配额",
+                    "type": "integer",
+                    "example": 60
                 },
                 "updateDate": {
-                    "type": "string"
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 }
             }
         },
@@ -15133,12 +16654,16 @@ const docTemplate = `{
             ],
             "properties": {
                 "quota": {
+                    "description": "号源配额",
                     "type": "integer",
                     "maximum": 99,
-                    "minimum": 0
+                    "minimum": 0,
+                    "example": 10
                 },
                 "startTime": {
-                    "type": "string"
+                    "description": "时段开始时间",
+                    "type": "string",
+                    "example": "09:00"
                 }
             }
         },
@@ -15146,28 +16671,44 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "bookedQuota": {
-                    "type": "integer"
+                    "description": "已预约数量",
+                    "type": "integer",
+                    "example": 2
                 },
                 "bookingStatus": {
-                    "type": "string"
+                    "description": "预约状态",
+                    "type": "string",
+                    "example": "available"
                 },
                 "canBook": {
-                    "type": "boolean"
+                    "description": "是否可预约",
+                    "type": "boolean",
+                    "example": true
                 },
                 "endTime": {
-                    "type": "string"
+                    "description": "结束时间",
+                    "type": "string",
+                    "example": "09:30"
                 },
                 "quota": {
-                    "type": "integer"
+                    "description": "号源配额",
+                    "type": "integer",
+                    "example": 5
                 },
                 "remainingQuota": {
-                    "type": "integer"
+                    "description": "剩余可预约数量",
+                    "type": "integer",
+                    "example": 3
                 },
                 "slotId": {
-                    "type": "string"
+                    "description": "时段ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "startTime": {
-                    "type": "string"
+                    "description": "开始时间",
+                    "type": "string",
+                    "example": "09:00"
                 }
             }
         },
@@ -15175,69 +16716,109 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "defaultSlotQuota": {
-                    "type": "integer"
+                    "description": "默认号源配额",
+                    "type": "integer",
+                    "example": 15
                 },
                 "departmentCode": {
-                    "type": "string"
+                    "description": "科室编码",
+                    "type": "string",
+                    "example": "NK"
                 },
                 "departmentId": {
-                    "type": "string"
+                    "description": "科室ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "departmentName": {
-                    "type": "string"
+                    "description": "科室名称",
+                    "type": "string",
+                    "example": "内科"
                 },
                 "doctorId": {
-                    "type": "string"
+                    "description": "医生ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "doctorName": {
-                    "type": "string"
+                    "description": "医生姓名",
+                    "type": "string",
+                    "example": "张三"
                 },
                 "doctorNo": {
-                    "type": "string"
+                    "description": "医生编号",
+                    "type": "string",
+                    "example": "DOC001"
                 },
                 "effectiveDate": {
-                    "type": "string"
+                    "description": "生效日期",
+                    "type": "string",
+                    "example": "2026-01-15"
                 },
                 "endTime": {
-                    "type": "string"
+                    "description": "结束时间",
+                    "type": "string",
+                    "example": "17:00"
                 },
                 "expiryDate": {
-                    "type": "string"
+                    "description": "失效日期",
+                    "type": "string",
+                    "example": "2026-12-31"
                 },
                 "registrationType": {
-                    "type": "string"
+                    "description": "号别",
+                    "type": "string",
+                    "example": "普通"
                 },
                 "remark": {
-                    "type": "string"
+                    "description": "备注",
+                    "type": "string",
+                    "example": "备注信息"
                 },
                 "slotQuotaConfig": {
+                    "description": "时段号源配置",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.ScheduleSlotQuotaRequest"
                     }
                 },
                 "startTime": {
-                    "type": "string"
+                    "description": "开始时间",
+                    "type": "string",
+                    "example": "09:00"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态(0-禁用 1-启用)",
+                    "type": "integer",
+                    "example": 1
                 },
                 "templateId": {
-                    "type": "string"
+                    "description": "模板ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "templateName": {
-                    "type": "string"
+                    "description": "模板名称",
+                    "type": "string",
+                    "example": "门诊排班模板"
                 },
                 "totalQuota": {
-                    "type": "integer"
+                    "description": "总号源配额",
+                    "type": "integer",
+                    "example": 60
                 },
                 "updateDate": {
-                    "type": "string"
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "weekdays": {
+                    "description": "出诊星期，每项范围为1（周一）至7（周日）",
                     "type": "array",
                     "items": {
                         "type": "integer"
@@ -15742,15 +17323,19 @@ const docTemplate = `{
             ],
             "properties": {
                 "expectedRowVersion": {
+                    "description": "期望行版本号",
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 1
                 },
                 "status": {
+                    "description": "状态",
                     "type": "integer",
                     "enum": [
                         0,
                         1
-                    ]
+                    ],
+                    "example": 1
                 }
             }
         },
@@ -15898,15 +17483,19 @@ const docTemplate = `{
             ],
             "properties": {
                 "expectedRowVersion": {
+                    "description": "期望行版本号",
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 1
                 },
                 "status": {
+                    "description": "状态",
                     "type": "integer",
                     "enum": [
                         0,
                         1
-                    ]
+                    ],
+                    "example": 1
                 }
             }
         },
@@ -15917,15 +17506,19 @@ const docTemplate = `{
             ],
             "properties": {
                 "expectedRowVersion": {
+                    "description": "期望行版本号",
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 1
                 },
                 "status": {
+                    "description": "状态",
                     "type": "integer",
                     "enum": [
                         0,
                         1
-                    ]
+                    ],
+                    "example": 1
                 }
             }
         },
@@ -15936,15 +17529,19 @@ const docTemplate = `{
             ],
             "properties": {
                 "expectedRowVersion": {
+                    "description": "期望行版本号",
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 1
                 },
                 "status": {
+                    "description": "状态",
                     "type": "integer",
                     "enum": [
                         0,
                         1
-                    ]
+                    ],
+                    "example": 1
                 }
             }
         },
@@ -15955,15 +17552,19 @@ const docTemplate = `{
             ],
             "properties": {
                 "expectedRowVersion": {
+                    "description": "期望行版本号",
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 1
                 },
                 "status": {
+                    "description": "状态",
                     "type": "integer",
                     "enum": [
                         0,
                         1
-                    ]
+                    ],
+                    "example": 1
                 }
             }
         },
@@ -16525,40 +18126,64 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "copyId": {
-                    "type": "string"
+                    "description": "抄送ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "instanceId": {
-                    "type": "string"
+                    "description": "流程实例ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "instanceTitle": {
-                    "type": "string"
+                    "description": "流程标题",
+                    "type": "string",
+                    "example": "XX功能需求审批"
                 },
                 "nodeId": {
-                    "type": "string"
+                    "description": "节点ID",
+                    "type": "string",
+                    "example": "approve_manager"
                 },
                 "nodeInstanceId": {
-                    "type": "string"
+                    "description": "节点实例ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "nodeName": {
-                    "type": "string"
+                    "description": "节点名称",
+                    "type": "string",
+                    "example": "部门主管审批"
                 },
                 "readDate": {
-                    "type": "string"
+                    "description": "已读时间",
+                    "type": "string",
+                    "example": "2026-01-15 15:00:00"
                 },
                 "receiverId": {
-                    "type": "string"
+                    "description": "接收人ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "receiverName": {
-                    "type": "string"
+                    "description": "接收人姓名",
+                    "type": "string",
+                    "example": "王五"
                 },
                 "starterName": {
-                    "type": "string"
+                    "description": "发起人姓名",
+                    "type": "string",
+                    "example": "张三"
                 },
                 "status": {
-                    "type": "string"
+                    "description": "抄送状态：0未读 1已读",
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -16636,9 +18261,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "instance": {
-                    "$ref": "#/definitions/models.WorkflowInstanceResponse"
+                    "description": "流程实例信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.WorkflowInstanceResponse"
+                        }
+                    ]
                 },
                 "nodes": {
+                    "description": "节点实例列表",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.WorkflowNodeInstanceResponse"
@@ -16650,58 +18281,89 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "businessKey": {
-                    "type": "string"
+                    "description": "业务对象标识",
+                    "type": "string",
+                    "example": "story:550e8400-e29b-41d4-a716-446655440000"
                 },
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "definitionId": {
-                    "type": "string"
+                    "description": "流程定义ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "definitionKey": {
-                    "type": "string"
+                    "description": "流程标识",
+                    "type": "string",
+                    "example": "story_approval"
                 },
                 "definitionName": {
-                    "type": "string"
+                    "description": "流程名称",
+                    "type": "string",
+                    "example": "需求审批流程"
                 },
                 "definitionVersion": {
-                    "type": "integer"
+                    "description": "流程定义版本",
+                    "type": "integer",
+                    "example": 1
                 },
                 "endDate": {
-                    "type": "string"
+                    "description": "结束时间",
+                    "type": "string",
+                    "example": "2026-01-15 18:00:00"
                 },
                 "formLayout": {
+                    "description": "表单布局",
                     "type": "string",
                     "example": "single"
                 },
                 "formSchema": {
+                    "description": "表单Schema快照",
                     "type": "array",
                     "items": {
                         "type": "object"
                     }
                 },
                 "instanceId": {
-                    "type": "string"
+                    "description": "流程实例ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "instanceNo": {
-                    "type": "string"
+                    "description": "流程编号",
+                    "type": "string",
+                    "example": "WF202601150001"
                 },
                 "startDate": {
-                    "type": "string"
+                    "description": "开始时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "starterId": {
-                    "type": "string"
+                    "description": "发起人ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "starterName": {
-                    "type": "string"
+                    "description": "发起人姓名",
+                    "type": "string",
+                    "example": "张三"
                 },
                 "status": {
-                    "type": "string"
+                    "description": "流程状态：0运行中 1已完成 2已拒绝 3已取消",
+                    "type": "string",
+                    "example": "0"
                 },
                 "title": {
-                    "type": "string"
+                    "description": "流程标题",
+                    "type": "string",
+                    "example": "XX功能需求审批"
                 },
                 "variables": {
+                    "description": "条件判断业务变量",
                     "type": "object",
                     "additionalProperties": true
                 }
@@ -16711,10 +18373,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "userId": {
-                    "type": "string"
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "userName": {
-                    "type": "string"
+                    "description": "用户姓名",
+                    "type": "string",
+                    "example": "张三"
                 }
             }
         },
@@ -16722,70 +18388,100 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "type": "string"
+                    "description": "节点操作",
+                    "type": "string",
+                    "example": "approve"
                 },
                 "actors": {
+                    "description": "预计参与人列表",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.WorkflowNodeActorResponse"
                     }
                 },
                 "approvalMode": {
-                    "type": "string"
+                    "description": "审批模式",
+                    "type": "string",
+                    "example": "or"
                 },
                 "branchEdgeId": {
-                    "type": "string"
+                    "description": "分支连线ID",
+                    "type": "string",
+                    "example": "edge_001"
                 },
                 "copies": {
+                    "description": "抄送列表",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.WorkflowCopyResponse"
                     }
                 },
                 "durationSeconds": {
+                    "description": "耗时秒数",
                     "type": "integer",
                     "example": 4500
                 },
                 "endDate": {
-                    "type": "string"
+                    "description": "结束时间",
+                    "type": "string",
+                    "example": "2026-01-15 18:00:00"
                 },
                 "fieldPermissions": {
+                    "description": "字段读写权限映射",
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
                     }
                 },
                 "nodeId": {
-                    "type": "string"
+                    "description": "节点ID",
+                    "type": "string",
+                    "example": "approve_manager"
                 },
                 "nodeInstanceId": {
-                    "type": "string"
+                    "description": "节点实例ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "nodeName": {
-                    "type": "string"
+                    "description": "节点名称",
+                    "type": "string",
+                    "example": "部门主管审批"
                 },
                 "nodeType": {
-                    "type": "string"
+                    "description": "节点类型",
+                    "type": "string",
+                    "example": "approval"
                 },
                 "records": {
+                    "description": "操作记录列表",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.WorkflowRecordResponse"
                     }
                 },
                 "routeVersion": {
-                    "type": "integer"
+                    "description": "路由版本",
+                    "type": "integer",
+                    "example": 1
                 },
                 "sequence": {
-                    "type": "integer"
+                    "description": "节点序号",
+                    "type": "integer",
+                    "example": 1
                 },
                 "startDate": {
-                    "type": "string"
+                    "description": "开始时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "status": {
-                    "type": "string"
+                    "description": "节点状态：0计划中 1激活 2已完成 3终止 4被取代",
+                    "type": "string",
+                    "example": "1"
                 },
                 "tasks": {
+                    "description": "任务列表",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.WorkflowTaskResponse"
@@ -16797,34 +18493,54 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "type": "string"
+                    "description": "操作类型",
+                    "type": "string",
+                    "example": "approve"
                 },
                 "comment": {
-                    "type": "string"
+                    "description": "操作意见",
+                    "type": "string",
+                    "example": "同意通过"
                 },
                 "createDate": {
-                    "type": "string"
+                    "description": "操作时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "nodeId": {
-                    "type": "string"
+                    "description": "节点ID",
+                    "type": "string",
+                    "example": "approve_manager"
                 },
                 "nodeInstanceId": {
-                    "type": "string"
+                    "description": "节点实例ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "nodeName": {
-                    "type": "string"
+                    "description": "节点名称",
+                    "type": "string",
+                    "example": "部门主管审批"
                 },
                 "operatorId": {
-                    "type": "string"
+                    "description": "操作人ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "operatorName": {
-                    "type": "string"
+                    "description": "操作人姓名",
+                    "type": "string",
+                    "example": "张三"
                 },
                 "recordId": {
-                    "type": "string"
+                    "description": "记录ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "taskId": {
-                    "type": "string"
+                    "description": "任务ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 }
             }
         },
@@ -16832,10 +18548,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "nodeId": {
-                    "type": "string"
+                    "description": "节点ID",
+                    "type": "string",
+                    "example": "approve_manager"
                 },
                 "nodeName": {
-                    "type": "string"
+                    "description": "节点名称",
+                    "type": "string",
+                    "example": "部门主管审批"
                 }
             }
         },
@@ -16898,49 +18618,79 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "approvalMode": {
-                    "type": "string"
+                    "description": "审批模式",
+                    "type": "string",
+                    "example": "or"
                 },
                 "assigneeId": {
-                    "type": "string"
+                    "description": "审批人ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "assigneeName": {
-                    "type": "string"
+                    "description": "审批人姓名",
+                    "type": "string",
+                    "example": "李四"
                 },
                 "comment": {
-                    "type": "string"
+                    "description": "审批意见",
+                    "type": "string",
+                    "example": "同意通过"
                 },
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 },
                 "finishDate": {
-                    "type": "string"
+                    "description": "完成时间",
+                    "type": "string",
+                    "example": "2026-01-15 18:00:00"
                 },
                 "instanceId": {
-                    "type": "string"
+                    "description": "流程实例ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "instanceTitle": {
-                    "type": "string"
+                    "description": "流程标题",
+                    "type": "string",
+                    "example": "XX功能需求审批"
                 },
                 "nodeId": {
-                    "type": "string"
+                    "description": "节点ID",
+                    "type": "string",
+                    "example": "approve_manager"
                 },
                 "nodeInstanceId": {
-                    "type": "string"
+                    "description": "节点实例ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "nodeName": {
-                    "type": "string"
+                    "description": "节点名称",
+                    "type": "string",
+                    "example": "部门主管审批"
                 },
                 "starterName": {
-                    "type": "string"
+                    "description": "发起人姓名",
+                    "type": "string",
+                    "example": "张三"
                 },
                 "status": {
-                    "type": "string"
+                    "description": "任务状态：0待办 1已审批 2已拒绝 3已取消",
+                    "type": "string",
+                    "example": "0"
                 },
                 "taskGroupId": {
-                    "type": "string"
+                    "description": "任务组ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "taskId": {
-                    "type": "string"
+                    "description": "任务ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 }
             }
         },
@@ -16980,18 +18730,26 @@ const docTemplate = `{
         "utils.PageResult": {
             "type": "object",
             "properties": {
-                "items": {},
+                "items": {
+                    "description": "分页数据列表"
+                },
                 "total": {
-                    "type": "integer"
+                    "description": "数据总条数",
+                    "type": "integer",
+                    "example": 100
                 }
             }
         },
         "utils.PaginationResponse": {
             "type": "object",
             "properties": {
-                "items": {},
+                "items": {
+                    "description": "分页数据列表"
+                },
                 "total": {
-                    "type": "integer"
+                    "description": "数据总条数",
+                    "type": "integer",
+                    "example": 100
                 }
             }
         }

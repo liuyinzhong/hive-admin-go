@@ -10,6 +10,7 @@ import (
 
 // GetRegistrationFeeRuleList 获取挂号费规则列表。
 // @Summary 获取挂号费规则列表
+// @Description 分页查询挂号费规则列表，支持按医生、科室、挂号类型、有效期状态等条件筛选
 // @Tags 医疗管理/挂号费
 // @Produce json
 // @Security ApiKeyAuth
@@ -22,7 +23,9 @@ import (
 // @Param periodStatus query string false "有效期状态 current/future/expired"
 // @Param sorts query string false "排序"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.RegistrationFeeRuleResponse}}
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/registrationFeeRules [get]
 func (ctrl *MedicalController) GetRegistrationFeeRuleList(c *gin.Context) {
 	var req models.RegistrationFeeRuleListRequest
@@ -40,13 +43,16 @@ func (ctrl *MedicalController) GetRegistrationFeeRuleList(c *gin.Context) {
 
 // CreateRegistrationFeeRule 创建挂号费规则。
 // @Summary 创建挂号费规则
+// @Description 创建挂号费规则，支持配置费用、生效日期和失效日期
 // @Tags 医疗管理/挂号费
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.CreateRegistrationFeeRuleRequest true "挂号费规则"
 // @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/registrationFeeRules [post]
 func (ctrl *MedicalController) CreateRegistrationFeeRule(c *gin.Context) {
 	var req models.CreateRegistrationFeeRuleRequest
@@ -63,6 +69,7 @@ func (ctrl *MedicalController) CreateRegistrationFeeRule(c *gin.Context) {
 
 // AdjustRegistrationFeeRule 调整挂号费并生成新版本。
 // @Summary 调整挂号费并生成新版本
+// @Description 对已有挂号费规则进行调价，生成新版本挂号费记录
 // @Tags 医疗管理/挂号费
 // @Accept json
 // @Produce json
@@ -70,7 +77,9 @@ func (ctrl *MedicalController) CreateRegistrationFeeRule(c *gin.Context) {
 // @Param feeRuleId path string true "挂号费规则ID"
 // @Param request body models.AdjustRegistrationFeeRuleRequest true "调价信息"
 // @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "参数错误"
 // @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/registrationFeeRules/{feeRuleId}/adjustments [post]
 func (ctrl *MedicalController) AdjustRegistrationFeeRule(c *gin.Context) {
 	var req models.AdjustRegistrationFeeRuleRequest

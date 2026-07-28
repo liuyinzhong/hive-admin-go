@@ -787,162 +787,304 @@ definitions:
   models.DoctorDepartmentResponse:
     properties:
       appointmentEnabled:
+        description: 是否开启预约
+        example: 1
         type: integer
       departmentCode:
+        description: 科室编码
+        example: NK
         type: string
       departmentId:
+        description: 科室ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       departmentName:
+        description: 科室名称
+        example: 内科
         type: string
       departmentPosition:
+        description: 科室职务
+        example: 主任
         type: string
       doctorDepartmentId:
+        description: 医生科室关联ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       isPrimary:
+        description: 是否主科室
+        example: 1
         type: integer
       status:
+        description: 状态
+        example: 1
         type: integer
     type: object
   models.DoctorOptionResponse:
     properties:
       doctorId:
+        description: 医生ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       doctorNo:
+        description: 医生编号
+        example: DOC001
         type: string
       name:
+        description: 姓名
+        example: 张三
         type: string
       primaryDepartmentId:
+        description: 主科室ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       primaryDepartmentName:
+        description: 主科室名称
+        example: 内科
         type: string
       professionalTitle:
+        description: 职称
+        example: 主任医师
         type: string
     type: object
   models.DoctorResponse:
     properties:
       administrativePosition:
+        description: 行政职务
+        example: 科室主任
         type: string
       appointmentEnabled:
+        description: 预约开启(0-关闭 1-开启)
+        example: 1
         type: integer
       avatar:
+        description: 头像
+        example: https://example.com/avatar.jpg
         type: string
       birthDate:
+        description: 出生日期
+        example: "1985-06-15"
         type: string
       createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
         type: string
       defaultVisitMinutes:
+        description: 默认就诊时长(分钟)
+        example: 15
         type: integer
       departmentIds:
+        description: 科室ID列表
+        example:
+        - '["550e8400-e29b-41d4-a716-446655440000"]'
         items:
           type: string
         type: array
       departmentNames:
+        description: 科室名称列表
+        example:
+        - '["内科"'
+        - '"外科"]'
         items:
           type: string
         type: array
       departments:
+        description: 科室列表
         items:
           $ref: '#/definitions/models.DoctorDepartmentResponse'
         type: array
       departureDate:
+        description: 离职日期
+        example: "2024-12-31"
         type: string
       doctorId:
+        description: 医生ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       doctorNo:
+        description: 医生编号
+        example: DOC001
         type: string
       email:
+        description: 邮箱
+        example: zhangsan@example.com
         type: string
       employmentDate:
+        description: 入职日期
+        example: "2010-03-15"
         type: string
       employmentType:
+        description: 执业类型
+        example: full-time
         type: string
       expertise:
+        description: 专长
+        example: 心内科常见疾病诊治
         type: string
       gender:
+        description: 性别
+        example: male
         type: string
       introduction:
+        description: 简介
+        example: 从事心内科临床工作二十年，具有丰富的临床经验
         type: string
       name:
+        description: 姓名
+        example: 张三
         type: string
       namePinyin:
+        description: 姓名拼音
+        example: zhangsan
         type: string
       onlineConsultation:
+        description: 在线咨询(0-关闭 1-开启)
+        example: 1
         type: integer
       phone:
+        description: 手机号
+        example: "13800138000"
         type: string
       practiceStartDate:
+        description: 执业开始日期
+        example: "2005-07-01"
         type: string
       primaryDepartmentId:
+        description: 主科室ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       primaryDepartmentName:
+        description: 主科室名称
+        example: 内科
         type: string
       professionalTitle:
+        description: 职称
+        example: 主任医师
         type: string
       profileVisible:
+        description: 资料可见(0-隐藏 1-可见)
+        example: 1
         type: integer
       remark:
+        description: 备注
+        example: 备注信息
         type: string
       sort:
+        description: 排序
+        example: 0
         type: integer
       status:
+        description: 状态(0-禁用 1-启用)
+        example: 1
         type: integer
       updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
         type: string
       userId:
+        description: 用户ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       userName:
+        description: 用户名
+        example: 张三
         type: string
     type: object
   models.EnterpriseOptionResponse:
     properties:
       enterpriseCode:
+        description: 企业编码
+        example: ENT001
         type: string
       enterpriseId:
+        description: 企业主体ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       enterpriseName:
+        description: 企业名称
+        example: 张三企业
         type: string
       enterpriseType:
+        description: 企业类型
+        example: ENTERPRISE
         type: string
       roles:
+        description: 企业角色列表
+        example:
+        - '["id1"'
+        - '"id2"]'
         items:
           type: string
         type: array
       shortName:
+        description: 企业简称
+        example: 张企
         type: string
     type: object
   models.EnterpriseResponse:
     properties:
       address:
+        description: 地址
+        example: 北京市朝阳区
         type: string
       contactName:
+        description: 联系人姓名
+        example: 张三
         type: string
       contactPhone:
+        description: 联系人电话
+        example: "13800138000"
         type: string
       createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
         type: string
       enterpriseCode:
+        description: 企业编码
+        example: ENT001
         type: string
       enterpriseId:
+        description: 企业主体ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       enterpriseName:
+        description: 企业名称
+        example: 张三企业
         type: string
       enterpriseType:
+        description: 企业类型
+        example: ENTERPRISE
         type: string
       remark:
+        description: 备注
+        example: 备注信息
         type: string
       roles:
+        description: 企业角色列表
+        example:
+        - '["id1"'
+        - '"id2"]'
         items:
           type: string
         type: array
       rowVersion:
+        description: 版本号
+        example: 1
         type: integer
       shortName:
+        description: 企业简称
+        example: 张企
         type: string
       status:
+        description: 状态
+        example: 1
         type: integer
       unifiedCreditCode:
+        description: 统一社会信用代码
+        example: 91110108MA01XXXXXX
         type: string
       updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
         type: string
     type: object
   models.ExternalPageResponse:
@@ -1098,16 +1240,27 @@ definitions:
   models.GenerateSchedulesResponse:
     properties:
       batchId:
+        description: 批次ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       generatedCount:
+        description: 生成数量
+        example: 30
         type: integer
       idempotent:
+        description: 是否幂等
+        example: true
         type: boolean
       scheduleIds:
+        description: 排班ID列表
+        example:
+        - '["550e8400-e29b-41d4-a716-446655440000"]'
         items:
           type: string
         type: array
       skippedCount:
+        description: 跳过数量
+        example: 5
         type: integer
     type: object
   models.LoginLogDetailResponse:
@@ -1184,26 +1337,45 @@ definitions:
   models.MedicalDepartmentTreeResponse:
     properties:
       children:
+        description: 子级科室列表
         items:
           $ref: '#/definitions/models.MedicalDepartmentTreeResponse'
         type: array
       createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
         type: string
       departmentCode:
+        description: 科室编码
+        example: DEPT001
         type: string
       departmentId:
+        description: 科室ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       departmentName:
+        description: 科室名称
+        example: 内科
         type: string
       pid:
+        description: 父级科室ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       remark:
+        description: 备注
+        example: 备注信息
         type: string
       sort:
+        description: 排序号
+        example: 1
         type: integer
       status:
+        description: 状态(0-禁用 1-启用)
+        example: 1
         type: integer
       updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
         type: string
     type: object
   models.MenuMeta:
@@ -1459,222 +1631,422 @@ definitions:
   models.ProductMpResponse:
     properties:
       approvalNo:
+        description: 批准文号
+        example: 国药准字H20260001
         type: string
       brandName:
+        description: 品牌名
+        example: 品牌名
         type: string
       createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
         type: string
       description:
+        description: 产品描述
+        example: 产品描述
         type: string
       enterpriseCode:
+        description: 企业编码
+        example: ENT001
         type: string
       enterpriseId:
+        description: 企业主体ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       enterpriseName:
+        description: 企业名称
+        example: 张三企业
         type: string
       mpCode:
+        description: MP编码
+        example: MP001
         type: string
       mpId:
+        description: 产品MP ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       productName:
+        description: 产品名称
+        example: 阿莫西林胶囊
         type: string
       productType:
+        description: 产品类型
+        example: DRUG
         type: string
       rowVersion:
+        description: 版本号
+        example: 1
         type: integer
       rpCode:
+        description: 规格编码
+        example: RP001
         type: string
       rpId:
+        description: 产品规格ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       specName:
+        description: 规格名称
+        example: 0.25g
         type: string
       spuCode:
+        description: SPU编码
+        example: SPU001
         type: string
       spuId:
+        description: 产品SPU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       status:
+        description: 状态
+        example: 1
         type: integer
       updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
         type: string
     type: object
   models.ProductRpOptionResponse:
     properties:
       productName:
+        description: 产品名称
+        example: 阿莫西林胶囊
         type: string
       productType:
+        description: 产品类型
+        example: DRUG
         type: string
       rpCode:
+        description: 规格编码
+        example: RP001
         type: string
       rpId:
+        description: 产品规格ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       specName:
+        description: 规格名称
+        example: 0.25g
         type: string
       spuCode:
+        description: SPU编码
+        example: SPU001
         type: string
       spuId:
+        description: 产品SPU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
     type: object
   models.ProductRpResponse:
     properties:
       createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
         type: string
       description:
+        description: 规格描述
+        example: 规格描述
         type: string
       dosageForm:
+        description: 剂型
+        example: 胶囊剂
         type: string
       productName:
+        description: 产品名称
+        example: 阿莫西林胶囊
         type: string
       productType:
+        description: 产品类型
+        example: DRUG
         type: string
       rowVersion:
+        description: 版本号
+        example: 1
         type: integer
       rpCode:
+        description: 规格编码
+        example: RP001
         type: string
       rpId:
+        description: 产品规格ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       specName:
+        description: 规格名称
+        example: 0.25g
         type: string
       spuCode:
+        description: SPU编码
+        example: SPU001
         type: string
       spuId:
+        description: 产品SPU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       status:
+        description: 状态
+        example: 1
         type: integer
       strengthText:
+        description: 规格含量
+        example: 0.25g
         type: string
       updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
         type: string
     type: object
   models.ProductSkuOptionResponse:
     properties:
       approvalNo:
+        description: 批准文号
+        example: 国药准字H20260001
         type: string
       brandName:
+        description: 品牌名
+        example: 品牌名
         type: string
       enterpriseId:
+        description: 企业主体ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       enterpriseName:
+        description: 企业名称
+        example: 张三企业
         type: string
       mpCode:
+        description: MP编码
+        example: MP001
         type: string
       mpId:
+        description: 产品MP ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       packageSpecName:
+        description: 包装规格名称
+        example: 10粒/盒
         type: string
       productName:
+        description: 产品名称
+        example: 阿莫西林胶囊
         type: string
       productType:
+        description: 产品类型
+        example: DRUG
         type: string
       rpCode:
+        description: 规格编码
+        example: RP001
         type: string
       rpId:
+        description: 产品规格ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       skuCode:
+        description: SKU编码
+        example: SKU001
         type: string
       skuId:
+        description: 产品SKU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       specName:
+        description: 规格名称
+        example: 0.25g
         type: string
       spuCode:
+        description: SPU编码
+        example: SPU001
         type: string
       spuId:
+        description: 产品SPU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
     type: object
   models.ProductSkuResponse:
     properties:
       allowSplit:
+        description: 是否允许拆零
+        example: 0
         type: integer
       approvalNo:
+        description: 批准文号
+        example: 国药准字H20260001
         type: string
       barcode:
+        description: 条形码
+        example: "6901234567890"
         type: string
       brandName:
+        description: 品牌名
+        example: 品牌名
         type: string
       createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
         type: string
       description:
+        description: 包装描述
+        example: 包装描述
         type: string
       enterpriseCode:
+        description: 企业编码
+        example: ENT001
         type: string
       enterpriseId:
+        description: 企业主体ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       enterpriseName:
+        description: 企业名称
+        example: 张三企业
         type: string
       gtin:
+        description: GTIN码
+        example: "06901234567890"
         type: string
       minUnitName:
+        description: 最小单位名称
+        example: 粒
         type: string
       mpCode:
+        description: MP编码
+        example: MP001
         type: string
       mpId:
+        description: 产品MP ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       packageQuantity:
+        description: 包装数量
+        example: 10
         type: integer
       packageSpecName:
+        description: 包装规格名称
+        example: 10粒/盒
         type: string
       packageUnitName:
+        description: 包装单位名称
+        example: 盒
         type: string
       productName:
+        description: 产品名称
+        example: 阿莫西林胶囊
         type: string
       productType:
+        description: 产品类型
+        example: DRUG
         type: string
       rowVersion:
+        description: 版本号
+        example: 1
         type: integer
       rpCode:
+        description: 规格编码
+        example: RP001
         type: string
       rpId:
+        description: 产品规格ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       skuCode:
+        description: SKU编码
+        example: SKU001
         type: string
       skuId:
+        description: 产品SKU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       specName:
+        description: 规格名称
+        example: 0.25g
         type: string
       spuCode:
+        description: SPU编码
+        example: SPU001
         type: string
       spuId:
+        description: 产品SPU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       status:
+        description: 状态
+        example: 1
         type: integer
       udiDi:
+        description: UDI-DI码
+        example: (01)06901234567890
         type: string
       updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
         type: string
     type: object
   models.ProductSpuOptionResponse:
     properties:
       productName:
+        description: 产品名称
+        example: 阿莫西林胶囊
         type: string
       productType:
+        description: 产品类型
+        example: DRUG
         type: string
       shortName:
+        description: 产品简称
+        example: 阿莫西林
         type: string
       spuCode:
+        description: SPU编码
+        example: SPU001
         type: string
       spuId:
+        description: 产品SPU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
     type: object
   models.ProductSpuResponse:
     properties:
       createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
         type: string
       description:
+        description: 产品描述
+        example: 产品描述
         type: string
       productName:
+        description: 产品名称
+        example: 阿莫西林胶囊
         type: string
       productType:
+        description: 产品类型
+        example: DRUG
         type: string
       rowVersion:
+        description: 版本号
+        example: 1
         type: integer
       shortName:
+        description: 产品简称
+        example: 阿莫西林
         type: string
       spuCode:
+        description: SPU编码
+        example: SPU001
         type: string
       spuId:
+        description: 产品SPU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       status:
+        description: 状态
+        example: 1
         type: integer
       updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
         type: string
     type: object
   models.ProfileResponse:
@@ -1798,36 +2170,68 @@ definitions:
   models.RegistrationFeeRuleResponse:
     properties:
       createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
         type: string
       departmentCode:
+        description: 科室编码
+        example: DEPT001
         type: string
       departmentId:
+        description: 科室ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       departmentName:
+        description: 科室名称
+        example: 内科
         type: string
       doctorId:
+        description: 医生ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       doctorName:
+        description: 医生姓名
+        example: 张医生
         type: string
       doctorNo:
+        description: 医生工号
+        example: DOC001
         type: string
       effectiveDate:
+        description: 生效日期
+        example: "2026-01-15"
         type: string
       expiryDate:
+        description: 失效日期
+        example: "2026-12-31"
         type: string
       feeAmount:
+        description: 费用金额
+        example: "100.00"
         type: string
       feeRuleId:
+        description: 费用规则ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       periodStatus:
+        description: 期间状态
+        example: active
         type: string
       registrationType:
+        description: 挂号类型
+        example: 普通
         type: string
       remark:
+        description: 备注
+        example: 备注信息
         type: string
       updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
         type: string
       version:
+        description: 版本号
+        example: 1
         type: integer
     type: object
   models.Response:
@@ -1960,39 +2364,63 @@ definitions:
   models.SaveEnterpriseRequest:
     properties:
       address:
+        description: 地址
+        example: 北京市朝阳区
         maxLength: 512
         type: string
       contactName:
+        description: 联系人姓名
+        example: 张三
         maxLength: 64
         type: string
       contactPhone:
+        description: 联系人电话
+        example: "13800138000"
         maxLength: 32
         type: string
       enterpriseName:
+        description: 企业名称
+        example: 张三企业
         maxLength: 128
         type: string
       enterpriseType:
+        description: 企业类型
+        example: ENTERPRISE
         maxLength: 32
         type: string
       expectedRowVersion:
+        description: 期望行版本号
+        example: 1
         type: integer
       remark:
+        description: 备注
+        example: 备注信息
         maxLength: 512
         type: string
       roles:
+        description: 企业角色列表
+        example:
+        - '["MANUFACTURER"'
+        - '"MAH"]'
         items:
           type: string
         minItems: 1
         type: array
       shortName:
+        description: 企业简称
+        example: 张企
         maxLength: 64
         type: string
       status:
+        description: 状态
         enum:
         - 0
         - 1
+        example: 1
         type: integer
       unifiedCreditCode:
+        description: 统一社会信用代码
+        example: 91110108MA01XXXXXX
         maxLength: 32
         type: string
     required:
@@ -2003,24 +2431,38 @@ definitions:
   models.SaveProductMpRequest:
     properties:
       approvalNo:
+        description: 批准文号
+        example: 国药准字H20260001
         maxLength: 128
         type: string
       brandName:
+        description: 品牌名
+        example: 品牌名
         maxLength: 128
         type: string
       description:
+        description: 产品描述
+        example: 产品描述
         maxLength: 2000
         type: string
       enterpriseId:
+        description: 企业主体ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       expectedRowVersion:
+        description: 期望行版本号
+        example: 1
         type: integer
       rpId:
+        description: 产品规格ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       status:
+        description: 状态
         enum:
         - 0
         - 1
+        example: 1
         type: integer
     required:
     - approvalNo
@@ -2030,24 +2472,38 @@ definitions:
   models.SaveProductRpRequest:
     properties:
       description:
+        description: 规格描述
+        example: 规格描述
         maxLength: 2000
         type: string
       dosageForm:
+        description: 剂型
+        example: 胶囊剂
         maxLength: 64
         type: string
       expectedRowVersion:
+        description: 期望行版本号
+        example: 1
         type: integer
       specName:
+        description: 规格名称
+        example: 0.25g
         maxLength: 128
         type: string
       spuId:
+        description: 产品SPU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       status:
+        description: 状态
         enum:
         - 0
         - 1
+        example: 1
         type: integer
       strengthText:
+        description: 规格含量
+        example: 0.25g
         maxLength: 128
         type: string
     required:
@@ -2057,42 +2513,66 @@ definitions:
   models.SaveProductSkuRequest:
     properties:
       allowSplit:
+        description: 是否允许拆零
         enum:
         - 0
         - 1
+        example: 0
         type: integer
       barcode:
+        description: 条形码
+        example: "6901234567890"
         maxLength: 64
         type: string
       description:
+        description: 包装描述
+        example: 包装描述
         maxLength: 2000
         type: string
       expectedRowVersion:
+        description: 期望行版本号
+        example: 1
         type: integer
       gtin:
+        description: GTIN码
+        example: "06901234567890"
         maxLength: 64
         type: string
       minUnitName:
+        description: 最小单位名称
+        example: 粒
         maxLength: 32
         type: string
       mpId:
+        description: 产品MP ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       packageQuantity:
+        description: 包装数量
+        example: 10
         maximum: 999999
         minimum: 1
         type: integer
       packageSpecName:
+        description: 包装规格名称
+        example: 10粒/盒
         maxLength: 128
         type: string
       packageUnitName:
+        description: 包装单位名称
+        example: 盒
         maxLength: 32
         type: string
       status:
+        description: 状态
         enum:
         - 0
         - 1
+        example: 1
         type: integer
       udiDi:
+        description: UDI-DI码
+        example: (01)06901234567890
         maxLength: 128
         type: string
     required:
@@ -2105,23 +2585,35 @@ definitions:
   models.SaveProductSpuRequest:
     properties:
       description:
+        description: 产品描述
+        example: 产品描述
         maxLength: 2000
         type: string
       expectedRowVersion:
+        description: 期望行版本号
+        example: 1
         type: integer
       productName:
+        description: 产品名称
+        example: 阿莫西林胶囊
         maxLength: 128
         type: string
       productType:
+        description: 产品类型
+        example: DRUG
         maxLength: 32
         type: string
       shortName:
+        description: 产品简称
+        example: 阿莫西林
         maxLength: 64
         type: string
       status:
+        description: 状态
         enum:
         - 0
         - 1
+        example: 1
         type: integer
     required:
     - productName
@@ -2219,107 +2711,193 @@ definitions:
   models.ScheduleAutoTaskFailure:
     properties:
       doctorId:
+        description: 医生ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       doctorName:
+        description: 医生姓名
+        example: 张医生
         type: string
       reason:
+        description: 失败原因
+        example: 该医生该时段已有排班
         type: string
     type: object
   models.ScheduleAutoTaskResponse:
     properties:
       executedAt:
+        description: 执行时间
+        example: "2026-01-15 09:00:00"
         type: string
       failureDoctorCount:
+        description: 失败医生数
+        example: 1
         type: integer
       failures:
+        description: 失败详情
         items:
           $ref: '#/definitions/models.ScheduleAutoTaskFailure'
         type: array
       status:
+        description: 状态(0-成功 1-部分成功 2-失败 3-处理中)
+        example: 0
         type: integer
       successDoctorCount:
+        description: 成功医生数
+        example: 10
         type: integer
       targetWeekEnd:
+        description: 目标周结束日期
+        example: "2026-01-19"
         type: string
       targetWeekStart:
+        description: 目标周起始日期
+        example: "2026-01-13"
         type: string
       taskId:
+        description: 任务ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       taskType:
+        description: 任务类型
+        example: publish
         type: string
     type: object
   models.ScheduleResponse:
     properties:
       bookedQuota:
+        description: 已预约号源
+        example: 5
         type: integer
       createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
         type: string
       defaultSlotQuota:
+        description: 默认号源配额
+        example: 15
         type: integer
       departmentCode:
+        description: 科室编码
+        example: NK
         type: string
       departmentId:
+        description: 科室ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       departmentName:
+        description: 科室名称
+        example: 内科
         type: string
       doctorId:
+        description: 医生ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       doctorName:
+        description: 医生姓名
+        example: 张三
         type: string
       doctorNo:
+        description: 医生编号
+        example: DOC001
         type: string
       endTime:
+        description: 结束时间
+        example: "17:00"
         type: string
       feeAmount:
+        description: 费用金额
+        example: "50.00"
         type: string
       feeRuleId:
+        description: 费用规则ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       feeRuleVersion:
+        description: 费用规则版本
+        example: 1
         type: integer
       feeSnapshotStatus:
+        description: 费用快照状态
+        example: valid
         type: string
       finishedAt:
+        description: 结束时间
+        example: "2026-01-15 09:00:00"
         type: string
       generationBatchId:
+        description: 生成批次ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       publishedAt:
+        description: 发布时间
+        example: "2026-01-15 09:00:00"
         type: string
       registrationType:
+        description: 号别
+        example: 普通
         type: string
       remainingQuota:
+        description: 剩余号源
+        example: 55
         type: integer
       remark:
+        description: 备注
+        example: 备注信息
         type: string
       scheduleDate:
+        description: 排班日期
+        example: "2026-01-15"
         type: string
       scheduleId:
+        description: 排班ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       slots:
+        description: 时段列表
         items:
           $ref: '#/definitions/models.ScheduleSlotResponse'
         type: array
       startTime:
+        description: 开始时间
+        example: "09:00"
         type: string
       status:
+        description: 状态(0-草稿 1-已发布 2-已停诊 3-已结束)
+        example: 1
         type: integer
       stopReason:
+        description: 停诊原因
+        example: 医生请假
         type: string
       stoppedAt:
+        description: 停诊时间
+        example: "2026-01-15 09:00:00"
         type: string
       templateId:
+        description: 模板ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       totalQuota:
+        description: 总号源配额
+        example: 60
         type: integer
       updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
         type: string
     type: object
   models.ScheduleSlotQuotaRequest:
     properties:
       quota:
+        description: 号源配额
+        example: 10
         maximum: 99
         minimum: 0
         type: integer
       startTime:
+        description: 时段开始时间
+        example: "09:00"
         type: string
     required:
     - startTime
@@ -2327,67 +2905,123 @@ definitions:
   models.ScheduleSlotResponse:
     properties:
       bookedQuota:
+        description: 已预约数量
+        example: 2
         type: integer
       bookingStatus:
+        description: 预约状态
+        example: available
         type: string
       canBook:
+        description: 是否可预约
+        example: true
         type: boolean
       endTime:
+        description: 结束时间
+        example: "09:30"
         type: string
       quota:
+        description: 号源配额
+        example: 5
         type: integer
       remainingQuota:
+        description: 剩余可预约数量
+        example: 3
         type: integer
       slotId:
+        description: 时段ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       startTime:
+        description: 开始时间
+        example: "09:00"
         type: string
     type: object
   models.ScheduleTemplateResponse:
     properties:
       createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
         type: string
       defaultSlotQuota:
+        description: 默认号源配额
+        example: 15
         type: integer
       departmentCode:
+        description: 科室编码
+        example: NK
         type: string
       departmentId:
+        description: 科室ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       departmentName:
+        description: 科室名称
+        example: 内科
         type: string
       doctorId:
+        description: 医生ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       doctorName:
+        description: 医生姓名
+        example: 张三
         type: string
       doctorNo:
+        description: 医生编号
+        example: DOC001
         type: string
       effectiveDate:
+        description: 生效日期
+        example: "2026-01-15"
         type: string
       endTime:
+        description: 结束时间
+        example: "17:00"
         type: string
       expiryDate:
+        description: 失效日期
+        example: "2026-12-31"
         type: string
       registrationType:
+        description: 号别
+        example: 普通
         type: string
       remark:
+        description: 备注
+        example: 备注信息
         type: string
       slotQuotaConfig:
+        description: 时段号源配置
         items:
           $ref: '#/definitions/models.ScheduleSlotQuotaRequest'
         type: array
       startTime:
+        description: 开始时间
+        example: "09:00"
         type: string
       status:
+        description: 状态(0-禁用 1-启用)
+        example: 1
         type: integer
       templateId:
+        description: 模板ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       templateName:
+        description: 模板名称
+        example: 门诊排班模板
         type: string
       totalQuota:
+        description: 总号源配额
+        example: 60
         type: integer
       updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
         type: string
       weekdays:
+        description: 出诊星期，每项范围为1（周一）至7（周日）
         items:
           type: integer
         type: array
@@ -2772,12 +3406,16 @@ definitions:
   models.UpdateEnterpriseStatusRequest:
     properties:
       expectedRowVersion:
+        description: 期望行版本号
+        example: 1
         minimum: 1
         type: integer
       status:
+        description: 状态
         enum:
         - 0
         - 1
+        example: 1
         type: integer
     required:
     - expectedRowVersion
@@ -2882,12 +3520,16 @@ definitions:
   models.UpdateProductMpStatusRequest:
     properties:
       expectedRowVersion:
+        description: 期望行版本号
+        example: 1
         minimum: 1
         type: integer
       status:
+        description: 状态
         enum:
         - 0
         - 1
+        example: 1
         type: integer
     required:
     - expectedRowVersion
@@ -2895,12 +3537,16 @@ definitions:
   models.UpdateProductRpStatusRequest:
     properties:
       expectedRowVersion:
+        description: 期望行版本号
+        example: 1
         minimum: 1
         type: integer
       status:
+        description: 状态
         enum:
         - 0
         - 1
+        example: 1
         type: integer
     required:
     - expectedRowVersion
@@ -2908,12 +3554,16 @@ definitions:
   models.UpdateProductSkuStatusRequest:
     properties:
       expectedRowVersion:
+        description: 期望行版本号
+        example: 1
         minimum: 1
         type: integer
       status:
+        description: 状态
         enum:
         - 0
         - 1
+        example: 1
         type: integer
     required:
     - expectedRowVersion
@@ -2921,12 +3571,16 @@ definitions:
   models.UpdateProductSpuStatusRequest:
     properties:
       expectedRowVersion:
+        description: 期望行版本号
+        example: 1
         minimum: 1
         type: integer
       status:
+        description: 状态
         enum:
         - 0
         - 1
+        example: 1
         type: integer
     required:
     - expectedRowVersion
@@ -3352,28 +4006,52 @@ definitions:
   models.WorkflowCopyResponse:
     properties:
       copyId:
+        description: 抄送ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
         type: string
       instanceId:
+        description: 流程实例ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       instanceTitle:
+        description: 流程标题
+        example: XX功能需求审批
         type: string
       nodeId:
+        description: 节点ID
+        example: approve_manager
         type: string
       nodeInstanceId:
+        description: 节点实例ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       nodeName:
+        description: 节点名称
+        example: 部门主管审批
         type: string
       readDate:
+        description: 已读时间
+        example: "2026-01-15 15:00:00"
         type: string
       receiverId:
+        description: 接收人ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       receiverName:
+        description: 接收人姓名
+        example: 王五
         type: string
       starterName:
+        description: 发起人姓名
+        example: 张三
         type: string
       status:
+        description: 抄送状态：0未读 1已读
+        example: "0"
         type: string
     type: object
   models.WorkflowDefinitionResponse:
@@ -3434,8 +4112,11 @@ definitions:
   models.WorkflowInstanceDetailResponse:
     properties:
       instance:
-        $ref: '#/definitions/models.WorkflowInstanceResponse'
+        allOf:
+        - $ref: '#/definitions/models.WorkflowInstanceResponse'
+        description: 流程实例信息
       nodes:
+        description: 节点实例列表
         items:
           $ref: '#/definitions/models.WorkflowNodeInstanceResponse'
         type: array
@@ -3443,97 +4124,162 @@ definitions:
   models.WorkflowInstanceResponse:
     properties:
       businessKey:
+        description: 业务对象标识
+        example: story:550e8400-e29b-41d4-a716-446655440000
         type: string
       createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
         type: string
       definitionId:
+        description: 流程定义ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       definitionKey:
+        description: 流程标识
+        example: story_approval
         type: string
       definitionName:
+        description: 流程名称
+        example: 需求审批流程
         type: string
       definitionVersion:
+        description: 流程定义版本
+        example: 1
         type: integer
       endDate:
+        description: 结束时间
+        example: "2026-01-15 18:00:00"
         type: string
       formLayout:
+        description: 表单布局
         example: single
         type: string
       formSchema:
+        description: 表单Schema快照
         items:
           type: object
         type: array
       instanceId:
+        description: 流程实例ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       instanceNo:
+        description: 流程编号
+        example: WF202601150001
         type: string
       startDate:
+        description: 开始时间
+        example: "2026-01-15 09:00:00"
         type: string
       starterId:
+        description: 发起人ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       starterName:
+        description: 发起人姓名
+        example: 张三
         type: string
       status:
+        description: 流程状态：0运行中 1已完成 2已拒绝 3已取消
+        example: "0"
         type: string
       title:
+        description: 流程标题
+        example: XX功能需求审批
         type: string
       variables:
         additionalProperties: true
+        description: 条件判断业务变量
         type: object
     type: object
   models.WorkflowNodeActorResponse:
     properties:
       userId:
+        description: 用户ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       userName:
+        description: 用户姓名
+        example: 张三
         type: string
     type: object
   models.WorkflowNodeInstanceResponse:
     properties:
       action:
+        description: 节点操作
+        example: approve
         type: string
       actors:
+        description: 预计参与人列表
         items:
           $ref: '#/definitions/models.WorkflowNodeActorResponse'
         type: array
       approvalMode:
+        description: 审批模式
+        example: or
         type: string
       branchEdgeId:
+        description: 分支连线ID
+        example: edge_001
         type: string
       copies:
+        description: 抄送列表
         items:
           $ref: '#/definitions/models.WorkflowCopyResponse'
         type: array
       durationSeconds:
+        description: 耗时秒数
         example: 4500
         type: integer
       endDate:
+        description: 结束时间
+        example: "2026-01-15 18:00:00"
         type: string
       fieldPermissions:
         additionalProperties:
           type: string
+        description: 字段读写权限映射
         type: object
       nodeId:
+        description: 节点ID
+        example: approve_manager
         type: string
       nodeInstanceId:
+        description: 节点实例ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       nodeName:
+        description: 节点名称
+        example: 部门主管审批
         type: string
       nodeType:
+        description: 节点类型
+        example: approval
         type: string
       records:
+        description: 操作记录列表
         items:
           $ref: '#/definitions/models.WorkflowRecordResponse'
         type: array
       routeVersion:
+        description: 路由版本
+        example: 1
         type: integer
       sequence:
+        description: 节点序号
+        example: 1
         type: integer
       startDate:
+        description: 开始时间
+        example: "2026-01-15 09:00:00"
         type: string
       status:
+        description: 节点状态：0计划中 1激活 2已完成 3终止 4被取代
+        example: "1"
         type: string
       tasks:
+        description: 任务列表
         items:
           $ref: '#/definitions/models.WorkflowTaskResponse'
         type: array
@@ -3541,31 +4287,55 @@ definitions:
   models.WorkflowRecordResponse:
     properties:
       action:
+        description: 操作类型
+        example: approve
         type: string
       comment:
+        description: 操作意见
+        example: 同意通过
         type: string
       createDate:
+        description: 操作时间
+        example: "2026-01-15 09:00:00"
         type: string
       nodeId:
+        description: 节点ID
+        example: approve_manager
         type: string
       nodeInstanceId:
+        description: 节点实例ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       nodeName:
+        description: 节点名称
+        example: 部门主管审批
         type: string
       operatorId:
+        description: 操作人ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       operatorName:
+        description: 操作人姓名
+        example: 张三
         type: string
       recordId:
+        description: 记录ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       taskId:
+        description: 任务ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
     type: object
   models.WorkflowReturnTargetResponse:
     properties:
       nodeId:
+        description: 节点ID
+        example: approve_manager
         type: string
       nodeName:
+        description: 节点名称
+        example: 部门主管审批
         type: string
     type: object
   models.WorkflowTaskActionRequest:
@@ -3610,34 +4380,64 @@ definitions:
   models.WorkflowTaskResponse:
     properties:
       approvalMode:
+        description: 审批模式
+        example: or
         type: string
       assigneeId:
+        description: 审批人ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       assigneeName:
+        description: 审批人姓名
+        example: 李四
         type: string
       comment:
+        description: 审批意见
+        example: 同意通过
         type: string
       createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
         type: string
       finishDate:
+        description: 完成时间
+        example: "2026-01-15 18:00:00"
         type: string
       instanceId:
+        description: 流程实例ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       instanceTitle:
+        description: 流程标题
+        example: XX功能需求审批
         type: string
       nodeId:
+        description: 节点ID
+        example: approve_manager
         type: string
       nodeInstanceId:
+        description: 节点实例ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       nodeName:
+        description: 节点名称
+        example: 部门主管审批
         type: string
       starterName:
+        description: 发起人姓名
+        example: 张三
         type: string
       status:
+        description: 任务状态：0待办 1已审批 2已拒绝 3已取消
+        example: "0"
         type: string
       taskGroupId:
+        description: 任务组ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       taskId:
+        description: 任务ID
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
     type: object
   models.WorkflowTaskReturnRequest:
@@ -3666,14 +4466,20 @@ definitions:
     type: object
   utils.PageResult:
     properties:
-      items: {}
+      items:
+        description: 分页数据列表
       total:
+        description: 数据总条数
+        example: 100
         type: integer
     type: object
   utils.PaginationResponse:
     properties:
-      items: {}
+      items:
+        description: 分页数据列表
       total:
+        description: 数据总条数
+        example: 100
         type: integer
     type: object
 host: localhost:9191
@@ -3824,6 +4630,7 @@ paths:
       - 认证管理
   /base/enterprises:
     get:
+      description: 分页查询企业主体列表，支持按名称、简称、编码、信用代码、企业类型、角色类型和状态进行筛选
       parameters:
       - description: 页码
         in: query
@@ -3857,14 +4664,29 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 获取成功
           schema:
             allOf:
             - $ref: '#/definitions/models.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/utils.PaginationResponse'
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.EnterpriseResponse'
+                        type: array
+                    type: object
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取企业主体列表
@@ -3873,6 +4695,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 创建新的企业主体记录
       parameters:
       - description: 企业主体
         in: body
@@ -3892,6 +4715,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.EnterpriseResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 新增企业主体
@@ -3899,6 +4730,7 @@ paths:
       - 基础资料/企业主体
   /base/enterprises/{enterpriseId}:
     get:
+      description: 根据企业主体ID获取企业主体的详细信息
       parameters:
       - description: 企业主体ID
         in: path
@@ -3917,6 +4749,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.EnterpriseResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取企业主体详情
@@ -3925,6 +4765,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 根据企业主体ID更新企业主体信息
       parameters:
       - description: 企业主体ID
         in: path
@@ -3949,6 +4790,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.EnterpriseResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新企业主体
@@ -3958,6 +4807,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 根据企业主体ID更新企业主体的启用/停用状态
       parameters:
       - description: 企业主体ID
         in: path
@@ -3982,6 +4832,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.EnterpriseResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新企业主体启停状态
@@ -3989,6 +4847,7 @@ paths:
       - 基础资料/企业主体
   /base/enterprises/options:
     get:
+      description: 获取已启用的企业主体选项列表，用于下拉选择等场景
       parameters:
       - description: 名称、简称、编码或信用代码
         in: query
@@ -4016,6 +4875,14 @@ paths:
                     $ref: '#/definitions/models.EnterpriseOptionResponse'
                   type: array
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取启用企业主体选项
@@ -6102,6 +6969,7 @@ paths:
     delete:
       consumes:
       - application/json
+      description: 批量删除表单 Schema，支持一次删除多个，传入表单 Schema ID 数组。
       parameters:
       - description: 表单 Schema ID 数组
         in: body
@@ -6118,8 +6986,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6128,6 +7004,7 @@ paths:
       tags:
       - 表单管理
     get:
+      description: 分页查询表单 Schema 列表，支持按 Schema 标识、名称、分类、状态筛选及排序。
       parameters:
       - description: 页码
         in: query
@@ -6161,16 +7038,31 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 获取成功
           schema:
             allOf:
             - $ref: '#/definitions/models.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/utils.PaginationResponse'
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.FormSchemaResponse'
+                        type: array
+                    type: object
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6181,6 +7073,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 创建新的表单 Schema 配置，包含表单字段定义、布局、校验规则等完整配置信息。
       parameters:
       - description: 表单 Schema
         in: body
@@ -6195,8 +7088,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6206,6 +7107,7 @@ paths:
       - 表单管理
   /form/schemas/{formSchemaId}:
     get:
+      description: 根据表单 Schema ID 获取单个表单 Schema 的完整配置信息。
       parameters:
       - description: 表单 Schema ID
         in: path
@@ -6224,8 +7126,16 @@ paths:
                 data:
                   $ref: '#/definitions/models.FormSchemaResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6236,6 +7146,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 根据表单 Schema ID 更新指定表单 Schema 的配置信息，包括字段定义、布局、校验规则等。
       parameters:
       - description: 表单 Schema ID
         in: path
@@ -6255,8 +7166,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6266,6 +7185,7 @@ paths:
       - 表单管理
   /form/schemas/all:
     get:
+      description: 获取全部表单 Schema，用于下拉选择等场景，支持按名称和状态筛选。
       produces:
       - application/json
       responses:
@@ -6280,6 +7200,18 @@ paths:
                     $ref: '#/definitions/models.FormSchemaResponse'
                   type: array
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取全部表单 Schema
@@ -6289,6 +7221,7 @@ paths:
     delete:
       consumes:
       - application/json
+      description: 批量删除临床科室及其子科室
       parameters:
       - description: 临床科室ID列表
         in: body
@@ -6305,8 +7238,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6315,6 +7256,7 @@ paths:
       tags:
       - 医疗管理/临床科室
     get:
+      description: 获取临床科室树形结构数据，支持按关键字和状态筛选
       parameters:
       - description: 科室编码或名称
         in: query
@@ -6338,8 +7280,16 @@ paths:
                     $ref: '#/definitions/models.MedicalDepartmentTreeResponse'
                   type: array
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6350,6 +7300,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 创建临床科室，支持设置父级科室形成树形结构
       parameters:
       - description: 临床科室信息
         in: body
@@ -6364,8 +7315,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6375,6 +7334,7 @@ paths:
       - 医疗管理/临床科室
   /medical/departments/{departmentId}:
     get:
+      description: 根据科室ID获取临床科室详细信息
       parameters:
       - description: 临床科室ID
         in: path
@@ -6393,8 +7353,16 @@ paths:
                 data:
                   $ref: '#/definitions/models.MedicalDepartmentTreeResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6405,6 +7373,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 更新临床科室基本信息
       parameters:
       - description: 临床科室ID
         in: path
@@ -6424,8 +7393,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6437,6 +7414,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 启用或停用临床科室
       parameters:
       - description: 临床科室ID
         in: path
@@ -6456,8 +7434,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6467,6 +7453,7 @@ paths:
       - 医疗管理/临床科室
   /medical/departments/all:
     get:
+      description: 获取所有启用状态的临床科室选项列表
       produces:
       - application/json
       responses:
@@ -6481,6 +7468,10 @@ paths:
                     $ref: '#/definitions/models.MedicalDepartmentTreeResponse'
                   type: array
               type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取所有启用的临床科室
@@ -6490,6 +7481,7 @@ paths:
     delete:
       consumes:
       - application/json
+      description: 批量删除医生档案
       parameters:
       - description: 医生ID列表
         in: body
@@ -6506,8 +7498,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6516,6 +7516,7 @@ paths:
       tags:
       - 医疗管理/医生档案
     get:
+      description: 分页查询医生档案列表，支持按姓名、科室、职称、用工类型、状态等条件筛选
       parameters:
       - description: 页码
         in: query
@@ -6568,8 +7569,16 @@ paths:
                         type: array
                     type: object
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6580,6 +7589,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 创建医生档案，包含基本信息、职称、用工类型、执业范围等
       parameters:
       - description: 医生档案
         in: body
@@ -6594,8 +7604,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6605,6 +7623,7 @@ paths:
       - 医疗管理/医生档案
   /medical/doctors/{doctorId}:
     get:
+      description: 根据医生ID获取医生档案详细信息
       parameters:
       - description: 医生ID
         in: path
@@ -6623,8 +7642,16 @@ paths:
                 data:
                   $ref: '#/definitions/models.DoctorResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6635,6 +7662,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 更新医生档案信息
       parameters:
       - description: 医生ID
         in: path
@@ -6654,8 +7682,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6667,6 +7703,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 启用或停用医生档案
       parameters:
       - description: 医生ID
         in: path
@@ -6686,8 +7723,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6697,6 +7742,7 @@ paths:
       - 医疗管理/医生档案
   /medical/doctors/all:
     get:
+      description: 获取所有启用状态的医生选项列表
       produces:
       - application/json
       responses:
@@ -6711,6 +7757,10 @@ paths:
                     $ref: '#/definitions/models.DoctorOptionResponse'
                   type: array
               type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取所有启用医生选项
@@ -6718,6 +7768,7 @@ paths:
       - 医疗管理/医生档案
   /medical/registrationFeeRules:
     get:
+      description: 分页查询挂号费规则列表，支持按医生、科室、挂号类型、有效期状态等条件筛选
       parameters:
       - description: 页码
         in: query
@@ -6770,8 +7821,16 @@ paths:
                         type: array
                     type: object
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6782,6 +7841,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 创建挂号费规则，支持配置费用、生效日期和失效日期
       parameters:
       - description: 挂号费规则
         in: body
@@ -6796,8 +7856,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6809,6 +7877,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 对已有挂号费规则进行调价，生成新版本挂号费记录
       parameters:
       - description: 挂号费规则ID
         in: path
@@ -6828,8 +7897,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6839,6 +7916,7 @@ paths:
       - 医疗管理/挂号费
   /medical/scheduleTasks:
     get:
+      description: 分页查询自动任务执行记录，支持按任务类型、状态、日期范围等条件筛选
       parameters:
       - description: 页码
         in: query
@@ -6887,8 +7965,16 @@ paths:
                         type: array
                     type: object
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6898,6 +7984,7 @@ paths:
       - 医疗管理/排班
   /medical/scheduleTemplates:
     get:
+      description: 分页查询周期排班模板列表，支持按医生、科室、星期、状态等条件筛选
       parameters:
       - description: 页码
         in: query
@@ -6946,8 +8033,16 @@ paths:
                         type: array
                     type: object
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6958,6 +8053,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 创建周期排班模板，定义医生在每周固定时间的出诊安排
       parameters:
       - description: 周期排班模板
         in: body
@@ -6972,8 +8068,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -6997,8 +8101,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -7009,6 +8121,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 更新周期排班模板信息
       parameters:
       - description: 排班模板ID
         in: path
@@ -7028,8 +8141,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -7041,6 +8162,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 启用或停用周期排班模板
       parameters:
       - description: 排班模板ID
         in: path
@@ -7060,8 +8182,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -7073,6 +8203,7 @@ paths:
     delete:
       consumes:
       - application/json
+      description: 批量删除草稿状态的排班记录
       parameters:
       - description: 排班ID列表
         in: body
@@ -7089,8 +8220,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -7099,6 +8238,7 @@ paths:
       tags:
       - 医疗管理/排班
     get:
+      description: 分页查询实际排班列表，支持按医生、科室、挂号类型、日期范围、状态等条件筛选
       parameters:
       - description: 页码
         in: query
@@ -7155,8 +8295,16 @@ paths:
                         type: array
                     type: object
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -7167,6 +8315,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 手工创建实际排班记录
       parameters:
       - description: 实际排班
         in: body
@@ -7181,8 +8330,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -7194,6 +8351,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 编辑草稿状态的排班记录
       parameters:
       - description: 排班ID
         in: path
@@ -7213,8 +8371,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -7224,6 +8390,7 @@ paths:
       - 医疗管理/排班
   /medical/schedules/{scheduleId}/finish:
     put:
+      description: 将已完成出诊的排班标记为结束状态
       parameters:
       - description: 排班ID
         in: path
@@ -7237,8 +8404,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -7250,6 +8425,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 将已发布的排班标记为停诊状态，需提供停诊原因
       parameters:
       - description: 排班ID
         in: path
@@ -7269,8 +8445,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -7282,6 +8466,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 根据启用的周期排班模板，批量生成指定日期范围内的实际排班
       parameters:
       - description: 生成范围和幂等键
         in: body
@@ -7301,8 +8486,16 @@ paths:
                 data:
                   $ref: '#/definitions/models.GenerateSchedulesResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -7314,6 +8507,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 批量发布草稿排班，将其状态变更为已发布
       parameters:
       - description: 排班ID列表
         in: body
@@ -7328,8 +8522,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
         "403":
           description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -7339,6 +8541,7 @@ paths:
       - 医疗管理/排班
   /product/mps:
     get:
+      description: 分页查询厂家产品列表，支持按所属规格产品筛选
       parameters:
       - description: 所属规格产品ID
         in: query
@@ -7349,14 +8552,29 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 获取成功
           schema:
             allOf:
             - $ref: '#/definitions/models.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/utils.PaginationResponse'
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ProductMpResponse'
+                        type: array
+                    type: object
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取厂家产品列表
@@ -7365,6 +8583,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 新增厂家产品记录
       parameters:
       - description: 厂家产品
         in: body
@@ -7384,6 +8603,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductMpResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 新增厂家产品
@@ -7391,6 +8618,7 @@ paths:
       - 产品档案/厂家产品
   /product/mps/{mpId}:
     get:
+      description: 根据MP ID查询厂家产品详细信息
       parameters:
       - description: 厂家产品ID
         in: path
@@ -7409,6 +8637,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductMpResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取厂家产品详情
@@ -7417,6 +8653,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 根据MP ID更新厂家产品信息
       parameters:
       - description: 厂家产品ID
         in: path
@@ -7441,6 +8678,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductMpResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新厂家产品
@@ -7450,6 +8695,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 更新厂家产品的启用/停用状态
       parameters:
       - description: 厂家产品ID
         in: path
@@ -7474,6 +8720,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductMpResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新厂家产品启停状态
@@ -7481,6 +8735,7 @@ paths:
       - 产品档案/厂家产品
   /product/rps:
     get:
+      description: 分页查询规格产品列表，支持按编码、名称、剂型、规格、SPU、产品类型、状态筛选及排序
       parameters:
       - description: 页码
         in: query
@@ -7514,14 +8769,29 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 获取成功
           schema:
             allOf:
             - $ref: '#/definitions/models.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/utils.PaginationResponse'
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ProductRpResponse'
+                        type: array
+                    type: object
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取规格产品列表
@@ -7530,6 +8800,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 新增规格产品记录
       parameters:
       - description: 规格产品
         in: body
@@ -7549,6 +8820,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductRpResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 新增规格产品
@@ -7556,6 +8835,7 @@ paths:
       - 产品档案/规格产品
   /product/rps/{rpId}:
     get:
+      description: 根据RP ID查询规格产品详细信息
       parameters:
       - description: 规格产品ID
         in: path
@@ -7574,6 +8854,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductRpResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取规格产品详情
@@ -7582,6 +8870,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 根据RP ID更新规格产品信息
       parameters:
       - description: 规格产品ID
         in: path
@@ -7606,6 +8895,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductRpResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新规格产品
@@ -7615,6 +8912,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 更新规格产品的启用/停用状态
       parameters:
       - description: 规格产品ID
         in: path
@@ -7639,6 +8937,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductRpResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新规格产品启停状态
@@ -7646,6 +8952,7 @@ paths:
       - 产品档案/规格产品
   /product/rps/options:
     get:
+      description: 获取已启用的规格产品选项列表，用于下拉选择等场景
       parameters:
       - description: RP编码、规格名称、剂型、规格文本、SPU编码或通用名称
         in: query
@@ -7677,6 +8984,14 @@ paths:
                     $ref: '#/definitions/models.ProductRpOptionResponse'
                   type: array
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取启用规格产品选项
@@ -7684,6 +8999,7 @@ paths:
       - 产品档案/规格产品
   /product/skus:
     get:
+      description: 分页查询SKU列表，按所属厂家产品ID筛选及排序
       parameters:
       - description: 所属厂家产品ID
         in: query
@@ -7706,14 +9022,29 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 获取成功
           schema:
             allOf:
             - $ref: '#/definitions/models.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/utils.PaginationResponse'
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ProductSkuResponse'
+                        type: array
+                    type: object
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取SKU列表
@@ -7722,6 +9053,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 新增SKU记录
       parameters:
       - description: SKU
         in: body
@@ -7741,6 +9073,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductSkuResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 新增SKU
@@ -7748,6 +9088,7 @@ paths:
       - 产品档案/SKU
   /product/skus/{skuId}:
     get:
+      description: 根据SKU ID查询SKU详细信息
       parameters:
       - description: SKU ID
         in: path
@@ -7766,6 +9107,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductSkuResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取SKU详情
@@ -7774,6 +9123,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 根据SKU ID更新SKU信息
       parameters:
       - description: SKU ID
         in: path
@@ -7798,6 +9148,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductSkuResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新SKU
@@ -7807,6 +9165,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 更新SKU的启用/停用状态
       parameters:
       - description: SKU ID
         in: path
@@ -7831,6 +9190,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductSkuResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新SKU启停状态
@@ -7838,6 +9205,7 @@ paths:
       - 产品档案/SKU
   /product/skus/options:
     get:
+      description: 获取已启用的SKU选项列表，用于下拉选择等场景
       parameters:
       - description: 所属厂家产品ID
         in: query
@@ -7865,6 +9233,14 @@ paths:
                     $ref: '#/definitions/models.ProductSkuOptionResponse'
                   type: array
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取启用SKU选项
@@ -7872,6 +9248,7 @@ paths:
       - 产品档案/SKU
   /product/spus:
     get:
+      description: 分页查询通用产品列表，支持按编码、名称、产品类型、状态筛选及排序
       parameters:
       - description: 页码
         in: query
@@ -7901,14 +9278,29 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 获取成功
           schema:
             allOf:
             - $ref: '#/definitions/models.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/utils.PaginationResponse'
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ProductSpuResponse'
+                        type: array
+                    type: object
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取通用产品列表
@@ -7917,6 +9309,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 新增通用产品记录
       parameters:
       - description: 通用产品
         in: body
@@ -7936,6 +9329,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductSpuResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 新增通用产品
@@ -7943,6 +9344,7 @@ paths:
       - 产品档案/通用产品
   /product/spus/{spuId}:
     get:
+      description: 根据SPU ID查询通用产品详细信息
       parameters:
       - description: 通用产品ID
         in: path
@@ -7961,6 +9363,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductSpuResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取通用产品详情
@@ -7969,6 +9379,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 根据SPU ID更新通用产品信息
       parameters:
       - description: 通用产品ID
         in: path
@@ -7993,6 +9404,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductSpuResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新通用产品
@@ -8002,6 +9421,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 更新通用产品的启用/停用状态
       parameters:
       - description: 通用产品ID
         in: path
@@ -8026,6 +9446,14 @@ paths:
                 data:
                   $ref: '#/definitions/models.ProductSpuResponse'
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 更新通用产品启停状态
@@ -8033,6 +9461,7 @@ paths:
       - 产品档案/通用产品
   /product/spus/options:
     get:
+      description: 获取已启用的通用产品选项列表，用于下拉选择等场景
       parameters:
       - description: 编码、通用名称或简称
         in: query
@@ -8060,6 +9489,14 @@ paths:
                     $ref: '#/definitions/models.ProductSpuOptionResponse'
                   type: array
               type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取启用通用产品选项

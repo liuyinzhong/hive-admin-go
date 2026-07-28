@@ -25,60 +25,60 @@ func (ProductRp) TableName() string {
 }
 
 type ProductRpListRequest struct {
-	Page        int    `form:"page" example:"1"`
-	PageSize    int    `form:"pageSize" example:"20"`
-	Keyword     string `form:"keyword"`
-	SpuID       string `form:"spuId"`
-	ProductType string `form:"productType"`
-	Status      *int   `form:"status"`
-	Sorts       string `form:"sorts"`
+	Page        int    `form:"page" example:"1"`                                     // 页码
+	PageSize    int    `form:"pageSize" example:"20"`                                // 每页数量
+	Keyword     string `form:"keyword" example:"0.25g"`                              // 关键词搜索
+	SpuID       string `form:"spuId" example:"550e8400-e29b-41d4-a716-446655440000"` // 产品SPU ID
+	ProductType string `form:"productType" example:"DRUG"`                           // 产品类型
+	Status      *int   `form:"status" example:"1"`                                   // 状态
+	Sorts       string `form:"sorts" example:"specName,desc;createDate,desc"`        // 排序
 }
 
 type SaveProductRpRequest struct {
-	SpuID              string  `json:"spuId" binding:"required"`
-	SpecName           string  `json:"specName" binding:"required,max=128"`
-	DosageForm         *string `json:"dosageForm" binding:"omitempty,max=64"`
-	StrengthText       *string `json:"strengthText" binding:"omitempty,max=128"`
-	Description        *string `json:"description" binding:"omitempty,max=2000"`
-	Status             int     `json:"status" binding:"oneof=0 1"`
-	ExpectedRowVersion int     `json:"expectedRowVersion"`
+	SpuID              string  `json:"spuId" binding:"required" example:"550e8400-e29b-41d4-a716-446655440000"` // 产品SPU ID
+	SpecName           string  `json:"specName" binding:"required,max=128" example:"0.25g"`                     // 规格名称
+	DosageForm         *string `json:"dosageForm" binding:"omitempty,max=64" example:"胶囊剂"`                     // 剂型
+	StrengthText       *string `json:"strengthText" binding:"omitempty,max=128" example:"0.25g"`                // 规格含量
+	Description        *string `json:"description" binding:"omitempty,max=2000" example:"规格描述"`                 // 规格描述
+	Status             int     `json:"status" binding:"oneof=0 1" example:"1"`                                  // 状态
+	ExpectedRowVersion int     `json:"expectedRowVersion" example:"1"`                                          // 期望行版本号
 }
 
 type UpdateProductRpStatusRequest struct {
-	Status             int `json:"status" binding:"oneof=0 1"`
-	ExpectedRowVersion int `json:"expectedRowVersion" binding:"required,min=1"`
+	Status             int `json:"status" binding:"oneof=0 1" example:"1"`                  // 状态
+	ExpectedRowVersion int `json:"expectedRowVersion" binding:"required,min=1" example:"1"` // 期望行版本号
 }
 
 type ProductRpOptionsRequest struct {
-	Keyword     string `form:"keyword"`
-	SpuID       string `form:"spuId"`
-	ProductType string `form:"productType"`
-	PageSize    int    `form:"pageSize"`
+	Keyword     string `form:"keyword" example:"0.25g"`                              // 关键词搜索
+	SpuID       string `form:"spuId" example:"550e8400-e29b-41d4-a716-446655440000"` // 产品SPU ID
+	ProductType string `form:"productType" example:"DRUG"`                           // 产品类型
+	PageSize    int    `form:"pageSize" example:"20"`                                // 每页数量
 }
 
 type ProductRpResponse struct {
-	RpID         string  `json:"rpId"`
-	RpCode       string  `json:"rpCode"`
-	SpuID        string  `json:"spuId"`
-	SpuCode      string  `json:"spuCode"`
-	ProductName  string  `json:"productName"`
-	ProductType  string  `json:"productType"`
-	SpecName     string  `json:"specName"`
-	DosageForm   *string `json:"dosageForm"`
-	StrengthText *string `json:"strengthText"`
-	Description  *string `json:"description"`
-	Status       int     `json:"status"`
-	RowVersion   int     `json:"rowVersion"`
-	CreateDate   *string `json:"createDate"`
-	UpdateDate   *string `json:"updateDate"`
+	RpID         string  `json:"rpId" example:"550e8400-e29b-41d4-a716-446655440000"`  // 产品规格ID
+	RpCode       string  `json:"rpCode" example:"RP001"`                               // 规格编码
+	SpuID        string  `json:"spuId" example:"550e8400-e29b-41d4-a716-446655440000"` // 产品SPU ID
+	SpuCode      string  `json:"spuCode" example:"SPU001"`                             // SPU编码
+	ProductName  string  `json:"productName" example:"阿莫西林胶囊"`                         // 产品名称
+	ProductType  string  `json:"productType" example:"DRUG"`                           // 产品类型
+	SpecName     string  `json:"specName" example:"0.25g"`                             // 规格名称
+	DosageForm   *string `json:"dosageForm" example:"胶囊剂"`                             // 剂型
+	StrengthText *string `json:"strengthText" example:"0.25g"`                         // 规格含量
+	Description  *string `json:"description" example:"规格描述"`                           // 规格描述
+	Status       int     `json:"status" example:"1"`                                   // 状态
+	RowVersion   int     `json:"rowVersion" example:"1"`                               // 版本号
+	CreateDate   *string `json:"createDate" example:"2026-01-15 09:00:00"`             // 创建时间
+	UpdateDate   *string `json:"updateDate" example:"2026-01-15 09:00:00"`             // 更新时间
 }
 
 type ProductRpOptionResponse struct {
-	RpID        string `json:"rpId"`
-	RpCode      string `json:"rpCode"`
-	SpuID       string `json:"spuId"`
-	SpuCode     string `json:"spuCode"`
-	ProductName string `json:"productName"`
-	ProductType string `json:"productType"`
-	SpecName    string `json:"specName"`
+	RpID        string `json:"rpId" example:"550e8400-e29b-41d4-a716-446655440000"`  // 产品规格ID
+	RpCode      string `json:"rpCode" example:"RP001"`                               // 规格编码
+	SpuID       string `json:"spuId" example:"550e8400-e29b-41d4-a716-446655440000"` // 产品SPU ID
+	SpuCode     string `json:"spuCode" example:"SPU001"`                             // SPU编码
+	ProductName string `json:"productName" example:"阿莫西林胶囊"`                         // 产品名称
+	ProductType string `json:"productType" example:"DRUG"`                           // 产品类型
+	SpecName    string `json:"specName" example:"0.25g"`                             // 规格名称
 }

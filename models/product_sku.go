@@ -30,85 +30,85 @@ func (ProductSku) TableName() string {
 }
 
 type ProductSkuListRequest struct {
-	MpID     string `form:"mpId" binding:"required"`
-	Page     int    `form:"page"`
-	PageSize int    `form:"pageSize"`
-	Sorts    string `form:"sorts"`
+	MpID     string `form:"mpId" binding:"required" example:"550e8400-e29b-41d4-a716-446655440000"` // 产品MP ID
+	Page     int    `form:"page" example:"1"`                                                       // 页码
+	PageSize int    `form:"pageSize" example:"20"`                                                  // 每页数量
+	Sorts    string `form:"sorts" example:"packageSpecName,desc;createDate,desc"`                   // 排序
 }
 
 type SaveProductSkuRequest struct {
-	MpID               string  `json:"mpId" binding:"required"`
-	PackageSpecName    string  `json:"packageSpecName" binding:"required,max=128"`
-	PackageQuantity    int     `json:"packageQuantity" binding:"required,min=1,max=999999"`
-	MinUnitName        string  `json:"minUnitName" binding:"required,max=32"`
-	PackageUnitName    string  `json:"packageUnitName" binding:"required,max=32"`
-	Barcode            *string `json:"barcode" binding:"omitempty,max=64"`
-	Gtin               *string `json:"gtin" binding:"omitempty,max=64"`
-	UdiDi              *string `json:"udiDi" binding:"omitempty,max=128"`
-	AllowSplit         int     `json:"allowSplit" binding:"oneof=0 1"`
-	Description        *string `json:"description" binding:"omitempty,max=2000"`
-	Status             int     `json:"status" binding:"oneof=0 1"`
-	ExpectedRowVersion int     `json:"expectedRowVersion"`
+	MpID               string  `json:"mpId" binding:"required" example:"550e8400-e29b-41d4-a716-446655440000"` // 产品MP ID
+	PackageSpecName    string  `json:"packageSpecName" binding:"required,max=128" example:"10粒/盒"`             // 包装规格名称
+	PackageQuantity    int     `json:"packageQuantity" binding:"required,min=1,max=999999" example:"10"`       // 包装数量
+	MinUnitName        string  `json:"minUnitName" binding:"required,max=32" example:"粒"`                      // 最小单位名称
+	PackageUnitName    string  `json:"packageUnitName" binding:"required,max=32" example:"盒"`                  // 包装单位名称
+	Barcode            *string `json:"barcode" binding:"omitempty,max=64" example:"6901234567890"`             // 条形码
+	Gtin               *string `json:"gtin" binding:"omitempty,max=64" example:"06901234567890"`               // GTIN码
+	UdiDi              *string `json:"udiDi" binding:"omitempty,max=128" example:"(01)06901234567890"`         // UDI-DI码
+	AllowSplit         int     `json:"allowSplit" binding:"oneof=0 1" example:"0"`                             // 是否允许拆零
+	Description        *string `json:"description" binding:"omitempty,max=2000" example:"包装描述"`                // 包装描述
+	Status             int     `json:"status" binding:"oneof=0 1" example:"1"`                                 // 状态
+	ExpectedRowVersion int     `json:"expectedRowVersion" example:"1"`                                         // 期望行版本号
 }
 
 type UpdateProductSkuStatusRequest struct {
-	Status             int `json:"status" binding:"oneof=0 1"`
-	ExpectedRowVersion int `json:"expectedRowVersion" binding:"required,min=1"`
+	Status             int `json:"status" binding:"oneof=0 1" example:"1"`                  // 状态
+	ExpectedRowVersion int `json:"expectedRowVersion" binding:"required,min=1" example:"1"` // 期望行版本号
 }
 
 type ProductSkuOptionsRequest struct {
-	MpID     string `form:"mpId"`
-	Keyword  string `form:"keyword"`
-	PageSize int    `form:"pageSize"`
+	MpID     string `form:"mpId" example:"550e8400-e29b-41d4-a716-446655440000"` // 产品MP ID
+	Keyword  string `form:"keyword" example:"10粒"`                               // 关键词搜索
+	PageSize int    `form:"pageSize" example:"20"`                               // 每页数量
 }
 
 type ProductSkuResponse struct {
-	SpuID           string  `json:"spuId"`
-	SpuCode         string  `json:"spuCode"`
-	ProductName     string  `json:"productName"`
-	ProductType     string  `json:"productType"`
-	RpID            string  `json:"rpId"`
-	RpCode          string  `json:"rpCode"`
-	SpecName        string  `json:"specName"`
-	MpID            string  `json:"mpId"`
-	MpCode          string  `json:"mpCode"`
-	EnterpriseID    string  `json:"enterpriseId"`
-	EnterpriseCode  string  `json:"enterpriseCode"`
-	EnterpriseName  string  `json:"enterpriseName"`
-	ApprovalNo      string  `json:"approvalNo"`
-	BrandName       *string `json:"brandName"`
-	SkuID           string  `json:"skuId"`
-	SkuCode         string  `json:"skuCode"`
-	PackageSpecName string  `json:"packageSpecName"`
-	PackageQuantity int     `json:"packageQuantity"`
-	MinUnitName     string  `json:"minUnitName"`
-	PackageUnitName string  `json:"packageUnitName"`
-	Barcode         *string `json:"barcode"`
-	Gtin            *string `json:"gtin"`
-	UdiDi           *string `json:"udiDi"`
-	AllowSplit      int     `json:"allowSplit"`
-	Description     *string `json:"description"`
-	Status          int     `json:"status"`
-	RowVersion      int     `json:"rowVersion"`
-	CreateDate      *string `json:"createDate"`
-	UpdateDate      *string `json:"updateDate"`
+	SpuID           string  `json:"spuId" example:"550e8400-e29b-41d4-a716-446655440000"`        // 产品SPU ID
+	SpuCode         string  `json:"spuCode" example:"SPU001"`                                    // SPU编码
+	ProductName     string  `json:"productName" example:"阿莫西林胶囊"`                                // 产品名称
+	ProductType     string  `json:"productType" example:"DRUG"`                                  // 产品类型
+	RpID            string  `json:"rpId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 产品规格ID
+	RpCode          string  `json:"rpCode" example:"RP001"`                                      // 规格编码
+	SpecName        string  `json:"specName" example:"0.25g"`                                    // 规格名称
+	MpID            string  `json:"mpId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 产品MP ID
+	MpCode          string  `json:"mpCode" example:"MP001"`                                      // MP编码
+	EnterpriseID    string  `json:"enterpriseId" example:"550e8400-e29b-41d4-a716-446655440000"` // 企业主体ID
+	EnterpriseCode  string  `json:"enterpriseCode" example:"ENT001"`                             // 企业编码
+	EnterpriseName  string  `json:"enterpriseName" example:"张三企业"`                               // 企业名称
+	ApprovalNo      string  `json:"approvalNo" example:"国药准字H20260001"`                          // 批准文号
+	BrandName       *string `json:"brandName" example:"品牌名"`                                     // 品牌名
+	SkuID           string  `json:"skuId" example:"550e8400-e29b-41d4-a716-446655440000"`        // 产品SKU ID
+	SkuCode         string  `json:"skuCode" example:"SKU001"`                                    // SKU编码
+	PackageSpecName string  `json:"packageSpecName" example:"10粒/盒"`                             // 包装规格名称
+	PackageQuantity int     `json:"packageQuantity" example:"10"`                                // 包装数量
+	MinUnitName     string  `json:"minUnitName" example:"粒"`                                     // 最小单位名称
+	PackageUnitName string  `json:"packageUnitName" example:"盒"`                                 // 包装单位名称
+	Barcode         *string `json:"barcode" example:"6901234567890"`                             // 条形码
+	Gtin            *string `json:"gtin" example:"06901234567890"`                               // GTIN码
+	UdiDi           *string `json:"udiDi" example:"(01)06901234567890"`                          // UDI-DI码
+	AllowSplit      int     `json:"allowSplit" example:"0"`                                      // 是否允许拆零
+	Description     *string `json:"description" example:"包装描述"`                                  // 包装描述
+	Status          int     `json:"status" example:"1"`                                          // 状态
+	RowVersion      int     `json:"rowVersion" example:"1"`                                      // 版本号
+	CreateDate      *string `json:"createDate" example:"2026-01-15 09:00:00"`                    // 创建时间
+	UpdateDate      *string `json:"updateDate" example:"2026-01-15 09:00:00"`                    // 更新时间
 }
 
 type ProductSkuOptionResponse struct {
-	SpuID           string  `json:"spuId"`
-	SpuCode         string  `json:"spuCode"`
-	ProductName     string  `json:"productName"`
-	ProductType     string  `json:"productType"`
-	RpID            string  `json:"rpId"`
-	RpCode          string  `json:"rpCode"`
-	SpecName        string  `json:"specName"`
-	MpID            string  `json:"mpId"`
-	MpCode          string  `json:"mpCode"`
-	EnterpriseID    string  `json:"enterpriseId"`
-	EnterpriseName  string  `json:"enterpriseName"`
-	ApprovalNo      string  `json:"approvalNo"`
-	BrandName       *string `json:"brandName"`
-	SkuID           string  `json:"skuId"`
-	SkuCode         string  `json:"skuCode"`
-	PackageSpecName string  `json:"packageSpecName"`
+	SpuID           string  `json:"spuId" example:"550e8400-e29b-41d4-a716-446655440000"`        // 产品SPU ID
+	SpuCode         string  `json:"spuCode" example:"SPU001"`                                    // SPU编码
+	ProductName     string  `json:"productName" example:"阿莫西林胶囊"`                                // 产品名称
+	ProductType     string  `json:"productType" example:"DRUG"`                                  // 产品类型
+	RpID            string  `json:"rpId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 产品规格ID
+	RpCode          string  `json:"rpCode" example:"RP001"`                                      // 规格编码
+	SpecName        string  `json:"specName" example:"0.25g"`                                    // 规格名称
+	MpID            string  `json:"mpId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 产品MP ID
+	MpCode          string  `json:"mpCode" example:"MP001"`                                      // MP编码
+	EnterpriseID    string  `json:"enterpriseId" example:"550e8400-e29b-41d4-a716-446655440000"` // 企业主体ID
+	EnterpriseName  string  `json:"enterpriseName" example:"张三企业"`                               // 企业名称
+	ApprovalNo      string  `json:"approvalNo" example:"国药准字H20260001"`                          // 批准文号
+	BrandName       *string `json:"brandName" example:"品牌名"`                                     // 品牌名
+	SkuID           string  `json:"skuId" example:"550e8400-e29b-41d4-a716-446655440000"`        // 产品SKU ID
+	SkuCode         string  `json:"skuCode" example:"SKU001"`                                    // SKU编码
+	PackageSpecName string  `json:"packageSpecName" example:"10粒/盒"`                             // 包装规格名称
 }

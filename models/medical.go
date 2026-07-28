@@ -80,16 +80,16 @@ type MedicalDepartmentListRequest struct {
 }
 
 type MedicalDepartmentTreeResponse struct {
-	DepartmentID   string                           `json:"departmentId"`
-	DepartmentCode string                           `json:"departmentCode"`
-	DepartmentName string                           `json:"departmentName"`
-	Pid            *string                          `json:"pid"`
-	Sort           int                              `json:"sort"`
-	Status         int                              `json:"status"`
-	Remark         *string                          `json:"remark"`
-	CreateDate     *string                          `json:"createDate"`
-	UpdateDate     *string                          `json:"updateDate"`
-	Children       []*MedicalDepartmentTreeResponse `json:"children"`
+	DepartmentID   string                           `json:"departmentId" example:"550e8400-e29b-41d4-a716-446655440000"` // 科室ID
+	DepartmentCode string                           `json:"departmentCode" example:"DEPT001"`                            // 科室编码
+	DepartmentName string                           `json:"departmentName" example:"内科"`                                 // 科室名称
+	Pid            *string                          `json:"pid" example:"550e8400-e29b-41d4-a716-446655440000"`          // 父级科室ID
+	Sort           int                              `json:"sort" example:"1"`                                            // 排序号
+	Status         int                              `json:"status" example:"1"`                                          // 状态(0-禁用 1-启用)
+	Remark         *string                          `json:"remark" example:"备注信息"`                                       // 备注
+	CreateDate     *string                          `json:"createDate" example:"2026-01-15 09:00:00"`                    // 创建时间
+	UpdateDate     *string                          `json:"updateDate" example:"2026-01-15 09:00:00"`                    // 更新时间
+	Children       []*MedicalDepartmentTreeResponse `json:"children"`                                                    // 子级科室列表
 }
 
 type CreateMedicalDepartmentRequest struct {
@@ -148,59 +148,59 @@ type SaveDoctorRequest struct {
 }
 
 type DoctorDepartmentResponse struct {
-	DoctorDepartmentID string  `json:"doctorDepartmentId"`
-	DepartmentID       string  `json:"departmentId"`
-	DepartmentCode     string  `json:"departmentCode"`
-	DepartmentName     string  `json:"departmentName"`
-	IsPrimary          int     `json:"isPrimary"`
-	DepartmentPosition *string `json:"departmentPosition"`
-	AppointmentEnabled int     `json:"appointmentEnabled"`
-	Status             int     `json:"status"`
+	DoctorDepartmentID string  `json:"doctorDepartmentId" example:"550e8400-e29b-41d4-a716-446655440000"` // 医生科室关联ID
+	DepartmentID       string  `json:"departmentId" example:"550e8400-e29b-41d4-a716-446655440000"`       // 科室ID
+	DepartmentCode     string  `json:"departmentCode" example:"NK"`                                       // 科室编码
+	DepartmentName     string  `json:"departmentName" example:"内科"`                                       // 科室名称
+	IsPrimary          int     `json:"isPrimary" example:"1"`                                             // 是否主科室
+	DepartmentPosition *string `json:"departmentPosition" example:"主任"`                                   // 科室职务
+	AppointmentEnabled int     `json:"appointmentEnabled" example:"1"`                                    // 是否开启预约
+	Status             int     `json:"status" example:"1"`                                                // 状态
 }
 
 type DoctorResponse struct {
-	DoctorID               string                     `json:"doctorId"`
-	DoctorNo               string                     `json:"doctorNo"`
-	UserID                 *string                    `json:"userId"`
-	UserName               *string                    `json:"userName"`
-	Name                   string                     `json:"name"`
-	NamePinyin             *string                    `json:"namePinyin"`
-	Gender                 *string                    `json:"gender"`
-	BirthDate              *string                    `json:"birthDate"`
-	Phone                  *string                    `json:"phone"`
-	Email                  *string                    `json:"email"`
-	Avatar                 *string                    `json:"avatar"`
-	ProfessionalTitle      string                     `json:"professionalTitle"`
-	AdministrativePosition *string                    `json:"administrativePosition"`
-	EmploymentType         string                     `json:"employmentType"`
-	PracticeStartDate      *string                    `json:"practiceStartDate"`
-	EmploymentDate         *string                    `json:"employmentDate"`
-	DepartureDate          *string                    `json:"departureDate"`
-	Expertise              *string                    `json:"expertise"`
-	Introduction           *string                    `json:"introduction"`
-	DefaultVisitMinutes    int                        `json:"defaultVisitMinutes"`
-	OnlineConsultation     int                        `json:"onlineConsultation"`
-	AppointmentEnabled     int                        `json:"appointmentEnabled"`
-	ProfileVisible         int                        `json:"profileVisible"`
-	Sort                   int                        `json:"sort"`
-	Status                 int                        `json:"status"`
-	Remark                 *string                    `json:"remark"`
-	DepartmentIDs          []string                   `json:"departmentIds"`
-	DepartmentNames        []string                   `json:"departmentNames"`
-	PrimaryDepartmentID    *string                    `json:"primaryDepartmentId"`
-	PrimaryDepartmentName  *string                    `json:"primaryDepartmentName"`
-	Departments            []DoctorDepartmentResponse `json:"departments"`
-	CreateDate             *string                    `json:"createDate"`
-	UpdateDate             *string                    `json:"updateDate"`
+	DoctorID               string                     `json:"doctorId" example:"550e8400-e29b-41d4-a716-446655440000"`            // 医生ID
+	DoctorNo               string                     `json:"doctorNo" example:"DOC001"`                                          // 医生编号
+	UserID                 *string                    `json:"userId" example:"550e8400-e29b-41d4-a716-446655440000"`              // 用户ID
+	UserName               *string                    `json:"userName" example:"张三"`                                              // 用户名
+	Name                   string                     `json:"name" example:"张三"`                                                  // 姓名
+	NamePinyin             *string                    `json:"namePinyin" example:"zhangsan"`                                      // 姓名拼音
+	Gender                 *string                    `json:"gender" example:"male"`                                              // 性别
+	BirthDate              *string                    `json:"birthDate" example:"1985-06-15"`                                     // 出生日期
+	Phone                  *string                    `json:"phone" example:"13800138000"`                                        // 手机号
+	Email                  *string                    `json:"email" example:"zhangsan@example.com"`                               // 邮箱
+	Avatar                 *string                    `json:"avatar" example:"https://example.com/avatar.jpg"`                    // 头像
+	ProfessionalTitle      string                     `json:"professionalTitle" example:"主任医师"`                                   // 职称
+	AdministrativePosition *string                    `json:"administrativePosition" example:"科室主任"`                              // 行政职务
+	EmploymentType         string                     `json:"employmentType" example:"full-time"`                                 // 执业类型
+	PracticeStartDate      *string                    `json:"practiceStartDate" example:"2005-07-01"`                             // 执业开始日期
+	EmploymentDate         *string                    `json:"employmentDate" example:"2010-03-15"`                                // 入职日期
+	DepartureDate          *string                    `json:"departureDate" example:"2024-12-31"`                                 // 离职日期
+	Expertise              *string                    `json:"expertise" example:"心内科常见疾病诊治"`                                      // 专长
+	Introduction           *string                    `json:"introduction" example:"从事心内科临床工作二十年，具有丰富的临床经验"`                      // 简介
+	DefaultVisitMinutes    int                        `json:"defaultVisitMinutes" example:"15"`                                   // 默认就诊时长(分钟)
+	OnlineConsultation     int                        `json:"onlineConsultation" example:"1"`                                     // 在线咨询(0-关闭 1-开启)
+	AppointmentEnabled     int                        `json:"appointmentEnabled" example:"1"`                                     // 预约开启(0-关闭 1-开启)
+	ProfileVisible         int                        `json:"profileVisible" example:"1"`                                         // 资料可见(0-隐藏 1-可见)
+	Sort                   int                        `json:"sort" example:"0"`                                                   // 排序
+	Status                 int                        `json:"status" example:"1"`                                                 // 状态(0-禁用 1-启用)
+	Remark                 *string                    `json:"remark" example:"备注信息"`                                              // 备注
+	DepartmentIDs          []string                   `json:"departmentIds" example:"[\"550e8400-e29b-41d4-a716-446655440000\"]"` // 科室ID列表
+	DepartmentNames        []string                   `json:"departmentNames" example:"[\"内科\",\"外科\"]"`                          // 科室名称列表
+	PrimaryDepartmentID    *string                    `json:"primaryDepartmentId" example:"550e8400-e29b-41d4-a716-446655440000"` // 主科室ID
+	PrimaryDepartmentName  *string                    `json:"primaryDepartmentName" example:"内科"`                                 // 主科室名称
+	Departments            []DoctorDepartmentResponse `json:"departments"`                                                        // 科室列表
+	CreateDate             *string                    `json:"createDate" example:"2026-01-15 09:00:00"`                           // 创建时间
+	UpdateDate             *string                    `json:"updateDate" example:"2026-01-15 09:00:00"`                           // 更新时间
 }
 
 type DoctorOptionResponse struct {
-	DoctorID              string  `json:"doctorId"`
-	DoctorNo              string  `json:"doctorNo"`
-	Name                  string  `json:"name"`
-	ProfessionalTitle     string  `json:"professionalTitle"`
-	PrimaryDepartmentID   *string `json:"primaryDepartmentId"`
-	PrimaryDepartmentName *string `json:"primaryDepartmentName"`
+	DoctorID              string  `json:"doctorId" example:"550e8400-e29b-41d4-a716-446655440000"`            // 医生ID
+	DoctorNo              string  `json:"doctorNo" example:"DOC001"`                                          // 医生编号
+	Name                  string  `json:"name" example:"张三"`                                                  // 姓名
+	ProfessionalTitle     string  `json:"professionalTitle" example:"主任医师"`                                   // 职称
+	PrimaryDepartmentID   *string `json:"primaryDepartmentId" example:"550e8400-e29b-41d4-a716-446655440000"` // 主科室ID
+	PrimaryDepartmentName *string `json:"primaryDepartmentName" example:"内科"`                                 // 主科室名称
 }
 
 type MedRegistrationFeeRule struct {
@@ -250,20 +250,20 @@ type AdjustRegistrationFeeRuleRequest struct {
 }
 
 type RegistrationFeeRuleResponse struct {
-	FeeRuleID        string  `json:"feeRuleId"`
-	DoctorID         string  `json:"doctorId"`
-	DoctorNo         string  `json:"doctorNo"`
-	DoctorName       string  `json:"doctorName"`
-	DepartmentID     string  `json:"departmentId"`
-	DepartmentCode   string  `json:"departmentCode"`
-	DepartmentName   string  `json:"departmentName"`
-	RegistrationType string  `json:"registrationType"`
-	FeeAmount        string  `json:"feeAmount"`
-	EffectiveDate    string  `json:"effectiveDate"`
-	ExpiryDate       *string `json:"expiryDate"`
-	Version          int     `json:"version"`
-	PeriodStatus     string  `json:"periodStatus"`
-	Remark           *string `json:"remark"`
-	CreateDate       *string `json:"createDate"`
-	UpdateDate       *string `json:"updateDate"`
+	FeeRuleID        string  `json:"feeRuleId" example:"550e8400-e29b-41d4-a716-446655440000"`    // 费用规则ID
+	DoctorID         string  `json:"doctorId" example:"550e8400-e29b-41d4-a716-446655440000"`     // 医生ID
+	DoctorNo         string  `json:"doctorNo" example:"DOC001"`                                   // 医生工号
+	DoctorName       string  `json:"doctorName" example:"张医生"`                                    // 医生姓名
+	DepartmentID     string  `json:"departmentId" example:"550e8400-e29b-41d4-a716-446655440000"` // 科室ID
+	DepartmentCode   string  `json:"departmentCode" example:"DEPT001"`                            // 科室编码
+	DepartmentName   string  `json:"departmentName" example:"内科"`                                 // 科室名称
+	RegistrationType string  `json:"registrationType" example:"普通"`                               // 挂号类型
+	FeeAmount        string  `json:"feeAmount" example:"100.00"`                                  // 费用金额
+	EffectiveDate    string  `json:"effectiveDate" example:"2026-01-15"`                          // 生效日期
+	ExpiryDate       *string `json:"expiryDate" example:"2026-12-31"`                             // 失效日期
+	Version          int     `json:"version" example:"1"`                                         // 版本号
+	PeriodStatus     string  `json:"periodStatus" example:"active"`                               // 期间状态
+	Remark           *string `json:"remark" example:"备注信息"`                                       // 备注
+	CreateDate       *string `json:"createDate" example:"2026-01-15 09:00:00"`                    // 创建时间
+	UpdateDate       *string `json:"updateDate" example:"2026-01-15 09:00:00"`                    // 更新时间
 }

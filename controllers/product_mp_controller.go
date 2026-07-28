@@ -23,11 +23,14 @@ func NewProductMpController() *ProductMpController {
 
 // GetProductMpList 获取厂家产品列表
 // @Summary 获取厂家产品列表
+// @Description 分页查询厂家产品列表，支持按所属规格产品筛选
 // @Tags 产品档案/厂家产品
 // @Produce json
 // @Security ApiKeyAuth
 // @Param rpId query string true "所属规格产品ID"
-// @Success 200 {object} models.Response{data=utils.PaginationResponse}
+// @Success 200 {object} models.Response{data=utils.PaginationResponse{items=[]models.ProductMpResponse}} "获取成功"
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /product/mps [get]
 func (ctrl *ProductMpController) GetProductMpList(c *gin.Context) {
 	var req models.ProductMpListRequest
@@ -45,11 +48,14 @@ func (ctrl *ProductMpController) GetProductMpList(c *gin.Context) {
 
 // GetProductMp 获取厂家产品详情
 // @Summary 获取厂家产品详情
+// @Description 根据MP ID查询厂家产品详细信息
 // @Tags 产品档案/厂家产品
 // @Produce json
 // @Security ApiKeyAuth
 // @Param mpId path string true "厂家产品ID"
 // @Success 200 {object} models.Response{data=models.ProductMpResponse}
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /product/mps/{mpId} [get]
 func (ctrl *ProductMpController) GetProductMp(c *gin.Context) {
 	result, err := ctrl.productMpService.GetProductMpDetail(c.Param("mpId"))
@@ -62,12 +68,15 @@ func (ctrl *ProductMpController) GetProductMp(c *gin.Context) {
 
 // CreateProductMp 新增厂家产品
 // @Summary 新增厂家产品
+// @Description 新增厂家产品记录
 // @Tags 产品档案/厂家产品
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body models.SaveProductMpRequest true "厂家产品"
 // @Success 200 {object} models.Response{data=models.ProductMpResponse}
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /product/mps [post]
 func (ctrl *ProductMpController) CreateProductMp(c *gin.Context) {
 	var req models.SaveProductMpRequest
@@ -85,6 +94,7 @@ func (ctrl *ProductMpController) CreateProductMp(c *gin.Context) {
 
 // UpdateProductMp 更新厂家产品
 // @Summary 更新厂家产品
+// @Description 根据MP ID更新厂家产品信息
 // @Tags 产品档案/厂家产品
 // @Accept json
 // @Produce json
@@ -92,6 +102,8 @@ func (ctrl *ProductMpController) CreateProductMp(c *gin.Context) {
 // @Param mpId path string true "厂家产品ID"
 // @Param request body models.SaveProductMpRequest true "厂家产品"
 // @Success 200 {object} models.Response{data=models.ProductMpResponse}
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /product/mps/{mpId} [put]
 func (ctrl *ProductMpController) UpdateProductMp(c *gin.Context) {
 	var req models.SaveProductMpRequest
@@ -109,6 +121,7 @@ func (ctrl *ProductMpController) UpdateProductMp(c *gin.Context) {
 
 // UpdateProductMpStatus 更新厂家产品启停状态
 // @Summary 更新厂家产品启停状态
+// @Description 更新厂家产品的启用/停用状态
 // @Tags 产品档案/厂家产品
 // @Accept json
 // @Produce json
@@ -116,6 +129,8 @@ func (ctrl *ProductMpController) UpdateProductMp(c *gin.Context) {
 // @Param mpId path string true "厂家产品ID"
 // @Param request body models.UpdateProductMpStatusRequest true "状态"
 // @Success 200 {object} models.Response{data=models.ProductMpResponse}
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /product/mps/{mpId}/status [put]
 func (ctrl *ProductMpController) UpdateProductMpStatus(c *gin.Context) {
 	var req models.UpdateProductMpStatusRequest

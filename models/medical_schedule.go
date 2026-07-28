@@ -128,27 +128,27 @@ type SaveScheduleTemplateRequest struct {
 }
 
 type ScheduleTemplateResponse struct {
-	TemplateID       string                     `json:"templateId"`
-	TemplateName     string                     `json:"templateName"`
-	DoctorID         string                     `json:"doctorId"`
-	DoctorNo         string                     `json:"doctorNo"`
-	DoctorName       string                     `json:"doctorName"`
-	DepartmentID     string                     `json:"departmentId"`
-	DepartmentCode   string                     `json:"departmentCode"`
-	DepartmentName   string                     `json:"departmentName"`
-	RegistrationType string                     `json:"registrationType"`
-	Weekdays         []int                      `json:"weekdays"`
-	StartTime        string                     `json:"startTime"`
-	EndTime          string                     `json:"endTime"`
-	DefaultSlotQuota int                        `json:"defaultSlotQuota"`
-	SlotQuotaConfig  []ScheduleSlotQuotaRequest `json:"slotQuotaConfig"`
-	TotalQuota       int                        `json:"totalQuota"`
-	EffectiveDate    string                     `json:"effectiveDate"`
-	ExpiryDate       *string                    `json:"expiryDate"`
-	Status           int                        `json:"status"`
-	Remark           *string                    `json:"remark"`
-	CreateDate       *string                    `json:"createDate"`
-	UpdateDate       *string                    `json:"updateDate"`
+	TemplateID       string                     `json:"templateId" example:"550e8400-e29b-41d4-a716-446655440000"`   // 模板ID
+	TemplateName     string                     `json:"templateName" example:"门诊排班模板"`                               // 模板名称
+	DoctorID         string                     `json:"doctorId" example:"550e8400-e29b-41d4-a716-446655440000"`     // 医生ID
+	DoctorNo         string                     `json:"doctorNo" example:"DOC001"`                                   // 医生编号
+	DoctorName       string                     `json:"doctorName" example:"张三"`                                     // 医生姓名
+	DepartmentID     string                     `json:"departmentId" example:"550e8400-e29b-41d4-a716-446655440000"` // 科室ID
+	DepartmentCode   string                     `json:"departmentCode" example:"NK"`                                 // 科室编码
+	DepartmentName   string                     `json:"departmentName" example:"内科"`                                 // 科室名称
+	RegistrationType string                     `json:"registrationType" example:"普通"`                               // 号别
+	Weekdays         []int                      `json:"weekdays"`                                                    // 出诊星期，每项范围为1（周一）至7（周日）
+	StartTime        string                     `json:"startTime" example:"09:00"`                                   // 开始时间
+	EndTime          string                     `json:"endTime" example:"17:00"`                                     // 结束时间
+	DefaultSlotQuota int                        `json:"defaultSlotQuota" example:"15"`                               // 默认号源配额
+	SlotQuotaConfig  []ScheduleSlotQuotaRequest `json:"slotQuotaConfig"`                                             // 时段号源配置
+	TotalQuota       int                        `json:"totalQuota" example:"60"`                                     // 总号源配额
+	EffectiveDate    string                     `json:"effectiveDate" example:"2026-01-15"`                          // 生效日期
+	ExpiryDate       *string                    `json:"expiryDate" example:"2026-12-31"`                             // 失效日期
+	Status           int                        `json:"status" example:"1"`                                          // 状态(0-禁用 1-启用)
+	Remark           *string                    `json:"remark" example:"备注信息"`                                       // 备注
+	CreateDate       *string                    `json:"createDate" example:"2026-01-15 09:00:00"`                    // 创建时间
+	UpdateDate       *string                    `json:"updateDate" example:"2026-01-15 09:00:00"`                    // 更新时间
 }
 
 type ScheduleListRequest struct {
@@ -191,42 +191,42 @@ type StopScheduleRequest struct {
 }
 
 type ScheduleResponse struct {
-	ScheduleID        string                 `json:"scheduleId"`
-	TemplateID        *string                `json:"templateId"`
-	GenerationBatchID *string                `json:"generationBatchId"`
-	DoctorID          string                 `json:"doctorId"`
-	DoctorNo          string                 `json:"doctorNo"`
-	DoctorName        string                 `json:"doctorName"`
-	DepartmentID      string                 `json:"departmentId"`
-	DepartmentCode    string                 `json:"departmentCode"`
-	DepartmentName    string                 `json:"departmentName"`
-	RegistrationType  string                 `json:"registrationType"`
-	ScheduleDate      string                 `json:"scheduleDate"`
-	StartTime         string                 `json:"startTime"`
-	EndTime           string                 `json:"endTime"`
-	FeeRuleID         *string                `json:"feeRuleId"`
-	FeeRuleVersion    *int                   `json:"feeRuleVersion"`
-	FeeAmount         *string                `json:"feeAmount"`
-	FeeSnapshotStatus string                 `json:"feeSnapshotStatus"`
-	DefaultSlotQuota  int                    `json:"defaultSlotQuota"`
-	TotalQuota        int                    `json:"totalQuota"`
-	BookedQuota       int                    `json:"bookedQuota"`
-	RemainingQuota    int                    `json:"remainingQuota"`
-	Status            int                    `json:"status"`
-	StopReason        *string                `json:"stopReason"`
-	PublishedAt       *string                `json:"publishedAt"`
-	StoppedAt         *string                `json:"stoppedAt"`
-	FinishedAt        *string                `json:"finishedAt"`
-	Remark            *string                `json:"remark"`
-	CreateDate        *string                `json:"createDate"`
-	UpdateDate        *string                `json:"updateDate"`
-	Slots             []ScheduleSlotResponse `json:"slots"`
+	ScheduleID        string                 `json:"scheduleId" example:"550e8400-e29b-41d4-a716-446655440000"`        // 排班ID
+	TemplateID        *string                `json:"templateId" example:"550e8400-e29b-41d4-a716-446655440000"`        // 模板ID
+	GenerationBatchID *string                `json:"generationBatchId" example:"550e8400-e29b-41d4-a716-446655440000"` // 生成批次ID
+	DoctorID          string                 `json:"doctorId" example:"550e8400-e29b-41d4-a716-446655440000"`          // 医生ID
+	DoctorNo          string                 `json:"doctorNo" example:"DOC001"`                                        // 医生编号
+	DoctorName        string                 `json:"doctorName" example:"张三"`                                          // 医生姓名
+	DepartmentID      string                 `json:"departmentId" example:"550e8400-e29b-41d4-a716-446655440000"`      // 科室ID
+	DepartmentCode    string                 `json:"departmentCode" example:"NK"`                                      // 科室编码
+	DepartmentName    string                 `json:"departmentName" example:"内科"`                                      // 科室名称
+	RegistrationType  string                 `json:"registrationType" example:"普通"`                                    // 号别
+	ScheduleDate      string                 `json:"scheduleDate" example:"2026-01-15"`                                // 排班日期
+	StartTime         string                 `json:"startTime" example:"09:00"`                                        // 开始时间
+	EndTime           string                 `json:"endTime" example:"17:00"`                                          // 结束时间
+	FeeRuleID         *string                `json:"feeRuleId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 费用规则ID
+	FeeRuleVersion    *int                   `json:"feeRuleVersion" example:"1"`                                       // 费用规则版本
+	FeeAmount         *string                `json:"feeAmount" example:"50.00"`                                        // 费用金额
+	FeeSnapshotStatus string                 `json:"feeSnapshotStatus" example:"valid"`                                // 费用快照状态
+	DefaultSlotQuota  int                    `json:"defaultSlotQuota" example:"15"`                                    // 默认号源配额
+	TotalQuota        int                    `json:"totalQuota" example:"60"`                                          // 总号源配额
+	BookedQuota       int                    `json:"bookedQuota" example:"5"`                                          // 已预约号源
+	RemainingQuota    int                    `json:"remainingQuota" example:"55"`                                      // 剩余号源
+	Status            int                    `json:"status" example:"1"`                                               // 状态(0-草稿 1-已发布 2-已停诊 3-已结束)
+	StopReason        *string                `json:"stopReason" example:"医生请假"`                                        // 停诊原因
+	PublishedAt       *string                `json:"publishedAt" example:"2026-01-15 09:00:00"`                        // 发布时间
+	StoppedAt         *string                `json:"stoppedAt" example:"2026-01-15 09:00:00"`                          // 停诊时间
+	FinishedAt        *string                `json:"finishedAt" example:"2026-01-15 09:00:00"`                         // 结束时间
+	Remark            *string                `json:"remark" example:"备注信息"`                                            // 备注
+	CreateDate        *string                `json:"createDate" example:"2026-01-15 09:00:00"`                         // 创建时间
+	UpdateDate        *string                `json:"updateDate" example:"2026-01-15 09:00:00"`                         // 更新时间
+	Slots             []ScheduleSlotResponse `json:"slots"`                                                            // 时段列表
 }
 
 type GenerateSchedulesResponse struct {
-	BatchID        string   `json:"batchId"`
-	Idempotent     bool     `json:"idempotent"`
-	GeneratedCount int      `json:"generatedCount"`
-	SkippedCount   int      `json:"skippedCount"`
-	ScheduleIDs    []string `json:"scheduleIds"`
+	BatchID        string   `json:"batchId" example:"550e8400-e29b-41d4-a716-446655440000"`           // 批次ID
+	Idempotent     bool     `json:"idempotent" example:"true"`                                        // 是否幂等
+	GeneratedCount int      `json:"generatedCount" example:"30"`                                      // 生成数量
+	SkippedCount   int      `json:"skippedCount" example:"5"`                                         // 跳过数量
+	ScheduleIDs    []string `json:"scheduleIds" example:"[\"550e8400-e29b-41d4-a716-446655440000\"]"` // 排班ID列表
 }

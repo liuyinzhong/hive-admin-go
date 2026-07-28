@@ -15,8 +15,8 @@ const (
 )
 
 type ScheduleSlotQuotaRequest struct {
-	StartTime string `json:"startTime" binding:"required"`
-	Quota     int    `json:"quota" binding:"min=0,max=99"`
+	StartTime string `json:"startTime" binding:"required" example:"09:00"` // 时段开始时间
+	Quota     int    `json:"quota" binding:"min=0,max=99" example:"10"`    // 号源配额
 }
 
 type MedScheduleSlot struct {
@@ -53,14 +53,14 @@ type MedScheduleAutoTask struct {
 func (MedScheduleAutoTask) TableName() string { return "med_schedule_auto_task" }
 
 type ScheduleSlotResponse struct {
-	SlotID         string `json:"slotId"`
-	StartTime      string `json:"startTime"`
-	EndTime        string `json:"endTime"`
-	Quota          int    `json:"quota"`
-	BookedQuota    int    `json:"bookedQuota"`
-	RemainingQuota int    `json:"remainingQuota"`
-	BookingStatus  string `json:"bookingStatus"`
-	CanBook        bool   `json:"canBook"`
+	SlotID         string `json:"slotId" example:"550e8400-e29b-41d4-a716-446655440000"` // 时段ID
+	StartTime      string `json:"startTime" example:"09:00"`                             // 开始时间
+	EndTime        string `json:"endTime" example:"09:30"`                               // 结束时间
+	Quota          int    `json:"quota" example:"5"`                                     // 号源配额
+	BookedQuota    int    `json:"bookedQuota" example:"2"`                               // 已预约数量
+	RemainingQuota int    `json:"remainingQuota" example:"3"`                            // 剩余可预约数量
+	BookingStatus  string `json:"bookingStatus" example:"available"`                     // 预约状态
+	CanBook        bool   `json:"canBook" example:"true"`                                // 是否可预约
 }
 
 type ScheduleAutoTaskListRequest struct {
@@ -74,19 +74,19 @@ type ScheduleAutoTaskListRequest struct {
 }
 
 type ScheduleAutoTaskFailure struct {
-	DoctorID   string `json:"doctorId"`
-	DoctorName string `json:"doctorName"`
-	Reason     string `json:"reason"`
+	DoctorID   string `json:"doctorId" example:"550e8400-e29b-41d4-a716-446655440000"` // 医生ID
+	DoctorName string `json:"doctorName" example:"张医生"`                                // 医生姓名
+	Reason     string `json:"reason" example:"该医生该时段已有排班"`                             // 失败原因
 }
 
 type ScheduleAutoTaskResponse struct {
-	TaskID             string                    `json:"taskId"`
-	TaskType           string                    `json:"taskType"`
-	TargetWeekStart    string                    `json:"targetWeekStart"`
-	TargetWeekEnd      string                    `json:"targetWeekEnd"`
-	Status             int                       `json:"status"`
-	SuccessDoctorCount int                       `json:"successDoctorCount"`
-	FailureDoctorCount int                       `json:"failureDoctorCount"`
-	Failures           []ScheduleAutoTaskFailure `json:"failures"`
-	ExecutedAt         string                    `json:"executedAt"`
+	TaskID             string                    `json:"taskId" example:"550e8400-e29b-41d4-a716-446655440000"` // 任务ID
+	TaskType           string                    `json:"taskType" example:"publish"`                            // 任务类型
+	TargetWeekStart    string                    `json:"targetWeekStart" example:"2026-01-13"`                  // 目标周起始日期
+	TargetWeekEnd      string                    `json:"targetWeekEnd" example:"2026-01-19"`                    // 目标周结束日期
+	Status             int                       `json:"status" example:"0"`                                    // 状态(0-成功 1-部分成功 2-失败 3-处理中)
+	SuccessDoctorCount int                       `json:"successDoctorCount" example:"10"`                       // 成功医生数
+	FailureDoctorCount int                       `json:"failureDoctorCount" example:"1"`                        // 失败医生数
+	Failures           []ScheduleAutoTaskFailure `json:"failures"`                                              // 失败详情
+	ExecutedAt         string                    `json:"executedAt" example:"2026-01-15 09:00:00"`              // 执行时间
 }
