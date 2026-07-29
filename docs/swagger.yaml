@@ -704,6 +704,16 @@ definitions:
     required:
     - ids
     type: object
+  models.DeleteProductSkuPriceRequest:
+    properties:
+      expectedRowVersion:
+        description: 期望行版本号
+        example: 1
+        minimum: 1
+        type: integer
+    required:
+    - expectedRowVersion
+    type: object
   models.DeptTreeResponse:
     properties:
       children:
@@ -1864,6 +1874,77 @@ definitions:
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
     type: object
+  models.ProductSkuPriceResponse:
+    properties:
+      createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
+        type: string
+      currencyCode:
+        description: 币种
+        example: CNY
+        type: string
+      effectiveEnd:
+        description: 生效结束时间
+        example: "2026-09-01 00:00:00"
+        type: string
+      effectiveStart:
+        description: 生效开始时间
+        example: "2026-08-01 00:00:00"
+        type: string
+      price:
+        description: 价格金额
+        example: "29.8000"
+        type: string
+      priceId:
+        description: 价格ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      priceType:
+        description: 价格类型
+        example: RETAIL
+        type: string
+      remark:
+        description: 备注
+        example: 价格维护说明
+        type: string
+      rowVersion:
+        description: 版本号
+        example: 1
+        type: integer
+      scopeId:
+        description: 范围对象ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      scopeName:
+        description: 范围对象名称
+        example: 张三企业
+        type: string
+      scopeType:
+        description: 价格范围
+        example: GLOBAL
+        type: string
+      skuCode:
+        description: SKU编码
+        example: SKU000001
+        type: string
+      skuId:
+        description: SKU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      status:
+        description: 状态
+        example: 1
+        type: integer
+      taxIncluded:
+        description: 是否含税
+        example: 1
+        type: integer
+      updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
+        type: string
+    type: object
   models.ProductSkuResponse:
     properties:
       allowSplit:
@@ -2684,6 +2765,70 @@ definitions:
     required:
     - specName
     - spuId
+    type: object
+  models.SaveProductSkuPriceRequest:
+    properties:
+      currencyCode:
+        description: 币种，第一版仅支持CNY
+        example: CNY
+        maxLength: 3
+        type: string
+      effectiveEnd:
+        description: 生效结束时间
+        example: "2026-09-01 00:00:00"
+        type: string
+      effectiveStart:
+        description: 生效开始时间
+        example: "2026-08-01 00:00:00"
+        type: string
+      expectedRowVersion:
+        description: 期望行版本号
+        example: 1
+        type: integer
+      price:
+        description: 价格金额，最多4位小数
+        example: "29.8000"
+        type: string
+      priceType:
+        description: 价格类型
+        example: RETAIL
+        maxLength: 32
+        type: string
+      remark:
+        description: 备注
+        example: 价格维护说明
+        maxLength: 512
+        type: string
+      scopeId:
+        description: 范围对象ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      scopeType:
+        description: 价格范围
+        example: GLOBAL
+        maxLength: 32
+        type: string
+      status:
+        description: 状态
+        enum:
+        - 0
+        - 1
+        example: 1
+        type: integer
+      taxIncluded:
+        description: 是否含税
+        enum:
+        - 0
+        - 1
+        example: 1
+        type: integer
+    required:
+    - effectiveStart
+    - price
+    - priceType
+    - scopeType
+    - status
+    - taxIncluded
     type: object
   models.SaveProductSkuRequest:
     properties:
@@ -3725,6 +3870,24 @@ definitions:
         type: integer
     required:
     - expectedRowVersion
+    type: object
+  models.UpdateProductSkuPriceStatusRequest:
+    properties:
+      expectedRowVersion:
+        description: 期望行版本号
+        example: 1
+        minimum: 1
+        type: integer
+      status:
+        description: 状态
+        enum:
+        - 0
+        - 1
+        example: 1
+        type: integer
+    required:
+    - expectedRowVersion
+    - status
     type: object
   models.UpdateProductSkuStatusRequest:
     properties:
@@ -9336,6 +9499,294 @@ paths:
       summary: 更新SKU
       tags:
       - 产品档案/SKU
+  /product/skus/{skuId}/prices:
+    get:
+      description: 获取指定SKU下全部未删除价格资料，按生效开始时间倒序和创建时间倒序展示
+      parameters:
+      - description: SKU ID
+        in: path
+        name: skuId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ProductSkuPriceResponse'
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 业务数据不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取SKU价格列表
+      tags:
+      - 产品档案/SKU价格
+    post:
+      consumes:
+      - application/json
+      description: 为指定SKU新增价格资料
+      parameters:
+      - description: SKU ID
+        in: path
+        name: skuId
+        required: true
+        type: string
+      - description: SKU价格
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveProductSkuPriceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductSkuPriceResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 业务数据不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 业务数据冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 新增SKU价格
+      tags:
+      - 产品档案/SKU价格
+  /product/skus/{skuId}/prices/{priceId}:
+    delete:
+      consumes:
+      - application/json
+      description: 软删除指定SKU价格资料
+      parameters:
+      - description: SKU ID
+        in: path
+        name: skuId
+        required: true
+        type: string
+      - description: 价格ID
+        in: path
+        name: priceId
+        required: true
+        type: string
+      - description: 删除参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeleteProductSkuPriceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 业务数据不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 业务数据冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除SKU价格
+      tags:
+      - 产品档案/SKU价格
+    put:
+      consumes:
+      - application/json
+      description: 根据价格ID更新指定SKU下的价格资料
+      parameters:
+      - description: SKU ID
+        in: path
+        name: skuId
+        required: true
+        type: string
+      - description: 价格ID
+        in: path
+        name: priceId
+        required: true
+        type: string
+      - description: SKU价格
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveProductSkuPriceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductSkuPriceResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 业务数据不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 业务数据冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新SKU价格
+      tags:
+      - 产品档案/SKU价格
+  /product/skus/{skuId}/prices/{priceId}/status:
+    put:
+      consumes:
+      - application/json
+      description: 更新指定SKU价格的启用/停用状态，启用时重新校验生效期重叠
+      parameters:
+      - description: SKU ID
+        in: path
+        name: skuId
+        required: true
+        type: string
+      - description: 价格ID
+        in: path
+        name: priceId
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateProductSkuPriceStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProductSkuPriceResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 业务数据不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 业务数据冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新SKU价格状态
+      tags:
+      - 产品档案/SKU价格
   /product/skus/{skuId}/status:
     put:
       consumes:
