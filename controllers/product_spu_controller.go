@@ -53,13 +53,15 @@ func (ctrl *ProductSpuController) GetProductSpuList(c *gin.Context) {
 
 // GetProductSpu 获取通用产品详情
 // @Summary 获取通用产品详情
-// @Description 根据SPU ID查询通用产品详细信息
+// @Description 根据SPU ID查询通用产品详细信息。响应包含顶部SPU基础字段，以及用于合并单元格展示的rows扁平行；rows.status仅代表SKU状态，无SKU时为空。
 // @Tags 产品档案/通用产品
 // @Produce json
 // @Security ApiKeyAuth
-// @Param spuId path string true "通用产品ID"
-// @Success 200 {object} models.Response{data=models.ProductSpuResponse}
-// @Failure 400 {object} models.Response "参数错误"
+// @Param spuId path string true "通用产品ID，UUID格式" example(550e8400-e29b-41d4-a716-446655440000)
+// @Success 200 {object} models.Response{data=models.ProductSpuDetailResponse} "查询成功"
+// @Failure 400 {object} models.Response "参数错误或业务数据不存在，message返回具体原因"
+// @Failure 401 {object} models.Response "未登录或Token无效"
+// @Failure 403 {object} models.Response "无接口权限"
 // @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /product/spus/{spuId} [get]
 func (ctrl *ProductSpuController) GetProductSpu(c *gin.Context) {

@@ -57,7 +57,7 @@ func (s *ProductSpuService) GetProductSpuList(req models.ProductSpuListRequest) 
 	return &utils.PaginationResponse{Items: s.productSpusToResponses(spus), Total: total}, nil
 }
 
-func (s *ProductSpuService) GetProductSpuDetail(spuID string) (*models.ProductSpuResponse, error) {
+func (s *ProductSpuService) GetProductSpuDetail(spuID string) (*models.ProductSpuDetailResponse, error) {
 	if err := validateProductSpuUUID(spuID, "通用产品ID"); err != nil {
 		return nil, err
 	}
@@ -69,7 +69,13 @@ func (s *ProductSpuService) GetProductSpuDetail(spuID string) (*models.ProductSp
 		}
 		return nil, err
 	}
-	return s.productSpuToResponse(spu), nil
+
+	rows, err := s.getProductSpuDetailRows(spu)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.productSpuToDetailResponse(spu, rows), nil
 }
 
 func (s *ProductSpuService) CreateProductSpu(req models.SaveProductSpuRequest, operatorID string) (*models.ProductSpuResponse, error) {
@@ -112,7 +118,7 @@ func (s *ProductSpuService) CreateProductSpu(req models.SaveProductSpuRequest, o
 		return nil, err
 	}
 
-	return s.GetProductSpuDetail(createdID)
+	return s.getProductSpuResponseByID(createdID)
 }
 
 func (s *ProductSpuService) UpdateProductSpu(spuID string, req models.SaveProductSpuRequest, operatorID string) (*models.ProductSpuResponse, error) {
@@ -158,7 +164,7 @@ func (s *ProductSpuService) UpdateProductSpu(spuID string, req models.SaveProduc
 		return nil, err
 	}
 
-	return s.GetProductSpuDetail(spuID)
+	return s.getProductSpuResponseByID(spuID)
 }
 
 func (s *ProductSpuService) UpdateProductSpuStatus(spuID string, req models.UpdateProductSpuStatusRequest, operatorID string) (*models.ProductSpuResponse, error) {
@@ -194,7 +200,7 @@ func (s *ProductSpuService) UpdateProductSpuStatus(spuID string, req models.Upda
 		return nil, err
 	}
 
-	return s.GetProductSpuDetail(spuID)
+	return s.getProductSpuResponseByID(spuID)
 }
 
 func (s *ProductSpuService) GetProductSpuOptions(req models.ProductSpuOptionsRequest) ([]models.ProductSpuOptionResponse, error) {
@@ -329,6 +335,17 @@ func (s *ProductSpuService) productSpusToResponses(spus []models.ProductSpu) []m
 	return responses
 }
 
+func (s *ProductSpuService) getProductSpuResponseByID(spuID string) (*models.ProductSpuResponse, error) {
+	var spu models.ProductSpu
+	if err := database.DB.Where("spu_id = ? AND del_flag = 0", spuID).First(&spu).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("%w: 通用产品不存在", ErrProductSpuNotFound)
+		}
+		return nil, err
+	}
+	return s.productSpuToResponse(spu), nil
+}
+
 func (s *ProductSpuService) productSpuToResponse(spu models.ProductSpu) *models.ProductSpuResponse {
 	return &models.ProductSpuResponse{
 		SpuID:       spu.SpuID,
@@ -341,6 +358,77 @@ func (s *ProductSpuService) productSpuToResponse(spu models.ProductSpu) *models.
 		RowVersion:  spu.RowVersion,
 		CreateDate:  models.TimeToStringPtr(spu.CreateDate),
 		UpdateDate:  models.TimeToStringPtr(spu.UpdateDate),
+	}
+}
+
+func (s *ProductSpuService) getProductSpuDetailRows(spu models.ProductSpu) ([]models.ProductSpuDetailRowResponse, error) {
+	var rows []models.ProductSpuDetailRowResponse
+	if err := database.DB.Table("product_rp").
+		Select(productSpuDetailRowSelectFields()).
+		Joins("LEFT JOIN product_mp ON product_mp.rp_id = product_rp.rp_id AND product_mp.del_flag = 0").
+		Joins("LEFT JOIN base_enterprise ON base_enterprise.enterprise_id = product_mp.enterprise_id AND base_enterprise.del_flag = 0").
+		Joins("LEFT JOIN product_sku ON product_sku.mp_id = product_mp.mp_id AND product_sku.del_flag = 0").
+		Joins("INNER JOIN product_spu ON product_spu.spu_id = product_rp.spu_id AND product_spu.del_flag = 0").
+		Where("product_rp.spu_id = ? AND product_rp.del_flag = 0", spu.SpuID).
+		Order("product_rp.create_date asc, product_rp.rp_code asc, product_mp.create_date asc, product_mp.mp_code asc, product_sku.create_date asc, product_sku.sku_code asc").
+		Scan(&rows).Error; err != nil {
+		return nil, err
+	}
+	if len(rows) > 0 {
+		return rows, nil
+	}
+	return []models.ProductSpuDetailRowResponse{}, nil
+}
+
+func productSpuDetailRowSelectFields() string {
+	return strings.Join([]string{
+		"product_spu.spu_id",
+		"product_spu.spu_code",
+		"product_spu.product_name",
+		"product_spu.short_name",
+		"product_spu.product_type",
+		"product_rp.rp_id",
+		"product_rp.rp_code",
+		"product_rp.spec_name",
+		"product_rp.dosage_form",
+		"product_rp.strength_text",
+		"product_rp.row_version AS rp_row_version",
+		"product_mp.mp_id",
+		"product_mp.mp_code",
+		"product_mp.enterprise_id",
+		"base_enterprise.enterprise_code",
+		"base_enterprise.enterprise_name",
+		"product_mp.approval_no",
+		"product_mp.brand_name",
+		"product_mp.row_version AS mp_row_version",
+		"product_sku.sku_id",
+		"product_sku.sku_code",
+		"product_sku.package_spec_name",
+		"product_sku.package_quantity",
+		"product_sku.min_unit_name",
+		"product_sku.package_unit_name",
+		"product_sku.barcode",
+		"product_sku.gtin",
+		"product_sku.udi_di",
+		"product_sku.allow_split",
+		"product_sku.row_version AS sku_row_version",
+		"product_sku.status",
+	}, ", ")
+}
+
+func (s *ProductSpuService) productSpuToDetailResponse(spu models.ProductSpu, rows []models.ProductSpuDetailRowResponse) *models.ProductSpuDetailResponse {
+	return &models.ProductSpuDetailResponse{
+		SpuID:       spu.SpuID,
+		SpuCode:     spu.SpuCode,
+		ProductName: spu.ProductName,
+		ShortName:   spu.ShortName,
+		ProductType: spu.ProductType,
+		Description: spu.Description,
+		Status:      spu.Status,
+		RowVersion:  spu.RowVersion,
+		CreateDate:  models.TimeToStringPtr(spu.CreateDate),
+		UpdateDate:  models.TimeToStringPtr(spu.UpdateDate),
+		Rows:        rows,
 	}
 }
 

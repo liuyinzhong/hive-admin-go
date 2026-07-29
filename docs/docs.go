@@ -7963,7 +7963,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "根据SPU ID查询通用产品详细信息",
+                "description": "根据SPU ID查询通用产品详细信息。响应包含顶部SPU基础字段，以及用于合并单元格展示的rows扁平行；rows.status仅代表SKU状态，无SKU时为空。",
                 "produces": [
                     "application/json"
                 ],
@@ -7974,7 +7974,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "通用产品ID",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "通用产品ID，UUID格式",
                         "name": "spuId",
                         "in": "path",
                         "required": true
@@ -7982,7 +7983,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "查询成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -7992,7 +7993,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.ProductSpuResponse"
+                                            "$ref": "#/definitions/models.ProductSpuDetailResponse"
                                         }
                                     }
                                 }
@@ -8000,7 +8001,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "参数错误",
+                        "description": "参数错误或业务数据不存在，message返回具体原因",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -15465,6 +15478,228 @@ const docTemplate = `{
                     "description": "更新时间",
                     "type": "string",
                     "example": "2026-01-15 09:00:00"
+                }
+            }
+        },
+        "models.ProductSpuDetailResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "description": {
+                    "description": "产品描述",
+                    "type": "string",
+                    "example": "产品描述"
+                },
+                "productName": {
+                    "description": "产品名称",
+                    "type": "string",
+                    "example": "阿莫西林胶囊"
+                },
+                "productType": {
+                    "description": "产品类型",
+                    "type": "string",
+                    "example": "DRUG"
+                },
+                "rowVersion": {
+                    "description": "SPU版本号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "rows": {
+                    "description": "合并单元格表格行，status仅代表SKU状态",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ProductSpuDetailRowResponse"
+                    }
+                },
+                "shortName": {
+                    "description": "产品简称",
+                    "type": "string",
+                    "example": "阿莫西林"
+                },
+                "spuCode": {
+                    "description": "SPU编码",
+                    "type": "string",
+                    "example": "SPU001"
+                },
+                "spuId": {
+                    "description": "产品SPU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "status": {
+                    "description": "SPU状态：0停用 1启用",
+                    "type": "integer",
+                    "example": 1
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                }
+            }
+        },
+        "models.ProductSpuDetailRowResponse": {
+            "type": "object",
+            "properties": {
+                "allowSplit": {
+                    "description": "是否允许拆零：0否 1是",
+                    "type": "integer",
+                    "example": 0
+                },
+                "approvalNo": {
+                    "description": "批准文号/注册证号/备案号",
+                    "type": "string",
+                    "example": "国药准字H20260001"
+                },
+                "barcode": {
+                    "description": "商品条码",
+                    "type": "string",
+                    "example": "6901234567890"
+                },
+                "brandName": {
+                    "description": "品牌/商品名",
+                    "type": "string",
+                    "example": "品牌名"
+                },
+                "dosageForm": {
+                    "description": "剂型/形态",
+                    "type": "string",
+                    "example": "胶囊剂"
+                },
+                "enterpriseCode": {
+                    "description": "企业编码",
+                    "type": "string",
+                    "example": "ENT001"
+                },
+                "enterpriseId": {
+                    "description": "企业主体ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "enterpriseName": {
+                    "description": "企业名称",
+                    "type": "string",
+                    "example": "张三企业"
+                },
+                "gtin": {
+                    "description": "GTIN",
+                    "type": "string",
+                    "example": "06901234567890"
+                },
+                "minUnitName": {
+                    "description": "最小单位",
+                    "type": "string",
+                    "example": "粒"
+                },
+                "mpCode": {
+                    "description": "MP编码",
+                    "type": "string",
+                    "example": "MP001"
+                },
+                "mpId": {
+                    "description": "厂家产品ID，未维护时为空",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "mpRowVersion": {
+                    "description": "MP版本号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "packageQuantity": {
+                    "description": "包装数量",
+                    "type": "integer",
+                    "example": 10
+                },
+                "packageSpecName": {
+                    "description": "包装规格名称",
+                    "type": "string",
+                    "example": "10粒/盒"
+                },
+                "packageUnitName": {
+                    "description": "包装单位",
+                    "type": "string",
+                    "example": "盒"
+                },
+                "productName": {
+                    "description": "产品名称",
+                    "type": "string",
+                    "example": "阿莫西林胶囊"
+                },
+                "productType": {
+                    "description": "产品类型",
+                    "type": "string",
+                    "example": "DRUG"
+                },
+                "rpCode": {
+                    "description": "RP编码",
+                    "type": "string",
+                    "example": "RP001"
+                },
+                "rpId": {
+                    "description": "规格产品ID，未维护时为空",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "rpRowVersion": {
+                    "description": "RP版本号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "shortName": {
+                    "description": "产品简称",
+                    "type": "string",
+                    "example": "阿莫西林"
+                },
+                "skuCode": {
+                    "description": "SKU编码",
+                    "type": "string",
+                    "example": "SKU001"
+                },
+                "skuId": {
+                    "description": "SKU ID，未维护时为空",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "skuRowVersion": {
+                    "description": "SKU版本号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "specName": {
+                    "description": "规格名称",
+                    "type": "string",
+                    "example": "0.25g"
+                },
+                "spuCode": {
+                    "description": "SPU编码",
+                    "type": "string",
+                    "example": "SPU001"
+                },
+                "spuId": {
+                    "description": "产品SPU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "status": {
+                    "description": "SKU状态：0停用 1启用；无SKU时为空",
+                    "type": "integer",
+                    "example": 1
+                },
+                "strengthText": {
+                    "description": "含量/规格文本",
+                    "type": "string",
+                    "example": "0.25g"
+                },
+                "udiDi": {
+                    "description": "UDI-DI",
+                    "type": "string",
+                    "example": "(01)06901234567890"
                 }
             }
         },

@@ -1983,6 +1983,181 @@ definitions:
         example: "2026-01-15 09:00:00"
         type: string
     type: object
+  models.ProductSpuDetailResponse:
+    properties:
+      createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
+        type: string
+      description:
+        description: 产品描述
+        example: 产品描述
+        type: string
+      productName:
+        description: 产品名称
+        example: 阿莫西林胶囊
+        type: string
+      productType:
+        description: 产品类型
+        example: DRUG
+        type: string
+      rowVersion:
+        description: SPU版本号
+        example: 1
+        type: integer
+      rows:
+        description: 合并单元格表格行，status仅代表SKU状态
+        items:
+          $ref: '#/definitions/models.ProductSpuDetailRowResponse'
+        type: array
+      shortName:
+        description: 产品简称
+        example: 阿莫西林
+        type: string
+      spuCode:
+        description: SPU编码
+        example: SPU001
+        type: string
+      spuId:
+        description: 产品SPU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      status:
+        description: SPU状态：0停用 1启用
+        example: 1
+        type: integer
+      updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
+        type: string
+    type: object
+  models.ProductSpuDetailRowResponse:
+    properties:
+      allowSplit:
+        description: 是否允许拆零：0否 1是
+        example: 0
+        type: integer
+      approvalNo:
+        description: 批准文号/注册证号/备案号
+        example: 国药准字H20260001
+        type: string
+      barcode:
+        description: 商品条码
+        example: "6901234567890"
+        type: string
+      brandName:
+        description: 品牌/商品名
+        example: 品牌名
+        type: string
+      dosageForm:
+        description: 剂型/形态
+        example: 胶囊剂
+        type: string
+      enterpriseCode:
+        description: 企业编码
+        example: ENT001
+        type: string
+      enterpriseId:
+        description: 企业主体ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      enterpriseName:
+        description: 企业名称
+        example: 张三企业
+        type: string
+      gtin:
+        description: GTIN
+        example: "06901234567890"
+        type: string
+      minUnitName:
+        description: 最小单位
+        example: 粒
+        type: string
+      mpCode:
+        description: MP编码
+        example: MP001
+        type: string
+      mpId:
+        description: 厂家产品ID，未维护时为空
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      mpRowVersion:
+        description: MP版本号
+        example: 1
+        type: integer
+      packageQuantity:
+        description: 包装数量
+        example: 10
+        type: integer
+      packageSpecName:
+        description: 包装规格名称
+        example: 10粒/盒
+        type: string
+      packageUnitName:
+        description: 包装单位
+        example: 盒
+        type: string
+      productName:
+        description: 产品名称
+        example: 阿莫西林胶囊
+        type: string
+      productType:
+        description: 产品类型
+        example: DRUG
+        type: string
+      rpCode:
+        description: RP编码
+        example: RP001
+        type: string
+      rpId:
+        description: 规格产品ID，未维护时为空
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      rpRowVersion:
+        description: RP版本号
+        example: 1
+        type: integer
+      shortName:
+        description: 产品简称
+        example: 阿莫西林
+        type: string
+      skuCode:
+        description: SKU编码
+        example: SKU001
+        type: string
+      skuId:
+        description: SKU ID，未维护时为空
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      skuRowVersion:
+        description: SKU版本号
+        example: 1
+        type: integer
+      specName:
+        description: 规格名称
+        example: 0.25g
+        type: string
+      spuCode:
+        description: SPU编码
+        example: SPU001
+        type: string
+      spuId:
+        description: 产品SPU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      status:
+        description: SKU状态：0停用 1启用；无SKU时为空
+        example: 1
+        type: integer
+      strengthText:
+        description: 含量/规格文本
+        example: 0.25g
+        type: string
+      udiDi:
+        description: UDI-DI
+        example: (01)06901234567890
+        type: string
+    type: object
   models.ProductSpuOptionResponse:
     properties:
       productName:
@@ -9344,9 +9519,10 @@ paths:
       - 产品档案/通用产品
   /product/spus/{spuId}:
     get:
-      description: 根据SPU ID查询通用产品详细信息
+      description: 根据SPU ID查询通用产品详细信息。响应包含顶部SPU基础字段，以及用于合并单元格展示的rows扁平行；rows.status仅代表SKU状态，无SKU时为空。
       parameters:
-      - description: 通用产品ID
+      - description: 通用产品ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
         in: path
         name: spuId
         required: true
@@ -9355,16 +9531,24 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 查询成功
           schema:
             allOf:
             - $ref: '#/definitions/models.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.ProductSpuResponse'
+                  $ref: '#/definitions/models.ProductSpuDetailResponse'
               type: object
         "400":
-          description: 参数错误
+          description: 参数错误或业务数据不存在，message返回具体原因
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
           schema:
             $ref: '#/definitions/models.Response'
         "500":
