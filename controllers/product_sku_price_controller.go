@@ -170,6 +170,62 @@ func (ctrl *ProductSkuPriceController) DeleteProductSkuPrice(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
 }
 
+// GetProductSkuPriceTiers 获取SKU价格阶梯
+// @Summary 获取SKU价格阶梯
+// @Description 获取指定SKU价格下全部未删除阶梯价格，按起始数量升序展示
+// @Tags 产品档案/SKU价格
+// @Produce json
+// @Security ApiKeyAuth
+// @Param skuId path string true "SKU ID"
+// @Param priceId path string true "价格ID"
+// @Success 200 {object} models.Response{data=[]models.ProductSkuPriceTierResponse} "获取成功"
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 401 {object} models.Response "未登录或Token无效"
+// @Failure 403 {object} models.Response "无接口权限"
+// @Failure 404 {object} models.Response "业务数据不存在"
+// @Failure 500 {object} models.Response "服务器内部错误"
+// @Router /product/skus/{skuId}/prices/{priceId}/tiers [get]
+func (ctrl *ProductSkuPriceController) GetProductSkuPriceTiers(c *gin.Context) {
+	result, err := ctrl.productSkuPriceService.GetProductSkuPriceTiers(c.Param("skuId"), c.Param("priceId"))
+	if err != nil {
+		writeProductSkuPriceError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
+// SaveProductSkuPriceTiers 保存SKU价格阶梯
+// @Summary 保存SKU价格阶梯
+// @Description 全量保存指定SKU价格下的阶梯价格，空数组表示清空阶梯价格；保存时校验父级价格版本、起始数量唯一和区间不重叠
+// @Tags 产品档案/SKU价格
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param skuId path string true "SKU ID"
+// @Param priceId path string true "价格ID"
+// @Param request body models.SaveProductSkuPriceTiersRequest true "阶梯价格"
+// @Success 200 {object} models.Response{data=models.ProductSkuPriceResponse}
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 401 {object} models.Response "未登录或Token无效"
+// @Failure 403 {object} models.Response "无接口权限"
+// @Failure 404 {object} models.Response "业务数据不存在"
+// @Failure 409 {object} models.Response "业务数据冲突"
+// @Failure 500 {object} models.Response "服务器内部错误"
+// @Router /product/skus/{skuId}/prices/{priceId}/tiers [put]
+func (ctrl *ProductSkuPriceController) SaveProductSkuPriceTiers(c *gin.Context) {
+	var req models.SaveProductSkuPriceTiersRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
+		return
+	}
+	result, err := ctrl.productSkuPriceService.SaveProductSkuPriceTiers(c.Param("skuId"), c.Param("priceId"), req, productSkuPriceOperatorID(c))
+	if err != nil {
+		writeProductSkuPriceError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
 func productSkuPriceOperatorID(c *gin.Context) string {
 	value, exists := c.Get("userId")
 	if !exists {

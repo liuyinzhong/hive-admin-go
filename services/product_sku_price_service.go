@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -47,6 +48,26 @@ func (s *ProductSkuPriceService) GetProductSkuPriceList(skuID string) ([]models.
 		return nil, err
 	}
 	return productSkuPriceRowsToResponses(rows), nil
+}
+
+func (s *ProductSkuPriceService) GetProductSkuPriceTiers(skuID, priceID string) ([]models.ProductSkuPriceTierResponse, error) {
+	if err := validateProductSkuPriceUUID(skuID, "SKU ID"); err != nil {
+		return nil, err
+	}
+	if err := validateProductSkuPriceUUID(priceID, "价格ID"); err != nil {
+		return nil, err
+	}
+	if _, err := s.getExistingProductSkuPrice(database.DB, skuID, priceID); err != nil {
+		return nil, err
+	}
+
+	var tiers []models.ProductSkuPriceTier
+	if err := database.DB.Where("price_id = ? AND del_flag = 0", priceID).
+		Order("min_quantity asc, tier_id asc").
+		Find(&tiers).Error; err != nil {
+		return nil, err
+	}
+	return productSkuPriceTiersToResponses(tiers), nil
 }
 
 func (s *ProductSkuPriceService) CreateProductSkuPrice(skuID string, req models.SaveProductSkuPriceRequest, operatorID string) (*models.ProductSkuPriceResponse, error) {
@@ -250,6 +271,13 @@ func (s *ProductSkuPriceService) DeleteProductSkuPrice(skuID, priceID string, re
 		}
 
 		now := time.Now()
+		if err := tx.Model(&models.ProductSkuPriceTier{}).Where("price_id = ? AND del_flag = 0", priceID).Updates(map[string]interface{}{
+			"del_flag":    1,
+			"updater_id":  optionalProductSkuPriceOperatorID(operatorID),
+			"update_date": now,
+		}).Error; err != nil {
+			return err
+		}
 		return tx.Model(&models.ProductSkuPrice{}).Where("price_id = ?", priceID).Updates(map[string]interface{}{
 			"del_flag":    1,
 			"row_version": current.RowVersion + 1,
@@ -257,6 +285,112 @@ func (s *ProductSkuPriceService) DeleteProductSkuPrice(skuID, priceID string, re
 			"update_date": now,
 		}).Error
 	})
+}
+
+func (s *ProductSkuPriceService) SaveProductSkuPriceTiers(skuID, priceID string, req models.SaveProductSkuPriceTiersRequest, operatorID string) (*models.ProductSkuPriceResponse, error) {
+	if err := validateProductSkuPriceUUID(skuID, "SKU ID"); err != nil {
+		return nil, err
+	}
+	if err := validateProductSkuPriceUUID(priceID, "价格ID"); err != nil {
+		return nil, err
+	}
+	normalized, err := normalizeProductSkuPriceTierItems(req.Tiers)
+	if err != nil {
+		return nil, err
+	}
+	if req.ExpectedPriceRowVersion <= 0 {
+		return nil, fmt.Errorf("%w: 缺少价格版本号", ErrProductSkuPriceInvalidInput)
+	}
+
+	if err := database.DB.Transaction(func(tx *gorm.DB) error {
+		if _, err := s.lockExistingProductSku(tx, skuID); err != nil {
+			return err
+		}
+
+		var current models.ProductSkuPrice
+		if err := tx.Where("price_id = ? AND sku_id = ? AND del_flag = 0", priceID, skuID).
+			Clauses(clause.Locking{Strength: "UPDATE"}).
+			First(&current).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("%w: SKU价格不存在", ErrProductSkuPriceNotFound)
+			}
+			return err
+		}
+		if current.RowVersion != req.ExpectedPriceRowVersion {
+			return fmt.Errorf("%w: SKU价格已被其他人修改，请刷新后重试", ErrProductSkuPriceConflict)
+		}
+
+		existing, err := s.lockProductSkuPriceTiers(tx, priceID)
+		if err != nil {
+			return err
+		}
+		existingMap := make(map[string]models.ProductSkuPriceTier, len(existing))
+		for _, tier := range existing {
+			existingMap[tier.TierID] = tier
+		}
+
+		now := time.Now()
+		keptTierIDs := make(map[string]struct{}, len(normalized))
+		for _, tier := range normalized {
+			if tier.TierID == nil {
+				row := models.ProductSkuPriceTier{
+					TierID:      utils.GenerateUUID(),
+					PriceID:     priceID,
+					MinQuantity: tier.MinQuantity,
+					MaxQuantity: tier.MaxQuantity,
+					TierPrice:   tier.TierPrice,
+					CreatorID:   optionalProductSkuPriceOperatorID(operatorID),
+					UpdaterID:   optionalProductSkuPriceOperatorID(operatorID),
+					CreateDate:  &now,
+					UpdateDate:  &now,
+					DelFlag:     0,
+				}
+				if err := tx.Create(&row).Error; err != nil {
+					return err
+				}
+				keptTierIDs[row.TierID] = struct{}{}
+				continue
+			}
+
+			existingTier, exists := existingMap[*tier.TierID]
+			if !exists {
+				return fmt.Errorf("%w: 阶梯价格不存在或不属于当前价格", ErrProductSkuPriceInvalidInput)
+			}
+			if err := tx.Model(&models.ProductSkuPriceTier{}).Where("tier_id = ?", existingTier.TierID).Updates(map[string]interface{}{
+				"min_quantity": tier.MinQuantity,
+				"max_quantity": tier.MaxQuantity,
+				"tier_price":   tier.TierPrice,
+				"updater_id":   optionalProductSkuPriceOperatorID(operatorID),
+				"update_date":  now,
+			}).Error; err != nil {
+				return err
+			}
+			keptTierIDs[existingTier.TierID] = struct{}{}
+		}
+
+		for _, tier := range existing {
+			if _, kept := keptTierIDs[tier.TierID]; kept {
+				continue
+			}
+			if err := tx.Model(&models.ProductSkuPriceTier{}).Where("tier_id = ?", tier.TierID).Updates(map[string]interface{}{
+				"del_flag":    1,
+				"updater_id":  optionalProductSkuPriceOperatorID(operatorID),
+				"update_date": now,
+			}).Error; err != nil {
+				return err
+			}
+		}
+
+		return tx.Model(&models.ProductSkuPrice{}).Where("price_id = ?", priceID).Updates(map[string]interface{}{
+			"row_version": current.RowVersion + 1,
+			"updater_id":  optionalProductSkuPriceOperatorID(operatorID),
+			"update_date": now,
+		}).Error
+	}); err != nil {
+		return nil, err
+	}
+
+	return s.GetProductSkuPriceDetail(skuID, priceID)
 }
 
 func (s *ProductSkuPriceService) GetProductSkuPriceDetail(skuID, priceID string) (*models.ProductSkuPriceResponse, error) {
@@ -303,8 +437,16 @@ type productSkuPriceQueryRow struct {
 	Status         int
 	Remark         *string
 	RowVersion     int
+	TierCount      int
 	CreateDate     *time.Time
 	UpdateDate     *time.Time
+}
+
+type normalizedProductSkuPriceTier struct {
+	TierID      *string
+	MinQuantity int
+	MaxQuantity *int
+	TierPrice   string
 }
 
 func (s *ProductSkuPriceService) normalizeSaveRequest(req models.SaveProductSkuPriceRequest, requireVersion bool) (*normalizedProductSkuPriceSave, error) {
@@ -379,6 +521,7 @@ func (s *ProductSkuPriceService) baseProductSkuPriceQuery() *gorm.DB {
 	return database.DB.Table("product_sku_price").
 		Joins("INNER JOIN product_sku ON product_sku.sku_id = product_sku_price.sku_id AND product_sku.del_flag = 0").
 		Joins("LEFT JOIN base_enterprise scope_enterprise ON scope_enterprise.enterprise_id = product_sku_price.scope_id AND scope_enterprise.del_flag = 0").
+		Joins("LEFT JOIN (?) AS tier_stat ON tier_stat.price_id = product_sku_price.price_id", productSkuPriceTierCountSubquery()).
 		Where("product_sku_price.del_flag = 0")
 }
 
@@ -404,6 +547,26 @@ func (s *ProductSkuPriceService) lockExistingProductSku(tx *gorm.DB, skuID strin
 		return nil, err
 	}
 	return &sku, nil
+}
+
+func (s *ProductSkuPriceService) getExistingProductSkuPrice(tx *gorm.DB, skuID, priceID string) (*models.ProductSkuPrice, error) {
+	var price models.ProductSkuPrice
+	if err := tx.Where("price_id = ? AND sku_id = ? AND del_flag = 0", priceID, skuID).First(&price).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("%w: SKU价格不存在", ErrProductSkuPriceNotFound)
+		}
+		return nil, err
+	}
+	return &price, nil
+}
+
+func (s *ProductSkuPriceService) lockProductSkuPriceTiers(tx *gorm.DB, priceID string) ([]models.ProductSkuPriceTier, error) {
+	var tiers []models.ProductSkuPriceTier
+	err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("price_id = ? AND del_flag = 0", priceID).
+		Order("min_quantity asc, tier_id asc").
+		Find(&tiers).Error
+	return tiers, err
 }
 
 func (s *ProductSkuPriceService) lockProductSkuPrices(tx *gorm.DB, skuID, priceType, scopeType string, scopeID *string) ([]models.ProductSkuPrice, error) {
@@ -436,9 +599,17 @@ func productSkuPriceSelectFields() string {
 		"product_sku_price.status",
 		"product_sku_price.remark",
 		"product_sku_price.row_version",
+		"COALESCE(tier_stat.tier_count, 0) AS tier_count",
 		"product_sku_price.create_date",
 		"product_sku_price.update_date",
 	}, ", ")
+}
+
+func productSkuPriceTierCountSubquery() *gorm.DB {
+	return database.DB.Table("product_sku_price_tier").
+		Select("price_id, COUNT(*) AS tier_count").
+		Where("del_flag = 0").
+		Group("price_id")
 }
 
 func productSkuPriceRowsToResponses(rows []productSkuPriceQueryRow) []models.ProductSkuPriceResponse {
@@ -466,9 +637,26 @@ func productSkuPriceRowToResponse(row productSkuPriceQueryRow) *models.ProductSk
 		Status:         row.Status,
 		Remark:         row.Remark,
 		RowVersion:     row.RowVersion,
+		TierCount:      row.TierCount,
 		CreateDate:     models.TimeToStringPtr(row.CreateDate),
 		UpdateDate:     models.TimeToStringPtr(row.UpdateDate),
 	}
+}
+
+func productSkuPriceTiersToResponses(tiers []models.ProductSkuPriceTier) []models.ProductSkuPriceTierResponse {
+	responses := make([]models.ProductSkuPriceTierResponse, 0, len(tiers))
+	for _, tier := range tiers {
+		responses = append(responses, models.ProductSkuPriceTierResponse{
+			TierID:      tier.TierID,
+			PriceID:     tier.PriceID,
+			MinQuantity: tier.MinQuantity,
+			MaxQuantity: tier.MaxQuantity,
+			TierPrice:   tier.TierPrice,
+			CreateDate:  models.TimeToStringPtr(tier.CreateDate),
+			UpdateDate:  models.TimeToStringPtr(tier.UpdateDate),
+		})
+	}
+	return responses
 }
 
 func productSkuPricePeriodsOverlap(prices []models.ProductSkuPrice, effectiveStart time.Time, effectiveEnd *time.Time, excludePriceID string) bool {
@@ -529,6 +717,73 @@ func normalizeProductSkuPriceAmount(value string) (string, error) {
 		return "", fmt.Errorf("%w: 价格金额必须大于0", ErrProductSkuPriceInvalidInput)
 	}
 	return fmt.Sprintf("%s.%s", intPart, fraction), nil
+}
+
+func normalizeProductSkuPriceTierItems(items []models.SaveProductSkuPriceTierItem) ([]normalizedProductSkuPriceTier, error) {
+	if items == nil {
+		return nil, fmt.Errorf("%w: 阶梯价格数组不能为空", ErrProductSkuPriceInvalidInput)
+	}
+	tiers := make([]normalizedProductSkuPriceTier, 0, len(items))
+	for _, item := range items {
+		tierID := normalizeProductSkuPriceOptionalString(item.TierID)
+		if tierID != nil {
+			if err := validateProductSkuPriceUUID(*tierID, "阶梯价格ID"); err != nil {
+				return nil, err
+			}
+		}
+		if item.MinQuantity <= 0 {
+			return nil, fmt.Errorf("%w: 起始数量必须为正整数", ErrProductSkuPriceInvalidInput)
+		}
+		if item.MaxQuantity != nil && *item.MaxQuantity < item.MinQuantity {
+			return nil, fmt.Errorf("%w: 结束数量必须大于等于起始数量", ErrProductSkuPriceInvalidInput)
+		}
+		tierPrice, err := normalizeProductSkuPriceAmount(item.TierPrice)
+		if err != nil {
+			return nil, err
+		}
+		tiers = append(tiers, normalizedProductSkuPriceTier{
+			TierID:      tierID,
+			MinQuantity: item.MinQuantity,
+			MaxQuantity: item.MaxQuantity,
+			TierPrice:   tierPrice,
+		})
+	}
+	sort.Slice(tiers, func(i, j int) bool {
+		if tiers[i].MinQuantity == tiers[j].MinQuantity {
+			return optionalProductSkuPriceMaxQuantityValue(tiers[i].MaxQuantity) < optionalProductSkuPriceMaxQuantityValue(tiers[j].MaxQuantity)
+		}
+		return tiers[i].MinQuantity < tiers[j].MinQuantity
+	})
+	if err := validateProductSkuPriceTierPeriods(tiers); err != nil {
+		return nil, err
+	}
+	return tiers, nil
+}
+
+func validateProductSkuPriceTierPeriods(tiers []normalizedProductSkuPriceTier) error {
+	seenMinQuantity := make(map[int]struct{}, len(tiers))
+	var previous *normalizedProductSkuPriceTier
+	for index := range tiers {
+		current := tiers[index]
+		if _, exists := seenMinQuantity[current.MinQuantity]; exists {
+			return fmt.Errorf("%w: 阶梯起始数量不能重复", ErrProductSkuPriceConflict)
+		}
+		seenMinQuantity[current.MinQuantity] = struct{}{}
+		if previous != nil {
+			if previous.MaxQuantity == nil || current.MinQuantity <= *previous.MaxQuantity {
+				return fmt.Errorf("%w: 阶梯数量区间不能重叠", ErrProductSkuPriceConflict)
+			}
+		}
+		previous = &tiers[index]
+	}
+	return nil
+}
+
+func optionalProductSkuPriceMaxQuantityValue(value *int) int {
+	if value == nil {
+		return int(^uint(0) >> 1)
+	}
+	return *value
 }
 
 func normalizeProductSkuPricePeriod(effectiveStartValue string, effectiveEndValue *string) (time.Time, *time.Time, error) {

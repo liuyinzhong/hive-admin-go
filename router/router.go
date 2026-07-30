@@ -266,6 +266,8 @@ func SetupRouter() *gin.Engine {
 				skus.PUT("/:skuId/prices/:priceId", permissionGuard.Require("product:skuPrice:update"), productSkuPriceController.UpdateProductSkuPrice)
 				skus.PUT("/:skuId/prices/:priceId/status", permissionGuard.Require("product:skuPrice:status"), productSkuPriceController.UpdateProductSkuPriceStatus)
 				skus.DELETE("/:skuId/prices/:priceId", permissionGuard.Require("product:skuPrice:delete"), productSkuPriceController.DeleteProductSkuPrice)
+				skus.GET("/:skuId/prices/:priceId/tiers", permissionGuard.Require("product:skuPriceTier:list"), productSkuPriceController.GetProductSkuPriceTiers)
+				skus.PUT("/:skuId/prices/:priceId/tiers", permissionGuard.Require("product:skuPriceTier:save"), productSkuPriceController.SaveProductSkuPriceTiers)
 				skus.GET("/:skuId", permissionGuard.Require("product:sku:detail"), productSkuController.GetProductSku)
 				skus.PUT("/:skuId", permissionGuard.Require("product:sku:update"), productSkuController.UpdateProductSku)
 				skus.PUT("/:skuId/status", permissionGuard.Require("product:sku:status"), productSkuController.UpdateProductSkuStatus)

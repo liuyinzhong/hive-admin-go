@@ -8111,6 +8111,191 @@ const docTemplate = `{
                 }
             }
         },
+        "/product/skus/{skuId}/prices/{priceId}/tiers": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取指定SKU价格下全部未删除阶梯价格，按起始数量升序展示",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/SKU价格"
+                ],
+                "summary": "获取SKU价格阶梯",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "SKU ID",
+                        "name": "skuId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "价格ID",
+                        "name": "priceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ProductSkuPriceTierResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "业务数据不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "全量保存指定SKU价格下的阶梯价格，空数组表示清空阶梯价格；保存时校验父级价格版本、起始数量唯一和区间不重叠",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "产品档案/SKU价格"
+                ],
+                "summary": "保存SKU价格阶梯",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "SKU ID",
+                        "name": "skuId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "价格ID",
+                        "name": "priceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "阶梯价格",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveProductSkuPriceTiersRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ProductSkuPriceResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "业务数据不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "业务数据冲突",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/product/skus/{skuId}/status": {
             "put": {
                 "security": [
@@ -15888,6 +16073,51 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "tierCount": {
+                    "description": "阶梯价格数量",
+                    "type": "integer",
+                    "example": 2
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                }
+            }
+        },
+        "models.ProductSkuPriceTierResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "maxQuantity": {
+                    "description": "结束数量，空表示以上",
+                    "type": "integer",
+                    "example": 9
+                },
+                "minQuantity": {
+                    "description": "起始数量，按SKU包装单位计算",
+                    "type": "integer",
+                    "example": 1
+                },
+                "priceId": {
+                    "description": "所属价格ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "tierId": {
+                    "description": "阶梯价格ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "tierPrice": {
+                    "description": "阶梯单价",
+                    "type": "string",
+                    "example": "29.8000"
+                },
                 "updateDate": {
                     "description": "更新时间",
                     "type": "string",
@@ -17042,6 +17272,57 @@ const docTemplate = `{
                         1
                     ],
                     "example": 1
+                }
+            }
+        },
+        "models.SaveProductSkuPriceTierItem": {
+            "type": "object",
+            "required": [
+                "minQuantity",
+                "tierPrice"
+            ],
+            "properties": {
+                "maxQuantity": {
+                    "description": "结束数量，空表示以上",
+                    "type": "integer",
+                    "example": 9
+                },
+                "minQuantity": {
+                    "description": "起始数量，按SKU包装单位计算",
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 1
+                },
+                "tierId": {
+                    "description": "阶梯价格ID，已有阶梯传入，新增为空",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "tierPrice": {
+                    "description": "阶梯单价",
+                    "type": "string",
+                    "example": "29.8000"
+                }
+            }
+        },
+        "models.SaveProductSkuPriceTiersRequest": {
+            "type": "object",
+            "required": [
+                "expectedPriceRowVersion"
+            ],
+            "properties": {
+                "expectedPriceRowVersion": {
+                    "description": "期望价格版本号",
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 1
+                },
+                "tiers": {
+                    "description": "全量阶梯价格数组，空数组表示清空阶梯价格",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SaveProductSkuPriceTierItem"
+                    }
                 }
             }
         },
