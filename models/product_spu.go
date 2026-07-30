@@ -120,6 +120,7 @@ type ProductSpuDetailRowResponse struct {
 	AllowSplit      *int    `json:"allowSplit" example:"0"`                                      // 是否允许拆零：0否 1是
 	SkuRowVersion   *int    `json:"skuRowVersion" example:"1"`                                   // SKU版本号
 	Status          *int    `json:"status" example:"1"`                                          // SKU状态：0停用 1启用；无SKU时为空
+	SkuPriceCount   int     `json:"skuPriceCount" example:"2"`                                   // SKU已维护价格数量
 }
 
 type ProductSpuOptionResponse struct {

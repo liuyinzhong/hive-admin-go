@@ -368,6 +368,7 @@ func (s *ProductSpuService) getProductSpuDetailRows(spu models.ProductSpu) ([]mo
 		Joins("LEFT JOIN product_mp ON product_mp.rp_id = product_rp.rp_id AND product_mp.del_flag = 0").
 		Joins("LEFT JOIN base_enterprise ON base_enterprise.enterprise_id = product_mp.enterprise_id AND base_enterprise.del_flag = 0").
 		Joins("LEFT JOIN product_sku ON product_sku.mp_id = product_mp.mp_id AND product_sku.del_flag = 0").
+		Joins("LEFT JOIN (?) AS sku_price_stat ON sku_price_stat.sku_id = product_sku.sku_id", productSkuPriceCountSubquery()).
 		Joins("INNER JOIN product_spu ON product_spu.spu_id = product_rp.spu_id AND product_spu.del_flag = 0").
 		Where("product_rp.spu_id = ? AND product_rp.del_flag = 0", spu.SpuID).
 		Order("product_rp.create_date asc, product_rp.rp_code asc, product_mp.create_date asc, product_mp.mp_code asc, product_sku.create_date asc, product_sku.sku_code asc").
@@ -413,7 +414,15 @@ func productSpuDetailRowSelectFields() string {
 		"product_sku.allow_split",
 		"product_sku.row_version AS sku_row_version",
 		"product_sku.status",
+		"COALESCE(sku_price_stat.sku_price_count, 0) AS sku_price_count",
 	}, ", ")
+}
+
+func productSkuPriceCountSubquery() *gorm.DB {
+	return database.DB.Table("product_sku_price").
+		Select("sku_id, COUNT(*) AS sku_price_count").
+		Where("del_flag = 0").
+		Group("sku_id")
 }
 
 func (s *ProductSpuService) productSpuToDetailResponse(spu models.ProductSpu, rows []models.ProductSpuDetailRowResponse) *models.ProductSpuDetailResponse {

@@ -2210,6 +2210,10 @@ definitions:
         description: SKU ID，未维护时为空
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
+      skuPriceCount:
+        description: SKU已维护价格数量
+        example: 2
+        type: integer
       skuRowVersion:
         description: SKU版本号
         example: 1
@@ -9970,7 +9974,7 @@ paths:
       - 产品档案/通用产品
   /product/spus/{spuId}:
     get:
-      description: 根据SPU ID查询通用产品详细信息。响应包含顶部SPU基础字段，以及用于合并单元格展示的rows扁平行；rows.status仅代表SKU状态，无SKU时为空。
+      description: 根据SPU ID查询通用产品详细信息。响应包含顶部SPU基础字段，以及用于合并单元格展示的rows扁平行；rows.status仅代表SKU状态，无SKU时为空；rows.skuPriceCount为该SKU未删除价格数量。
       parameters:
       - description: 通用产品ID，UUID格式
         example: 550e8400-e29b-41d4-a716-446655440000

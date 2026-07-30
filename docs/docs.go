@@ -8423,7 +8423,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "根据SPU ID查询通用产品详细信息。响应包含顶部SPU基础字段，以及用于合并单元格展示的rows扁平行；rows.status仅代表SKU状态，无SKU时为空。",
+                "description": "根据SPU ID查询通用产品详细信息。响应包含顶部SPU基础字段，以及用于合并单元格展示的rows扁平行；rows.status仅代表SKU状态，无SKU时为空；rows.skuPriceCount为该SKU未删除价格数量。",
                 "produces": [
                     "application/json"
                 ],
@@ -16229,6 +16229,11 @@ const docTemplate = `{
                     "description": "SKU ID，未维护时为空",
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "skuPriceCount": {
+                    "description": "SKU已维护价格数量",
+                    "type": "integer",
+                    "example": 2
                 },
                 "skuRowVersion": {
                     "description": "SKU版本号",

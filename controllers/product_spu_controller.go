@@ -53,7 +53,7 @@ func (ctrl *ProductSpuController) GetProductSpuList(c *gin.Context) {
 
 // GetProductSpu 获取通用产品详情
 // @Summary 获取通用产品详情
-// @Description 根据SPU ID查询通用产品详细信息。响应包含顶部SPU基础字段，以及用于合并单元格展示的rows扁平行；rows.status仅代表SKU状态，无SKU时为空。
+// @Description 根据SPU ID查询通用产品详细信息。响应包含顶部SPU基础字段，以及用于合并单元格展示的rows扁平行；rows.status仅代表SKU状态，无SKU时为空；rows.skuPriceCount为该SKU未删除价格数量。
 // @Tags 产品档案/通用产品
 // @Produce json
 // @Security ApiKeyAuth
