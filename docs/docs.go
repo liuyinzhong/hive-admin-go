@@ -3982,6 +3982,575 @@ const docTemplate = `{
                 }
             }
         },
+        "/erp/warehouses": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "分页查询仓库基础资料列表，支持按仓库编码/名称、储存类型、业务范围和状态筛选",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/仓库管理"
+                ],
+                "summary": "获取仓库列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "仓库编码或仓库名称",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "仓库储存类型：NORMAL普通 REFRIGERATED冷藏 FROZEN冷冻 COOL阴凉 HAZARDOUS危险品",
+                        "name": "storageType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "仓库业务范围：DRUG药品 CONSUMABLE耗材 DEVICE器械 COMPREHENSIVE综合",
+                        "name": "businessScope",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态：0停用 1启用",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ErpWarehouseResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "创建仓库基础资料，仓库编码由后端自动生成",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/仓库管理"
+                ],
+                "summary": "新增仓库",
+                "parameters": [
+                    {
+                        "description": "仓库",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveErpWarehouseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ErpWarehouseResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/warehouses/options": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取已启用的仓库基础资料选项，用于下拉选择等场景；需要登录，不做仓库按钮权限校验",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/仓库管理"
+                ],
+                "summary": "获取启用仓库选项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "仓库编码或仓库名称",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "返回数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ErpWarehouseOptionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/warehouses/{warehouseId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据仓库ID获取仓库基础资料详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/仓库管理"
+                ],
+                "summary": "获取仓库详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ErpWarehouseResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据仓库ID更新仓库基础资料，仓库编码不可修改",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/仓库管理"
+                ],
+                "summary": "更新仓库",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "仓库",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveErpWarehouseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ErpWarehouseResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据仓库ID软删除仓库基础资料，第一版不校验库存或单据引用",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/仓库管理"
+                ],
+                "summary": "删除仓库",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "删除参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.DeleteErpWarehouseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/warehouses/{warehouseId}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据仓库ID更新仓库启用/停用状态",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/仓库管理"
+                ],
+                "summary": "更新仓库启停状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateErpWarehouseStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ErpWarehouseResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/form/schemas": {
             "get": {
                 "security": [
@@ -14430,6 +14999,20 @@ const docTemplate = `{
                 }
             }
         },
+        "models.DeleteErpWarehouseRequest": {
+            "type": "object",
+            "required": [
+                "expectedRowVersion"
+            ],
+            "properties": {
+                "expectedRowVersion": {
+                    "description": "期望行版本号",
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 1
+                }
+            }
+        },
         "models.DeleteExternalPagesRequest": {
             "type": "object",
             "required": [
@@ -14953,6 +15536,96 @@ const docTemplate = `{
                     "description": "更新时间",
                     "type": "string",
                     "example": "2026-01-15 09:00:00"
+                }
+            }
+        },
+        "models.ErpWarehouseOptionResponse": {
+            "type": "object",
+            "properties": {
+                "businessScope": {
+                    "description": "仓库业务范围",
+                    "type": "string",
+                    "example": "DRUG"
+                },
+                "storageType": {
+                    "description": "仓库储存类型",
+                    "type": "string",
+                    "example": "NORMAL"
+                },
+                "warehouseCode": {
+                    "description": "仓库编码",
+                    "type": "string",
+                    "example": "WH000001"
+                },
+                "warehouseId": {
+                    "description": "仓库ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "warehouseName": {
+                    "description": "仓库名称",
+                    "type": "string",
+                    "example": "中心库"
+                }
+            }
+        },
+        "models.ErpWarehouseResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "地址",
+                    "type": "string",
+                    "example": "北京市朝阳区"
+                },
+                "businessScope": {
+                    "description": "仓库业务范围",
+                    "type": "string",
+                    "example": "DRUG"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "仓库基础资料备注"
+                },
+                "rowVersion": {
+                    "description": "版本号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "status": {
+                    "description": "状态",
+                    "type": "integer",
+                    "example": 1
+                },
+                "storageType": {
+                    "description": "仓库储存类型",
+                    "type": "string",
+                    "example": "NORMAL"
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "warehouseCode": {
+                    "description": "仓库编码",
+                    "type": "string",
+                    "example": "WH000001"
+                },
+                "warehouseId": {
+                    "description": "仓库ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "warehouseName": {
+                    "description": "仓库名称",
+                    "type": "string",
+                    "example": "中心库"
                 }
             }
         },
@@ -16148,6 +16821,21 @@ const docTemplate = `{
                     "type": "string",
                     "example": "品牌名"
                 },
+                "cartonConversion": {
+                    "description": "大包装换算系数",
+                    "type": "integer",
+                    "example": 20
+                },
+                "cartonSpecName": {
+                    "description": "大包装规格名称",
+                    "type": "string",
+                    "example": "20盒/箱"
+                },
+                "cartonUnitName": {
+                    "description": "大包装单位名称",
+                    "type": "string",
+                    "example": "箱"
+                },
                 "createDate": {
                     "description": "创建时间",
                     "type": "string",
@@ -16173,6 +16861,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "张三企业"
                 },
+                "fullChainSpecName": {
+                    "description": "全链路规格名称",
+                    "type": "string",
+                    "example": "1箱/20盒/200粒"
+                },
                 "gtin": {
                     "description": "GTIN码",
                     "type": "string",
@@ -16193,8 +16886,8 @@ const docTemplate = `{
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
-                "packageQuantity": {
-                    "description": "包装数量",
+                "packConversion": {
+                    "description": "包装换算系数",
                     "type": "integer",
                     "example": 10
                 },
@@ -16360,6 +17053,21 @@ const docTemplate = `{
                     "type": "string",
                     "example": "品牌名"
                 },
+                "cartonConversion": {
+                    "description": "大包装换算系数",
+                    "type": "integer",
+                    "example": 20
+                },
+                "cartonSpecName": {
+                    "description": "大包装规格名称",
+                    "type": "string",
+                    "example": "20盒/箱"
+                },
+                "cartonUnitName": {
+                    "description": "大包装单位",
+                    "type": "string",
+                    "example": "箱"
+                },
                 "dosageForm": {
                     "description": "剂型/形态",
                     "type": "string",
@@ -16379,6 +17087,11 @@ const docTemplate = `{
                     "description": "企业名称",
                     "type": "string",
                     "example": "张三企业"
+                },
+                "fullChainSpecName": {
+                    "description": "全链路规格名称",
+                    "type": "string",
+                    "example": "1箱/20盒/200粒"
                 },
                 "gtin": {
                     "description": "GTIN",
@@ -16405,8 +17118,8 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
-                "packageQuantity": {
-                    "description": "包装数量",
+                "packConversion": {
+                    "description": "包装换算系数",
                     "type": "integer",
                     "example": 10
                 },
@@ -17091,6 +17804,60 @@ const docTemplate = `{
                 }
             }
         },
+        "models.SaveErpWarehouseRequest": {
+            "type": "object",
+            "required": [
+                "businessScope",
+                "storageType",
+                "warehouseName"
+            ],
+            "properties": {
+                "address": {
+                    "description": "地址",
+                    "type": "string",
+                    "maxLength": 512,
+                    "example": "北京市朝阳区"
+                },
+                "businessScope": {
+                    "description": "仓库业务范围",
+                    "type": "string",
+                    "maxLength": 32,
+                    "example": "DRUG"
+                },
+                "expectedRowVersion": {
+                    "description": "期望行版本号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "maxLength": 512,
+                    "example": "仓库基础资料备注"
+                },
+                "status": {
+                    "description": "状态",
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ],
+                    "example": 1
+                },
+                "storageType": {
+                    "description": "仓库储存类型",
+                    "type": "string",
+                    "maxLength": 32,
+                    "example": "NORMAL"
+                },
+                "warehouseName": {
+                    "description": "仓库名称",
+                    "type": "string",
+                    "maxLength": 128,
+                    "example": "中心库"
+                }
+            }
+        },
         "models.SaveProductMpRequest": {
             "type": "object",
             "required": [
@@ -17329,10 +18096,11 @@ const docTemplate = `{
         "models.SaveProductSkuRequest": {
             "type": "object",
             "required": [
+                "cartonConversion",
+                "cartonUnitName",
                 "minUnitName",
                 "mpId",
-                "packageQuantity",
-                "packageSpecName",
+                "packConversion",
                 "packageUnitName"
             ],
             "properties": {
@@ -17350,6 +18118,19 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 64,
                     "example": "6901234567890"
+                },
+                "cartonConversion": {
+                    "description": "大包装换算系数",
+                    "type": "integer",
+                    "maximum": 999999,
+                    "minimum": 1,
+                    "example": 20
+                },
+                "cartonUnitName": {
+                    "description": "大包装单位名称",
+                    "type": "string",
+                    "maxLength": 32,
+                    "example": "箱"
                 },
                 "description": {
                     "description": "包装描述",
@@ -17379,18 +18160,12 @@ const docTemplate = `{
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
-                "packageQuantity": {
-                    "description": "包装数量",
+                "packConversion": {
+                    "description": "包装换算系数",
                     "type": "integer",
                     "maximum": 999999,
                     "minimum": 1,
                     "example": 10
-                },
-                "packageSpecName": {
-                    "description": "包装规格名称",
-                    "type": "string",
-                    "maxLength": 128,
-                    "example": "10粒/盒"
                 },
                 "packageUnitName": {
                     "description": "包装单位名称",
@@ -18482,6 +19257,29 @@ const docTemplate = `{
             }
         },
         "models.UpdateEnterpriseStatusRequest": {
+            "type": "object",
+            "required": [
+                "expectedRowVersion"
+            ],
+            "properties": {
+                "expectedRowVersion": {
+                    "description": "期望行版本号",
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 1
+                },
+                "status": {
+                    "description": "状态",
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ],
+                    "example": 1
+                }
+            }
+        },
+        "models.UpdateErpWarehouseStatusRequest": {
             "type": "object",
             "required": [
                 "expectedRowVersion"

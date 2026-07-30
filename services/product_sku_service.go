@@ -43,6 +43,7 @@ func (s *ProductSkuService) GetProductSkuList(req models.ProductSkuListRequest) 
 	order := utils.BuildOrderBy(req.Sorts, map[string]string{
 		"skuCode":         "product_sku.sku_code",
 		"packageSpecName": "product_sku.package_spec_name",
+		"cartonSpecName":  "product_sku.carton_spec_name",
 		"status":          "product_sku.status",
 		"createDate":      "product_sku.create_date",
 		"updateDate":      "product_sku.update_date",
@@ -92,7 +93,7 @@ func (s *ProductSkuService) CreateProductSku(req models.SaveProductSkuRequest, o
 		if _, err := s.getExistingProductMp(tx, normalized.MpID); err != nil {
 			return err
 		}
-		if err := s.ensureProductSkuUnique(tx, normalized.MpID, normalized.PackageSpecNameNormalized, ""); err != nil {
+		if err := s.ensureProductSkuUnique(tx, normalized, ""); err != nil {
 			return err
 		}
 		code, err := s.nextProductSkuCode(tx)
@@ -103,26 +104,29 @@ func (s *ProductSkuService) CreateProductSku(req models.SaveProductSkuRequest, o
 		now := time.Now()
 		createdID = utils.GenerateUUID()
 		sku := models.ProductSku{
-			SkuID:                     createdID,
-			SkuCode:                   code,
-			MpID:                      normalized.MpID,
-			PackageSpecName:           normalized.PackageSpecName,
-			PackageSpecNameNormalized: normalized.PackageSpecNameNormalized,
-			PackageQuantity:           normalized.PackageQuantity,
-			MinUnitName:               normalized.MinUnitName,
-			PackageUnitName:           normalized.PackageUnitName,
-			Barcode:                   normalized.Barcode,
-			Gtin:                      normalized.Gtin,
-			UdiDi:                     normalized.UdiDi,
-			AllowSplit:                normalized.AllowSplit,
-			Description:               normalized.Description,
-			Status:                    normalized.Status,
-			RowVersion:                1,
-			CreatorID:                 optionalProductSkuOperatorID(operatorID),
-			UpdaterID:                 optionalProductSkuOperatorID(operatorID),
-			CreateDate:                &now,
-			UpdateDate:                &now,
-			DelFlag:                   0,
+			SkuID:             createdID,
+			SkuCode:           code,
+			MpID:              normalized.MpID,
+			PackageSpecName:   normalized.PackageSpecName,
+			PackConversion:    normalized.PackConversion,
+			MinUnitName:       normalized.MinUnitName,
+			PackageUnitName:   normalized.PackageUnitName,
+			CartonUnitName:    normalized.CartonUnitName,
+			CartonConversion:  normalized.CartonConversion,
+			CartonSpecName:    normalized.CartonSpecName,
+			FullChainSpecName: normalized.FullChainSpecName,
+			Barcode:           normalized.Barcode,
+			Gtin:              normalized.Gtin,
+			UdiDi:             normalized.UdiDi,
+			AllowSplit:        normalized.AllowSplit,
+			Description:       normalized.Description,
+			Status:            normalized.Status,
+			RowVersion:        1,
+			CreatorID:         optionalProductSkuOperatorID(operatorID),
+			UpdaterID:         optionalProductSkuOperatorID(operatorID),
+			CreateDate:        &now,
+			UpdateDate:        &now,
+			DelFlag:           0,
 		}
 		return tx.Create(&sku).Error
 	}); err != nil {
@@ -157,26 +161,29 @@ func (s *ProductSkuService) UpdateProductSku(skuID string, req models.SaveProduc
 		if sku.RowVersion != normalized.ExpectedRowVersion {
 			return fmt.Errorf("%w: SKU已被其他人修改，请刷新后重试", ErrProductSkuConflict)
 		}
-		if err := s.ensureProductSkuUnique(tx, sku.MpID, normalized.PackageSpecNameNormalized, skuID); err != nil {
+		if err := s.ensureProductSkuUnique(tx, normalized, skuID); err != nil {
 			return err
 		}
 
 		now := time.Now()
 		return tx.Model(&models.ProductSku{}).Where("sku_id = ?", skuID).Updates(map[string]interface{}{
-			"package_spec_name":            normalized.PackageSpecName,
-			"package_spec_name_normalized": normalized.PackageSpecNameNormalized,
-			"package_quantity":             normalized.PackageQuantity,
-			"min_unit_name":                normalized.MinUnitName,
-			"package_unit_name":            normalized.PackageUnitName,
-			"barcode":                      normalized.Barcode,
-			"gtin":                         normalized.Gtin,
-			"udi_di":                       normalized.UdiDi,
-			"allow_split":                  normalized.AllowSplit,
-			"description":                  normalized.Description,
-			"status":                       normalized.Status,
-			"row_version":                  sku.RowVersion + 1,
-			"updater_id":                   optionalProductSkuOperatorID(operatorID),
-			"update_date":                  now,
+			"package_spec_name":    normalized.PackageSpecName,
+			"pack_conversion":      normalized.PackConversion,
+			"min_unit_name":        normalized.MinUnitName,
+			"package_unit_name":    normalized.PackageUnitName,
+			"carton_unit_name":     normalized.CartonUnitName,
+			"carton_conversion":    normalized.CartonConversion,
+			"carton_spec_name":     normalized.CartonSpecName,
+			"full_chain_spec_name": normalized.FullChainSpecName,
+			"barcode":              normalized.Barcode,
+			"gtin":                 normalized.Gtin,
+			"udi_di":               normalized.UdiDi,
+			"allow_split":          normalized.AllowSplit,
+			"description":          normalized.Description,
+			"status":               normalized.Status,
+			"row_version":          sku.RowVersion + 1,
+			"updater_id":           optionalProductSkuOperatorID(operatorID),
+			"update_date":          now,
 		}).Error
 	}); err != nil {
 		return nil, err
@@ -237,8 +244,8 @@ func (s *ProductSkuService) GetProductSkuOptions(req models.ProductSkuOptionsReq
 	if keyword := strings.TrimSpace(req.Keyword); keyword != "" {
 		like := "%" + strings.ToLower(keyword) + "%"
 		query = query.Where(
-			"LOWER(product_sku.sku_code) LIKE ? OR LOWER(product_sku.package_spec_name) LIKE ? OR LOWER(IFNULL(product_sku.barcode, '')) LIKE ? OR LOWER(IFNULL(product_sku.gtin, '')) LIKE ? OR LOWER(IFNULL(product_sku.udi_di, '')) LIKE ? OR LOWER(product_mp.mp_code) LIKE ? OR LOWER(base_enterprise.enterprise_name) LIKE ? OR LOWER(product_spu.product_name) LIKE ?",
-			like, like, like, like, like, like, like, like,
+			"LOWER(product_sku.sku_code) LIKE ? OR LOWER(product_sku.package_spec_name) LIKE ? OR LOWER(product_sku.carton_spec_name) LIKE ? OR LOWER(product_sku.full_chain_spec_name) LIKE ? OR LOWER(IFNULL(product_sku.barcode, '')) LIKE ? OR LOWER(IFNULL(product_sku.gtin, '')) LIKE ? OR LOWER(IFNULL(product_sku.udi_di, '')) LIKE ? OR LOWER(product_mp.mp_code) LIKE ? OR LOWER(base_enterprise.enterprise_name) LIKE ? OR LOWER(product_spu.product_name) LIKE ?",
+			like, like, like, like, like, like, like, like, like, like,
 		)
 	}
 
@@ -275,66 +282,66 @@ func (s *ProductSkuService) GetProductSkuOptions(req models.ProductSkuOptionsReq
 }
 
 type normalizedProductSkuSave struct {
-	MpID                      string
-	PackageSpecName           string
-	PackageSpecNameNormalized string
-	PackageQuantity           int
-	MinUnitName               string
-	PackageUnitName           string
-	Barcode                   *string
-	Gtin                      *string
-	UdiDi                     *string
-	AllowSplit                int
-	Description               *string
-	Status                    int
-	ExpectedRowVersion        int
+	MpID               string
+	PackageSpecName    string
+	PackConversion     int
+	MinUnitName        string
+	PackageUnitName    string
+	CartonUnitName     string
+	CartonConversion   int
+	CartonSpecName     string
+	FullChainSpecName  string
+	Barcode            *string
+	Gtin               *string
+	UdiDi              *string
+	AllowSplit         int
+	Description        *string
+	Status             int
+	ExpectedRowVersion int
 }
 
 type productSkuQueryRow struct {
-	SpuID           string
-	SpuCode         string
-	ProductName     string
-	ProductType     string
-	RpID            string
-	RpCode          string
-	SpecName        string
-	MpID            string
-	MpCode          string
-	EnterpriseID    string
-	EnterpriseCode  string
-	EnterpriseName  string
-	ApprovalNo      string
-	BrandName       *string
-	SkuID           string
-	SkuCode         string
-	PackageSpecName string
-	PackageQuantity int
-	MinUnitName     string
-	PackageUnitName string
-	Barcode         *string
-	Gtin            *string
-	UdiDi           *string
-	AllowSplit      int
-	Description     *string
-	Status          int
-	RowVersion      int
-	CreateDate      *time.Time
-	UpdateDate      *time.Time
+	SpuID             string
+	SpuCode           string
+	ProductName       string
+	ProductType       string
+	RpID              string
+	RpCode            string
+	SpecName          string
+	MpID              string
+	MpCode            string
+	EnterpriseID      string
+	EnterpriseCode    string
+	EnterpriseName    string
+	ApprovalNo        string
+	BrandName         *string
+	SkuID             string
+	SkuCode           string
+	PackageSpecName   string
+	PackConversion    int
+	MinUnitName       string
+	PackageUnitName   string
+	CartonUnitName    string
+	CartonConversion  int
+	CartonSpecName    string
+	FullChainSpecName string
+	Barcode           *string
+	Gtin              *string
+	UdiDi             *string
+	AllowSplit        int
+	Description       *string
+	Status            int
+	RowVersion        int
+	CreateDate        *time.Time
+	UpdateDate        *time.Time
 }
 
 func (s *ProductSkuService) normalizeSaveRequest(req models.SaveProductSkuRequest, requireVersion bool) (*normalizedProductSkuSave, error) {
 	if err := validateProductSkuUUID(req.MpID, "厂家产品ID"); err != nil {
 		return nil, err
 	}
-	packageSpecName := strings.TrimSpace(req.PackageSpecName)
-	if packageSpecName == "" {
-		return nil, fmt.Errorf("%w: 包装规格名称不能为空", ErrProductSkuInvalidInput)
-	}
-	if len([]rune(packageSpecName)) > 128 {
-		return nil, fmt.Errorf("%w: 包装规格名称不能超过128个字符", ErrProductSkuInvalidInput)
-	}
-	if req.PackageQuantity <= 0 || req.PackageQuantity > 999999 {
-		return nil, fmt.Errorf("%w: 包装数量必须在1到999999之间", ErrProductSkuInvalidInput)
+	if req.PackConversion <= 0 || req.PackConversion > 999999 {
+		return nil, fmt.Errorf("%w: 包装换算系数必须在1到999999之间", ErrProductSkuInvalidInput)
 	}
 	minUnitName := strings.TrimSpace(req.MinUnitName)
 	if minUnitName == "" {
@@ -349,6 +356,16 @@ func (s *ProductSkuService) normalizeSaveRequest(req models.SaveProductSkuReques
 	}
 	if len([]rune(packageUnitName)) > 32 {
 		return nil, fmt.Errorf("%w: 包装单位不能超过32个字符", ErrProductSkuInvalidInput)
+	}
+	cartonUnitName := strings.TrimSpace(req.CartonUnitName)
+	if cartonUnitName == "" {
+		return nil, fmt.Errorf("%w: 大包装单位不能为空", ErrProductSkuInvalidInput)
+	}
+	if len([]rune(cartonUnitName)) > 32 {
+		return nil, fmt.Errorf("%w: 大包装单位不能超过32个字符", ErrProductSkuInvalidInput)
+	}
+	if req.CartonConversion <= 0 || req.CartonConversion > 999999 {
+		return nil, fmt.Errorf("%w: 大包装换算系数必须在1到999999之间", ErrProductSkuInvalidInput)
 	}
 	if requireVersion && req.ExpectedRowVersion <= 0 {
 		return nil, fmt.Errorf("%w: 缺少数据版本号", ErrProductSkuInvalidInput)
@@ -377,20 +394,27 @@ func (s *ProductSkuService) normalizeSaveRequest(req models.SaveProductSkuReques
 		return nil, fmt.Errorf("%w: 描述不能超过2000个字符", ErrProductSkuInvalidInput)
 	}
 
+	packageSpecName := buildProductSkuPackageSpecName(req.PackConversion, minUnitName, packageUnitName)
+	cartonSpecName := buildProductSkuCartonSpecName(req.CartonConversion, packageUnitName, cartonUnitName)
+	fullChainSpecName := buildProductSkuFullChainSpecName(req.CartonConversion, cartonUnitName, packageUnitName, req.PackConversion, minUnitName)
+
 	return &normalizedProductSkuSave{
-		MpID:                      strings.TrimSpace(req.MpID),
-		PackageSpecName:           packageSpecName,
-		PackageSpecNameNormalized: normalizeProductSkuText(packageSpecName),
-		PackageQuantity:           req.PackageQuantity,
-		MinUnitName:               minUnitName,
-		PackageUnitName:           packageUnitName,
-		Barcode:                   barcode,
-		Gtin:                      gtin,
-		UdiDi:                     udiDi,
-		AllowSplit:                req.AllowSplit,
-		Description:               description,
-		Status:                    req.Status,
-		ExpectedRowVersion:        req.ExpectedRowVersion,
+		MpID:               strings.TrimSpace(req.MpID),
+		PackageSpecName:    packageSpecName,
+		PackConversion:     req.PackConversion,
+		MinUnitName:        minUnitName,
+		PackageUnitName:    packageUnitName,
+		CartonUnitName:     cartonUnitName,
+		CartonConversion:   req.CartonConversion,
+		CartonSpecName:     cartonSpecName,
+		FullChainSpecName:  fullChainSpecName,
+		Barcode:            barcode,
+		Gtin:               gtin,
+		UdiDi:              udiDi,
+		AllowSplit:         req.AllowSplit,
+		Description:        description,
+		Status:             req.Status,
+		ExpectedRowVersion: req.ExpectedRowVersion,
 	}, nil
 }
 
@@ -414,9 +438,17 @@ func (s *ProductSkuService) getExistingProductMp(tx *gorm.DB, mpID string) (*mod
 	return &mp, nil
 }
 
-func (s *ProductSkuService) ensureProductSkuUnique(tx *gorm.DB, mpID, packageSpecNameNormalized, excludeID string) error {
+func (s *ProductSkuService) ensureProductSkuUnique(tx *gorm.DB, normalized *normalizedProductSkuSave, excludeID string) error {
 	query := tx.Model(&models.ProductSku{}).
-		Where("del_flag = 0 AND mp_id = ? AND package_spec_name_normalized = ?", mpID, packageSpecNameNormalized)
+		Where(
+			"del_flag = 0 AND mp_id = ? AND pack_conversion = ? AND min_unit_name = ? AND package_unit_name = ? AND carton_conversion = ? AND carton_unit_name = ?",
+			normalized.MpID,
+			normalized.PackConversion,
+			normalized.MinUnitName,
+			normalized.PackageUnitName,
+			normalized.CartonConversion,
+			normalized.CartonUnitName,
+		)
 	if excludeID != "" {
 		query = query.Where("sku_id != ?", excludeID)
 	}
@@ -425,7 +457,7 @@ func (s *ProductSkuService) ensureProductSkuUnique(tx *gorm.DB, mpID, packageSpe
 		return err
 	}
 	if count > 0 {
-		return fmt.Errorf("%w: 当前厂家产品下包装规格名称已存在", ErrProductSkuConflict)
+		return fmt.Errorf("%w: 当前厂家产品下包装链路已存在", ErrProductSkuConflict)
 	}
 	return nil
 }
@@ -453,9 +485,13 @@ func productSkuSelectFields() string {
 		"product_sku.sku_id",
 		"product_sku.sku_code",
 		"product_sku.package_spec_name",
-		"product_sku.package_quantity",
+		"product_sku.pack_conversion",
 		"product_sku.min_unit_name",
 		"product_sku.package_unit_name",
+		"product_sku.carton_unit_name",
+		"product_sku.carton_conversion",
+		"product_sku.carton_spec_name",
+		"product_sku.full_chain_spec_name",
 		"product_sku.barcode",
 		"product_sku.gtin",
 		"product_sku.udi_di",
@@ -478,35 +514,39 @@ func productSkuRowsToResponses(rows []productSkuQueryRow) []models.ProductSkuRes
 
 func productSkuRowToResponse(row productSkuQueryRow) *models.ProductSkuResponse {
 	return &models.ProductSkuResponse{
-		SpuID:           row.SpuID,
-		SpuCode:         row.SpuCode,
-		ProductName:     row.ProductName,
-		ProductType:     row.ProductType,
-		RpID:            row.RpID,
-		RpCode:          row.RpCode,
-		SpecName:        row.SpecName,
-		MpID:            row.MpID,
-		MpCode:          row.MpCode,
-		EnterpriseID:    row.EnterpriseID,
-		EnterpriseCode:  row.EnterpriseCode,
-		EnterpriseName:  row.EnterpriseName,
-		ApprovalNo:      row.ApprovalNo,
-		BrandName:       row.BrandName,
-		SkuID:           row.SkuID,
-		SkuCode:         row.SkuCode,
-		PackageSpecName: row.PackageSpecName,
-		PackageQuantity: row.PackageQuantity,
-		MinUnitName:     row.MinUnitName,
-		PackageUnitName: row.PackageUnitName,
-		Barcode:         row.Barcode,
-		Gtin:            row.Gtin,
-		UdiDi:           row.UdiDi,
-		AllowSplit:      row.AllowSplit,
-		Description:     row.Description,
-		Status:          row.Status,
-		RowVersion:      row.RowVersion,
-		CreateDate:      models.TimeToStringPtr(row.CreateDate),
-		UpdateDate:      models.TimeToStringPtr(row.UpdateDate),
+		SpuID:             row.SpuID,
+		SpuCode:           row.SpuCode,
+		ProductName:       row.ProductName,
+		ProductType:       row.ProductType,
+		RpID:              row.RpID,
+		RpCode:            row.RpCode,
+		SpecName:          row.SpecName,
+		MpID:              row.MpID,
+		MpCode:            row.MpCode,
+		EnterpriseID:      row.EnterpriseID,
+		EnterpriseCode:    row.EnterpriseCode,
+		EnterpriseName:    row.EnterpriseName,
+		ApprovalNo:        row.ApprovalNo,
+		BrandName:         row.BrandName,
+		SkuID:             row.SkuID,
+		SkuCode:           row.SkuCode,
+		PackageSpecName:   row.PackageSpecName,
+		PackConversion:    row.PackConversion,
+		MinUnitName:       row.MinUnitName,
+		PackageUnitName:   row.PackageUnitName,
+		CartonUnitName:    row.CartonUnitName,
+		CartonConversion:  row.CartonConversion,
+		CartonSpecName:    row.CartonSpecName,
+		FullChainSpecName: row.FullChainSpecName,
+		Barcode:           row.Barcode,
+		Gtin:              row.Gtin,
+		UdiDi:             row.UdiDi,
+		AllowSplit:        row.AllowSplit,
+		Description:       row.Description,
+		Status:            row.Status,
+		RowVersion:        row.RowVersion,
+		CreateDate:        models.TimeToStringPtr(row.CreateDate),
+		UpdateDate:        models.TimeToStringPtr(row.UpdateDate),
 	}
 }
 
@@ -531,6 +571,19 @@ func validateProductSkuBoolFlag(value int, label string) error {
 	return nil
 }
 
+func buildProductSkuPackageSpecName(packConversion int, minUnitName, packageUnitName string) string {
+	return fmt.Sprintf("%d%s/%s", packConversion, minUnitName, packageUnitName)
+}
+
+func buildProductSkuCartonSpecName(cartonConversion int, packageUnitName, cartonUnitName string) string {
+	return fmt.Sprintf("%d%s/%s", cartonConversion, packageUnitName, cartonUnitName)
+}
+
+func buildProductSkuFullChainSpecName(cartonConversion int, cartonUnitName, packageUnitName string, packConversion int, minUnitName string) string {
+	totalMinUnitQuantity := int64(cartonConversion) * int64(packConversion)
+	return fmt.Sprintf("1%s/%d%s/%d%s", cartonUnitName, cartonConversion, packageUnitName, totalMinUnitQuantity, minUnitName)
+}
+
 func normalizeProductSkuOptionalString(value *string) *string {
 	if value == nil {
 		return nil
@@ -540,10 +593,6 @@ func normalizeProductSkuOptionalString(value *string) *string {
 		return nil
 	}
 	return &trimmed
-}
-
-func normalizeProductSkuText(value string) string {
-	return strings.ToLower(strings.Join(strings.Fields(strings.TrimSpace(value)), ""))
 }
 
 func normalizeProductSkuPage(page, pageSize, defaultSize, maxSize int) (int, int) {

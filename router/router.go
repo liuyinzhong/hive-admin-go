@@ -20,6 +20,7 @@ func SetupRouter() *gin.Engine {
 	formSchemaController := controllers.FormSchemaController{}
 	medicalController := controllers.NewMedicalController()
 	baseEnterpriseController := controllers.NewBaseEnterpriseController()
+	erpWarehouseController := controllers.NewErpWarehouseController()
 	productSpuController := controllers.NewProductSpuController()
 	productRpController := controllers.NewProductRpController()
 	productMpController := controllers.NewProductMpController()
@@ -225,6 +226,20 @@ func SetupRouter() *gin.Engine {
 				enterprises.GET("/:enterpriseId", permissionGuard.Require("base:enterprise:detail"), baseEnterpriseController.GetEnterprise)
 				enterprises.PUT("/:enterpriseId", permissionGuard.Require("base:enterprise:update"), baseEnterpriseController.UpdateEnterprise)
 				enterprises.PUT("/:enterpriseId/status", permissionGuard.Require("base:enterprise:status"), baseEnterpriseController.UpdateEnterpriseStatus)
+			}
+		}
+
+		erp := api.Group("/erp", middleware.AuthMiddleware())
+		{
+			warehouses := erp.Group("/warehouses")
+			{
+				warehouses.GET("", permissionGuard.Require("erp:warehouse:list"), erpWarehouseController.GetWarehouseList)
+				warehouses.GET("/options", erpWarehouseController.GetWarehouseOptions)
+				warehouses.POST("", permissionGuard.Require("erp:warehouse:create"), erpWarehouseController.CreateWarehouse)
+				warehouses.GET("/:warehouseId", permissionGuard.Require("erp:warehouse:detail"), erpWarehouseController.GetWarehouse)
+				warehouses.PUT("/:warehouseId", permissionGuard.Require("erp:warehouse:update"), erpWarehouseController.UpdateWarehouse)
+				warehouses.PUT("/:warehouseId/status", permissionGuard.Require("erp:warehouse:status"), erpWarehouseController.UpdateWarehouseStatus)
+				warehouses.DELETE("/:warehouseId", permissionGuard.Require("erp:warehouse:delete"), erpWarehouseController.DeleteWarehouse)
 			}
 		}
 
