@@ -50,6 +50,9 @@ func (s *ErpInventoryService) GetInventoryBalanceList(req models.ErpInventoryBal
 		"warehouseCode":    "erp_warehouse.warehouse_code",
 		"warehouseName":    "erp_warehouse.warehouse_name",
 		"skuCode":          "product_sku.sku_code",
+		"productName":      "product_spu.product_name",
+		"specName":         "product_rp.spec_name",
+		"enterpriseName":   "base_enterprise.enterprise_name",
 		"batchNo":          "erp_inventory_batch.batch_no",
 		"expiryDate":       "erp_inventory_batch.expiry_date",
 		"unitCost":         "erp_inventory_batch.unit_cost",
@@ -176,6 +179,11 @@ type erpInventoryBalanceQueryRow struct {
 	WarehouseName    string
 	SkuID            string
 	SkuCode          string
+	ProductName      string
+	SpecName         string
+	EnterpriseName   string
+	ApprovalNo       string
+	BrandName        *string
 	PackageSpecName  string
 	BatchID          string
 	BatchNo          string
@@ -199,6 +207,11 @@ type erpInventoryMovementQueryRow struct {
 	WarehouseName          string
 	SkuID                  string
 	SkuCode                string
+	ProductName            string
+	SpecName               string
+	EnterpriseName         string
+	ApprovalNo             string
+	BrandName              *string
 	PackageSpecName        string
 	BatchID                string
 	BatchNo                string
@@ -243,6 +256,10 @@ func (s *ErpInventoryService) baseInventoryBalanceQuery() *gorm.DB {
 	return database.DB.Table("erp_inventory_balance").
 		Joins("INNER JOIN erp_warehouse ON erp_warehouse.warehouse_id = erp_inventory_balance.warehouse_id AND erp_warehouse.del_flag = 0").
 		Joins("INNER JOIN product_sku ON product_sku.sku_id = erp_inventory_balance.sku_id AND product_sku.del_flag = 0").
+		Joins("LEFT JOIN product_mp ON product_mp.mp_id = product_sku.mp_id AND product_mp.del_flag = 0").
+		Joins("LEFT JOIN product_rp ON product_rp.rp_id = product_mp.rp_id AND product_rp.del_flag = 0").
+		Joins("LEFT JOIN product_spu ON product_spu.spu_id = product_rp.spu_id AND product_spu.del_flag = 0").
+		Joins("LEFT JOIN base_enterprise ON base_enterprise.enterprise_id = product_mp.enterprise_id AND base_enterprise.del_flag = 0").
 		Joins("INNER JOIN erp_inventory_batch ON erp_inventory_batch.batch_id = erp_inventory_balance.batch_id").
 		Joins("LEFT JOIN (?) AS movement_stat ON movement_stat.balance_id = erp_inventory_balance.balance_id", erpInventoryMovementCountSubquery())
 }
@@ -252,6 +269,10 @@ func (s *ErpInventoryService) baseInventoryMovementQuery() *gorm.DB {
 		Joins("INNER JOIN erp_inventory_balance ON erp_inventory_balance.balance_id = erp_inventory_movement.balance_id").
 		Joins("INNER JOIN erp_warehouse ON erp_warehouse.warehouse_id = erp_inventory_movement.warehouse_id AND erp_warehouse.del_flag = 0").
 		Joins("INNER JOIN product_sku ON product_sku.sku_id = erp_inventory_movement.sku_id AND product_sku.del_flag = 0").
+		Joins("LEFT JOIN product_mp ON product_mp.mp_id = product_sku.mp_id AND product_mp.del_flag = 0").
+		Joins("LEFT JOIN product_rp ON product_rp.rp_id = product_mp.rp_id AND product_rp.del_flag = 0").
+		Joins("LEFT JOIN product_spu ON product_spu.spu_id = product_rp.spu_id AND product_spu.del_flag = 0").
+		Joins("LEFT JOIN base_enterprise ON base_enterprise.enterprise_id = product_mp.enterprise_id AND base_enterprise.del_flag = 0").
 		Joins("INNER JOIN erp_inventory_batch ON erp_inventory_batch.batch_id = erp_inventory_movement.batch_id")
 }
 
@@ -263,6 +284,11 @@ func erpInventoryBalanceSelectFields() string {
 		"erp_warehouse.warehouse_name",
 		"erp_inventory_balance.sku_id",
 		"product_sku.sku_code",
+		"COALESCE(product_spu.product_name, '') AS product_name",
+		"COALESCE(product_rp.spec_name, '') AS spec_name",
+		"COALESCE(base_enterprise.enterprise_name, '') AS enterprise_name",
+		"COALESCE(product_mp.approval_no, '') AS approval_no",
+		"product_mp.brand_name",
 		"product_sku.package_spec_name",
 		"erp_inventory_balance.batch_id",
 		"erp_inventory_batch.batch_no",
@@ -288,6 +314,11 @@ func erpInventoryMovementSelectFields() string {
 		"erp_warehouse.warehouse_name",
 		"erp_inventory_movement.sku_id",
 		"product_sku.sku_code",
+		"COALESCE(product_spu.product_name, '') AS product_name",
+		"COALESCE(product_rp.spec_name, '') AS spec_name",
+		"COALESCE(base_enterprise.enterprise_name, '') AS enterprise_name",
+		"COALESCE(product_mp.approval_no, '') AS approval_no",
+		"product_mp.brand_name",
 		"product_sku.package_spec_name",
 		"erp_inventory_movement.batch_id",
 		"erp_inventory_batch.batch_no",
@@ -581,6 +612,11 @@ func erpInventoryBalanceRowsToResponses(rows []erpInventoryBalanceQueryRow) []mo
 			WarehouseName:    row.WarehouseName,
 			SkuID:            row.SkuID,
 			SkuCode:          row.SkuCode,
+			ProductName:      row.ProductName,
+			SpecName:         row.SpecName,
+			EnterpriseName:   row.EnterpriseName,
+			ApprovalNo:       row.ApprovalNo,
+			BrandName:        row.BrandName,
 			PackageSpecName:  row.PackageSpecName,
 			BatchID:          row.BatchID,
 			BatchNo:          row.BatchNo,
@@ -611,6 +647,11 @@ func erpInventoryMovementRowsToResponses(rows []erpInventoryMovementQueryRow) []
 			WarehouseName:          row.WarehouseName,
 			SkuID:                  row.SkuID,
 			SkuCode:                row.SkuCode,
+			ProductName:            row.ProductName,
+			SpecName:               row.SpecName,
+			EnterpriseName:         row.EnterpriseName,
+			ApprovalNo:             row.ApprovalNo,
+			BrandName:              row.BrandName,
 			PackageSpecName:        row.PackageSpecName,
 			BatchID:                row.BatchID,
 			BatchNo:                row.BatchNo,

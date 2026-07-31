@@ -1155,6 +1155,10 @@ definitions:
     type: object
   models.ErpInventoryBalanceResponse:
     properties:
+      approvalNo:
+        description: 批准文号
+        example: 国药准字H20260001
+        type: string
       balanceId:
         description: 库存余额ID
         example: 550e8400-e29b-41d4-a716-446655440000
@@ -1167,9 +1171,17 @@ definitions:
         description: 批号
         example: B20260731001
         type: string
+      brandName:
+        description: 品牌名
+        example: 品牌名
+        type: string
       createDate:
         description: 创建时间
         example: "2026-01-15 09:00:00"
+        type: string
+      enterpriseName:
+        description: 生产企业
+        example: 张三药业
         type: string
       expiryDate:
         description: 有效期
@@ -1203,6 +1215,10 @@ definitions:
         description: 包装单位名称
         example: 盒
         type: string
+      productName:
+        description: 通用名称
+        example: 阿莫西林胶囊
+        type: string
       rowVersion:
         description: 版本号
         example: 1
@@ -1214,6 +1230,10 @@ definitions:
       skuId:
         description: SKU ID
         example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      specName:
+        description: 规格名称
+        example: 0.25g
         type: string
       unitCost:
         description: 包装单位成本价
@@ -1282,6 +1302,10 @@ definitions:
         description: 变更后包装单位数量
         example: 20
         type: integer
+      approvalNo:
+        description: 批准文号
+        example: 国药准字H20260001
+        type: string
       balanceId:
         description: 库存余额ID
         example: 550e8400-e29b-41d4-a716-446655440000
@@ -1302,6 +1326,10 @@ definitions:
         description: 变更前包装单位数量
         example: 0
         type: integer
+      brandName:
+        description: 品牌名
+        example: 品牌名
+        type: string
       changeMinUnitCount:
         description: 变更最小单位数量
         example: 400
@@ -1317,6 +1345,10 @@ definitions:
       direction:
         description: 方向：IN入库
         example: IN
+        type: string
+      enterpriseName:
+        description: 生产企业
+        example: 张三药业
         type: string
       expiryDate:
         description: 有效期
@@ -1342,6 +1374,10 @@ definitions:
         description: 包装单位名称
         example: 盒
         type: string
+      productName:
+        description: 通用名称
+        example: 阿莫西林胶囊
+        type: string
       remark:
         description: 备注
         example: 初始库存导入
@@ -1365,6 +1401,10 @@ definitions:
       sourceBillType:
         description: 来源单据类型
         example: INITIAL_STOCK
+        type: string
+      specName:
+        description: 规格名称
+        example: 0.25g
         type: string
       unitCost:
         description: 包装单位成本价
@@ -2297,13 +2337,49 @@ definitions:
     type: object
   models.ProductSkuOptionResponse:
     properties:
+      allowSplit:
+        description: 是否允许拆零
+        example: 0
+        type: integer
       approvalNo:
         description: 批准文号
         example: 国药准字H20260001
         type: string
+      barcode:
+        description: 条形码
+        example: "6901234567890"
+        type: string
       brandName:
         description: 品牌名
         example: 品牌名
+        type: string
+      cartonConversion:
+        description: 大包装换算系数
+        example: 20
+        type: integer
+      cartonSpecName:
+        description: 大包装规格名称
+        example: 20盒/箱
+        type: string
+      cartonUnitName:
+        description: 大包装单位名称
+        example: 箱
+        type: string
+      createDate:
+        description: SKU创建时间
+        example: "2026-01-15 09:00:00"
+        type: string
+      description:
+        description: SKU描述
+        example: 包装描述
+        type: string
+      dosageForm:
+        description: 剂型
+        example: 胶囊剂
+        type: string
+      enterpriseCode:
+        description: 企业编码
+        example: ENT001
         type: string
       enterpriseId:
         description: 企业主体ID
@@ -2313,17 +2389,41 @@ definitions:
         description: 企业名称
         example: 张三企业
         type: string
+      fullChainSpecName:
+        description: 全链路规格名称
+        example: 1箱/20盒/200粒
+        type: string
+      gtin:
+        description: GTIN码
+        example: "06901234567890"
+        type: string
+      minUnitName:
+        description: 最小单位名称
+        example: 粒
+        type: string
       mpCode:
         description: MP编码
         example: MP001
+        type: string
+      mpDescription:
+        description: MP描述
+        example: 厂家产品描述
         type: string
       mpId:
         description: 产品MP ID
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
+      packConversion:
+        description: 包装换算系数
+        example: 10
+        type: integer
       packageSpecName:
         description: 包装规格名称
         example: 10粒/盒
+        type: string
+      packageUnitName:
+        description: 包装单位名称
+        example: 盒
         type: string
       productName:
         description: 产品名称
@@ -2333,13 +2433,25 @@ definitions:
         description: 产品类型
         example: DRUG
         type: string
+      rowVersion:
+        description: SKU版本号
+        example: 1
+        type: integer
       rpCode:
         description: 规格编码
         example: RP001
         type: string
+      rpDescription:
+        description: RP描述
+        example: 规格描述
+        type: string
       rpId:
         description: 产品规格ID
         example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      shortName:
+        description: 产品简称
+        example: 阿莫西林
         type: string
       skuCode:
         description: SKU编码
@@ -2357,9 +2469,25 @@ definitions:
         description: SPU编码
         example: SPU001
         type: string
+      spuDescription:
+        description: SPU描述
+        example: 产品描述
+        type: string
       spuId:
         description: 产品SPU ID
         example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      strengthText:
+        description: 规格含量
+        example: 0.25g
+        type: string
+      udiDi:
+        description: UDI-DI码
+        example: (01)06901234567890
+        type: string
+      updateDate:
+        description: SKU更新时间
+        example: "2026-01-15 09:00:00"
         type: string
     type: object
   models.ProductSkuPriceResponse:
@@ -11894,7 +12022,7 @@ paths:
         in: query
         name: keyword
         type: string
-      - description: 返回数量
+      - description: 返回数量，默认50，最大100
         in: query
         name: pageSize
         type: integer

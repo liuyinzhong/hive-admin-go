@@ -63,7 +63,7 @@ type UpdateProductSkuStatusRequest struct {
 type ProductSkuOptionsRequest struct {
 	MpID     string `form:"mpId" example:"550e8400-e29b-41d4-a716-446655440000"` // 产品MP ID
 	Keyword  string `form:"keyword" example:"10粒"`                               // 关键词搜索
-	PageSize int    `form:"pageSize" example:"20"`                               // 每页数量
+	PageSize int    `form:"pageSize" example:"20"`                               // 每页数量，默认50，最大100
 }
 
 type ProductSkuResponse struct {
@@ -103,20 +103,42 @@ type ProductSkuResponse struct {
 }
 
 type ProductSkuOptionResponse struct {
-	SpuID           string  `json:"spuId" example:"550e8400-e29b-41d4-a716-446655440000"`        // 产品SPU ID
-	SpuCode         string  `json:"spuCode" example:"SPU001"`                                    // SPU编码
-	ProductName     string  `json:"productName" example:"阿莫西林胶囊"`                                // 产品名称
-	ProductType     string  `json:"productType" example:"DRUG"`                                  // 产品类型
-	RpID            string  `json:"rpId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 产品规格ID
-	RpCode          string  `json:"rpCode" example:"RP001"`                                      // 规格编码
-	SpecName        string  `json:"specName" example:"0.25g"`                                    // 规格名称
-	MpID            string  `json:"mpId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 产品MP ID
-	MpCode          string  `json:"mpCode" example:"MP001"`                                      // MP编码
-	EnterpriseID    string  `json:"enterpriseId" example:"550e8400-e29b-41d4-a716-446655440000"` // 企业主体ID
-	EnterpriseName  string  `json:"enterpriseName" example:"张三企业"`                               // 企业名称
-	ApprovalNo      string  `json:"approvalNo" example:"国药准字H20260001"`                          // 批准文号
-	BrandName       *string `json:"brandName" example:"品牌名"`                                     // 品牌名
-	SkuID           string  `json:"skuId" example:"550e8400-e29b-41d4-a716-446655440000"`        // 产品SKU ID
-	SkuCode         string  `json:"skuCode" example:"SKU001"`                                    // SKU编码
-	PackageSpecName string  `json:"packageSpecName" example:"10粒/盒"`                             // 包装规格名称
+	SpuID             string  `json:"spuId" example:"550e8400-e29b-41d4-a716-446655440000"`        // 产品SPU ID
+	SpuCode           string  `json:"spuCode" example:"SPU001"`                                    // SPU编码
+	ProductName       string  `json:"productName" example:"阿莫西林胶囊"`                                // 产品名称
+	ShortName         *string `json:"shortName" example:"阿莫西林"`                                    // 产品简称
+	ProductType       string  `json:"productType" example:"DRUG"`                                  // 产品类型
+	SpuDescription    *string `json:"spuDescription" example:"产品描述"`                               // SPU描述
+	RpID              string  `json:"rpId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 产品规格ID
+	RpCode            string  `json:"rpCode" example:"RP001"`                                      // 规格编码
+	SpecName          string  `json:"specName" example:"0.25g"`                                    // 规格名称
+	DosageForm        *string `json:"dosageForm" example:"胶囊剂"`                                    // 剂型
+	StrengthText      *string `json:"strengthText" example:"0.25g"`                                // 规格含量
+	RpDescription     *string `json:"rpDescription" example:"规格描述"`                                // RP描述
+	MpID              string  `json:"mpId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 产品MP ID
+	MpCode            string  `json:"mpCode" example:"MP001"`                                      // MP编码
+	EnterpriseID      string  `json:"enterpriseId" example:"550e8400-e29b-41d4-a716-446655440000"` // 企业主体ID
+	EnterpriseCode    string  `json:"enterpriseCode" example:"ENT001"`                             // 企业编码
+	EnterpriseName    string  `json:"enterpriseName" example:"张三企业"`                               // 企业名称
+	ApprovalNo        string  `json:"approvalNo" example:"国药准字H20260001"`                          // 批准文号
+	BrandName         *string `json:"brandName" example:"品牌名"`                                     // 品牌名
+	MpDescription     *string `json:"mpDescription" example:"厂家产品描述"`                              // MP描述
+	SkuID             string  `json:"skuId" example:"550e8400-e29b-41d4-a716-446655440000"`        // 产品SKU ID
+	SkuCode           string  `json:"skuCode" example:"SKU001"`                                    // SKU编码
+	PackageSpecName   string  `json:"packageSpecName" example:"10粒/盒"`                             // 包装规格名称
+	PackConversion    int     `json:"packConversion" example:"10"`                                 // 包装换算系数
+	MinUnitName       string  `json:"minUnitName" example:"粒"`                                     // 最小单位名称
+	PackageUnitName   string  `json:"packageUnitName" example:"盒"`                                 // 包装单位名称
+	CartonUnitName    string  `json:"cartonUnitName" example:"箱"`                                  // 大包装单位名称
+	CartonConversion  int     `json:"cartonConversion" example:"20"`                               // 大包装换算系数
+	CartonSpecName    string  `json:"cartonSpecName" example:"20盒/箱"`                              // 大包装规格名称
+	FullChainSpecName string  `json:"fullChainSpecName" example:"1箱/20盒/200粒"`                     // 全链路规格名称
+	Barcode           *string `json:"barcode" example:"6901234567890"`                             // 条形码
+	Gtin              *string `json:"gtin" example:"06901234567890"`                               // GTIN码
+	UdiDi             *string `json:"udiDi" example:"(01)06901234567890"`                          // UDI-DI码
+	AllowSplit        int     `json:"allowSplit" example:"0"`                                      // 是否允许拆零
+	Description       *string `json:"description" example:"包装描述"`                                  // SKU描述
+	RowVersion        int     `json:"rowVersion" example:"1"`                                      // SKU版本号
+	CreateDate        *string `json:"createDate" example:"2026-01-15 09:00:00"`                    // SKU创建时间
+	UpdateDate        *string `json:"updateDate" example:"2026-01-15 09:00:00"`                    // SKU更新时间
 }

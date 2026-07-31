@@ -230,11 +230,17 @@ func (s *ProductSkuService) UpdateProductSkuStatus(skuID string, req models.Upda
 
 func (s *ProductSkuService) GetProductSkuOptions(req models.ProductSkuOptionsRequest) ([]models.ProductSkuOptionResponse, error) {
 	pageSize := req.PageSize
-	if pageSize <= 0 || pageSize > 100 {
+	if pageSize <= 0 {
 		pageSize = 50
+	} else if pageSize > 100 {
+		pageSize = 100
 	}
 
-	query := s.baseProductSkuQuery().Where("product_sku.status = 1")
+	query := s.baseProductSkuQuery().
+		Where("product_sku.status = 1").
+		Where("product_mp.status = 1").
+		Where("product_rp.status = 1").
+		Where("product_spu.status = 1")
 	if strings.TrimSpace(req.MpID) != "" {
 		if err := validateProductSkuUUID(req.MpID, "厂家产品ID"); err != nil {
 			return nil, err
@@ -260,22 +266,44 @@ func (s *ProductSkuService) GetProductSkuOptions(req models.ProductSkuOptionsReq
 	options := make([]models.ProductSkuOptionResponse, 0, len(rows))
 	for _, row := range rows {
 		options = append(options, models.ProductSkuOptionResponse{
-			SpuID:           row.SpuID,
-			SpuCode:         row.SpuCode,
-			ProductName:     row.ProductName,
-			ProductType:     row.ProductType,
-			RpID:            row.RpID,
-			RpCode:          row.RpCode,
-			SpecName:        row.SpecName,
-			MpID:            row.MpID,
-			MpCode:          row.MpCode,
-			EnterpriseID:    row.EnterpriseID,
-			EnterpriseName:  row.EnterpriseName,
-			ApprovalNo:      row.ApprovalNo,
-			BrandName:       row.BrandName,
-			SkuID:           row.SkuID,
-			SkuCode:         row.SkuCode,
-			PackageSpecName: row.PackageSpecName,
+			SpuID:             row.SpuID,
+			SpuCode:           row.SpuCode,
+			ProductName:       row.ProductName,
+			ShortName:         row.ShortName,
+			ProductType:       row.ProductType,
+			SpuDescription:    row.SpuDescription,
+			RpID:              row.RpID,
+			RpCode:            row.RpCode,
+			SpecName:          row.SpecName,
+			DosageForm:        row.DosageForm,
+			StrengthText:      row.StrengthText,
+			RpDescription:     row.RpDescription,
+			MpID:              row.MpID,
+			MpCode:            row.MpCode,
+			EnterpriseID:      row.EnterpriseID,
+			EnterpriseCode:    row.EnterpriseCode,
+			EnterpriseName:    row.EnterpriseName,
+			ApprovalNo:        row.ApprovalNo,
+			BrandName:         row.BrandName,
+			MpDescription:     row.MpDescription,
+			SkuID:             row.SkuID,
+			SkuCode:           row.SkuCode,
+			PackageSpecName:   row.PackageSpecName,
+			PackConversion:    row.PackConversion,
+			MinUnitName:       row.MinUnitName,
+			PackageUnitName:   row.PackageUnitName,
+			CartonUnitName:    row.CartonUnitName,
+			CartonConversion:  row.CartonConversion,
+			CartonSpecName:    row.CartonSpecName,
+			FullChainSpecName: row.FullChainSpecName,
+			Barcode:           row.Barcode,
+			Gtin:              row.Gtin,
+			UdiDi:             row.UdiDi,
+			AllowSplit:        row.AllowSplit,
+			Description:       row.Description,
+			RowVersion:        row.RowVersion,
+			CreateDate:        models.TimeToStringPtr(row.CreateDate),
+			UpdateDate:        models.TimeToStringPtr(row.UpdateDate),
 		})
 	}
 	return options, nil
@@ -304,10 +332,15 @@ type productSkuQueryRow struct {
 	SpuID             string
 	SpuCode           string
 	ProductName       string
+	ShortName         *string
 	ProductType       string
+	SpuDescription    *string
 	RpID              string
 	RpCode            string
 	SpecName          string
+	DosageForm        *string
+	StrengthText      *string
+	RpDescription     *string
 	MpID              string
 	MpCode            string
 	EnterpriseID      string
@@ -315,6 +348,7 @@ type productSkuQueryRow struct {
 	EnterpriseName    string
 	ApprovalNo        string
 	BrandName         *string
+	MpDescription     *string
 	SkuID             string
 	SkuCode           string
 	PackageSpecName   string
@@ -471,10 +505,15 @@ func productSkuSelectFields() string {
 		"product_spu.spu_id",
 		"product_spu.spu_code",
 		"product_spu.product_name",
+		"product_spu.short_name",
 		"product_spu.product_type",
+		"product_spu.description AS spu_description",
 		"product_rp.rp_id",
 		"product_rp.rp_code",
 		"product_rp.spec_name",
+		"product_rp.dosage_form",
+		"product_rp.strength_text",
+		"product_rp.description AS rp_description",
 		"product_mp.mp_id",
 		"product_mp.mp_code",
 		"product_mp.enterprise_id",
@@ -482,6 +521,7 @@ func productSkuSelectFields() string {
 		"base_enterprise.enterprise_name",
 		"product_mp.approval_no",
 		"product_mp.brand_name",
+		"product_mp.description AS mp_description",
 		"product_sku.sku_id",
 		"product_sku.sku_code",
 		"product_sku.package_spec_name",

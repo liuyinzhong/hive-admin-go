@@ -157,7 +157,7 @@ func (ctrl *ProductSkuController) UpdateProductSkuStatus(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Param mpId query string false "所属厂家产品ID"
 // @Param keyword query string false "关键字"
-// @Param pageSize query int false "返回数量"
+// @Param pageSize query int false "返回数量，默认50，最大100"
 // @Success 200 {object} models.Response{data=[]models.ProductSkuOptionResponse}
 // @Failure 400 {object} models.Response "参数错误"
 // @Failure 500 {object} models.Response "服务器内部错误"

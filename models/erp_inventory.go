@@ -113,6 +113,11 @@ type ErpInventoryBalanceResponse struct {
 	WarehouseName    string  `json:"warehouseName" example:"中心库"`                                // 仓库名称
 	SkuID            string  `json:"skuId" example:"550e8400-e29b-41d4-a716-446655440000"`       // SKU ID
 	SkuCode          string  `json:"skuCode" example:"SKU000001"`                                // SKU编码
+	ProductName      string  `json:"productName" example:"阿莫西林胶囊"`                               // 通用名称
+	SpecName         string  `json:"specName" example:"0.25g"`                                   // 规格名称
+	EnterpriseName   string  `json:"enterpriseName" example:"张三药业"`                              // 生产企业
+	ApprovalNo       string  `json:"approvalNo" example:"国药准字H20260001"`                         // 批准文号
+	BrandName        *string `json:"brandName" example:"品牌名"`                                    // 品牌名
 	PackageSpecName  string  `json:"packageSpecName" example:"10粒/盒"`                            // 包装规格
 	BatchID          string  `json:"batchId" example:"550e8400-e29b-41d4-a716-446655440000"`     // 批次ID
 	BatchNo          string  `json:"batchNo" example:"B20260731001"`                             // 批号
@@ -137,6 +142,11 @@ type ErpInventoryMovementResponse struct {
 	WarehouseName          string  `json:"warehouseName" example:"中心库"`                                 // 仓库名称
 	SkuID                  string  `json:"skuId" example:"550e8400-e29b-41d4-a716-446655440000"`        // SKU ID
 	SkuCode                string  `json:"skuCode" example:"SKU000001"`                                 // SKU编码
+	ProductName            string  `json:"productName" example:"阿莫西林胶囊"`                                // 通用名称
+	SpecName               string  `json:"specName" example:"0.25g"`                                    // 规格名称
+	EnterpriseName         string  `json:"enterpriseName" example:"张三药业"`                               // 生产企业
+	ApprovalNo             string  `json:"approvalNo" example:"国药准字H20260001"`                          // 批准文号
+	BrandName              *string `json:"brandName" example:"品牌名"`                                     // 品牌名
 	PackageSpecName        string  `json:"packageSpecName" example:"10粒/盒"`                             // 包装规格
 	BatchID                string  `json:"batchId" example:"550e8400-e29b-41d4-a716-446655440000"`      // 批次ID
 	BatchNo                string  `json:"batchNo" example:"B20260731001"`                              // 批号

@@ -9467,7 +9467,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "返回数量",
+                        "description": "返回数量，默认50，最大100",
                         "name": "pageSize",
                         "in": "query"
                     }
@@ -17021,6 +17021,11 @@ const docTemplate = `{
         "models.ErpInventoryBalanceResponse": {
             "type": "object",
             "properties": {
+                "approvalNo": {
+                    "description": "批准文号",
+                    "type": "string",
+                    "example": "国药准字H20260001"
+                },
                 "balanceId": {
                     "description": "库存余额ID",
                     "type": "string",
@@ -17036,10 +17041,20 @@ const docTemplate = `{
                     "type": "string",
                     "example": "B20260731001"
                 },
+                "brandName": {
+                    "description": "品牌名",
+                    "type": "string",
+                    "example": "品牌名"
+                },
                 "createDate": {
                     "description": "创建时间",
                     "type": "string",
                     "example": "2026-01-15 09:00:00"
+                },
+                "enterpriseName": {
+                    "description": "生产企业",
+                    "type": "string",
+                    "example": "张三药业"
                 },
                 "expiryDate": {
                     "description": "有效期",
@@ -17081,6 +17096,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "盒"
                 },
+                "productName": {
+                    "description": "通用名称",
+                    "type": "string",
+                    "example": "阿莫西林胶囊"
+                },
                 "rowVersion": {
                     "description": "版本号",
                     "type": "integer",
@@ -17095,6 +17115,11 @@ const docTemplate = `{
                     "description": "SKU ID",
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "specName": {
+                    "description": "规格名称",
+                    "type": "string",
+                    "example": "0.25g"
                 },
                 "unitCost": {
                     "description": "包装单位成本价",
@@ -17181,6 +17206,11 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 20
                 },
+                "approvalNo": {
+                    "description": "批准文号",
+                    "type": "string",
+                    "example": "国药准字H20260001"
+                },
                 "balanceId": {
                     "description": "库存余额ID",
                     "type": "string",
@@ -17206,6 +17236,11 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 0
                 },
+                "brandName": {
+                    "description": "品牌名",
+                    "type": "string",
+                    "example": "品牌名"
+                },
                 "changeMinUnitCount": {
                     "description": "变更最小单位数量",
                     "type": "integer",
@@ -17225,6 +17260,11 @@ const docTemplate = `{
                     "description": "方向：IN入库",
                     "type": "string",
                     "example": "IN"
+                },
+                "enterpriseName": {
+                    "description": "生产企业",
+                    "type": "string",
+                    "example": "张三药业"
                 },
                 "expiryDate": {
                     "description": "有效期",
@@ -17256,6 +17296,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "盒"
                 },
+                "productName": {
+                    "description": "通用名称",
+                    "type": "string",
+                    "example": "阿莫西林胶囊"
+                },
                 "remark": {
                     "description": "备注",
                     "type": "string",
@@ -17285,6 +17330,11 @@ const docTemplate = `{
                     "description": "来源单据类型",
                     "type": "string",
                     "example": "INITIAL_STOCK"
+                },
+                "specName": {
+                    "description": "规格名称",
+                    "type": "string",
+                    "example": "0.25g"
                 },
                 "unitCost": {
                     "description": "包装单位成本价",
@@ -18520,15 +18570,60 @@ const docTemplate = `{
         "models.ProductSkuOptionResponse": {
             "type": "object",
             "properties": {
+                "allowSplit": {
+                    "description": "是否允许拆零",
+                    "type": "integer",
+                    "example": 0
+                },
                 "approvalNo": {
                     "description": "批准文号",
                     "type": "string",
                     "example": "国药准字H20260001"
                 },
+                "barcode": {
+                    "description": "条形码",
+                    "type": "string",
+                    "example": "6901234567890"
+                },
                 "brandName": {
                     "description": "品牌名",
                     "type": "string",
                     "example": "品牌名"
+                },
+                "cartonConversion": {
+                    "description": "大包装换算系数",
+                    "type": "integer",
+                    "example": 20
+                },
+                "cartonSpecName": {
+                    "description": "大包装规格名称",
+                    "type": "string",
+                    "example": "20盒/箱"
+                },
+                "cartonUnitName": {
+                    "description": "大包装单位名称",
+                    "type": "string",
+                    "example": "箱"
+                },
+                "createDate": {
+                    "description": "SKU创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "description": {
+                    "description": "SKU描述",
+                    "type": "string",
+                    "example": "包装描述"
+                },
+                "dosageForm": {
+                    "description": "剂型",
+                    "type": "string",
+                    "example": "胶囊剂"
+                },
+                "enterpriseCode": {
+                    "description": "企业编码",
+                    "type": "string",
+                    "example": "ENT001"
                 },
                 "enterpriseId": {
                     "description": "企业主体ID",
@@ -18540,20 +18635,50 @@ const docTemplate = `{
                     "type": "string",
                     "example": "张三企业"
                 },
+                "fullChainSpecName": {
+                    "description": "全链路规格名称",
+                    "type": "string",
+                    "example": "1箱/20盒/200粒"
+                },
+                "gtin": {
+                    "description": "GTIN码",
+                    "type": "string",
+                    "example": "06901234567890"
+                },
+                "minUnitName": {
+                    "description": "最小单位名称",
+                    "type": "string",
+                    "example": "粒"
+                },
                 "mpCode": {
                     "description": "MP编码",
                     "type": "string",
                     "example": "MP001"
+                },
+                "mpDescription": {
+                    "description": "MP描述",
+                    "type": "string",
+                    "example": "厂家产品描述"
                 },
                 "mpId": {
                     "description": "产品MP ID",
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
+                "packConversion": {
+                    "description": "包装换算系数",
+                    "type": "integer",
+                    "example": 10
+                },
                 "packageSpecName": {
                     "description": "包装规格名称",
                     "type": "string",
                     "example": "10粒/盒"
+                },
+                "packageUnitName": {
+                    "description": "包装单位名称",
+                    "type": "string",
+                    "example": "盒"
                 },
                 "productName": {
                     "description": "产品名称",
@@ -18565,15 +18690,30 @@ const docTemplate = `{
                     "type": "string",
                     "example": "DRUG"
                 },
+                "rowVersion": {
+                    "description": "SKU版本号",
+                    "type": "integer",
+                    "example": 1
+                },
                 "rpCode": {
                     "description": "规格编码",
                     "type": "string",
                     "example": "RP001"
                 },
+                "rpDescription": {
+                    "description": "RP描述",
+                    "type": "string",
+                    "example": "规格描述"
+                },
                 "rpId": {
                     "description": "产品规格ID",
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "shortName": {
+                    "description": "产品简称",
+                    "type": "string",
+                    "example": "阿莫西林"
                 },
                 "skuCode": {
                     "description": "SKU编码",
@@ -18595,10 +18735,30 @@ const docTemplate = `{
                     "type": "string",
                     "example": "SPU001"
                 },
+                "spuDescription": {
+                    "description": "SPU描述",
+                    "type": "string",
+                    "example": "产品描述"
+                },
                 "spuId": {
                     "description": "产品SPU ID",
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "strengthText": {
+                    "description": "规格含量",
+                    "type": "string",
+                    "example": "0.25g"
+                },
+                "udiDi": {
+                    "description": "UDI-DI码",
+                    "type": "string",
+                    "example": "(01)06901234567890"
+                },
+                "updateDate": {
+                    "description": "SKU更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
                 }
             }
         },
