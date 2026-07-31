@@ -3980,6 +3980,335 @@
                 }
             }
         },
+        "/erp/inventory/balances": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "分页查询库存余额，第一版按仓库和库存批次展示；搜索条件支持仓库ID、SKU编码和批号，零库存余额默认保留并展示",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/库存管理"
+                ],
+                "summary": "获取库存余额列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SKU编码",
+                        "name": "skuCode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "批号",
+                        "name": "batchNo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序，支持warehouseCode、warehouseName、skuCode、batchNo、expiryDate、unitCost、packageUnitCount、minUnitCount、inventoryAmount、movementCount、createDate、updateDate",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ErpInventoryBalanceResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "业务数据不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "业务数据冲突",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/inventory/balances/{balanceId}/movements": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据库存余额ID分页查询库存流水；流水一旦写入不可更改，第一版仅包含初始库存入库流水",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/库存管理"
+                ],
+                "summary": "获取库存流水列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "库存余额ID，UUID格式",
+                        "name": "balanceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序，支持sourceBillType、sourceBillNo、movementType、direction、createDate",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ErpInventoryMovementResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "业务数据不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "业务数据冲突",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/inventory/initialStocks": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "批量写入初始库存，数量按SKU包装单位录入；同一批次再次写入是追加库存而不是覆盖库存；整批提交原子成功或失败",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/库存管理"
+                ],
+                "summary": "新增初始库存",
+                "parameters": [
+                    {
+                        "description": "初始库存",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateErpInventoryInitialStockRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CreateErpInventoryInitialStockResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "业务数据不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "业务数据冲突",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/erp/warehouses": {
             "get": {
                 "security": [
@@ -4520,6 +4849,1092 @@
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/warehouses/{warehouseId}/zones": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "分页查询指定仓库下的库区基础资料，支持按库区编码/名称和库区类型筛选",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/库区管理"
+                ],
+                "summary": "获取库区列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "库区编码或库区名称",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "库区类型：NORMAL普通区 PENDING_INSPECTION待验区 QUALIFIED合格品区 UNQUALIFIED不合格品区 RETURNED退货区",
+                        "name": "zoneType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ErpWarehouseZoneResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "在指定仓库下创建库区基础资料，库区编码由后端自动生成",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/库区管理"
+                ],
+                "summary": "新增库区",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "库区",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveErpWarehouseZoneRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ErpWarehouseZoneResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/warehouses/{warehouseId}/zones/options": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取指定仓库下的库区选项；需要登录，不做库区按钮权限校验",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/库区管理"
+                ],
+                "summary": "获取库区选项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "库区编码或库区名称",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "返回数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ErpWarehouseZoneOptionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/warehouses/{warehouseId}/zones/{zoneId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据仓库ID和库区ID获取库区基础资料详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/库区管理"
+                ],
+                "summary": "获取库区详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440001",
+                        "description": "库区ID，UUID格式",
+                        "name": "zoneId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ErpWarehouseZoneResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据仓库ID和库区ID更新库区基础资料，库区编码不可修改",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/库区管理"
+                ],
+                "summary": "更新库区",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440001",
+                        "description": "库区ID，UUID格式",
+                        "name": "zoneId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "库区",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveErpWarehouseZoneRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ErpWarehouseZoneResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据仓库ID和库区ID软删除库区基础资料，第一版不校验库存或单据引用",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/库区管理"
+                ],
+                "summary": "删除库区",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440001",
+                        "description": "库区ID，UUID格式",
+                        "name": "zoneId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "删除参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.DeleteErpWarehouseZoneRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/warehouses/{warehouseId}/zones/{zoneId}/locations": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "分页查询指定仓库和库区下的货位基础资料，支持按货位编码/名称筛选",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/货位管理"
+                ],
+                "summary": "获取货位列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440001",
+                        "description": "库区ID，UUID格式",
+                        "name": "zoneId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "货位编码或货位名称",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ErpWarehouseLocationResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "在指定仓库和库区下创建货位基础资料，货位编码由后端自动生成",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/货位管理"
+                ],
+                "summary": "新增货位",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440001",
+                        "description": "库区ID，UUID格式",
+                        "name": "zoneId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "货位",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveErpWarehouseLocationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ErpWarehouseLocationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/warehouses/{warehouseId}/zones/{zoneId}/locations/options": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取指定仓库和库区下的货位选项；需要登录，不做货位按钮权限校验",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/货位管理"
+                ],
+                "summary": "获取货位选项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440001",
+                        "description": "库区ID，UUID格式",
+                        "name": "zoneId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "货位编码或货位名称",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "返回数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ErpWarehouseLocationOptionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/warehouses/{warehouseId}/zones/{zoneId}/locations/{locationId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据仓库ID、库区ID和货位ID获取货位基础资料详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/货位管理"
+                ],
+                "summary": "获取货位详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440001",
+                        "description": "库区ID，UUID格式",
+                        "name": "zoneId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440002",
+                        "description": "货位ID，UUID格式",
+                        "name": "locationId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ErpWarehouseLocationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据仓库ID、库区ID和货位ID更新货位基础资料，货位编码不可修改",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/货位管理"
+                ],
+                "summary": "更新货位",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440001",
+                        "description": "库区ID，UUID格式",
+                        "name": "zoneId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440002",
+                        "description": "货位ID，UUID格式",
+                        "name": "locationId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "货位",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveErpWarehouseLocationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ErpWarehouseLocationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据仓库ID、库区ID和货位ID软删除货位基础资料，第一版不校验库存或单据引用",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/货位管理"
+                ],
+                "summary": "删除货位",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440001",
+                        "description": "库区ID，UUID格式",
+                        "name": "zoneId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440002",
+                        "description": "货位ID，UUID格式",
+                        "name": "locationId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "删除参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.DeleteErpWarehouseLocationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -14492,6 +15907,42 @@
                 }
             }
         },
+        "models.CreateErpInventoryInitialStockRequest": {
+            "type": "object",
+            "required": [
+                "items",
+                "warehouseId"
+            ],
+            "properties": {
+                "items": {
+                    "description": "初始库存明细",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ErpInventoryInitialStockItem"
+                    }
+                },
+                "warehouseId": {
+                    "description": "入库仓库ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                }
+            }
+        },
+        "models.CreateErpInventoryInitialStockResponse": {
+            "type": "object",
+            "properties": {
+                "movementCount": {
+                    "description": "写入流水数量",
+                    "type": "integer",
+                    "example": 2
+                },
+                "sourceBillNo": {
+                    "description": "初始库存来源批次号",
+                    "type": "string",
+                    "example": "INIT00000001"
+                }
+            }
+        },
         "models.CreateExternalPageRequest": {
             "type": "object",
             "required": [
@@ -14997,7 +16448,35 @@
                 }
             }
         },
+        "models.DeleteErpWarehouseLocationRequest": {
+            "type": "object",
+            "required": [
+                "expectedRowVersion"
+            ],
+            "properties": {
+                "expectedRowVersion": {
+                    "description": "期望行版本号",
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 1
+                }
+            }
+        },
         "models.DeleteErpWarehouseRequest": {
+            "type": "object",
+            "required": [
+                "expectedRowVersion"
+            ],
+            "properties": {
+                "expectedRowVersion": {
+                    "description": "期望行版本号",
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 1
+                }
+            }
+        },
+        "models.DeleteErpWarehouseZoneRequest": {
             "type": "object",
             "required": [
                 "expectedRowVersion"
@@ -15537,6 +17016,376 @@
                 }
             }
         },
+        "models.ErpInventoryBalanceResponse": {
+            "type": "object",
+            "properties": {
+                "balanceId": {
+                    "description": "库存余额ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "batchId": {
+                    "description": "批次ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "batchNo": {
+                    "description": "批号",
+                    "type": "string",
+                    "example": "B20260731001"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "expiryDate": {
+                    "description": "有效期",
+                    "type": "string",
+                    "example": "2028-12-31"
+                },
+                "inventoryAmount": {
+                    "description": "库存金额，按包装单位库存数量*成本价计算",
+                    "type": "string",
+                    "example": "240.0000"
+                },
+                "minUnitCount": {
+                    "description": "最小单位库存数量",
+                    "type": "integer",
+                    "example": 400
+                },
+                "minUnitName": {
+                    "description": "最小单位名称",
+                    "type": "string",
+                    "example": "粒"
+                },
+                "movementCount": {
+                    "description": "库存流水数量",
+                    "type": "integer",
+                    "example": 2
+                },
+                "packageSpecName": {
+                    "description": "包装规格",
+                    "type": "string",
+                    "example": "10粒/盒"
+                },
+                "packageUnitCount": {
+                    "description": "包装单位库存数量",
+                    "type": "integer",
+                    "example": 20
+                },
+                "packageUnitName": {
+                    "description": "包装单位名称",
+                    "type": "string",
+                    "example": "盒"
+                },
+                "rowVersion": {
+                    "description": "版本号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "skuCode": {
+                    "description": "SKU编码",
+                    "type": "string",
+                    "example": "SKU000001"
+                },
+                "skuId": {
+                    "description": "SKU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "unitCost": {
+                    "description": "包装单位成本价",
+                    "type": "string",
+                    "example": "12.0000"
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "warehouseCode": {
+                    "description": "仓库编码",
+                    "type": "string",
+                    "example": "WH000001"
+                },
+                "warehouseId": {
+                    "description": "仓库ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "warehouseName": {
+                    "description": "仓库名称",
+                    "type": "string",
+                    "example": "中心库"
+                }
+            }
+        },
+        "models.ErpInventoryInitialStockItem": {
+            "type": "object",
+            "required": [
+                "batchNo",
+                "expiryDate",
+                "quantity",
+                "skuId",
+                "unitCost"
+            ],
+            "properties": {
+                "batchNo": {
+                    "description": "批号",
+                    "type": "string",
+                    "maxLength": 64,
+                    "example": "B20260731001"
+                },
+                "expiryDate": {
+                    "description": "有效期，格式YYYY-MM-DD",
+                    "type": "string",
+                    "example": "2028-12-31"
+                },
+                "quantity": {
+                    "description": "包装单位入库数量",
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 20
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "maxLength": 512,
+                    "example": "初始库存导入"
+                },
+                "skuId": {
+                    "description": "SKU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "unitCost": {
+                    "description": "包装单位成本价",
+                    "type": "string",
+                    "example": "12.0000"
+                }
+            }
+        },
+        "models.ErpInventoryMovementResponse": {
+            "type": "object",
+            "properties": {
+                "afterMinUnitCount": {
+                    "description": "变更后最小单位数量",
+                    "type": "integer",
+                    "example": 400
+                },
+                "afterPackageUnitCount": {
+                    "description": "变更后包装单位数量",
+                    "type": "integer",
+                    "example": 20
+                },
+                "balanceId": {
+                    "description": "库存余额ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "batchId": {
+                    "description": "批次ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "batchNo": {
+                    "description": "批号",
+                    "type": "string",
+                    "example": "B20260731001"
+                },
+                "beforeMinUnitCount": {
+                    "description": "变更前最小单位数量",
+                    "type": "integer",
+                    "example": 0
+                },
+                "beforePackageUnitCount": {
+                    "description": "变更前包装单位数量",
+                    "type": "integer",
+                    "example": 0
+                },
+                "changeMinUnitCount": {
+                    "description": "变更最小单位数量",
+                    "type": "integer",
+                    "example": 400
+                },
+                "changePackageUnitCount": {
+                    "description": "变更包装单位数量",
+                    "type": "integer",
+                    "example": 20
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "direction": {
+                    "description": "方向：IN入库",
+                    "type": "string",
+                    "example": "IN"
+                },
+                "expiryDate": {
+                    "description": "有效期",
+                    "type": "string",
+                    "example": "2028-12-31"
+                },
+                "minUnitName": {
+                    "description": "最小单位名称",
+                    "type": "string",
+                    "example": "粒"
+                },
+                "movementId": {
+                    "description": "库存流水ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "movementType": {
+                    "description": "库存业务类型",
+                    "type": "string",
+                    "example": "INITIAL_IN"
+                },
+                "packageSpecName": {
+                    "description": "包装规格",
+                    "type": "string",
+                    "example": "10粒/盒"
+                },
+                "packageUnitName": {
+                    "description": "包装单位名称",
+                    "type": "string",
+                    "example": "盒"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "初始库存导入"
+                },
+                "skuCode": {
+                    "description": "SKU编码",
+                    "type": "string",
+                    "example": "SKU000001"
+                },
+                "skuId": {
+                    "description": "SKU ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "sourceBillId": {
+                    "description": "来源单据ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "sourceBillNo": {
+                    "description": "来源单据号",
+                    "type": "string",
+                    "example": "INIT00000001"
+                },
+                "sourceBillType": {
+                    "description": "来源单据类型",
+                    "type": "string",
+                    "example": "INITIAL_STOCK"
+                },
+                "unitCost": {
+                    "description": "包装单位成本价",
+                    "type": "string",
+                    "example": "12.0000"
+                },
+                "warehouseCode": {
+                    "description": "仓库编码",
+                    "type": "string",
+                    "example": "WH000001"
+                },
+                "warehouseId": {
+                    "description": "仓库ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "warehouseName": {
+                    "description": "仓库名称",
+                    "type": "string",
+                    "example": "中心库"
+                }
+            }
+        },
+        "models.ErpWarehouseLocationOptionResponse": {
+            "type": "object",
+            "properties": {
+                "locationCode": {
+                    "description": "货位编码",
+                    "type": "string",
+                    "example": "WL000001"
+                },
+                "locationId": {
+                    "description": "货位ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "locationName": {
+                    "description": "货位名称",
+                    "type": "string",
+                    "example": "A-01-01"
+                },
+                "warehouseId": {
+                    "description": "仓库ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                },
+                "zoneId": {
+                    "description": "库区ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440002"
+                }
+            }
+        },
+        "models.ErpWarehouseLocationResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "locationCode": {
+                    "description": "货位编码",
+                    "type": "string",
+                    "example": "WL000001"
+                },
+                "locationId": {
+                    "description": "货位ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "locationName": {
+                    "description": "货位名称",
+                    "type": "string",
+                    "example": "A-01-01"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "货位备注"
+                },
+                "rowVersion": {
+                    "description": "版本号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "warehouseId": {
+                    "description": "仓库ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                },
+                "zoneId": {
+                    "description": "库区ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440002"
+                }
+            }
+        },
         "models.ErpWarehouseOptionResponse": {
             "type": "object",
             "properties": {
@@ -15624,6 +17473,96 @@
                     "description": "仓库名称",
                     "type": "string",
                     "example": "中心库"
+                },
+                "zoneCount": {
+                    "description": "库区数量",
+                    "type": "integer",
+                    "example": 2
+                }
+            }
+        },
+        "models.ErpWarehouseZoneOptionResponse": {
+            "type": "object",
+            "properties": {
+                "warehouseId": {
+                    "description": "仓库ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                },
+                "zoneCode": {
+                    "description": "库区编码",
+                    "type": "string",
+                    "example": "WZ000001"
+                },
+                "zoneId": {
+                    "description": "库区ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "zoneName": {
+                    "description": "库区名称",
+                    "type": "string",
+                    "example": "合格品区A"
+                },
+                "zoneType": {
+                    "description": "库区类型",
+                    "type": "string",
+                    "example": "QUALIFIED"
+                }
+            }
+        },
+        "models.ErpWarehouseZoneResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "locationCount": {
+                    "description": "货位数量",
+                    "type": "integer",
+                    "example": 2
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "库区备注"
+                },
+                "rowVersion": {
+                    "description": "版本号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "warehouseId": {
+                    "description": "仓库ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                },
+                "zoneCode": {
+                    "description": "库区编码",
+                    "type": "string",
+                    "example": "WZ000001"
+                },
+                "zoneId": {
+                    "description": "库区ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "zoneName": {
+                    "description": "库区名称",
+                    "type": "string",
+                    "example": "合格品区A"
+                },
+                "zoneType": {
+                    "description": "库区类型",
+                    "type": "string",
+                    "example": "QUALIFIED"
                 }
             }
         },
@@ -17802,6 +19741,31 @@
                 }
             }
         },
+        "models.SaveErpWarehouseLocationRequest": {
+            "type": "object",
+            "required": [
+                "locationName"
+            ],
+            "properties": {
+                "expectedRowVersion": {
+                    "description": "期望行版本号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "locationName": {
+                    "description": "货位名称",
+                    "type": "string",
+                    "maxLength": 128,
+                    "example": "A-01-01"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "maxLength": 512,
+                    "example": "货位备注"
+                }
+            }
+        },
         "models.SaveErpWarehouseRequest": {
             "type": "object",
             "required": [
@@ -17853,6 +19817,38 @@
                     "type": "string",
                     "maxLength": 128,
                     "example": "中心库"
+                }
+            }
+        },
+        "models.SaveErpWarehouseZoneRequest": {
+            "type": "object",
+            "required": [
+                "zoneName",
+                "zoneType"
+            ],
+            "properties": {
+                "expectedRowVersion": {
+                    "description": "期望行版本号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "maxLength": 512,
+                    "example": "库区备注"
+                },
+                "zoneName": {
+                    "description": "库区名称",
+                    "type": "string",
+                    "maxLength": 128,
+                    "example": "合格品区A"
+                },
+                "zoneType": {
+                    "description": "库区类型",
+                    "type": "string",
+                    "maxLength": 32,
+                    "example": "QUALIFIED"
                 }
             }
         },

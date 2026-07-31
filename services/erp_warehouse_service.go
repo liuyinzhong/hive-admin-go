@@ -59,7 +59,11 @@ func (s *ErpWarehouseService) GetWarehouseList(req models.ErpWarehouseListReques
 		return nil, err
 	}
 
-	return &utils.PaginationResponse{Items: erpWarehousesToResponses(warehouses), Total: total}, nil
+	responses := erpWarehousesToResponses(warehouses)
+	if err := s.fillWarehouseZoneCounts(database.DB, responses); err != nil {
+		return nil, err
+	}
+	return &utils.PaginationResponse{Items: responses, Total: total}, nil
 }
 
 func (s *ErpWarehouseService) GetWarehouseDetail(warehouseID string) (*models.ErpWarehouseResponse, error) {
@@ -74,7 +78,13 @@ func (s *ErpWarehouseService) GetWarehouseDetail(warehouseID string) (*models.Er
 		}
 		return nil, err
 	}
-	return erpWarehouseToResponse(warehouse), nil
+	response := erpWarehouseToResponse(warehouse)
+	responses := []models.ErpWarehouseResponse{*response}
+	if err := s.fillWarehouseZoneCounts(database.DB, responses); err != nil {
+		return nil, err
+	}
+	response.ZoneCount = responses[0].ZoneCount
+	return response, nil
 }
 
 func (s *ErpWarehouseService) GetWarehouseOptions(req models.ErpWarehouseOptionsRequest) ([]models.ErpWarehouseOptionResponse, error) {

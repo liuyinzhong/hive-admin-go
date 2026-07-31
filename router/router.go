@@ -21,6 +21,7 @@ func SetupRouter() *gin.Engine {
 	medicalController := controllers.NewMedicalController()
 	baseEnterpriseController := controllers.NewBaseEnterpriseController()
 	erpWarehouseController := controllers.NewErpWarehouseController()
+	erpInventoryController := controllers.NewErpInventoryController()
 	productSpuController := controllers.NewProductSpuController()
 	productRpController := controllers.NewProductRpController()
 	productMpController := controllers.NewProductMpController()
@@ -236,10 +237,29 @@ func SetupRouter() *gin.Engine {
 				warehouses.GET("", permissionGuard.Require("erp:warehouse:list"), erpWarehouseController.GetWarehouseList)
 				warehouses.GET("/options", erpWarehouseController.GetWarehouseOptions)
 				warehouses.POST("", permissionGuard.Require("erp:warehouse:create"), erpWarehouseController.CreateWarehouse)
+				warehouses.GET("/:warehouseId/zones", permissionGuard.Require("erp:warehouseZone:list"), erpWarehouseController.GetWarehouseZoneList)
+				warehouses.GET("/:warehouseId/zones/options", erpWarehouseController.GetWarehouseZoneOptions)
+				warehouses.POST("/:warehouseId/zones", permissionGuard.Require("erp:warehouseZone:create"), erpWarehouseController.CreateWarehouseZone)
+				warehouses.GET("/:warehouseId/zones/:zoneId/locations", permissionGuard.Require("erp:warehouseLocation:list"), erpWarehouseController.GetWarehouseLocationList)
+				warehouses.GET("/:warehouseId/zones/:zoneId/locations/options", erpWarehouseController.GetWarehouseLocationOptions)
+				warehouses.POST("/:warehouseId/zones/:zoneId/locations", permissionGuard.Require("erp:warehouseLocation:create"), erpWarehouseController.CreateWarehouseLocation)
+				warehouses.GET("/:warehouseId/zones/:zoneId/locations/:locationId", permissionGuard.Require("erp:warehouseLocation:detail"), erpWarehouseController.GetWarehouseLocation)
+				warehouses.PUT("/:warehouseId/zones/:zoneId/locations/:locationId", permissionGuard.Require("erp:warehouseLocation:update"), erpWarehouseController.UpdateWarehouseLocation)
+				warehouses.DELETE("/:warehouseId/zones/:zoneId/locations/:locationId", permissionGuard.Require("erp:warehouseLocation:delete"), erpWarehouseController.DeleteWarehouseLocation)
+				warehouses.GET("/:warehouseId/zones/:zoneId", permissionGuard.Require("erp:warehouseZone:detail"), erpWarehouseController.GetWarehouseZone)
+				warehouses.PUT("/:warehouseId/zones/:zoneId", permissionGuard.Require("erp:warehouseZone:update"), erpWarehouseController.UpdateWarehouseZone)
+				warehouses.DELETE("/:warehouseId/zones/:zoneId", permissionGuard.Require("erp:warehouseZone:delete"), erpWarehouseController.DeleteWarehouseZone)
 				warehouses.GET("/:warehouseId", permissionGuard.Require("erp:warehouse:detail"), erpWarehouseController.GetWarehouse)
 				warehouses.PUT("/:warehouseId", permissionGuard.Require("erp:warehouse:update"), erpWarehouseController.UpdateWarehouse)
 				warehouses.PUT("/:warehouseId/status", permissionGuard.Require("erp:warehouse:status"), erpWarehouseController.UpdateWarehouseStatus)
 				warehouses.DELETE("/:warehouseId", permissionGuard.Require("erp:warehouse:delete"), erpWarehouseController.DeleteWarehouse)
+			}
+
+			inventory := erp.Group("/inventory")
+			{
+				inventory.GET("/balances", permissionGuard.Require("erp:inventoryBalance:list"), erpInventoryController.GetInventoryBalanceList)
+				inventory.GET("/balances/:balanceId/movements", permissionGuard.Require("erp:inventoryMovement:list"), erpInventoryController.GetInventoryMovements)
+				inventory.POST("/initialStocks", permissionGuard.Require("erp:inventoryInitial:create"), erpInventoryController.CreateInitialStocks)
 			}
 		}
 

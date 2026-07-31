@@ -80,6 +80,7 @@ type ErpWarehouseResponse struct {
 	Address       *string `json:"address" example:"北京市朝阳区"`                                   // 地址
 	Status        int     `json:"status" example:"1"`                                         // 状态
 	Remark        *string `json:"remark" example:"仓库基础资料备注"`                                  // 备注
+	ZoneCount     int     `json:"zoneCount" example:"2"`                                      // 库区数量
 	RowVersion    int     `json:"rowVersion" example:"1"`                                     // 版本号
 	CreateDate    *string `json:"createDate" example:"2026-01-15 09:00:00"`                   // 创建时间
 	UpdateDate    *string `json:"updateDate" example:"2026-01-15 09:00:00"`                   // 更新时间

@@ -313,6 +313,32 @@ definitions:
     - label
     - type
     type: object
+  models.CreateErpInventoryInitialStockRequest:
+    properties:
+      items:
+        description: 初始库存明细
+        items:
+          $ref: '#/definitions/models.ErpInventoryInitialStockItem'
+        type: array
+      warehouseId:
+        description: 入库仓库ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    required:
+    - items
+    - warehouseId
+    type: object
+  models.CreateErpInventoryInitialStockResponse:
+    properties:
+      movementCount:
+        description: 写入流水数量
+        example: 2
+        type: integer
+      sourceBillNo:
+        description: 初始库存来源批次号
+        example: INIT00000001
+        type: string
+    type: object
   models.CreateExternalPageRequest:
     properties:
       name:
@@ -692,7 +718,27 @@ definitions:
     - definitionKey
     - definitionName
     type: object
+  models.DeleteErpWarehouseLocationRequest:
+    properties:
+      expectedRowVersion:
+        description: 期望行版本号
+        example: 1
+        minimum: 1
+        type: integer
+    required:
+    - expectedRowVersion
+    type: object
   models.DeleteErpWarehouseRequest:
+    properties:
+      expectedRowVersion:
+        description: 期望行版本号
+        example: 1
+        minimum: 1
+        type: integer
+    required:
+    - expectedRowVersion
+    type: object
+  models.DeleteErpWarehouseZoneRequest:
     properties:
       expectedRowVersion:
         description: 期望行版本号
@@ -1107,6 +1153,298 @@ definitions:
         example: "2026-01-15 09:00:00"
         type: string
     type: object
+  models.ErpInventoryBalanceResponse:
+    properties:
+      balanceId:
+        description: 库存余额ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      batchId:
+        description: 批次ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      batchNo:
+        description: 批号
+        example: B20260731001
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
+        type: string
+      expiryDate:
+        description: 有效期
+        example: "2028-12-31"
+        type: string
+      inventoryAmount:
+        description: 库存金额，按包装单位库存数量*成本价计算
+        example: "240.0000"
+        type: string
+      minUnitCount:
+        description: 最小单位库存数量
+        example: 400
+        type: integer
+      minUnitName:
+        description: 最小单位名称
+        example: 粒
+        type: string
+      movementCount:
+        description: 库存流水数量
+        example: 2
+        type: integer
+      packageSpecName:
+        description: 包装规格
+        example: 10粒/盒
+        type: string
+      packageUnitCount:
+        description: 包装单位库存数量
+        example: 20
+        type: integer
+      packageUnitName:
+        description: 包装单位名称
+        example: 盒
+        type: string
+      rowVersion:
+        description: 版本号
+        example: 1
+        type: integer
+      skuCode:
+        description: SKU编码
+        example: SKU000001
+        type: string
+      skuId:
+        description: SKU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      unitCost:
+        description: 包装单位成本价
+        example: "12.0000"
+        type: string
+      updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
+        type: string
+      warehouseCode:
+        description: 仓库编码
+        example: WH000001
+        type: string
+      warehouseId:
+        description: 仓库ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      warehouseName:
+        description: 仓库名称
+        example: 中心库
+        type: string
+    type: object
+  models.ErpInventoryInitialStockItem:
+    properties:
+      batchNo:
+        description: 批号
+        example: B20260731001
+        maxLength: 64
+        type: string
+      expiryDate:
+        description: 有效期，格式YYYY-MM-DD
+        example: "2028-12-31"
+        type: string
+      quantity:
+        description: 包装单位入库数量
+        example: 20
+        minimum: 1
+        type: integer
+      remark:
+        description: 备注
+        example: 初始库存导入
+        maxLength: 512
+        type: string
+      skuId:
+        description: SKU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      unitCost:
+        description: 包装单位成本价
+        example: "12.0000"
+        type: string
+    required:
+    - batchNo
+    - expiryDate
+    - quantity
+    - skuId
+    - unitCost
+    type: object
+  models.ErpInventoryMovementResponse:
+    properties:
+      afterMinUnitCount:
+        description: 变更后最小单位数量
+        example: 400
+        type: integer
+      afterPackageUnitCount:
+        description: 变更后包装单位数量
+        example: 20
+        type: integer
+      balanceId:
+        description: 库存余额ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      batchId:
+        description: 批次ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      batchNo:
+        description: 批号
+        example: B20260731001
+        type: string
+      beforeMinUnitCount:
+        description: 变更前最小单位数量
+        example: 0
+        type: integer
+      beforePackageUnitCount:
+        description: 变更前包装单位数量
+        example: 0
+        type: integer
+      changeMinUnitCount:
+        description: 变更最小单位数量
+        example: 400
+        type: integer
+      changePackageUnitCount:
+        description: 变更包装单位数量
+        example: 20
+        type: integer
+      createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
+        type: string
+      direction:
+        description: 方向：IN入库
+        example: IN
+        type: string
+      expiryDate:
+        description: 有效期
+        example: "2028-12-31"
+        type: string
+      minUnitName:
+        description: 最小单位名称
+        example: 粒
+        type: string
+      movementId:
+        description: 库存流水ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      movementType:
+        description: 库存业务类型
+        example: INITIAL_IN
+        type: string
+      packageSpecName:
+        description: 包装规格
+        example: 10粒/盒
+        type: string
+      packageUnitName:
+        description: 包装单位名称
+        example: 盒
+        type: string
+      remark:
+        description: 备注
+        example: 初始库存导入
+        type: string
+      skuCode:
+        description: SKU编码
+        example: SKU000001
+        type: string
+      skuId:
+        description: SKU ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      sourceBillId:
+        description: 来源单据ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      sourceBillNo:
+        description: 来源单据号
+        example: INIT00000001
+        type: string
+      sourceBillType:
+        description: 来源单据类型
+        example: INITIAL_STOCK
+        type: string
+      unitCost:
+        description: 包装单位成本价
+        example: "12.0000"
+        type: string
+      warehouseCode:
+        description: 仓库编码
+        example: WH000001
+        type: string
+      warehouseId:
+        description: 仓库ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      warehouseName:
+        description: 仓库名称
+        example: 中心库
+        type: string
+    type: object
+  models.ErpWarehouseLocationOptionResponse:
+    properties:
+      locationCode:
+        description: 货位编码
+        example: WL000001
+        type: string
+      locationId:
+        description: 货位ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      locationName:
+        description: 货位名称
+        example: A-01-01
+        type: string
+      warehouseId:
+        description: 仓库ID
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      zoneId:
+        description: 库区ID
+        example: 550e8400-e29b-41d4-a716-446655440002
+        type: string
+    type: object
+  models.ErpWarehouseLocationResponse:
+    properties:
+      createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
+        type: string
+      locationCode:
+        description: 货位编码
+        example: WL000001
+        type: string
+      locationId:
+        description: 货位ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      locationName:
+        description: 货位名称
+        example: A-01-01
+        type: string
+      remark:
+        description: 备注
+        example: 货位备注
+        type: string
+      rowVersion:
+        description: 版本号
+        example: 1
+        type: integer
+      updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
+        type: string
+      warehouseId:
+        description: 仓库ID
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      zoneId:
+        description: 库区ID
+        example: 550e8400-e29b-41d4-a716-446655440002
+        type: string
+    type: object
   models.ErpWarehouseOptionResponse:
     properties:
       businessScope:
@@ -1175,6 +1513,76 @@ definitions:
       warehouseName:
         description: 仓库名称
         example: 中心库
+        type: string
+      zoneCount:
+        description: 库区数量
+        example: 2
+        type: integer
+    type: object
+  models.ErpWarehouseZoneOptionResponse:
+    properties:
+      warehouseId:
+        description: 仓库ID
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      zoneCode:
+        description: 库区编码
+        example: WZ000001
+        type: string
+      zoneId:
+        description: 库区ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      zoneName:
+        description: 库区名称
+        example: 合格品区A
+        type: string
+      zoneType:
+        description: 库区类型
+        example: QUALIFIED
+        type: string
+    type: object
+  models.ErpWarehouseZoneResponse:
+    properties:
+      createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
+        type: string
+      locationCount:
+        description: 货位数量
+        example: 2
+        type: integer
+      remark:
+        description: 备注
+        example: 库区备注
+        type: string
+      rowVersion:
+        description: 版本号
+        example: 1
+        type: integer
+      updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
+        type: string
+      warehouseId:
+        description: 仓库ID
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      zoneCode:
+        description: 库区编码
+        example: WZ000001
+        type: string
+      zoneId:
+        description: 库区ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      zoneName:
+        description: 库区名称
+        example: 合格品区A
+        type: string
+      zoneType:
+        description: 库区类型
+        example: QUALIFIED
         type: string
     type: object
   models.ExternalPageResponse:
@@ -2835,6 +3243,25 @@ definitions:
     - enterpriseType
     - roles
     type: object
+  models.SaveErpWarehouseLocationRequest:
+    properties:
+      expectedRowVersion:
+        description: 期望行版本号
+        example: 1
+        type: integer
+      locationName:
+        description: 货位名称
+        example: A-01-01
+        maxLength: 128
+        type: string
+      remark:
+        description: 备注
+        example: 货位备注
+        maxLength: 512
+        type: string
+    required:
+    - locationName
+    type: object
   models.SaveErpWarehouseRequest:
     properties:
       address:
@@ -2877,6 +3304,31 @@ definitions:
     - businessScope
     - storageType
     - warehouseName
+    type: object
+  models.SaveErpWarehouseZoneRequest:
+    properties:
+      expectedRowVersion:
+        description: 期望行版本号
+        example: 1
+        type: integer
+      remark:
+        description: 备注
+        example: 库区备注
+        maxLength: 512
+        type: string
+      zoneName:
+        description: 库区名称
+        example: 合格品区A
+        maxLength: 128
+        type: string
+      zoneType:
+        description: 库区类型
+        example: QUALIFIED
+        maxLength: 32
+        type: string
+    required:
+    - zoneName
+    - zoneType
     type: object
   models.SaveProductMpRequest:
     properties:
@@ -7559,6 +8011,205 @@ paths:
       summary: 获取最新版本号
       tags:
       - 开发管理/版本管理
+  /erp/inventory/balances:
+    get:
+      description: 分页查询库存余额，第一版按仓库和库存批次展示；搜索条件支持仓库ID、SKU编码和批号，零库存余额默认保留并展示
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 仓库ID，UUID格式
+        in: query
+        name: warehouseId
+        type: string
+      - description: SKU编码
+        in: query
+        name: skuCode
+        type: string
+      - description: 批号
+        in: query
+        name: batchNo
+        type: string
+      - description: 排序，支持warehouseCode、warehouseName、skuCode、batchNo、expiryDate、unitCost、packageUnitCount、minUnitCount、inventoryAmount、movementCount、createDate、updateDate
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ErpInventoryBalanceResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 业务数据不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 业务数据冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取库存余额列表
+      tags:
+      - 进销存/库存管理
+  /erp/inventory/balances/{balanceId}/movements:
+    get:
+      description: 根据库存余额ID分页查询库存流水；流水一旦写入不可更改，第一版仅包含初始库存入库流水
+      parameters:
+      - description: 库存余额ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
+        in: path
+        name: balanceId
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 排序，支持sourceBillType、sourceBillNo、movementType、direction、createDate
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ErpInventoryMovementResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 业务数据不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 业务数据冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取库存流水列表
+      tags:
+      - 进销存/库存管理
+  /erp/inventory/initialStocks:
+    post:
+      consumes:
+      - application/json
+      description: 批量写入初始库存，数量按SKU包装单位录入；同一批次再次写入是追加库存而不是覆盖库存；整批提交原子成功或失败
+      parameters:
+      - description: 初始库存
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateErpInventoryInitialStockRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CreateErpInventoryInitialStockResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 业务数据不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 业务数据冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 新增初始库存
+      tags:
+      - 进销存/库存管理
   /erp/warehouses:
     get:
       description: 分页查询仓库基础资料列表，支持按仓库编码/名称、储存类型、业务范围和状态筛选
@@ -7864,6 +8515,689 @@ paths:
       summary: 更新仓库启停状态
       tags:
       - 进销存/仓库管理
+  /erp/warehouses/{warehouseId}/zones:
+    get:
+      description: 分页查询指定仓库下的库区基础资料，支持按库区编码/名称和库区类型筛选
+      parameters:
+      - description: 仓库ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
+        in: path
+        name: warehouseId
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 库区编码或库区名称
+        in: query
+        name: keyword
+        type: string
+      - description: 库区类型：NORMAL普通区 PENDING_INSPECTION待验区 QUALIFIED合格品区 UNQUALIFIED不合格品区
+          RETURNED退货区
+        in: query
+        name: zoneType
+        type: string
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ErpWarehouseZoneResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取库区列表
+      tags:
+      - 进销存/库区管理
+    post:
+      consumes:
+      - application/json
+      description: 在指定仓库下创建库区基础资料，库区编码由后端自动生成
+      parameters:
+      - description: 仓库ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
+        in: path
+        name: warehouseId
+        required: true
+        type: string
+      - description: 库区
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveErpWarehouseZoneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpWarehouseZoneResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 新增库区
+      tags:
+      - 进销存/库区管理
+  /erp/warehouses/{warehouseId}/zones/{zoneId}:
+    delete:
+      consumes:
+      - application/json
+      description: 根据仓库ID和库区ID软删除库区基础资料，第一版不校验库存或单据引用
+      parameters:
+      - description: 仓库ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
+        in: path
+        name: warehouseId
+        required: true
+        type: string
+      - description: 库区ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440001
+        in: path
+        name: zoneId
+        required: true
+        type: string
+      - description: 删除参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeleteErpWarehouseZoneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除库区
+      tags:
+      - 进销存/库区管理
+    get:
+      description: 根据仓库ID和库区ID获取库区基础资料详情
+      parameters:
+      - description: 仓库ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
+        in: path
+        name: warehouseId
+        required: true
+        type: string
+      - description: 库区ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440001
+        in: path
+        name: zoneId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpWarehouseZoneResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取库区详情
+      tags:
+      - 进销存/库区管理
+    put:
+      consumes:
+      - application/json
+      description: 根据仓库ID和库区ID更新库区基础资料，库区编码不可修改
+      parameters:
+      - description: 仓库ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
+        in: path
+        name: warehouseId
+        required: true
+        type: string
+      - description: 库区ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440001
+        in: path
+        name: zoneId
+        required: true
+        type: string
+      - description: 库区
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveErpWarehouseZoneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpWarehouseZoneResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新库区
+      tags:
+      - 进销存/库区管理
+  /erp/warehouses/{warehouseId}/zones/{zoneId}/locations:
+    get:
+      description: 分页查询指定仓库和库区下的货位基础资料，支持按货位编码/名称筛选
+      parameters:
+      - description: 仓库ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
+        in: path
+        name: warehouseId
+        required: true
+        type: string
+      - description: 库区ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440001
+        in: path
+        name: zoneId
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 货位编码或货位名称
+        in: query
+        name: keyword
+        type: string
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ErpWarehouseLocationResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取货位列表
+      tags:
+      - 进销存/货位管理
+    post:
+      consumes:
+      - application/json
+      description: 在指定仓库和库区下创建货位基础资料，货位编码由后端自动生成
+      parameters:
+      - description: 仓库ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
+        in: path
+        name: warehouseId
+        required: true
+        type: string
+      - description: 库区ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440001
+        in: path
+        name: zoneId
+        required: true
+        type: string
+      - description: 货位
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveErpWarehouseLocationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpWarehouseLocationResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 新增货位
+      tags:
+      - 进销存/货位管理
+  /erp/warehouses/{warehouseId}/zones/{zoneId}/locations/{locationId}:
+    delete:
+      consumes:
+      - application/json
+      description: 根据仓库ID、库区ID和货位ID软删除货位基础资料，第一版不校验库存或单据引用
+      parameters:
+      - description: 仓库ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
+        in: path
+        name: warehouseId
+        required: true
+        type: string
+      - description: 库区ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440001
+        in: path
+        name: zoneId
+        required: true
+        type: string
+      - description: 货位ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440002
+        in: path
+        name: locationId
+        required: true
+        type: string
+      - description: 删除参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeleteErpWarehouseLocationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除货位
+      tags:
+      - 进销存/货位管理
+    get:
+      description: 根据仓库ID、库区ID和货位ID获取货位基础资料详情
+      parameters:
+      - description: 仓库ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
+        in: path
+        name: warehouseId
+        required: true
+        type: string
+      - description: 库区ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440001
+        in: path
+        name: zoneId
+        required: true
+        type: string
+      - description: 货位ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440002
+        in: path
+        name: locationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpWarehouseLocationResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取货位详情
+      tags:
+      - 进销存/货位管理
+    put:
+      consumes:
+      - application/json
+      description: 根据仓库ID、库区ID和货位ID更新货位基础资料，货位编码不可修改
+      parameters:
+      - description: 仓库ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
+        in: path
+        name: warehouseId
+        required: true
+        type: string
+      - description: 库区ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440001
+        in: path
+        name: zoneId
+        required: true
+        type: string
+      - description: 货位ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440002
+        in: path
+        name: locationId
+        required: true
+        type: string
+      - description: 货位
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveErpWarehouseLocationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpWarehouseLocationResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新货位
+      tags:
+      - 进销存/货位管理
+  /erp/warehouses/{warehouseId}/zones/{zoneId}/locations/options:
+    get:
+      description: 获取指定仓库和库区下的货位选项；需要登录，不做货位按钮权限校验
+      parameters:
+      - description: 仓库ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
+        in: path
+        name: warehouseId
+        required: true
+        type: string
+      - description: 库区ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440001
+        in: path
+        name: zoneId
+        required: true
+        type: string
+      - description: 货位编码或货位名称
+        in: query
+        name: keyword
+        type: string
+      - description: 返回数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ErpWarehouseLocationOptionResponse'
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取货位选项
+      tags:
+      - 进销存/货位管理
+  /erp/warehouses/{warehouseId}/zones/options:
+    get:
+      description: 获取指定仓库下的库区选项；需要登录，不做库区按钮权限校验
+      parameters:
+      - description: 仓库ID，UUID格式
+        example: 550e8400-e29b-41d4-a716-446655440000
+        in: path
+        name: warehouseId
+        required: true
+        type: string
+      - description: 库区编码或库区名称
+        in: query
+        name: keyword
+        type: string
+      - description: 返回数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ErpWarehouseZoneOptionResponse'
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取库区选项
+      tags:
+      - 进销存/库区管理
   /erp/warehouses/options:
     get:
       description: 获取已启用的仓库基础资料选项，用于下拉选择等场景；需要登录，不做仓库按钮权限校验
