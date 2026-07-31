@@ -10846,6 +10846,193 @@ const docTemplate = `{
                 }
             }
         },
+        "/statistics/dev/getTaskFindDay": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "按小时统计两个日期的任务创建数量，用于任务趋势对比折线图",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "统计/开发管理"
+                ],
+                "summary": "统计任务趋势",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "2026/02/25",
+                        "description": "日期1（昨天），格式 YYYY/MM/DD 或 YYYY-MM-DD",
+                        "name": "date1",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "2026/02/26",
+                        "description": "日期2（今天），格式 YYYY/MM/DD 或 YYYY-MM-DD",
+                        "name": "date2",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.TaskFindDayResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/statistics/dev/getTaskFindYear": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "按月统计指定年份的任务实际工时合计，用于工时总量柱状图",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "统计/开发管理"
+                ],
+                "summary": "统计任务年度工时",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 2026,
+                        "description": "年份",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.TaskFindYearResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/statistics/dev/getWorkspaceEnum": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取需求、任务、缺陷的总数与待处理数量，用于工作台概览",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "统计/开发管理"
+                ],
+                "summary": "获取工作空间概览统计",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.WorkspaceEnumResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/system/depts": {
             "get": {
                 "security": [
@@ -22471,6 +22658,37 @@ const docTemplate = `{
                 }
             }
         },
+        "models.TaskFindDayResponse": {
+            "type": "object",
+            "properties": {
+                "date1": {
+                    "description": "日期1（昨天）各小时任务创建数量，长度 24",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "date2": {
+                    "description": "日期2（今天）各小时任务创建数量，长度 24",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "models.TaskFindYearResponse": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "description": "各月份实际工时合计，长度 12",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                }
+            }
+        },
         "models.TaskResponse": {
             "type": "object",
             "properties": {
@@ -24332,6 +24550,35 @@ const docTemplate = `{
                     "description": "目标用户ID",
                     "type": "string",
                     "example": "UUID"
+                }
+            }
+        },
+        "models.WorkspaceEnumResponse": {
+            "type": "object",
+            "properties": {
+                "bugNum": {
+                    "description": "待处理缺陷数",
+                    "type": "integer"
+                },
+                "bugTotalNum": {
+                    "description": "缺陷总数",
+                    "type": "integer"
+                },
+                "storyNum": {
+                    "description": "待评审需求数",
+                    "type": "integer"
+                },
+                "storyTotalNum": {
+                    "description": "需求总数",
+                    "type": "integer"
+                },
+                "taskNum": {
+                    "description": "待执行任务数",
+                    "type": "integer"
+                },
+                "taskTotalNum": {
+                    "description": "任务总数",
+                    "type": "integer"
                 }
             }
         },

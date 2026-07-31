@@ -226,6 +226,16 @@ func SetupRouter() *gin.Engine {
 			dev.POST("/changeHistory", permissionGuard.Require("dev:changeHistory:create"), devController.CreateChangeHistory)
 		}
 
+		statistics := api.Group("/statistics", middleware.AuthMiddleware())
+		{
+			devStatistics := statistics.Group("/dev")
+			{
+				devStatistics.GET("/getTaskFindDay", devController.GetTaskFindDay)
+				devStatistics.GET("/getTaskFindYear", devController.GetTaskFindYear)
+				devStatistics.GET("/getWorkspaceEnum", devController.GetWorkspaceEnum)
+			}
+		}
+
 		form := api.Group("/form", middleware.AuthMiddleware())
 		{
 			schemas := form.Group("/schemas")

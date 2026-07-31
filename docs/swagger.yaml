@@ -4580,6 +4580,27 @@ definitions:
         example: UUID
         type: string
     type: object
+  models.TaskFindDayResponse:
+    properties:
+      date1:
+        description: 日期1（昨天）各小时任务创建数量，长度 24
+        items:
+          type: integer
+        type: array
+      date2:
+        description: 日期2（今天）各小时任务创建数量，长度 24
+        items:
+          type: integer
+        type: array
+    type: object
+  models.TaskFindYearResponse:
+    properties:
+      list:
+        description: 各月份实际工时合计，长度 12
+        items:
+          type: number
+        type: array
+    type: object
   models.TaskResponse:
     properties:
       actualHours:
@@ -5987,6 +6008,27 @@ definitions:
         type: string
     required:
     - targetUserId
+    type: object
+  models.WorkspaceEnumResponse:
+    properties:
+      bugNum:
+        description: 待处理缺陷数
+        type: integer
+      bugTotalNum:
+        description: 缺陷总数
+        type: integer
+      storyNum:
+        description: 待评审需求数
+        type: integer
+      storyTotalNum:
+        description: 需求总数
+        type: integer
+      taskNum:
+        description: 待执行任务数
+        type: integer
+      taskTotalNum:
+        description: 任务总数
+        type: integer
     type: object
   utils.PageResult:
     properties:
@@ -12699,6 +12741,119 @@ paths:
       summary: 检查外部页面是否可访问
       tags:
       - 公共接口/外部页面
+  /statistics/dev/getTaskFindDay:
+    get:
+      consumes:
+      - application/json
+      description: 按小时统计两个日期的任务创建数量，用于任务趋势对比折线图
+      parameters:
+      - default: 2026/02/25
+        description: 日期1（昨天），格式 YYYY/MM/DD 或 YYYY-MM-DD
+        in: query
+        name: date1
+        required: true
+        type: string
+      - default: 2026/02/26
+        description: 日期2（今天），格式 YYYY/MM/DD 或 YYYY-MM-DD
+        in: query
+        name: date2
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TaskFindDayResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 统计任务趋势
+      tags:
+      - 统计/开发管理
+  /statistics/dev/getTaskFindYear:
+    get:
+      consumes:
+      - application/json
+      description: 按月统计指定年份的任务实际工时合计，用于工时总量柱状图
+      parameters:
+      - default: 2026
+        description: 年份
+        in: query
+        name: year
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TaskFindYearResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 统计任务年度工时
+      tags:
+      - 统计/开发管理
+  /statistics/dev/getWorkspaceEnum:
+    get:
+      consumes:
+      - application/json
+      description: 获取需求、任务、缺陷的总数与待处理数量，用于工作台概览
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.WorkspaceEnumResponse'
+              type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取工作空间概览统计
+      tags:
+      - 统计/开发管理
   /system/depts:
     delete:
       consumes:
