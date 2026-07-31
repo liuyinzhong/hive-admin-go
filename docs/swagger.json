@@ -13026,6 +13026,457 @@
                 }
             }
         },
+        "/system/params": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "分页查询系统参数列表,支持按参数键、类型、是否公开筛选与排序",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/参数管理"
+                ],
+                "summary": "分页查询参数列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码,默认1",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "每页大小,默认20",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "sys.session",
+                        "description": "参数键,模糊搜索",
+                        "name": "paramKey",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "number",
+                        "description": "参数类型,精确匹配 string/number/boolean/json",
+                        "name": "paramType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 1,
+                        "description": "是否公开 0=否 1=是",
+                        "name": "isPublic",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "updateDate,desc",
+                        "description": "排序参数,支持 paramKey/paramType/isPublic/updateDate/createDate",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ParamResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "创建新的系统参数,校验 paramKey 格式与唯一性、paramType 与 paramValue 一致性",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/参数管理"
+                ],
+                "summary": "创建参数",
+                "parameters": [
+                    {
+                        "description": "参数信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateParamRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "参数键已存在或创建失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "批量逻辑删除参数",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/参数管理"
+                ],
+                "summary": "批量删除参数",
+                "parameters": [
+                    {
+                        "description": "参数ID列表",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/params/values": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "按参数键批量查询公开参数(isPublic=1),返回 key-\u003evalue 映射。需登录但无需接口权限",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/参数管理"
+                ],
+                "summary": "公共参数批量查询",
+                "parameters": [
+                    {
+                        "description": "参数键数组,为空时返回全部公开参数",
+                        "name": "request",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/models.ParamValuesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/system/params/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据参数ID查询参数详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/参数管理"
+                ],
+                "summary": "查询参数详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "参数ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ParamResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "参数不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "更新参数信息,允许修改 paramKey(校验唯一性排除自身)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/参数管理"
+                ],
+                "summary": "更新参数",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "参数ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "参数信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateParamRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "参数不存在、参数键已存在或校验失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/system/roles": {
             "get": {
                 "security": [
@@ -16074,6 +16525,41 @@
                 }
             }
         },
+        "models.CreateParamRequest": {
+            "type": "object",
+            "required": [
+                "paramKey",
+                "paramType",
+                "paramValue"
+            ],
+            "properties": {
+                "isPublic": {
+                    "description": "是否公开 0=否 1=是",
+                    "type": "integer",
+                    "example": 1
+                },
+                "paramKey": {
+                    "description": "参数键,点分命名,全局唯一",
+                    "type": "string",
+                    "example": "sys.session.timeout"
+                },
+                "paramType": {
+                    "description": "参数类型 string/number/boolean/json",
+                    "type": "string",
+                    "example": "number"
+                },
+                "paramValue": {
+                    "description": "参数值",
+                    "type": "string",
+                    "example": "30"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "会话超时分钟数"
+                }
+            }
+        },
         "models.CreateProjectRequest": {
             "type": "object",
             "required": [
@@ -18347,6 +18833,67 @@
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "models.ParamResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "id": {
+                    "description": "参数ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "isPublic": {
+                    "description": "是否公开 0=否 1=是",
+                    "type": "integer",
+                    "example": 1
+                },
+                "paramKey": {
+                    "description": "参数键",
+                    "type": "string",
+                    "example": "sys.session.timeout"
+                },
+                "paramType": {
+                    "description": "参数类型",
+                    "type": "string",
+                    "example": "number"
+                },
+                "paramValue": {
+                    "description": "参数值",
+                    "type": "string",
+                    "example": "30"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "会话超时分钟数"
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                }
+            }
+        },
+        "models.ParamValuesRequest": {
+            "type": "object",
+            "properties": {
+                "keys": {
+                    "description": "参数键数组,为空时返回所有 isPublic=1 的参数",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"SYS_SESSION_TIMEOUT\"",
+                        "\"SYS_UPLOAD_MAX_SIZE\"]"
+                    ]
                 }
             }
         },
@@ -21590,6 +22137,41 @@
                     "description": "排序",
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "models.UpdateParamRequest": {
+            "type": "object",
+            "required": [
+                "paramKey",
+                "paramType",
+                "paramValue"
+            ],
+            "properties": {
+                "isPublic": {
+                    "description": "是否公开",
+                    "type": "integer",
+                    "example": 1
+                },
+                "paramKey": {
+                    "description": "参数键",
+                    "type": "string",
+                    "example": "sys.session.timeout"
+                },
+                "paramType": {
+                    "description": "参数类型",
+                    "type": "string",
+                    "example": "number"
+                },
+                "paramValue": {
+                    "description": "参数值",
+                    "type": "string",
+                    "example": "30"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "会话超时分钟数"
                 }
             }
         },

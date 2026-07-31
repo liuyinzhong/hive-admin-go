@@ -10,6 +10,7 @@ type SystemController struct {
 	dictService     *services.DictService
 	fileService     *services.FileService
 	auditLogService *services.AuditLogService
+	paramService    *services.SystemParamService
 }
 
 func NewSystemController() *SystemController {
@@ -21,5 +22,6 @@ func NewSystemController() *SystemController {
 		dictService:     services.NewDictService(),
 		fileService:     services.NewFileService(),
 		auditLogService: services.NewAuditLogService(),
+		paramService:    services.NewSystemParamService(),
 	}
 }

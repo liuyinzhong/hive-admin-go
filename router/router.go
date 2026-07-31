@@ -116,6 +116,17 @@ func SetupRouter() *gin.Engine {
 				dicts.DELETE("", permissionGuard.Require("system:dict:delete"), systemController.DeleteDicts)
 			}
 
+			params := system.Group("/params")
+			{
+				params.GET("", permissionGuard.Require("system:param:list"), systemController.GetParamList)
+				params.POST("", permissionGuard.Require("system:param:create"), systemController.CreateParam)
+				params.GET("/:id", permissionGuard.Require("system:param:detail"), systemController.GetParamDetail)
+				params.PUT("/:id", permissionGuard.Require("system:param:update"), systemController.UpdateParam)
+				params.DELETE("", permissionGuard.Require("system:param:delete"), systemController.DeleteParams)
+				// 公共参数批量查询:需登录但无接口权限
+				params.POST("/values", systemController.GetParamValues)
+			}
+
 			operationLogs := system.Group("/operationLogs")
 			{
 				operationLogs.GET("", permissionGuard.Require("system:operationLog:list"), systemController.GetOperationLogs)
