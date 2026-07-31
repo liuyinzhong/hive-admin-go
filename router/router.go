@@ -127,6 +127,17 @@ func SetupRouter() *gin.Engine {
 				params.POST("/values", systemController.GetParamValues)
 			}
 
+			payChannels := system.Group("/payChannels")
+			{
+				payChannels.GET("", permissionGuard.Require("system:payChannel:list"), systemController.GetPayChannelList)
+				payChannels.POST("", permissionGuard.Require("system:payChannel:create"), systemController.CreatePayChannel)
+				payChannels.GET("/:id", permissionGuard.Require("system:payChannel:detail"), systemController.GetPayChannelDetail)
+				payChannels.PUT("/:id", permissionGuard.Require("system:payChannel:update"), systemController.UpdatePayChannel)
+				payChannels.DELETE("", permissionGuard.Require("system:payChannel:delete"), systemController.DeletePayChannels)
+				payChannels.PUT("/:id/status", permissionGuard.Require("system:payChannel:status"), systemController.UpdatePayChannelStatus)
+				payChannels.PUT("/:id/default", permissionGuard.Require("system:payChannel:update"), systemController.UpdatePayChannelDefault)
+			}
+
 			operationLogs := system.Group("/operationLogs")
 			{
 				operationLogs.GET("", permissionGuard.Require("system:operationLog:list"), systemController.GetOperationLogs)

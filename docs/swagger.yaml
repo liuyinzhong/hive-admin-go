@@ -461,6 +461,50 @@ definitions:
     - paramType
     - paramValue
     type: object
+  models.CreatePayChannelRequest:
+    properties:
+      appId:
+        description: 应用ID
+        example: wx1234
+        type: string
+      channelName:
+        description: 渠道配置名称
+        example: 微信支付-生产
+        type: string
+      channelType:
+        description: 渠道类型 wechat/alipay
+        example: wechat
+        type: string
+      envMode:
+        description: 环境模式
+        example: production
+        type: string
+      extraConfig:
+        description: 渠道差异化配置 JSON
+        example: '{"mchId":""}'
+        type: string
+      isDefault:
+        description: 是否默认 0=否 1=是
+        example: 1
+        type: integer
+      notifyUrl:
+        description: 支付回调地址
+        example: https://api.xxx.com/pay/wx
+        type: string
+      remark:
+        description: 备注
+        example: 主账号
+        type: string
+      status:
+        description: 启用状态 0=禁用 1=启用
+        example: 1
+        type: integer
+    required:
+    - appId
+    - channelName
+    - channelType
+    - envMode
+    type: object
   models.CreateProjectRequest:
     properties:
       description:
@@ -1831,51 +1875,95 @@ definitions:
   models.LoginLogDetailResponse:
     properties:
       contentType:
+        description: 内容类型
+        example: application/json
         type: string
       createDate:
+        description: 创建时间
+        example: "2026-07-31 15:30:26"
         type: string
       durationMs:
+        description: 耗时(毫秒)
+        example: 120
         type: integer
       eventType:
+        description: 事件类型 login登录 logout退出
+        example: login
         type: string
       httpStatus:
+        description: HTTP状态码
+        example: 200
         type: integer
       ip:
+        description: 客户端IP
+        example: 192.168.1.100
         type: string
       logId:
+        description: 日志ID
+        example: cc1a8564-37e7-47df-ad60-6c0a7f199d31
         type: string
       responseBody:
+        description: 响应体
+        example: '{"code":0,"data":null}'
         type: string
       responseTruncated:
+        description: 响应体是否被截断
+        example: false
         type: boolean
       status:
+        description: 操作状态 0失败 1成功
+        example: 1
         type: integer
       userAgent:
+        description: 用户代理
+        example: Mozilla/5.0
         type: string
       userId:
+        description: 用户ID
+        example: cc1a8564-37e7-47df-ad60-6c0a7f199d31
         type: string
       username:
+        description: 用户名
+        example: admin
         type: string
     type: object
   models.LoginLogListResponse:
     properties:
       createDate:
+        description: 创建时间
+        example: "2026-07-31 15:30:26"
         type: string
       durationMs:
+        description: 耗时(毫秒)
+        example: 120
         type: integer
       eventType:
+        description: 事件类型 login登录 logout退出
+        example: login
         type: string
       httpStatus:
+        description: HTTP状态码
+        example: 200
         type: integer
       ip:
+        description: 客户端IP
+        example: 192.168.1.100
         type: string
       logId:
+        description: 日志ID
+        example: cc1a8564-37e7-47df-ad60-6c0a7f199d31
         type: string
       status:
+        description: 操作状态 0失败 1成功
+        example: 1
         type: integer
       userAgent:
+        description: 用户代理
+        example: Mozilla/5.0
         type: string
       username:
+        description: 用户名
+        example: admin
         type: string
     type: object
   models.LoginRequest:
@@ -2132,65 +2220,123 @@ definitions:
   models.OperationLogDetailResponse:
     properties:
       contentType:
+        description: 内容类型
+        example: application/json
         type: string
       createDate:
+        description: 创建时间
+        example: "2026-07-31 15:30:26"
         type: string
       durationMs:
+        description: 耗时(毫秒)
+        example: 35
         type: integer
       httpStatus:
+        description: HTTP状态码
+        example: 200
         type: integer
       ip:
+        description: 客户端IP
+        example: 192.168.1.100
         type: string
       logId:
+        description: 日志ID
+        example: cc1a8564-37e7-47df-ad60-6c0a7f199d31
         type: string
       queryParams:
+        description: 查询参数
+        example: page=1&pageSize=20
         type: string
       queryTruncated:
+        description: 查询参数是否被截断
+        example: false
         type: boolean
       realName:
+        description: 用户真实姓名
+        example: 管理员
         type: string
       requestBody:
+        description: 请求体
+        example: '{"username":"test"}'
         type: string
       requestMethod:
+        description: 请求方法
+        example: POST
         type: string
       requestTruncated:
+        description: 请求体是否被截断
+        example: false
         type: boolean
       requestUrl:
+        description: 请求URL
+        example: /api/system/users
         type: string
       responseBody:
+        description: 响应体
+        example: '{"code":0,"data":null}'
         type: string
       responseTruncated:
+        description: 响应体是否被截断
+        example: false
         type: boolean
       status:
+        description: 操作状态 0失败 1成功
+        example: 1
         type: integer
       userAgent:
+        description: 用户代理
+        example: Mozilla/5.0
         type: string
       userId:
+        description: 用户ID
+        example: cc1a8564-37e7-47df-ad60-6c0a7f199d31
         type: string
       username:
+        description: 用户名
+        example: admin
         type: string
     type: object
   models.OperationLogListResponse:
     properties:
       createDate:
+        description: 创建时间
+        example: "2026-07-31 15:30:26"
         type: string
       durationMs:
+        description: 耗时(毫秒)
+        example: 35
         type: integer
       httpStatus:
+        description: HTTP状态码
+        example: 200
         type: integer
       ip:
+        description: 客户端IP
+        example: 192.168.1.100
         type: string
       logId:
+        description: 日志ID
+        example: cc1a8564-37e7-47df-ad60-6c0a7f199d31
         type: string
       realName:
+        description: 用户真实姓名
+        example: 管理员
         type: string
       requestMethod:
+        description: 请求方法
+        example: POST
         type: string
       requestUrl:
+        description: 请求URL
+        example: /api/system/users
         type: string
       status:
+        description: 操作状态 0失败 1成功
+        example: 1
         type: integer
       username:
+        description: 用户名
+        example: admin
         type: string
     type: object
   models.ParamResponse:
@@ -2238,6 +2384,57 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  models.PayChannelResponse:
+    properties:
+      appId:
+        description: 应用ID
+        example: wx1234
+        type: string
+      channelName:
+        description: 渠道配置名称
+        example: 微信支付-生产
+        type: string
+      channelType:
+        description: 渠道类型
+        example: wechat
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2026-07-31 12:00:00"
+        type: string
+      envMode:
+        description: 环境模式
+        example: production
+        type: string
+      extraConfig:
+        description: 渠道差异化配置 JSON
+        example: '{"mchId":""}'
+        type: string
+      id:
+        description: 渠道配置ID
+        example: UUID
+        type: string
+      isDefault:
+        description: 是否默认
+        example: 1
+        type: integer
+      notifyUrl:
+        description: 支付回调地址
+        example: https://api.xxx.com/pay/wx
+        type: string
+      remark:
+        description: 备注
+        example: 主账号
+        type: string
+      status:
+        description: 启用状态
+        example: 1
+        type: integer
+      updateDate:
+        description: 更新时间
+        example: "2026-07-31 12:00:00"
+        type: string
     type: object
   models.ProductMpResponse:
     properties:
@@ -4772,6 +4969,59 @@ definitions:
     - paramKey
     - paramType
     - paramValue
+    type: object
+  models.UpdatePayChannelDefaultRequest:
+    properties:
+      isDefault:
+        description: 是否默认 0=否 1=是
+        example: 1
+        type: integer
+    required:
+    - isDefault
+    type: object
+  models.UpdatePayChannelRequest:
+    properties:
+      appId:
+        example: wx1234
+        type: string
+      channelName:
+        example: 微信支付-生产
+        type: string
+      channelType:
+        example: wechat
+        type: string
+      envMode:
+        example: production
+        type: string
+      extraConfig:
+        example: '{"mchId":""}'
+        type: string
+      isDefault:
+        example: 1
+        type: integer
+      notifyUrl:
+        example: https://api.xxx.com/pay/wx
+        type: string
+      remark:
+        example: 主账号
+        type: string
+      status:
+        example: 1
+        type: integer
+    required:
+    - appId
+    - channelName
+    - channelType
+    - envMode
+    type: object
+  models.UpdatePayChannelStatusRequest:
+    properties:
+      status:
+        description: 启用状态 0=禁用 1=启用
+        example: 1
+        type: integer
+    required:
+    - status
     type: object
   models.UpdateProductMpStatusRequest:
     properties:
@@ -13248,41 +13498,51 @@ paths:
       - 系统管理/文件管理
   /system/loginLogs:
     get:
-      description: 分页查询最近七天的登录和退出日志
+      description: 分页查询登录与退出日志。未传时间范围时默认查询最近 7 天数据；日志表保留 180 天，超期会被物理删除。
       parameters:
-      - description: 页码
+      - default: 1
+        description: 页码，默认 1
         in: query
         name: page
         type: integer
-      - description: 每页大小，最大100
+      - default: 20
+        description: 每页大小，默认 20，最大 100
         in: query
         name: pageSize
         type: integer
-      - description: 用户名
+      - description: 用户名，模糊匹配
         in: query
         name: username
         type: string
-      - description: 客户端IP
+      - description: 客户端 IP，模糊匹配
         in: query
         name: ip
         type: string
-      - description: 类型，login或logout
+      - description: 事件类型：login 登录、logout 退出；传其他值返回 400
+        enum:
+        - login
+        - logout
         in: query
         name: eventType
         type: string
-      - description: 状态，0失败 1成功
+      - description: 操作状态：0 失败，1 成功；传非 0/1 返回 400
+        enum:
+        - 0
+        - 1
         in: query
         name: status
         type: integer
-      - description: 开始时间
+      - description: 开始时间，支持格式：YYYY-MM-DD、YYYY-MM-DD HH:mm:ss、RFC3339；不传时默认为当前时间往前
+          7 天
         in: query
         name: startDate
         type: string
-      - description: 结束时间
+      - description: 结束时间，支持格式同 startDate；仅传日期时取当天 23:59:59.999；不传时默认为当前时间；不能早于 startDate
         in: query
         name: endDate
         type: string
-      - description: 排序
+      - description: 排序，格式 field,desc;field,asc；可排序字段：createDate、durationMs、httpStatus；未传时默认
+          createDate desc
         in: query
         name: sorts
         type: string
@@ -13306,7 +13566,7 @@ paths:
                     type: object
               type: object
         "400":
-          description: 参数错误
+          description: 参数错误：事件类型非法、状态值非法、时间格式不正确或结束时间早于开始时间
           schema:
             $ref: '#/definitions/models.Response'
         "401":
@@ -13317,6 +13577,10 @@ paths:
           description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
+        "500":
+          description: 日志查询失败
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取登录日志列表
@@ -13324,8 +13588,9 @@ paths:
       - 系统管理/日志管理
   /system/loginLogs/{logId}:
     get:
+      description: 根据日志 ID 获取登录日志详情，包含响应体、内容类型等完整信息
       parameters:
-      - description: 日志ID
+      - description: 日志 ID（UUID，带横线）
         in: path
         name: logId
         required: true
@@ -13352,6 +13617,10 @@ paths:
             $ref: '#/definitions/models.Response'
         "404":
           description: 日志不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 日志查询失败
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -13690,41 +13959,48 @@ paths:
       - 系统管理/菜单管理
   /system/operationLogs:
     get:
-      description: 分页查询最近七天的操作日志
+      description: 分页查询操作日志。未传时间范围时默认查询最近 7 天数据；日志表保留 180 天，超期会被物理删除。
       parameters:
-      - description: 页码
+      - default: 1
+        description: 页码，默认 1
         in: query
         name: page
         type: integer
-      - description: 每页大小，最大100
+      - default: 20
+        description: 每页大小，默认 20，最大 100
         in: query
         name: pageSize
         type: integer
-      - description: 用户名
+      - description: 用户名，模糊匹配
         in: query
         name: username
         type: string
-      - description: 请求URL
+      - description: 请求 URL，模糊匹配
         in: query
         name: requestUrl
         type: string
-      - description: 请求方法
+      - description: 请求方法，精确匹配（自动转大写），例如 GET、POST、PUT、DELETE
         in: query
         name: requestMethod
         type: string
-      - description: 状态，0失败 1成功
+      - description: 操作状态：0 失败，1 成功；传非 0/1 返回 400
+        enum:
+        - 0
+        - 1
         in: query
         name: status
         type: integer
-      - description: 开始时间
+      - description: 开始时间，支持格式：YYYY-MM-DD、YYYY-MM-DD HH:mm:ss、RFC3339；不传时默认为当前时间往前
+          7 天
         in: query
         name: startDate
         type: string
-      - description: 结束时间
+      - description: 结束时间，支持格式同 startDate；仅传日期时取当天 23:59:59.999；不传时默认为当前时间；不能早于 startDate
         in: query
         name: endDate
         type: string
-      - description: 排序
+      - description: 排序，格式 field,desc;field,asc；可排序字段：createDate、durationMs、httpStatus；未传时默认
+          createDate desc
         in: query
         name: sorts
         type: string
@@ -13748,7 +14024,7 @@ paths:
                     type: object
               type: object
         "400":
-          description: 参数错误
+          description: 参数错误：状态值非法、时间格式不正确或结束时间早于开始时间
           schema:
             $ref: '#/definitions/models.Response'
         "401":
@@ -13759,6 +14035,10 @@ paths:
           description: 无接口访问权限
           schema:
             $ref: '#/definitions/models.Response'
+        "500":
+          description: 日志查询失败
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
       summary: 获取操作日志列表
@@ -13766,8 +14046,9 @@ paths:
       - 系统管理/日志管理
   /system/operationLogs/{logId}:
     get:
+      description: 根据日志 ID 获取操作日志详情，包含请求参数、请求体、响应体等完整信息
       parameters:
-      - description: 日志ID
+      - description: 日志 ID（UUID，带横线）
         in: path
         name: logId
         required: true
@@ -13794,6 +14075,10 @@ paths:
             $ref: '#/definitions/models.Response'
         "404":
           description: 日志不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 日志查询失败
           schema:
             $ref: '#/definitions/models.Response'
       security:
@@ -14085,6 +14370,356 @@ paths:
       summary: 公共参数批量查询
       tags:
       - 系统管理/参数管理
+  /system/payChannels:
+    delete:
+      consumes:
+      - application/json
+      description: 批量逻辑删除支付渠道配置
+      parameters:
+      - description: 支付渠道ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 批量删除支付渠道
+      tags:
+      - 系统管理/支付渠道
+    get:
+      consumes:
+      - application/json
+      description: 分页查询支付渠道配置列表,支持按名称、类型、环境、状态、默认筛选与排序
+      parameters:
+      - default: 1
+        description: 页码,默认1
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: 每页大小,默认20
+        in: query
+        name: pageSize
+        type: integer
+      - description: 渠道配置名称,模糊搜索
+        example: 微信
+        in: query
+        name: channelName
+        type: string
+      - description: 渠道类型 wechat/alipay
+        example: wechat
+        in: query
+        name: channelType
+        type: string
+      - description: 环境模式 development/testing/staging/production
+        example: production
+        in: query
+        name: envMode
+        type: string
+      - description: 启用状态 0=禁用 1=启用
+        example: 1
+        in: query
+        name: status
+        type: integer
+      - description: 是否默认 0=否 1=是
+        example: 1
+        in: query
+        name: isDefault
+        type: integer
+      - description: 排序参数
+        example: updateDate,desc
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.PayChannelResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 分页查询支付渠道列表
+      tags:
+      - 系统管理/支付渠道
+    post:
+      consumes:
+      - application/json
+      description: 创建新的支付渠道配置,校验渠道类型/环境模式枚举、extraConfig 合法性、默认渠道唯一性
+      parameters:
+      - description: 支付渠道信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePayChannelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 校验失败或创建失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建支付渠道
+      tags:
+      - 系统管理/支付渠道
+  /system/payChannels/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 根据ID查询支付渠道配置详情
+      parameters:
+      - description: 支付渠道ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PayChannelResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 支付渠道不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 查询支付渠道详情
+      tags:
+      - 系统管理/支付渠道
+    put:
+      consumes:
+      - application/json
+      description: 更新支付渠道配置,允许修改全部字段;设为默认时自动取消同组其他默认
+      parameters:
+      - description: 支付渠道ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 支付渠道信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePayChannelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 支付渠道不存在或校验失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新支付渠道
+      tags:
+      - 系统管理/支付渠道
+  /system/payChannels/{id}/default:
+    put:
+      consumes:
+      - application/json
+      description: 设置或取消支付渠道默认标记,设为默认时自动取消同 channelType+envMode 下其他默认
+      parameters:
+      - description: 支付渠道ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 默认标记
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePayChannelDefaultRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 修改成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 支付渠道不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 修改支付渠道默认标记
+      tags:
+      - 系统管理/支付渠道
+  /system/payChannels/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: 启用或禁用支付渠道
+      parameters:
+      - description: 支付渠道ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 启用状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePayChannelStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 修改成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 支付渠道不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 修改支付渠道启用状态
+      tags:
+      - 系统管理/支付渠道
   /system/roles:
     delete:
       consumes:

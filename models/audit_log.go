@@ -97,47 +97,47 @@ type AuditLogListRequest struct {
 }
 
 type OperationLogListResponse struct {
-	LogID         string `json:"logId"`
-	Username      string `json:"username"`
-	RealName      string `json:"realName"`
-	RequestMethod string `json:"requestMethod"`
-	RequestURL    string `json:"requestUrl"`
-	HTTPStatus    int    `json:"httpStatus"`
-	Status        int    `json:"status"`
-	DurationMs    int64  `json:"durationMs"`
-	IP            string `json:"ip"`
-	CreateDate    string `json:"createDate"`
+	LogID         string `json:"logId" example:"cc1a8564-37e7-47df-ad60-6c0a7f199d31"` // 日志ID
+	Username      string `json:"username" example:"admin"`                             // 用户名
+	RealName      string `json:"realName" example:"管理员"`                               // 用户真实姓名
+	RequestMethod string `json:"requestMethod" example:"POST"`                         // 请求方法
+	RequestURL    string `json:"requestUrl" example:"/api/system/users"`               // 请求URL
+	HTTPStatus    int    `json:"httpStatus" example:"200"`                             // HTTP状态码
+	Status        int    `json:"status" example:"1"`                                   // 操作状态 0失败 1成功
+	DurationMs    int64  `json:"durationMs" example:"35"`                              // 耗时(毫秒)
+	IP            string `json:"ip" example:"192.168.1.100"`                           // 客户端IP
+	CreateDate    string `json:"createDate" example:"2026-07-31 15:30:26"`             // 创建时间
 }
 
 type OperationLogDetailResponse struct {
 	OperationLogListResponse
-	UserID            string `json:"userId"`
-	QueryParams       string `json:"queryParams"`
-	QueryTruncated    bool   `json:"queryTruncated"`
-	RequestBody       string `json:"requestBody"`
-	ResponseBody      string `json:"responseBody"`
-	RequestTruncated  bool   `json:"requestTruncated"`
-	ResponseTruncated bool   `json:"responseTruncated"`
-	UserAgent         string `json:"userAgent"`
-	ContentType       string `json:"contentType"`
+	UserID            string `json:"userId" example:"cc1a8564-37e7-47df-ad60-6c0a7f199d31"` // 用户ID
+	QueryParams       string `json:"queryParams" example:"page=1&pageSize=20"`              // 查询参数
+	QueryTruncated    bool   `json:"queryTruncated" example:"false"`                        // 查询参数是否被截断
+	RequestBody       string `json:"requestBody" example:"{\"username\":\"test\"}"`         // 请求体
+	ResponseBody      string `json:"responseBody" example:"{\"code\":0,\"data\":null}"`     // 响应体
+	RequestTruncated  bool   `json:"requestTruncated" example:"false"`                      // 请求体是否被截断
+	ResponseTruncated bool   `json:"responseTruncated" example:"false"`                     // 响应体是否被截断
+	UserAgent         string `json:"userAgent" example:"Mozilla/5.0"`                       // 用户代理
+	ContentType       string `json:"contentType" example:"application/json"`                // 内容类型
 }
 
 type LoginLogListResponse struct {
-	LogID      string `json:"logId"`
-	Username   string `json:"username"`
-	EventType  string `json:"eventType"`
-	HTTPStatus int    `json:"httpStatus"`
-	Status     int    `json:"status"`
-	DurationMs int64  `json:"durationMs"`
-	IP         string `json:"ip"`
-	UserAgent  string `json:"userAgent"`
-	CreateDate string `json:"createDate"`
+	LogID      string `json:"logId" example:"cc1a8564-37e7-47df-ad60-6c0a7f199d31"` // 日志ID
+	Username   string `json:"username" example:"admin"`                             // 用户名
+	EventType  string `json:"eventType" example:"login"`                            // 事件类型 login登录 logout退出
+	HTTPStatus int    `json:"httpStatus" example:"200"`                             // HTTP状态码
+	Status     int    `json:"status" example:"1"`                                   // 操作状态 0失败 1成功
+	DurationMs int64  `json:"durationMs" example:"120"`                             // 耗时(毫秒)
+	IP         string `json:"ip" example:"192.168.1.100"`                           // 客户端IP
+	UserAgent  string `json:"userAgent" example:"Mozilla/5.0"`                      // 用户代理
+	CreateDate string `json:"createDate" example:"2026-07-31 15:30:26"`             // 创建时间
 }
 
 type LoginLogDetailResponse struct {
 	LoginLogListResponse
-	UserID            string `json:"userId"`
-	ResponseBody      string `json:"responseBody"`
-	ResponseTruncated bool   `json:"responseTruncated"`
-	ContentType       string `json:"contentType"`
+	UserID            string `json:"userId" example:"cc1a8564-37e7-47df-ad60-6c0a7f199d31"` // 用户ID
+	ResponseBody      string `json:"responseBody" example:"{\"code\":0,\"data\":null}"`     // 响应体
+	ResponseTruncated bool   `json:"responseTruncated" example:"false"`                     // 响应体是否被截断
+	ContentType       string `json:"contentType" example:"application/json"`                // 内容类型
 }

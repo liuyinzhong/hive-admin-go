@@ -12133,7 +12133,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "分页查询最近七天的登录和退出日志",
+                "description": "分页查询登录与退出日志。未传时间范围时默认查询最近 7 天数据；日志表保留 180 天，超期会被物理删除。",
                 "produces": [
                     "application/json"
                 ],
@@ -12144,55 +12144,65 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "页码",
+                        "default": 1,
+                        "description": "页码，默认 1",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "每页大小，最大100",
+                        "default": 20,
+                        "description": "每页大小，默认 20，最大 100",
                         "name": "pageSize",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "用户名",
+                        "description": "用户名，模糊匹配",
                         "name": "username",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "客户端IP",
+                        "description": "客户端 IP，模糊匹配",
                         "name": "ip",
                         "in": "query"
                     },
                     {
+                        "enum": [
+                            "login",
+                            "logout"
+                        ],
                         "type": "string",
-                        "description": "类型，login或logout",
+                        "description": "事件类型：login 登录、logout 退出；传其他值返回 400",
                         "name": "eventType",
                         "in": "query"
                     },
                     {
+                        "enum": [
+                            0,
+                            1
+                        ],
                         "type": "integer",
-                        "description": "状态，0失败 1成功",
+                        "description": "操作状态：0 失败，1 成功；传非 0/1 返回 400",
                         "name": "status",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "开始时间",
+                        "description": "开始时间，支持格式：YYYY-MM-DD、YYYY-MM-DD HH:mm:ss、RFC3339；不传时默认为当前时间往前 7 天",
                         "name": "startDate",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "结束时间",
+                        "description": "结束时间，支持格式同 startDate；仅传日期时取当天 23:59:59.999；不传时默认为当前时间；不能早于 startDate",
                         "name": "endDate",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "排序",
+                        "description": "排序，格式 field,desc;field,asc；可排序字段：createDate、durationMs、httpStatus；未传时默认 createDate desc",
                         "name": "sorts",
                         "in": "query"
                     }
@@ -12232,7 +12242,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "参数错误",
+                        "description": "参数错误：事件类型非法、状态值非法、时间格式不正确或结束时间早于开始时间",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -12248,6 +12258,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
+                    },
+                    "500": {
+                        "description": "日志查询失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -12259,6 +12275,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据日志 ID 获取登录日志详情，包含响应体、内容类型等完整信息",
                 "produces": [
                     "application/json"
                 ],
@@ -12269,7 +12286,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "日志ID",
+                        "description": "日志 ID（UUID，带横线）",
                         "name": "logId",
                         "in": "path",
                         "required": true
@@ -12308,6 +12325,12 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "日志不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "日志查询失败",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -12846,7 +12869,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "分页查询最近七天的操作日志",
+                "description": "分页查询操作日志。未传时间范围时默认查询最近 7 天数据；日志表保留 180 天，超期会被物理删除。",
                 "produces": [
                     "application/json"
                 ],
@@ -12857,55 +12880,61 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "页码",
+                        "default": 1,
+                        "description": "页码，默认 1",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "每页大小，最大100",
+                        "default": 20,
+                        "description": "每页大小，默认 20，最大 100",
                         "name": "pageSize",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "用户名",
+                        "description": "用户名，模糊匹配",
                         "name": "username",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "请求URL",
+                        "description": "请求 URL，模糊匹配",
                         "name": "requestUrl",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "请求方法",
+                        "description": "请求方法，精确匹配（自动转大写），例如 GET、POST、PUT、DELETE",
                         "name": "requestMethod",
                         "in": "query"
                     },
                     {
+                        "enum": [
+                            0,
+                            1
+                        ],
                         "type": "integer",
-                        "description": "状态，0失败 1成功",
+                        "description": "操作状态：0 失败，1 成功；传非 0/1 返回 400",
                         "name": "status",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "开始时间",
+                        "description": "开始时间，支持格式：YYYY-MM-DD、YYYY-MM-DD HH:mm:ss、RFC3339；不传时默认为当前时间往前 7 天",
                         "name": "startDate",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "结束时间",
+                        "description": "结束时间，支持格式同 startDate；仅传日期时取当天 23:59:59.999；不传时默认为当前时间；不能早于 startDate",
                         "name": "endDate",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "排序",
+                        "description": "排序，格式 field,desc;field,asc；可排序字段：createDate、durationMs、httpStatus；未传时默认 createDate desc",
                         "name": "sorts",
                         "in": "query"
                     }
@@ -12945,7 +12974,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "参数错误",
+                        "description": "参数错误：状态值非法、时间格式不正确或结束时间早于开始时间",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -12961,6 +12990,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
+                    },
+                    "500": {
+                        "description": "日志查询失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
@@ -12972,6 +13007,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "根据日志 ID 获取操作日志详情，包含请求参数、请求体、响应体等完整信息",
                 "produces": [
                     "application/json"
                 ],
@@ -12982,7 +13018,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "日志ID",
+                        "description": "日志 ID（UUID，带横线）",
                         "name": "logId",
                         "in": "path",
                         "required": true
@@ -13021,6 +13057,12 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "日志不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "日志查询失败",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -13472,6 +13514,551 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "参数不存在、参数键已存在或校验失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/payChannels": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "分页查询支付渠道配置列表,支持按名称、类型、环境、状态、默认筛选与排序",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/支付渠道"
+                ],
+                "summary": "分页查询支付渠道列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码,默认1",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "每页大小,默认20",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "微信",
+                        "description": "渠道配置名称,模糊搜索",
+                        "name": "channelName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "wechat",
+                        "description": "渠道类型 wechat/alipay",
+                        "name": "channelType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "production",
+                        "description": "环境模式 development/testing/staging/production",
+                        "name": "envMode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 1,
+                        "description": "启用状态 0=禁用 1=启用",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 1,
+                        "description": "是否默认 0=否 1=是",
+                        "name": "isDefault",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "updateDate,desc",
+                        "description": "排序参数",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.PayChannelResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "创建新的支付渠道配置,校验渠道类型/环境模式枚举、extraConfig 合法性、默认渠道唯一性",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/支付渠道"
+                ],
+                "summary": "创建支付渠道",
+                "parameters": [
+                    {
+                        "description": "支付渠道信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreatePayChannelRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "校验失败或创建失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "批量逻辑删除支付渠道配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/支付渠道"
+                ],
+                "summary": "批量删除支付渠道",
+                "parameters": [
+                    {
+                        "description": "支付渠道ID列表",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/payChannels/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据ID查询支付渠道配置详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/支付渠道"
+                ],
+                "summary": "查询支付渠道详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "支付渠道ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PayChannelResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "支付渠道不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "更新支付渠道配置,允许修改全部字段;设为默认时自动取消同组其他默认",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/支付渠道"
+                ],
+                "summary": "更新支付渠道",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "支付渠道ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "支付渠道信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdatePayChannelRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "支付渠道不存在或校验失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/payChannels/{id}/default": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "设置或取消支付渠道默认标记,设为默认时自动取消同 channelType+envMode 下其他默认",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/支付渠道"
+                ],
+                "summary": "修改支付渠道默认标记",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "支付渠道ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "默认标记",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdatePayChannelDefaultRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "修改成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "支付渠道不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/payChannels/{id}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "启用或禁用支付渠道",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/支付渠道"
+                ],
+                "summary": "修改支付渠道启用状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "支付渠道ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "启用状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdatePayChannelStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "修改成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "支付渠道不存在",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -16562,6 +17149,62 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CreatePayChannelRequest": {
+            "type": "object",
+            "required": [
+                "appId",
+                "channelName",
+                "channelType",
+                "envMode"
+            ],
+            "properties": {
+                "appId": {
+                    "description": "应用ID",
+                    "type": "string",
+                    "example": "wx1234"
+                },
+                "channelName": {
+                    "description": "渠道配置名称",
+                    "type": "string",
+                    "example": "微信支付-生产"
+                },
+                "channelType": {
+                    "description": "渠道类型 wechat/alipay",
+                    "type": "string",
+                    "example": "wechat"
+                },
+                "envMode": {
+                    "description": "环境模式",
+                    "type": "string",
+                    "example": "production"
+                },
+                "extraConfig": {
+                    "description": "渠道差异化配置 JSON",
+                    "type": "string",
+                    "example": "{\"mchId\":\"\"}"
+                },
+                "isDefault": {
+                    "description": "是否默认 0=否 1=是",
+                    "type": "integer",
+                    "example": 1
+                },
+                "notifyUrl": {
+                    "description": "支付回调地址",
+                    "type": "string",
+                    "example": "https://api.xxx.com/pay/wx"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "主账号"
+                },
+                "status": {
+                    "description": "启用状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
         "models.CreateProjectRequest": {
             "type": "object",
             "required": [
@@ -18343,43 +18986,69 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "contentType": {
-                    "type": "string"
+                    "description": "内容类型",
+                    "type": "string",
+                    "example": "application/json"
                 },
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-07-31 15:30:26"
                 },
                 "durationMs": {
-                    "type": "integer"
+                    "description": "耗时(毫秒)",
+                    "type": "integer",
+                    "example": 120
                 },
                 "eventType": {
-                    "type": "string"
+                    "description": "事件类型 login登录 logout退出",
+                    "type": "string",
+                    "example": "login"
                 },
                 "httpStatus": {
-                    "type": "integer"
+                    "description": "HTTP状态码",
+                    "type": "integer",
+                    "example": 200
                 },
                 "ip": {
-                    "type": "string"
+                    "description": "客户端IP",
+                    "type": "string",
+                    "example": "192.168.1.100"
                 },
                 "logId": {
-                    "type": "string"
+                    "description": "日志ID",
+                    "type": "string",
+                    "example": "cc1a8564-37e7-47df-ad60-6c0a7f199d31"
                 },
                 "responseBody": {
-                    "type": "string"
+                    "description": "响应体",
+                    "type": "string",
+                    "example": "{\"code\":0,\"data\":null}"
                 },
                 "responseTruncated": {
-                    "type": "boolean"
+                    "description": "响应体是否被截断",
+                    "type": "boolean",
+                    "example": false
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "操作状态 0失败 1成功",
+                    "type": "integer",
+                    "example": 1
                 },
                 "userAgent": {
-                    "type": "string"
+                    "description": "用户代理",
+                    "type": "string",
+                    "example": "Mozilla/5.0"
                 },
                 "userId": {
-                    "type": "string"
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "cc1a8564-37e7-47df-ad60-6c0a7f199d31"
                 },
                 "username": {
-                    "type": "string"
+                    "description": "用户名",
+                    "type": "string",
+                    "example": "admin"
                 }
             }
         },
@@ -18387,31 +19056,49 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-07-31 15:30:26"
                 },
                 "durationMs": {
-                    "type": "integer"
+                    "description": "耗时(毫秒)",
+                    "type": "integer",
+                    "example": 120
                 },
                 "eventType": {
-                    "type": "string"
+                    "description": "事件类型 login登录 logout退出",
+                    "type": "string",
+                    "example": "login"
                 },
                 "httpStatus": {
-                    "type": "integer"
+                    "description": "HTTP状态码",
+                    "type": "integer",
+                    "example": 200
                 },
                 "ip": {
-                    "type": "string"
+                    "description": "客户端IP",
+                    "type": "string",
+                    "example": "192.168.1.100"
                 },
                 "logId": {
-                    "type": "string"
+                    "description": "日志ID",
+                    "type": "string",
+                    "example": "cc1a8564-37e7-47df-ad60-6c0a7f199d31"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "操作状态 0失败 1成功",
+                    "type": "integer",
+                    "example": 1
                 },
                 "userAgent": {
-                    "type": "string"
+                    "description": "用户代理",
+                    "type": "string",
+                    "example": "Mozilla/5.0"
                 },
                 "username": {
-                    "type": "string"
+                    "description": "用户名",
+                    "type": "string",
+                    "example": "admin"
                 }
             }
         },
@@ -18745,61 +19432,99 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "contentType": {
-                    "type": "string"
+                    "description": "内容类型",
+                    "type": "string",
+                    "example": "application/json"
                 },
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-07-31 15:30:26"
                 },
                 "durationMs": {
-                    "type": "integer"
+                    "description": "耗时(毫秒)",
+                    "type": "integer",
+                    "example": 35
                 },
                 "httpStatus": {
-                    "type": "integer"
+                    "description": "HTTP状态码",
+                    "type": "integer",
+                    "example": 200
                 },
                 "ip": {
-                    "type": "string"
+                    "description": "客户端IP",
+                    "type": "string",
+                    "example": "192.168.1.100"
                 },
                 "logId": {
-                    "type": "string"
+                    "description": "日志ID",
+                    "type": "string",
+                    "example": "cc1a8564-37e7-47df-ad60-6c0a7f199d31"
                 },
                 "queryParams": {
-                    "type": "string"
+                    "description": "查询参数",
+                    "type": "string",
+                    "example": "page=1\u0026pageSize=20"
                 },
                 "queryTruncated": {
-                    "type": "boolean"
+                    "description": "查询参数是否被截断",
+                    "type": "boolean",
+                    "example": false
                 },
                 "realName": {
-                    "type": "string"
+                    "description": "用户真实姓名",
+                    "type": "string",
+                    "example": "管理员"
                 },
                 "requestBody": {
-                    "type": "string"
+                    "description": "请求体",
+                    "type": "string",
+                    "example": "{\"username\":\"test\"}"
                 },
                 "requestMethod": {
-                    "type": "string"
+                    "description": "请求方法",
+                    "type": "string",
+                    "example": "POST"
                 },
                 "requestTruncated": {
-                    "type": "boolean"
+                    "description": "请求体是否被截断",
+                    "type": "boolean",
+                    "example": false
                 },
                 "requestUrl": {
-                    "type": "string"
+                    "description": "请求URL",
+                    "type": "string",
+                    "example": "/api/system/users"
                 },
                 "responseBody": {
-                    "type": "string"
+                    "description": "响应体",
+                    "type": "string",
+                    "example": "{\"code\":0,\"data\":null}"
                 },
                 "responseTruncated": {
-                    "type": "boolean"
+                    "description": "响应体是否被截断",
+                    "type": "boolean",
+                    "example": false
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "操作状态 0失败 1成功",
+                    "type": "integer",
+                    "example": 1
                 },
                 "userAgent": {
-                    "type": "string"
+                    "description": "用户代理",
+                    "type": "string",
+                    "example": "Mozilla/5.0"
                 },
                 "userId": {
-                    "type": "string"
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "cc1a8564-37e7-47df-ad60-6c0a7f199d31"
                 },
                 "username": {
-                    "type": "string"
+                    "description": "用户名",
+                    "type": "string",
+                    "example": "admin"
                 }
             }
         },
@@ -18807,34 +19532,54 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "createDate": {
-                    "type": "string"
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-07-31 15:30:26"
                 },
                 "durationMs": {
-                    "type": "integer"
+                    "description": "耗时(毫秒)",
+                    "type": "integer",
+                    "example": 35
                 },
                 "httpStatus": {
-                    "type": "integer"
+                    "description": "HTTP状态码",
+                    "type": "integer",
+                    "example": 200
                 },
                 "ip": {
-                    "type": "string"
+                    "description": "客户端IP",
+                    "type": "string",
+                    "example": "192.168.1.100"
                 },
                 "logId": {
-                    "type": "string"
+                    "description": "日志ID",
+                    "type": "string",
+                    "example": "cc1a8564-37e7-47df-ad60-6c0a7f199d31"
                 },
                 "realName": {
-                    "type": "string"
+                    "description": "用户真实姓名",
+                    "type": "string",
+                    "example": "管理员"
                 },
                 "requestMethod": {
-                    "type": "string"
+                    "description": "请求方法",
+                    "type": "string",
+                    "example": "POST"
                 },
                 "requestUrl": {
-                    "type": "string"
+                    "description": "请求URL",
+                    "type": "string",
+                    "example": "/api/system/users"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "操作状态 0失败 1成功",
+                    "type": "integer",
+                    "example": 1
                 },
                 "username": {
-                    "type": "string"
+                    "description": "用户名",
+                    "type": "string",
+                    "example": "admin"
                 }
             }
         },
@@ -18896,6 +19641,71 @@ const docTemplate = `{
                         "[\"SYS_SESSION_TIMEOUT\"",
                         "\"SYS_UPLOAD_MAX_SIZE\"]"
                     ]
+                }
+            }
+        },
+        "models.PayChannelResponse": {
+            "type": "object",
+            "properties": {
+                "appId": {
+                    "description": "应用ID",
+                    "type": "string",
+                    "example": "wx1234"
+                },
+                "channelName": {
+                    "description": "渠道配置名称",
+                    "type": "string",
+                    "example": "微信支付-生产"
+                },
+                "channelType": {
+                    "description": "渠道类型",
+                    "type": "string",
+                    "example": "wechat"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-07-31 12:00:00"
+                },
+                "envMode": {
+                    "description": "环境模式",
+                    "type": "string",
+                    "example": "production"
+                },
+                "extraConfig": {
+                    "description": "渠道差异化配置 JSON",
+                    "type": "string",
+                    "example": "{\"mchId\":\"\"}"
+                },
+                "id": {
+                    "description": "渠道配置ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "isDefault": {
+                    "description": "是否默认",
+                    "type": "integer",
+                    "example": 1
+                },
+                "notifyUrl": {
+                    "description": "支付回调地址",
+                    "type": "string",
+                    "example": "https://api.xxx.com/pay/wx"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "主账号"
+                },
+                "status": {
+                    "description": "启用状态",
+                    "type": "integer",
+                    "example": 1
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-07-31 12:00:00"
                 }
             }
         },
@@ -22174,6 +22984,79 @@ const docTemplate = `{
                     "description": "备注",
                     "type": "string",
                     "example": "会话超时分钟数"
+                }
+            }
+        },
+        "models.UpdatePayChannelDefaultRequest": {
+            "type": "object",
+            "required": [
+                "isDefault"
+            ],
+            "properties": {
+                "isDefault": {
+                    "description": "是否默认 0=否 1=是",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "models.UpdatePayChannelRequest": {
+            "type": "object",
+            "required": [
+                "appId",
+                "channelName",
+                "channelType",
+                "envMode"
+            ],
+            "properties": {
+                "appId": {
+                    "type": "string",
+                    "example": "wx1234"
+                },
+                "channelName": {
+                    "type": "string",
+                    "example": "微信支付-生产"
+                },
+                "channelType": {
+                    "type": "string",
+                    "example": "wechat"
+                },
+                "envMode": {
+                    "type": "string",
+                    "example": "production"
+                },
+                "extraConfig": {
+                    "type": "string",
+                    "example": "{\"mchId\":\"\"}"
+                },
+                "isDefault": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "notifyUrl": {
+                    "type": "string",
+                    "example": "https://api.xxx.com/pay/wx"
+                },
+                "remark": {
+                    "type": "string",
+                    "example": "主账号"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "models.UpdatePayChannelStatusRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "description": "启用状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
