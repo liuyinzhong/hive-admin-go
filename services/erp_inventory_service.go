@@ -118,6 +118,49 @@ func (s *ErpInventoryService) GetInventoryMovements(balanceID string, req models
 	return &utils.PaginationResponse{Items: erpInventoryMovementRowsToResponses(rows), Total: total}, nil
 }
 
+func (s *ErpInventoryService) GetInventoryMovementsBySource(req models.ErpInventorySourceMovementListRequest) (*utils.PaginationResponse, error) {
+	if strings.TrimSpace(req.SourceBillType) == "" {
+		return nil, fmt.Errorf("%w: 来源单据类型不能为空", ErrErpInventoryInvalidInput)
+	}
+	if err := validateErpInventoryUUID(req.SourceBillID, "来源单据ID"); err != nil {
+		return nil, err
+	}
+
+	page, pageSize := normalizeErpInventoryPage(req.Page, req.PageSize, 20, 100)
+	query := s.baseInventoryMovementQuery().Where(
+		"erp_inventory_movement.source_bill_type = ? AND erp_inventory_movement.source_bill_id = ?",
+		strings.TrimSpace(req.SourceBillType),
+		strings.TrimSpace(req.SourceBillID),
+	)
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, err
+	}
+
+	order := utils.BuildOrderBy(req.Sorts, map[string]string{
+		"sourceBillType": "erp_inventory_movement.source_bill_type",
+		"sourceBillNo":   "erp_inventory_movement.source_bill_no",
+		"movementType":   "erp_inventory_movement.movement_type",
+		"direction":      "erp_inventory_movement.direction",
+		"createDate":     "erp_inventory_movement.create_date",
+	})
+	if order == "" {
+		order = "erp_inventory_movement.create_date desc"
+	}
+
+	var rows []erpInventoryMovementQueryRow
+	if err := query.Select(erpInventoryMovementSelectFields()).
+		Order(order).
+		Offset((page - 1) * pageSize).
+		Limit(pageSize).
+		Scan(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	return &utils.PaginationResponse{Items: erpInventoryMovementRowsToResponses(rows), Total: total}, nil
+}
+
 func (s *ErpInventoryService) CreateInitialStocks(req models.CreateErpInventoryInitialStockRequest, operatorID string) (*models.CreateErpInventoryInitialStockResponse, error) {
 	if err := validateErpInventoryUUID(req.WarehouseID, "仓库ID"); err != nil {
 		return nil, err
@@ -145,7 +188,11 @@ func (s *ErpInventoryService) CreateInitialStocks(req models.CreateErpInventoryI
 		movementCount := 0
 		for _, item := range items {
 			sku := skuMap[item.SkuID]
-			if err := s.createInitialStockMovement(tx, *warehouse, sku, item, sourceBillNo, operatorID); err != nil {
+			if err := s.createInventoryInMovement(tx, *warehouse, sku, item, erpInventoryInMovementContext{
+				SourceBillType: models.InventorySourceBillTypeInitialStock,
+				SourceBillNo:   sourceBillNo,
+				MovementType:   models.InventoryMovementTypeInitialIn,
+			}, operatorID); err != nil {
 				return err
 			}
 			movementCount++
@@ -163,7 +210,7 @@ func (s *ErpInventoryService) CreateInitialStocks(req models.CreateErpInventoryI
 	return &result, nil
 }
 
-type normalizedErpInventoryInitialStockItem struct {
+type normalizedErpInventoryInboundItem struct {
 	SkuID      string
 	BatchNo    string
 	ExpiryDate time.Time
@@ -372,7 +419,7 @@ func (s *ErpInventoryService) lockEnabledWarehouse(tx *gorm.DB, warehouseID stri
 	return &warehouse, nil
 }
 
-func (s *ErpInventoryService) lockEnabledSkuMap(tx *gorm.DB, items []normalizedErpInventoryInitialStockItem) (map[string]models.ProductSku, error) {
+func (s *ErpInventoryService) lockEnabledSkuMap(tx *gorm.DB, items []normalizedErpInventoryInboundItem) (map[string]models.ProductSku, error) {
 	skuIDSet := make(map[string]struct{}, len(items))
 	for _, item := range items {
 		skuIDSet[item.SkuID] = struct{}{}
@@ -403,7 +450,14 @@ func (s *ErpInventoryService) lockEnabledSkuMap(tx *gorm.DB, items []normalizedE
 	return skuMap, nil
 }
 
-func (s *ErpInventoryService) createInitialStockMovement(tx *gorm.DB, warehouse models.ErpWarehouse, sku models.ProductSku, item normalizedErpInventoryInitialStockItem, sourceBillNo, operatorID string) error {
+type erpInventoryInMovementContext struct {
+	SourceBillType string
+	SourceBillID   *string
+	SourceBillNo   string
+	MovementType   string
+}
+
+func (s *ErpInventoryService) createInventoryInMovement(tx *gorm.DB, warehouse models.ErpWarehouse, sku models.ProductSku, item normalizedErpInventoryInboundItem, context erpInventoryInMovementContext, operatorID string) error {
 	now := time.Now().In(erpInventoryLocation)
 	batch, err := s.getOrCreateInventoryBatch(tx, sku, item, operatorID, now)
 	if err != nil {
@@ -473,10 +527,10 @@ func (s *ErpInventoryService) createInitialStockMovement(tx *gorm.DB, warehouse 
 		WarehouseID:            warehouse.WarehouseID,
 		SkuID:                  sku.SkuID,
 		BatchID:                batch.BatchID,
-		SourceBillType:         models.InventorySourceBillTypeInitialStock,
-		SourceBillID:           nil,
-		SourceBillNo:           sourceBillNo,
-		MovementType:           models.InventoryMovementTypeInitialIn,
+		SourceBillType:         context.SourceBillType,
+		SourceBillID:           context.SourceBillID,
+		SourceBillNo:           context.SourceBillNo,
+		MovementType:           context.MovementType,
 		Direction:              models.InventoryMovementDirectionIn,
 		BeforePackageUnitCount: beforePackageCount,
 		ChangePackageUnitCount: changePackageCount,
@@ -493,7 +547,7 @@ func (s *ErpInventoryService) createInitialStockMovement(tx *gorm.DB, warehouse 
 	return tx.Create(&movement).Error
 }
 
-func (s *ErpInventoryService) getOrCreateInventoryBatch(tx *gorm.DB, sku models.ProductSku, item normalizedErpInventoryInitialStockItem, operatorID string, now time.Time) (*models.ErpInventoryBatch, error) {
+func (s *ErpInventoryService) getOrCreateInventoryBatch(tx *gorm.DB, sku models.ProductSku, item normalizedErpInventoryInboundItem, operatorID string, now time.Time) (*models.ErpInventoryBatch, error) {
 	var batch models.ErpInventoryBatch
 	err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
 		Where("sku_id = ? AND batch_no = ? AND expiry_date = ? AND unit_cost = ?", sku.SkuID, item.BatchNo, item.ExpiryDate, item.UnitCost).
@@ -543,7 +597,7 @@ func (s *ErpInventoryService) nextInitialStockSourceBillNo(tx *gorm.DB) (string,
 	return NewBaseCodeSequenceService().NextBusinessCode(tx, "ERP_INVENTORY_INITIAL_STOCK", "INIT", 8)
 }
 
-func normalizeErpInventoryInitialStockItems(items []models.ErpInventoryInitialStockItem) ([]normalizedErpInventoryInitialStockItem, error) {
+func normalizeErpInventoryInitialStockItems(items []models.ErpInventoryInitialStockItem) ([]normalizedErpInventoryInboundItem, error) {
 	if len(items) == 0 {
 		return nil, fmt.Errorf("%w: 初始库存明细不能为空", ErrErpInventoryInvalidInput)
 	}
@@ -551,7 +605,7 @@ func normalizeErpInventoryInitialStockItems(items []models.ErpInventoryInitialSt
 		return nil, fmt.Errorf("%w: 初始库存明细不能超过100行", ErrErpInventoryInvalidInput)
 	}
 
-	normalized := make([]normalizedErpInventoryInitialStockItem, 0, len(items))
+	normalized := make([]normalizedErpInventoryInboundItem, 0, len(items))
 	seen := make(map[string]struct{}, len(items))
 	for _, item := range items {
 		skuID := strings.TrimSpace(item.SkuID)
@@ -590,7 +644,7 @@ func normalizeErpInventoryInitialStockItems(items []models.ErpInventoryInitialSt
 		}
 		seen[duplicateKey] = struct{}{}
 
-		normalized = append(normalized, normalizedErpInventoryInitialStockItem{
+		normalized = append(normalized, normalizedErpInventoryInboundItem{
 			SkuID:      skuID,
 			BatchNo:    batchNo,
 			ExpiryDate: expiryDate,

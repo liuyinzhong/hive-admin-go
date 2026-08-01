@@ -87,6 +87,37 @@ func (ctrl *ErpInventoryController) GetInventoryMovements(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
 }
 
+// GetInventoryMovementsBySource 获取来源单据库存流水列表
+// @Summary 获取来源单据库存流水列表
+// @Description 根据来源单据类型和来源单据ID分页查询库存流水，适用于查看整张采购入库单产生的全部流水
+// @Tags 进销存/库存管理
+// @Produce json
+// @Security ApiKeyAuth
+// @Param sourceBillType query string true "来源单据类型，例如PURCHASE_INBOUND"
+// @Param sourceBillId query string true "来源单据ID，UUID格式"
+// @Param page query int false "页码"
+// @Param pageSize query int false "每页数量"
+// @Param sorts query string false "排序，支持sourceBillType、sourceBillNo、movementType、direction、createDate"
+// @Success 200 {object} models.Response{data=utils.PaginationResponse{items=[]models.ErpInventoryMovementResponse}} "获取成功"
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 401 {object} models.Response "未登录或Token无效"
+// @Failure 403 {object} models.Response "无接口权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
+// @Router /erp/inventory/movements [get]
+func (ctrl *ErpInventoryController) GetInventoryMovementsBySource(c *gin.Context) {
+	var req models.ErpInventorySourceMovementListRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
+		return
+	}
+	result, err := ctrl.inventoryService.GetInventoryMovementsBySource(req)
+	if err != nil {
+		writeErpInventoryError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
 // CreateInitialStocks 新增初始库存
 // @Summary 新增初始库存
 // @Description 批量写入初始库存，数量按SKU包装单位录入；同一批次再次写入是追加库存而不是覆盖库存；整批提交原子成功或失败

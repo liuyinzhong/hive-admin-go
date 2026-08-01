@@ -22,6 +22,7 @@ func SetupRouter() *gin.Engine {
 	baseEnterpriseController := controllers.NewBaseEnterpriseController()
 	erpWarehouseController := controllers.NewErpWarehouseController()
 	erpInventoryController := controllers.NewErpInventoryController()
+	erpPurchaseInboundController := controllers.NewErpPurchaseInboundController()
 	productSpuController := controllers.NewProductSpuController()
 	productRpController := controllers.NewProductRpController()
 	productMpController := controllers.NewProductMpController()
@@ -311,7 +312,15 @@ func SetupRouter() *gin.Engine {
 			{
 				inventory.GET("/balances", permissionGuard.Require("erp:inventoryBalance:list"), erpInventoryController.GetInventoryBalanceList)
 				inventory.GET("/balances/:balanceId/movements", permissionGuard.Require("erp:inventoryMovement:list"), erpInventoryController.GetInventoryMovements)
+				inventory.GET("/movements", permissionGuard.Require("erp:inventorySourceMovement:list"), erpInventoryController.GetInventoryMovementsBySource)
 				inventory.POST("/initialStocks", permissionGuard.Require("erp:inventoryInitial:create"), erpInventoryController.CreateInitialStocks)
+			}
+
+			purchaseInbounds := erp.Group("/purchaseInbounds")
+			{
+				purchaseInbounds.GET("", permissionGuard.Require("erp:purchaseInbound:list"), erpPurchaseInboundController.GetPurchaseInboundList)
+				purchaseInbounds.POST("", permissionGuard.Require("erp:purchaseInbound:create"), erpPurchaseInboundController.CreatePurchaseInbound)
+				purchaseInbounds.GET("/:inboundId", permissionGuard.Require("erp:purchaseInbound:detail"), erpPurchaseInboundController.GetPurchaseInboundDetail)
 			}
 		}
 

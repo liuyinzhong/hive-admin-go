@@ -3,9 +3,11 @@ package models
 import "time"
 
 const (
-	InventorySourceBillTypeInitialStock = "INITIAL_STOCK"
-	InventoryMovementTypeInitialIn      = "INITIAL_IN"
-	InventoryMovementDirectionIn        = "IN"
+	InventorySourceBillTypeInitialStock    = "INITIAL_STOCK"
+	InventorySourceBillTypePurchaseInbound = "PURCHASE_INBOUND"
+	InventoryMovementTypeInitialIn         = "INITIAL_IN"
+	InventoryMovementTypePurchaseIn        = "PURCHASE_IN"
+	InventoryMovementDirectionIn           = "IN"
 )
 
 type ErpInventoryBatch struct {
@@ -85,6 +87,14 @@ type ErpInventoryMovementListRequest struct {
 	Page     int    `form:"page" example:"1"`                // 页码
 	PageSize int    `form:"pageSize" example:"20"`           // 每页数量
 	Sorts    string `form:"sorts" example:"createDate,desc"` // 排序
+}
+
+type ErpInventorySourceMovementListRequest struct {
+	SourceBillType string `form:"sourceBillType" example:"PURCHASE_INBOUND"`
+	SourceBillID   string `form:"sourceBillId" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Page           int    `form:"page" example:"1"`
+	PageSize       int    `form:"pageSize" example:"20"`
+	Sorts          string `form:"sorts" example:"createDate,desc"`
 }
 
 type CreateErpInventoryInitialStockRequest struct {

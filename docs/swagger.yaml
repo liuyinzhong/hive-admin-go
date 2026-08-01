@@ -426,6 +426,61 @@ definitions:
         example: INIT00000001
         type: string
     type: object
+  models.CreateErpPurchaseInboundItem:
+    properties:
+      batchNo:
+        example: B20260731001
+        maxLength: 64
+        type: string
+      expiryDate:
+        example: "2028-12-31"
+        type: string
+      quantity:
+        example: 20
+        minimum: 1
+        type: integer
+      remark:
+        example: 首批到货
+        maxLength: 512
+        type: string
+      skuId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      unitCost:
+        example: "12.0000"
+        type: string
+    required:
+    - batchNo
+    - expiryDate
+    - quantity
+    - skuId
+    - unitCost
+    type: object
+  models.CreateErpPurchaseInboundRequest:
+    properties:
+      inboundDate:
+        example: "2026-07-31"
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/models.CreateErpPurchaseInboundItem'
+        type: array
+      remark:
+        example: 采购到货入库
+        maxLength: 512
+        type: string
+      supplierId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      warehouseId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    required:
+    - inboundDate
+    - items
+    - supplierId
+    - warehouseId
+    type: object
   models.CreateExternalPageRequest:
     properties:
       name:
@@ -1578,6 +1633,139 @@ definitions:
         type: string
       warehouseName:
         description: 仓库名称
+        example: 中心库
+        type: string
+    type: object
+  models.ErpPurchaseInboundItemResponse:
+    properties:
+      amount:
+        example: "240.0000"
+        type: string
+      batchNo:
+        example: B20260731001
+        type: string
+      enterpriseName:
+        example: 示例药业
+        type: string
+      expiryDate:
+        example: "2028-12-31"
+        type: string
+      inboundItemId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      lineNo:
+        example: 1
+        type: integer
+      minUnitName:
+        example: 粒
+        type: string
+      packageSpecName:
+        example: 10粒/盒
+        type: string
+      packageUnitName:
+        example: 盒
+        type: string
+      productName:
+        example: 阿莫西林胶囊
+        type: string
+      quantity:
+        example: 20
+        type: integer
+      remark:
+        example: 首批到货
+        type: string
+      skuCode:
+        example: SKU000001
+        type: string
+      skuId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      specName:
+        example: 0.25g
+        type: string
+      unitCost:
+        example: "12.0000"
+        type: string
+    type: object
+  models.ErpPurchaseInboundListResponse:
+    properties:
+      createDate:
+        example: "2026-07-31 10:00:00"
+        type: string
+      creatorId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      inboundDate:
+        example: "2026-07-31"
+        type: string
+      inboundId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      inboundNo:
+        example: PIN00000001
+        type: string
+      lineCount:
+        example: 2
+        type: integer
+      remark:
+        example: 采购到货入库
+        type: string
+      supplierId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      supplierName:
+        example: 示例供应商
+        type: string
+      totalAmount:
+        example: "240.0000"
+        type: string
+      warehouseId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      warehouseName:
+        example: 中心库
+        type: string
+    type: object
+  models.ErpPurchaseInboundResponse:
+    properties:
+      createDate:
+        example: "2026-07-31 10:00:00"
+        type: string
+      creatorId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      inboundDate:
+        example: "2026-07-31"
+        type: string
+      inboundId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      inboundNo:
+        example: PIN00000001
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/models.ErpPurchaseInboundItemResponse'
+        type: array
+      lineCount:
+        example: 2
+        type: integer
+      remark:
+        example: 采购到货入库
+        type: string
+      supplierId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      supplierName:
+        example: 示例供应商
+        type: string
+      totalAmount:
+        example: "240.0000"
+        type: string
+      warehouseId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      warehouseName:
         example: 中心库
         type: string
     type: object
@@ -9334,6 +9522,254 @@ paths:
       summary: 新增初始库存
       tags:
       - 进销存/库存管理
+  /erp/inventory/movements:
+    get:
+      description: 根据来源单据类型和来源单据ID分页查询库存流水，适用于查看整张采购入库单产生的全部流水
+      parameters:
+      - description: 来源单据类型，例如PURCHASE_INBOUND
+        in: query
+        name: sourceBillType
+        required: true
+        type: string
+      - description: 来源单据ID，UUID格式
+        in: query
+        name: sourceBillId
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 排序，支持sourceBillType、sourceBillNo、movementType、direction、createDate
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ErpInventoryMovementResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取来源单据库存流水列表
+      tags:
+      - 进销存/库存管理
+  /erp/purchaseInbounds:
+    get:
+      description: 分页查询采购入库单，支持按单号、供应商、仓库、SKU编码、批号和入库日期范围筛选
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 采购入库单号
+        in: query
+        name: inboundNo
+        type: string
+      - description: 供应商ID，UUID格式
+        in: query
+        name: supplierId
+        type: string
+      - description: 仓库ID，UUID格式
+        in: query
+        name: warehouseId
+        type: string
+      - description: SKU编码
+        in: query
+        name: skuCode
+        type: string
+      - description: 批号
+        in: query
+        name: batchNo
+        type: string
+      - description: 入库开始日期，格式YYYY-MM-DD
+        in: query
+        name: inboundDateFrom
+        type: string
+      - description: 入库结束日期，格式YYYY-MM-DD
+        in: query
+        name: inboundDateTo
+        type: string
+      - description: 排序，支持inboundNo、supplierName、warehouseName、inboundDate、lineCount、totalAmount、createDate
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ErpPurchaseInboundListResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取采购入库单列表
+      tags:
+      - 进销存/采购入库
+    post:
+      consumes:
+      - application/json
+      description: 提交即完成采购入库，批量保存单据和明细并原子写入库存批次、库存余额和库存流水；数量按SKU包装单位录入
+      parameters:
+      - description: 采购入库单
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateErpPurchaseInboundRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpPurchaseInboundResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 供应商、仓库或SKU不存在或未启用
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 明细重复或库存写入冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 新增采购入库单
+      tags:
+      - 进销存/采购入库
+  /erp/purchaseInbounds/{inboundId}:
+    get:
+      description: 获取采购入库单头、明细和当前SKU展示信息；采购入库单提交后只读
+      parameters:
+      - description: 采购入库单ID，UUID格式
+        in: path
+        name: inboundId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpPurchaseInboundResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 采购入库单不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取采购入库单详情
+      tags:
+      - 进销存/采购入库
   /erp/warehouses:
     get:
       description: 分页查询仓库基础资料列表，支持按仓库编码/名称、储存类型、业务范围和状态筛选
