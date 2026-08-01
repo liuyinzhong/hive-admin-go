@@ -163,6 +163,93 @@ definitions:
         example: "2024-01-01 12:00:00"
         type: string
     type: object
+  models.ClassificationNodeTreeResponse:
+    properties:
+      children:
+        description: 子节点
+        items:
+          $ref: '#/definitions/models.ClassificationNodeTreeResponse'
+        type: array
+      classificationNodeId:
+        description: 分类节点ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      classificationSystemId:
+        description: 所属体系ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
+        type: string
+      nodeCode:
+        description: 节点编码
+        example: "01"
+        type: string
+      nodeName:
+        description: 节点名称
+        example: 西药
+        type: string
+      parentId:
+        description: 父节点ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      remark:
+        description: 备注
+        example: 备注
+        type: string
+      rowVersion:
+        description: 数据版本号
+        example: 1
+        type: integer
+      sort:
+        description: 排序号
+        example: 1
+        type: integer
+      status:
+        description: 状态
+        example: 1
+        type: integer
+      updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
+        type: string
+    type: object
+  models.ClassificationSystemResponse:
+    properties:
+      classificationSystemId:
+        description: 分类体系ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2026-01-15 09:00:00"
+        type: string
+      remark:
+        description: 备注
+        example: 财务分类体系
+        type: string
+      rowVersion:
+        description: 数据版本号
+        example: 1
+        type: integer
+      sort:
+        description: 排序号
+        example: 1
+        type: integer
+      systemCode:
+        description: 体系编码
+        example: finance
+        type: string
+      systemName:
+        description: 体系名称
+        example: 财务分类
+        type: string
+      updateDate:
+        description: 更新时间
+        example: "2026-01-15 09:00:00"
+        type: string
+    type: object
   models.ConfirmBugRequest:
     properties:
       bugConfirmStatus:
@@ -3507,6 +3594,80 @@ definitions:
         example: 1
         type: integer
     type: object
+  models.SaveClassificationNodeRequest:
+    properties:
+      classificationSystemId:
+        description: 所属体系ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      expectedRowVersion:
+        description: 期望行版本号（修改时必填）
+        example: 1
+        type: integer
+      nodeCode:
+        description: 节点编码：体系内唯一
+        example: "01"
+        maxLength: 64
+        type: string
+      nodeName:
+        description: 节点名称
+        example: 西药
+        maxLength: 128
+        type: string
+      parentId:
+        description: 父节点ID，根节点为空
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      remark:
+        description: 备注
+        example: 备注
+        maxLength: 512
+        type: string
+      sort:
+        description: 排序号
+        example: 1
+        type: integer
+      status:
+        description: 状态
+        enum:
+        - 0
+        - 1
+        example: 1
+        type: integer
+    required:
+    - classificationSystemId
+    - nodeCode
+    - nodeName
+    type: object
+  models.SaveClassificationSystemRequest:
+    properties:
+      expectedRowVersion:
+        description: 期望行版本号（修改时必填）
+        example: 1
+        type: integer
+      remark:
+        description: 备注
+        example: 财务分类体系
+        maxLength: 512
+        type: string
+      sort:
+        description: 排序号
+        example: 1
+        type: integer
+      systemCode:
+        description: 体系编码：全局唯一
+        example: finance
+        maxLength: 64
+        type: string
+      systemName:
+        description: 体系名称
+        example: 财务分类
+        maxLength: 128
+        type: string
+    required:
+    - systemCode
+    - systemName
+    type: object
   models.SaveDoctorRequest:
     properties:
       administrativePosition:
@@ -4777,6 +4938,23 @@ definitions:
     - bugTitle
     - projectId
     - userId
+    type: object
+  models.UpdateClassificationNodeStatusRequest:
+    properties:
+      expectedRowVersion:
+        description: 期望行版本号
+        example: 1
+        minimum: 1
+        type: integer
+      status:
+        description: 状态
+        enum:
+        - 0
+        - 1
+        example: 1
+        type: integer
+    required:
+    - expectedRowVersion
     type: object
   models.UpdateDeptRequest:
     properties:
@@ -6194,6 +6372,432 @@ paths:
       summary: 获取用户信息
       tags:
       - 认证管理
+  /base/classificationSystems:
+    get:
+      description: 全量查询分类体系列表，按排序号和创建时间升序排列
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ClassificationSystemResponse'
+                  type: array
+              type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取全部分类体系
+      tags:
+      - 基础资料/分类体系
+    post:
+      consumes:
+      - application/json
+      description: 创建新的分类体系记录
+      parameters:
+      - description: 分类体系
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveClassificationSystemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ClassificationSystemResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 新增分类体系
+      tags:
+      - 基础资料/分类体系
+  /base/classificationSystems/{id}:
+    delete:
+      description: 单条删除分类体系，存在节点时禁止删除
+      parameters:
+      - description: 分类体系ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除分类体系
+      tags:
+      - 基础资料/分类体系
+    get:
+      description: 根据分类体系ID获取详细信息
+      parameters:
+      - description: 分类体系ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ClassificationSystemResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取分类体系详情
+      tags:
+      - 基础资料/分类体系
+    put:
+      consumes:
+      - application/json
+      description: 根据分类体系ID更新分类体系信息
+      parameters:
+      - description: 分类体系ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 分类体系
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveClassificationSystemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ClassificationSystemResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新分类体系
+      tags:
+      - 基础资料/分类体系
+  /base/classificationSystems/nodes:
+    get:
+      description: 按体系编码查询节点树，支持关键字过滤并保留祖先链
+      parameters:
+      - description: 体系编码
+        in: query
+        name: systemCode
+        required: true
+        type: string
+      - description: 节点编码或名称关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 状态：0停用 1启用
+        in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ClassificationNodeTreeResponse'
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取分类节点树
+      tags:
+      - 基础资料/分类节点
+    post:
+      consumes:
+      - application/json
+      description: 创建新的分类节点记录
+      parameters:
+      - description: 分类节点
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveClassificationNodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ClassificationNodeTreeResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 新增分类节点
+      tags:
+      - 基础资料/分类节点
+  /base/classificationSystems/nodes/{id}:
+    delete:
+      description: 单条删除分类节点，存在子节点时禁止删除
+      parameters:
+      - description: 分类节点ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除分类节点
+      tags:
+      - 基础资料/分类节点
+    get:
+      description: 根据分类节点ID获取详细信息
+      parameters:
+      - description: 分类节点ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ClassificationNodeTreeResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取分类节点详情
+      tags:
+      - 基础资料/分类节点
+    put:
+      consumes:
+      - application/json
+      description: 根据分类节点ID更新节点信息，支持移动父级
+      parameters:
+      - description: 分类节点ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 分类节点
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveClassificationNodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ClassificationNodeTreeResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新分类节点
+      tags:
+      - 基础资料/分类节点
+  /base/classificationSystems/nodes/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: 根据分类节点ID更新启用/停用状态
+      parameters:
+      - description: 分类节点ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateClassificationNodeStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ClassificationNodeTreeResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新分类节点启停状态
+      tags:
+      - 基础资料/分类节点
+  /base/classificationSystems/options:
+    get:
+      description: 按体系编码返回启用且未删除的节点树，需登录但无按钮权限
+      parameters:
+      - description: 体系编码
+        in: query
+        name: systemCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ClassificationNodeTreeResponse'
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取分类节点公共选项
+      tags:
+      - 基础资料/分类节点
   /base/enterprises:
     get:
       description: 分页查询企业主体列表，支持按名称、简称、编码、信用代码、企业类型、角色类型和状态进行筛选

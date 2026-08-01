@@ -248,6 +248,718 @@
                 }
             }
         },
+        "/base/classificationSystems": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "全量查询分类体系列表，按排序号和创建时间升序排列",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/分类体系"
+                ],
+                "summary": "获取全部分类体系",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ClassificationSystemResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "创建新的分类体系记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/分类体系"
+                ],
+                "summary": "新增分类体系",
+                "parameters": [
+                    {
+                        "description": "分类体系",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveClassificationSystemRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ClassificationSystemResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/base/classificationSystems/nodes": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "按体系编码查询节点树，支持关键字过滤并保留祖先链",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/分类节点"
+                ],
+                "summary": "获取分类节点树",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "体系编码",
+                        "name": "systemCode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "节点编码或名称关键字",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态：0停用 1启用",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ClassificationNodeTreeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "创建新的分类节点记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/分类节点"
+                ],
+                "summary": "新增分类节点",
+                "parameters": [
+                    {
+                        "description": "分类节点",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveClassificationNodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ClassificationNodeTreeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/base/classificationSystems/nodes/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据分类节点ID获取详细信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/分类节点"
+                ],
+                "summary": "获取分类节点详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "分类节点ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ClassificationNodeTreeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据分类节点ID更新节点信息，支持移动父级",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/分类节点"
+                ],
+                "summary": "更新分类节点",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "分类节点ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "分类节点",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveClassificationNodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ClassificationNodeTreeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "单条删除分类节点，存在子节点时禁止删除",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/分类节点"
+                ],
+                "summary": "删除分类节点",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "分类节点ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/base/classificationSystems/nodes/{id}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据分类节点ID更新启用/停用状态",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/分类节点"
+                ],
+                "summary": "更新分类节点启停状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "分类节点ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateClassificationNodeStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ClassificationNodeTreeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/base/classificationSystems/options": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "按体系编码返回启用且未删除的节点树，需登录但无按钮权限",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/分类节点"
+                ],
+                "summary": "获取分类节点公共选项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "体系编码",
+                        "name": "systemCode",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ClassificationNodeTreeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/base/classificationSystems/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据分类体系ID获取详细信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/分类体系"
+                ],
+                "summary": "获取分类体系详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "分类体系ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ClassificationSystemResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据分类体系ID更新分类体系信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/分类体系"
+                ],
+                "summary": "更新分类体系",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "分类体系ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "分类体系",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveClassificationSystemRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ClassificationSystemResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "单条删除分类体系，存在节点时禁止删除",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/分类体系"
+                ],
+                "summary": "删除分类体系",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "分类体系ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/base/enterprises": {
             "get": {
                 "security": [
@@ -16937,6 +17649,118 @@
                 }
             }
         },
+        "models.ClassificationNodeTreeResponse": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "description": "子节点",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ClassificationNodeTreeResponse"
+                    }
+                },
+                "classificationNodeId": {
+                    "description": "分类节点ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "classificationSystemId": {
+                    "description": "所属体系ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "nodeCode": {
+                    "description": "节点编码",
+                    "type": "string",
+                    "example": "01"
+                },
+                "nodeName": {
+                    "description": "节点名称",
+                    "type": "string",
+                    "example": "西药"
+                },
+                "parentId": {
+                    "description": "父节点ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "备注"
+                },
+                "rowVersion": {
+                    "description": "数据版本号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "sort": {
+                    "description": "排序号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "status": {
+                    "description": "状态",
+                    "type": "integer",
+                    "example": 1
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                }
+            }
+        },
+        "models.ClassificationSystemResponse": {
+            "type": "object",
+            "properties": {
+                "classificationSystemId": {
+                    "description": "分类体系ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "财务分类体系"
+                },
+                "rowVersion": {
+                    "description": "数据版本号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "sort": {
+                    "description": "排序号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "systemCode": {
+                    "description": "体系编码",
+                    "type": "string",
+                    "example": "finance"
+                },
+                "systemName": {
+                    "description": "体系名称",
+                    "type": "string",
+                    "example": "财务分类"
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                }
+            }
+        },
         "models.ConfirmBugRequest": {
             "type": "object",
             "required": [
@@ -21264,6 +22088,100 @@
                 }
             }
         },
+        "models.SaveClassificationNodeRequest": {
+            "type": "object",
+            "required": [
+                "classificationSystemId",
+                "nodeCode",
+                "nodeName"
+            ],
+            "properties": {
+                "classificationSystemId": {
+                    "description": "所属体系ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "expectedRowVersion": {
+                    "description": "期望行版本号（修改时必填）",
+                    "type": "integer",
+                    "example": 1
+                },
+                "nodeCode": {
+                    "description": "节点编码：体系内唯一",
+                    "type": "string",
+                    "maxLength": 64,
+                    "example": "01"
+                },
+                "nodeName": {
+                    "description": "节点名称",
+                    "type": "string",
+                    "maxLength": 128,
+                    "example": "西药"
+                },
+                "parentId": {
+                    "description": "父节点ID，根节点为空",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "maxLength": 512,
+                    "example": "备注"
+                },
+                "sort": {
+                    "description": "排序号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "status": {
+                    "description": "状态",
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ],
+                    "example": 1
+                }
+            }
+        },
+        "models.SaveClassificationSystemRequest": {
+            "type": "object",
+            "required": [
+                "systemCode",
+                "systemName"
+            ],
+            "properties": {
+                "expectedRowVersion": {
+                    "description": "期望行版本号（修改时必填）",
+                    "type": "integer",
+                    "example": 1
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "maxLength": 512,
+                    "example": "财务分类体系"
+                },
+                "sort": {
+                    "description": "排序号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "systemCode": {
+                    "description": "体系编码：全局唯一",
+                    "type": "string",
+                    "maxLength": 64,
+                    "example": "finance"
+                },
+                "systemName": {
+                    "description": "体系名称",
+                    "type": "string",
+                    "maxLength": 128,
+                    "example": "财务分类"
+                }
+            }
+        },
         "models.SaveDoctorRequest": {
             "type": "object",
             "required": [
@@ -22910,6 +23828,29 @@
                     "description": "关联版本ID",
                     "type": "string",
                     "example": "UUID"
+                }
+            }
+        },
+        "models.UpdateClassificationNodeStatusRequest": {
+            "type": "object",
+            "required": [
+                "expectedRowVersion"
+            ],
+            "properties": {
+                "expectedRowVersion": {
+                    "description": "期望行版本号",
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 1
+                },
+                "status": {
+                    "description": "状态",
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ],
+                    "example": 1
                 }
             }
         },
