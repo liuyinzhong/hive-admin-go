@@ -520,6 +520,27 @@ definitions:
     - departmentCode
     - departmentName
     type: object
+  models.CreateMenuMessageRequest:
+    properties:
+      count:
+        example: 3
+        maximum: 1000
+        type: integer
+      menuId:
+        example: UUID
+        type: string
+      userIds:
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - count
+    - menuId
+    - userIds
+    type: object
   models.CreateMenuRequest:
     properties:
       authCode:
@@ -2306,6 +2327,15 @@ definitions:
         example: "2026-01-15 09:00:00"
         type: string
     type: object
+  models.MenuMessageUnreadSummary:
+    properties:
+      menuId:
+        type: string
+      menuPath:
+        type: string
+      unreadCount:
+        type: integer
+    type: object
   models.MenuMeta:
     properties:
       activeIcon:
@@ -3654,6 +3684,14 @@ definitions:
         type: array
     required:
     - scheduleIds
+    type: object
+  models.ReadMenuMessageRequest:
+    properties:
+      menuId:
+        example: UUID
+        type: string
+    required:
+    - menuId
     type: object
   models.RegistrationFeeRuleResponse:
     properties:
@@ -15152,6 +15190,135 @@ paths:
       summary: 检查菜单路径是否存在
       tags:
       - 系统管理/菜单管理
+  /system/messages/demo:
+    post:
+      consumes:
+      - application/json
+      description: 为指定用户在指定叶子菜单下新增指定数量的测试未读消息
+      parameters:
+      - description: 消息参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMenuMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 创建失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建 Demo 菜单消息
+      tags:
+      - 系统管理/消息推送
+  /system/messages/read:
+    post:
+      consumes:
+      - application/json
+      description: 将当前登录用户指定菜单下的全部未读消息标记为已读
+      parameters:
+      - description: 菜单参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReadMenuMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 操作失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 标记菜单消息已读
+      tags:
+      - 系统管理/消息推送
+  /system/messages/stream:
+    get:
+      description: 订阅当前登录用户的菜单未读汇总变更
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: SSE 事件流
+          schema:
+            type: string
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 建立连接失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 订阅菜单未读推送
+      tags:
+      - 系统管理/消息推送
+  /system/messages/unreadSummary:
+    get:
+      description: 获取当前登录用户按菜单聚合的未读数量
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.MenuMessageUnreadSummary'
+                  type: array
+              type: object
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 获取失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取菜单未读汇总
+      tags:
+      - 系统管理/消息推送
   /system/operationLogs:
     get:
       description: 分页查询操作日志。未传时间范围时默认查询最近 7 天数据；日志表保留 180 天，超期会被物理删除。

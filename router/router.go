@@ -14,6 +14,7 @@ func SetupRouter() *gin.Engine {
 
 	authController := controllers.NewAuthController()
 	systemController := controllers.NewSystemController()
+	menuMessageController := controllers.NewMenuMessageController()
 	externalPageController := controllers.NewExternalPageController()
 	devController := controllers.DevController{}
 	workflowController := controllers.WorkflowController{}
@@ -50,6 +51,14 @@ func SetupRouter() *gin.Engine {
 
 		system := api.Group("/system", middleware.AuthMiddleware())
 		{
+			messages := system.Group("/messages")
+			{
+				messages.GET("/unreadSummary", menuMessageController.GetUnreadSummary)
+				messages.GET("/stream", menuMessageController.StreamUnreadSummary)
+				messages.POST("/read", menuMessageController.MarkRead)
+				messages.POST("/demo", permissionGuard.Require("system:message:demo:create"), menuMessageController.CreateDemoMessages)
+			}
+
 			system.POST("/upload", systemController.UploadFile)
 			system.GET("/files", permissionGuard.Require("system:file:list"), systemController.GetFileList)
 

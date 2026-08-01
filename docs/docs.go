@@ -14170,6 +14170,215 @@ const docTemplate = `{
                 }
             }
         },
+        "/system/messages/demo": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "为指定用户在指定叶子菜单下新增指定数量的测试未读消息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/消息推送"
+                ],
+                "summary": "创建 Demo 菜单消息",
+                "parameters": [
+                    {
+                        "description": "消息参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateMenuMessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "创建失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/messages/read": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "将当前登录用户指定菜单下的全部未读消息标记为已读",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/消息推送"
+                ],
+                "summary": "标记菜单消息已读",
+                "parameters": [
+                    {
+                        "description": "菜单参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ReadMenuMessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "操作失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/messages/stream": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "订阅当前登录用户的菜单未读汇总变更",
+                "produces": [
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "系统管理/消息推送"
+                ],
+                "summary": "订阅菜单未读推送",
+                "responses": {
+                    "200": {
+                        "description": "SSE 事件流",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "建立连接失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/messages/unreadSummary": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取当前登录用户按菜单聚合的未读数量",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/消息推送"
+                ],
+                "summary": "获取菜单未读汇总",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.MenuMessageUnreadSummary"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "获取失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/system/operationLogs": {
             "get": {
                 "security": [
@@ -18531,6 +18740,35 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CreateMenuMessageRequest": {
+            "type": "object",
+            "required": [
+                "count",
+                "menuId",
+                "userIds"
+            ],
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "maximum": 1000,
+                    "example": 3
+                },
+                "menuId": {
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "userIds": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
+                }
+            }
+        },
         "models.CreateMenuRequest": {
             "type": "object",
             "required": [
@@ -20862,6 +21100,20 @@ const docTemplate = `{
                 }
             }
         },
+        "models.MenuMessageUnreadSummary": {
+            "type": "object",
+            "properties": {
+                "menuId": {
+                    "type": "string"
+                },
+                "menuPath": {
+                    "type": "string"
+                },
+                "unreadCount": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.MenuMeta": {
             "type": "object",
             "properties": {
@@ -22584,6 +22836,18 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "models.ReadMenuMessageRequest": {
+            "type": "object",
+            "required": [
+                "menuId"
+            ],
+            "properties": {
+                "menuId": {
+                    "type": "string",
+                    "example": "UUID"
                 }
             }
         },
