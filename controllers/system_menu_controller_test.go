@@ -16,10 +16,6 @@ func TestWriteMenuMutationErrorMapsInvalidPermissionCode(t *testing.T) {
 	assertMenuMutationStatus(t, services.ErrInvalidPermissionCode, http.StatusBadRequest)
 }
 
-func TestWriteMenuMutationErrorMapsPermissionCodeConflict(t *testing.T) {
-	assertMenuMutationStatus(t, services.ErrPermissionCodeConflict, http.StatusBadRequest)
-}
-
 func TestWriteMenuMutationErrorMapsRequiredMenuName(t *testing.T) {
 	assertMenuMutationStatus(t, services.ErrMenuNameRequired, http.StatusBadRequest)
 }

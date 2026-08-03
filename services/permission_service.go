@@ -16,8 +16,7 @@ const maxPermissionBundleLength = 512
 var permissionCodePattern = regexp.MustCompile(`^[a-z][a-zA-Z0-9]*:[a-z][a-zA-Z0-9]*:[a-z][a-zA-Z0-9]*$`)
 
 var (
-	ErrInvalidPermissionCode  = errors.New("权限码校验失败")
-	ErrPermissionCodeConflict = errors.New("权限码冲突")
+	ErrInvalidPermissionCode = errors.New("权限码校验失败")
 )
 
 type permissionSource interface {
@@ -105,19 +104,6 @@ func ExpandPermissionBundles(bundles []string) []string {
 	}
 	sort.Strings(codes)
 	return codes
-}
-
-func findDuplicatePermissionCode(candidate string, existingBundles []string) string {
-	existingCodeSet := make(map[string]struct{})
-	for _, code := range ExpandPermissionBundles(existingBundles) {
-		existingCodeSet[code] = struct{}{}
-	}
-	for _, code := range ExpandPermissionBundles([]string{candidate}) {
-		if _, exists := existingCodeSet[code]; exists {
-			return code
-		}
-	}
-	return ""
 }
 
 func (databasePermissionSource) LoadUserPermissionBundles(userID string) (bool, []string, error) {

@@ -426,6 +426,44 @@ definitions:
         example: INIT00000001
         type: string
     type: object
+  models.CreateErpOtherOutboundItem:
+    properties:
+      balanceId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      quantity:
+        example: 2
+        minimum: 1
+        type: integer
+      remark:
+        example: 日常领用
+        maxLength: 500
+        type: string
+    required:
+    - balanceId
+    - quantity
+    type: object
+  models.CreateErpOtherOutboundRequest:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.CreateErpOtherOutboundItem'
+        type: array
+      outboundDate:
+        example: "2026-07-31"
+        type: string
+      remark:
+        example: 领用出库
+        maxLength: 500
+        type: string
+      warehouseId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    required:
+    - items
+    - outboundDate
+    - warehouseId
+    type: object
   models.CreateErpPurchaseInboundItem:
     properties:
       batchNo:
@@ -1654,6 +1692,118 @@ definitions:
         type: string
       warehouseName:
         description: 仓库名称
+        example: 中心库
+        type: string
+    type: object
+  models.ErpOtherOutboundItemResponse:
+    properties:
+      balanceId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      batchNo:
+        example: B20260731001
+        type: string
+      enterpriseName:
+        example: 示例药业
+        type: string
+      expiryDate:
+        example: "2028-12-31"
+        type: string
+      lineNo:
+        example: 1
+        type: integer
+      outboundItemId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      packageSpecName:
+        example: 10粒/盒
+        type: string
+      packageUnitName:
+        example: 盒
+        type: string
+      productName:
+        example: 阿莫西林胶囊
+        type: string
+      quantity:
+        example: 2
+        type: integer
+      remark:
+        example: 日常领用
+        type: string
+      skuCode:
+        example: SKU000001
+        type: string
+      skuId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      specName:
+        example: 0.25g
+        type: string
+      unitCost:
+        example: "12.0000"
+        type: string
+    type: object
+  models.ErpOtherOutboundListResponse:
+    properties:
+      createDate:
+        example: "2026-07-31 10:00:00"
+        type: string
+      creatorId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      lineCount:
+        example: 2
+        type: integer
+      outboundDate:
+        example: "2026-07-31"
+        type: string
+      outboundId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      outboundNo:
+        example: OOUT00000001
+        type: string
+      remark:
+        example: 领用出库
+        type: string
+      warehouseId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      warehouseName:
+        example: 中心库
+        type: string
+    type: object
+  models.ErpOtherOutboundResponse:
+    properties:
+      createDate:
+        example: "2026-07-31 10:00:00"
+        type: string
+      creatorId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/models.ErpOtherOutboundItemResponse'
+        type: array
+      lineCount:
+        example: 2
+        type: integer
+      outboundDate:
+        example: "2026-07-31"
+        type: string
+      outboundId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      outboundNo:
+        example: OOUT00000001
+        type: string
+      remark:
+        example: 领用出库
+        type: string
+      warehouseId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      warehouseName:
         example: 中心库
         type: string
     type: object
@@ -9363,7 +9513,7 @@ paths:
       - 开发管理/版本管理
   /erp/inventory/balances:
     get:
-      description: 分页查询库存余额，第一版按仓库和库存批次展示；搜索条件支持仓库ID、SKU编码和批号，零库存余额默认保留并展示
+      description: 分页查询库存余额，第一版按仓库和库存批次展示；搜索条件支持仓库ID、库存余额ID、SKU编码和批号，默认包含零库存余额
       parameters:
       - description: 页码
         in: query
@@ -9377,6 +9527,10 @@ paths:
         in: query
         name: warehouseId
         type: string
+      - description: 库存余额ID，多个ID以逗号分隔，最多100个
+        in: query
+        name: balanceIds
+        type: string
       - description: SKU编码
         in: query
         name: skuCode
@@ -9385,6 +9539,10 @@ paths:
         in: query
         name: batchNo
         type: string
+      - description: 是否仅返回包装单位库存大于0的余额
+        in: query
+        name: onlyPositive
+        type: boolean
       - description: 排序，支持warehouseCode、warehouseName、skuCode、batchNo、expiryDate、unitCost、packageUnitCount、minUnitCount、inventoryAmount、movementCount、createDate、updateDate
         in: query
         name: sorts
@@ -9626,6 +9784,184 @@ paths:
       summary: 获取来源单据库存流水列表
       tags:
       - 进销存/库存管理
+  /erp/otherOutbounds:
+    get:
+      description: 分页查询其它出库单，支持按单号、仓库、SKU编码、批号和出库日期范围筛选
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 其它出库单号
+        in: query
+        name: outboundNo
+        type: string
+      - description: 仓库ID，UUID格式
+        in: query
+        name: warehouseId
+        type: string
+      - description: SKU编码
+        in: query
+        name: skuCode
+        type: string
+      - description: 批号
+        in: query
+        name: batchNo
+        type: string
+      - description: 出库开始日期，格式YYYY-MM-DD
+        in: query
+        name: outboundDateFrom
+        type: string
+      - description: 出库结束日期，格式YYYY-MM-DD
+        in: query
+        name: outboundDateTo
+        type: string
+      - description: 排序，支持outboundNo、warehouseName、outboundDate、lineCount、createDate
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ErpOtherOutboundListResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取其它出库单列表
+      tags:
+      - 进销存/其它出库
+    post:
+      consumes:
+      - application/json
+      description: 提交即完成其它出库，批量保存单据和明细并原子扣减库存余额、写入库存流水；数量按SKU包装单位录入
+      parameters:
+      - description: 其它出库单
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateErpOtherOutboundRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpOtherOutboundResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 仓库、库存余额或SKU不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 明细重复、库存不足或库存写入冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 新增其它出库单
+      tags:
+      - 进销存/其它出库
+  /erp/otherOutbounds/{outboundId}:
+    get:
+      description: 获取其它出库单头、明细和当前库存关联展示信息；其它出库单提交后只读
+      parameters:
+      - description: 其它出库单ID，UUID格式
+        in: path
+        name: outboundId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpOtherOutboundResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 其它出库单不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取其它出库单详情
+      tags:
+      - 进销存/其它出库
   /erp/purchaseInbounds:
     get:
       description: 分页查询采购入库单，支持按单号、供应商、仓库、SKU编码、批号和入库日期范围筛选

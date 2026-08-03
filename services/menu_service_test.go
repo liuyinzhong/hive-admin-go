@@ -87,18 +87,17 @@ func TestNormalizeMenuRouteIdentityGeneratesLinkIdentity(t *testing.T) {
 	}
 }
 
-func TestNormalizeAndValidateAuthCodeClearsNonButtonAuthCode(t *testing.T) {
-	service := &MenuService{}
+func TestNormalizeAuthCodeClearsNonButtonAuthCode(t *testing.T) {
 	raw := "dev:project:home"
 
 	for _, menuType := range []string{"catalog", "menu"} {
 		t.Run(menuType, func(t *testing.T) {
-			authCode, err := service.normalizeAndValidateAuthCode(nil, menuType, &raw, "")
+			authCode, err := normalizeAuthCode(menuType, &raw)
 			if err != nil {
-				t.Fatalf("normalizeAndValidateAuthCode() error = %v", err)
+				t.Fatalf("normalizeAuthCode() error = %v", err)
 			}
 			if authCode != nil {
-				t.Fatalf("normalizeAndValidateAuthCode() = %q, want nil", *authCode)
+				t.Fatalf("normalizeAuthCode() = %q, want nil", *authCode)
 			}
 		})
 	}

@@ -4701,7 +4701,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "分页查询库存余额，第一版按仓库和库存批次展示；搜索条件支持仓库ID、SKU编码和批号，零库存余额默认保留并展示",
+                "description": "分页查询库存余额，第一版按仓库和库存批次展示；搜索条件支持仓库ID、库存余额ID、SKU编码和批号，默认包含零库存余额",
                 "produces": [
                     "application/json"
                 ],
@@ -4730,6 +4730,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "库存余额ID，多个ID以逗号分隔，最多100个",
+                        "name": "balanceIds",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "SKU编码",
                         "name": "skuCode",
                         "in": "query"
@@ -4738,6 +4744,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "批号",
                         "name": "batchNo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否仅返回包装单位库存大于0的余额",
+                        "name": "onlyPositive",
                         "in": "query"
                     },
                     {
@@ -5120,6 +5132,299 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/otherOutbounds": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "分页查询其它出库单，支持按单号、仓库、SKU编码、批号和出库日期范围筛选",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/其它出库"
+                ],
+                "summary": "获取其它出库单列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量，最大100",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "其它出库单号",
+                        "name": "outboundNo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "仓库ID，UUID格式",
+                        "name": "warehouseId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SKU编码",
+                        "name": "skuCode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "批号",
+                        "name": "batchNo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "出库开始日期，格式YYYY-MM-DD",
+                        "name": "outboundDateFrom",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "出库结束日期，格式YYYY-MM-DD",
+                        "name": "outboundDateTo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序，支持outboundNo、warehouseName、outboundDate、lineCount、createDate",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.ErpOtherOutboundListResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "提交即完成其它出库，批量保存单据和明细并原子扣减库存余额、写入库存流水；数量按SKU包装单位录入",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/其它出库"
+                ],
+                "summary": "新增其它出库单",
+                "parameters": [
+                    {
+                        "description": "其它出库单",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateErpOtherOutboundRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ErpOtherOutboundResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "仓库、库存余额或SKU不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "明细重复、库存不足或库存写入冲突",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/otherOutbounds/{outboundId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取其它出库单头、明细和当前库存关联展示信息；其它出库单提交后只读",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "进销存/其它出库"
+                ],
+                "summary": "获取其它出库单详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "其它出库单ID，UUID格式",
+                        "name": "outboundId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ErpOtherOutboundResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "其它出库单不存在",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -18612,6 +18917,58 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CreateErpOtherOutboundItem": {
+            "type": "object",
+            "required": [
+                "balanceId",
+                "quantity"
+            ],
+            "properties": {
+                "balanceId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 2
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "日常领用"
+                }
+            }
+        },
+        "models.CreateErpOtherOutboundRequest": {
+            "type": "object",
+            "required": [
+                "items",
+                "outboundDate",
+                "warehouseId"
+            ],
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.CreateErpOtherOutboundItem"
+                    }
+                },
+                "outboundDate": {
+                    "type": "string",
+                    "example": "2026-07-31"
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "领用出库"
+                },
+                "warehouseId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                }
+            }
+        },
         "models.CreateErpPurchaseInboundItem": {
             "type": "object",
             "required": [
@@ -20213,6 +20570,159 @@ const docTemplate = `{
                 },
                 "warehouseName": {
                     "description": "仓库名称",
+                    "type": "string",
+                    "example": "中心库"
+                }
+            }
+        },
+        "models.ErpOtherOutboundItemResponse": {
+            "type": "object",
+            "properties": {
+                "balanceId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "batchNo": {
+                    "type": "string",
+                    "example": "B20260731001"
+                },
+                "enterpriseName": {
+                    "type": "string",
+                    "example": "示例药业"
+                },
+                "expiryDate": {
+                    "type": "string",
+                    "example": "2028-12-31"
+                },
+                "lineNo": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "outboundItemId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "packageSpecName": {
+                    "type": "string",
+                    "example": "10粒/盒"
+                },
+                "packageUnitName": {
+                    "type": "string",
+                    "example": "盒"
+                },
+                "productName": {
+                    "type": "string",
+                    "example": "阿莫西林胶囊"
+                },
+                "quantity": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "remark": {
+                    "type": "string",
+                    "example": "日常领用"
+                },
+                "skuCode": {
+                    "type": "string",
+                    "example": "SKU000001"
+                },
+                "skuId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "specName": {
+                    "type": "string",
+                    "example": "0.25g"
+                },
+                "unitCost": {
+                    "type": "string",
+                    "example": "12.0000"
+                }
+            }
+        },
+        "models.ErpOtherOutboundListResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "type": "string",
+                    "example": "2026-07-31 10:00:00"
+                },
+                "creatorId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "lineCount": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "outboundDate": {
+                    "type": "string",
+                    "example": "2026-07-31"
+                },
+                "outboundId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "outboundNo": {
+                    "type": "string",
+                    "example": "OOUT00000001"
+                },
+                "remark": {
+                    "type": "string",
+                    "example": "领用出库"
+                },
+                "warehouseId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "warehouseName": {
+                    "type": "string",
+                    "example": "中心库"
+                }
+            }
+        },
+        "models.ErpOtherOutboundResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "type": "string",
+                    "example": "2026-07-31 10:00:00"
+                },
+                "creatorId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ErpOtherOutboundItemResponse"
+                    }
+                },
+                "lineCount": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "outboundDate": {
+                    "type": "string",
+                    "example": "2026-07-31"
+                },
+                "outboundId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "outboundNo": {
+                    "type": "string",
+                    "example": "OOUT00000001"
+                },
+                "remark": {
+                    "type": "string",
+                    "example": "领用出库"
+                },
+                "warehouseId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "warehouseName": {
                     "type": "string",
                     "example": "中心库"
                 }

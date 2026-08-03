@@ -231,7 +231,6 @@ func (ctrl *SystemController) UpdateMenuStatus(c *gin.Context) {
 func writeMenuMutationError(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, services.ErrInvalidPermissionCode),
-		errors.Is(err, services.ErrPermissionCodeConflict),
 		errors.Is(err, services.ErrMenuNameRequired),
 		errors.Is(err, services.ErrUnsupportedMenuType),
 		errors.Is(err, services.ErrRouteNameConflict),

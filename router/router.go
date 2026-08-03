@@ -24,6 +24,7 @@ func SetupRouter() *gin.Engine {
 	erpWarehouseController := controllers.NewErpWarehouseController()
 	erpInventoryController := controllers.NewErpInventoryController()
 	erpPurchaseInboundController := controllers.NewErpPurchaseInboundController()
+	erpOtherOutboundController := controllers.NewErpOtherOutboundController()
 	productSpuController := controllers.NewProductSpuController()
 	productRpController := controllers.NewProductRpController()
 	productMpController := controllers.NewProductMpController()
@@ -330,6 +331,13 @@ func SetupRouter() *gin.Engine {
 				purchaseInbounds.GET("", permissionGuard.Require("erp:purchaseInbound:list"), erpPurchaseInboundController.GetPurchaseInboundList)
 				purchaseInbounds.POST("", permissionGuard.Require("erp:purchaseInbound:create"), erpPurchaseInboundController.CreatePurchaseInbound)
 				purchaseInbounds.GET("/:inboundId", permissionGuard.Require("erp:purchaseInbound:detail"), erpPurchaseInboundController.GetPurchaseInboundDetail)
+			}
+
+			otherOutbounds := erp.Group("/otherOutbounds")
+			{
+				otherOutbounds.GET("", permissionGuard.Require("erp:otherOutbound:list"), erpOtherOutboundController.GetOtherOutboundList)
+				otherOutbounds.POST("", permissionGuard.Require("erp:otherOutbound:create"), erpOtherOutboundController.CreateOtherOutbound)
+				otherOutbounds.GET("/:outboundId", permissionGuard.Require("erp:otherOutbound:detail"), erpOtherOutboundController.GetOtherOutboundDetail)
 			}
 		}
 

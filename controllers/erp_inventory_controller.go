@@ -23,15 +23,17 @@ func NewErpInventoryController() *ErpInventoryController {
 
 // GetInventoryBalanceList 获取库存余额列表
 // @Summary 获取库存余额列表
-// @Description 分页查询库存余额，第一版按仓库和库存批次展示；搜索条件支持仓库ID、SKU编码和批号，零库存余额默认保留并展示
+// @Description 分页查询库存余额，第一版按仓库和库存批次展示；搜索条件支持仓库ID、库存余额ID、SKU编码和批号，默认包含零库存余额
 // @Tags 进销存/库存管理
 // @Produce json
 // @Security ApiKeyAuth
 // @Param page query int false "页码"
 // @Param pageSize query int false "每页数量"
 // @Param warehouseId query string false "仓库ID，UUID格式"
+// @Param balanceIds query string false "库存余额ID，多个ID以逗号分隔，最多100个"
 // @Param skuCode query string false "SKU编码"
 // @Param batchNo query string false "批号"
+// @Param onlyPositive query bool false "是否仅返回包装单位库存大于0的余额"
 // @Param sorts query string false "排序，支持warehouseCode、warehouseName、skuCode、batchNo、expiryDate、unitCost、packageUnitCount、minUnitCount、inventoryAmount、movementCount、createDate、updateDate"
 // @Success 200 {object} models.Response{data=utils.PaginationResponse{items=[]models.ErpInventoryBalanceResponse}} "获取成功"
 // @Failure 400 {object} models.Response "参数错误"

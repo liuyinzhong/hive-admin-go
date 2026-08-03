@@ -24,6 +24,22 @@ var (
 	ErrErpInventoryConflict     = errors.New("库存数据冲突")
 )
 
+type ErpInventoryInsufficientError struct {
+	SkuCode         string
+	BatchNo         string
+	Requested       int
+	Available       int
+	PackageUnitName string
+}
+
+func (e *ErpInventoryInsufficientError) Error() string {
+	return fmt.Sprintf("SKU %s 批号 %s 请求出库%d%s，当前可用%d%s", e.SkuCode, e.BatchNo, e.Requested, e.PackageUnitName, e.Available, e.PackageUnitName)
+}
+
+func (e *ErpInventoryInsufficientError) Unwrap() error {
+	return ErrErpInventoryConflict
+}
+
 var erpInventoryLocation = time.FixedZone("Asia/Shanghai", 8*60*60)
 
 type ErpInventoryService struct{}
@@ -288,6 +304,13 @@ func (s *ErpInventoryService) applyInventoryBalanceFilters(query *gorm.DB, req m
 		}
 		query = query.Where("erp_inventory_balance.warehouse_id = ?", strings.TrimSpace(req.WarehouseID))
 	}
+	if strings.TrimSpace(req.BalanceIDs) != "" {
+		balanceIDs, err := normalizeErpInventoryBalanceIDs(req.BalanceIDs)
+		if err != nil {
+			return nil, err
+		}
+		query = query.Where("erp_inventory_balance.balance_id IN ?", balanceIDs)
+	}
 	if strings.TrimSpace(req.SkuCode) != "" {
 		skuCode := "%" + strings.ToLower(strings.TrimSpace(req.SkuCode)) + "%"
 		query = query.Where("LOWER(product_sku.sku_code) LIKE ?", skuCode)
@@ -295,6 +318,9 @@ func (s *ErpInventoryService) applyInventoryBalanceFilters(query *gorm.DB, req m
 	if strings.TrimSpace(req.BatchNo) != "" {
 		batchNo := "%" + strings.ToLower(strings.TrimSpace(req.BatchNo)) + "%"
 		query = query.Where("LOWER(erp_inventory_batch.batch_no) LIKE ?", batchNo)
+	}
+	if req.OnlyPositive {
+		query = query.Where("erp_inventory_balance.package_unit_count > 0")
 	}
 	return query, nil
 }
@@ -541,6 +567,106 @@ func (s *ErpInventoryService) createInventoryInMovement(tx *gorm.DB, warehouse m
 		PackageUnitName:        sku.PackageUnitName,
 		MinUnitName:            sku.MinUnitName,
 		Remark:                 item.Remark,
+		OperatorID:             optionalErpInventoryOperatorID(operatorID),
+		CreateDate:             &now,
+	}
+	return tx.Create(&movement).Error
+}
+
+func (s *ErpInventoryService) createInventoryOutMovement(tx *gorm.DB, warehouse models.ErpWarehouse, balanceID string, quantity int, remark *string, context erpInventoryInMovementContext, operatorID string) error {
+	if quantity <= 0 {
+		return fmt.Errorf("%w: 出库数量必须为正整数", ErrErpInventoryInvalidInput)
+	}
+
+	var balance models.ErpInventoryBalance
+	if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("balance_id = ? AND warehouse_id = ?", balanceID, warehouse.WarehouseID).
+		First(&balance).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("%w: 库存余额不存在或不属于当前仓库", ErrErpInventoryNotFound)
+		}
+		return err
+	}
+
+	var sku models.ProductSku
+	if err := tx.Where("sku_id = ? AND del_flag = 0", balance.SkuID).First(&sku).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("%w: SKU不存在", ErrErpInventoryNotFound)
+		}
+		return err
+	}
+	if sku.PackConversion <= 0 {
+		return fmt.Errorf("%w: SKU包装换算系数无效", ErrErpInventoryInvalidInput)
+	}
+
+	var batch models.ErpInventoryBatch
+	if err := tx.Where("batch_id = ?", balance.BatchID).First(&batch).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("%w: 库存批次不存在", ErrErpInventoryNotFound)
+		}
+		return err
+	}
+
+	packageUnitName := balance.PackageUnitName
+	if packageUnitName == "" {
+		packageUnitName = sku.PackageUnitName
+	}
+	if balance.PackageUnitCount < quantity {
+		return &ErpInventoryInsufficientError{
+			SkuCode:         sku.SkuCode,
+			BatchNo:         batch.BatchNo,
+			Requested:       quantity,
+			Available:       balance.PackageUnitCount,
+			PackageUnitName: packageUnitName,
+		}
+	}
+
+	changeMinCount := int64(quantity) * int64(sku.PackConversion)
+	if changeMinCount <= 0 || balance.MinUnitCount < changeMinCount {
+		return fmt.Errorf("%w: SKU %s 批号 %s 的最小单位库存数据不一致", ErrErpInventoryConflict, sku.SkuCode, batch.BatchNo)
+	}
+
+	now := time.Now().In(erpInventoryLocation)
+	beforePackageCount := balance.PackageUnitCount
+	beforeMinCount := balance.MinUnitCount
+	afterPackageCount := beforePackageCount - quantity
+	afterMinCount := beforeMinCount - changeMinCount
+	if err := tx.Model(&models.ErpInventoryBalance{}).
+		Where("balance_id = ?", balance.BalanceID).
+		Updates(map[string]interface{}{
+			"package_unit_count": afterPackageCount,
+			"min_unit_count":     afterMinCount,
+			"row_version":        balance.RowVersion + 1,
+			"updater_id":         optionalErpInventoryOperatorID(operatorID),
+			"update_date":        now,
+		}).Error; err != nil {
+		return err
+	}
+
+	minUnitName := balance.MinUnitName
+	if minUnitName == "" {
+		minUnitName = sku.MinUnitName
+	}
+	movement := models.ErpInventoryMovement{
+		MovementID:             utils.GenerateUUID(),
+		BalanceID:              balance.BalanceID,
+		WarehouseID:            warehouse.WarehouseID,
+		SkuID:                  balance.SkuID,
+		BatchID:                balance.BatchID,
+		SourceBillType:         context.SourceBillType,
+		SourceBillID:           context.SourceBillID,
+		SourceBillNo:           context.SourceBillNo,
+		MovementType:           context.MovementType,
+		Direction:              models.InventoryMovementDirectionOut,
+		BeforePackageUnitCount: beforePackageCount,
+		ChangePackageUnitCount: -quantity,
+		AfterPackageUnitCount:  afterPackageCount,
+		BeforeMinUnitCount:     beforeMinCount,
+		ChangeMinUnitCount:     -changeMinCount,
+		AfterMinUnitCount:      afterMinCount,
+		PackageUnitName:        packageUnitName,
+		MinUnitName:            minUnitName,
+		Remark:                 remark,
 		OperatorID:             optionalErpInventoryOperatorID(operatorID),
 		CreateDate:             &now,
 	}
@@ -798,6 +924,33 @@ func validateErpInventoryUUID(value, label string) error {
 		return fmt.Errorf("%w: %s格式错误", ErrErpInventoryInvalidInput, label)
 	}
 	return nil
+}
+
+func normalizeErpInventoryBalanceIDs(value string) ([]string, error) {
+	parts := strings.Split(value, ",")
+	ids := make([]string, 0, len(parts))
+	seen := make(map[string]struct{}, len(parts))
+	for _, part := range parts {
+		balanceID := strings.TrimSpace(part)
+		if balanceID == "" {
+			continue
+		}
+		if err := validateErpInventoryUUID(balanceID, "库存余额ID"); err != nil {
+			return nil, err
+		}
+		if _, exists := seen[balanceID]; exists {
+			continue
+		}
+		seen[balanceID] = struct{}{}
+		ids = append(ids, balanceID)
+	}
+	if len(ids) == 0 {
+		return nil, fmt.Errorf("%w: 库存余额ID不能为空", ErrErpInventoryInvalidInput)
+	}
+	if len(ids) > 100 {
+		return nil, fmt.Errorf("%w: 库存余额ID不能超过100个", ErrErpInventoryInvalidInput)
+	}
+	return ids, nil
 }
 
 func isErpInventoryDuplicateKeyError(err error) bool {

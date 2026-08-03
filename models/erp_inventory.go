@@ -5,9 +5,12 @@ import "time"
 const (
 	InventorySourceBillTypeInitialStock    = "INITIAL_STOCK"
 	InventorySourceBillTypePurchaseInbound = "PURCHASE_INBOUND"
+	InventorySourceBillTypeOtherOutbound   = "OTHER_OUTBOUND"
 	InventoryMovementTypeInitialIn         = "INITIAL_IN"
 	InventoryMovementTypePurchaseIn        = "PURCHASE_IN"
+	InventoryMovementTypeOtherOut          = "OTHER_OUT"
 	InventoryMovementDirectionIn           = "IN"
+	InventoryMovementDirectionOut          = "OUT"
 )
 
 type ErpInventoryBatch struct {
@@ -75,12 +78,14 @@ func (ErpInventoryMovement) TableName() string {
 }
 
 type ErpInventoryBalanceListRequest struct {
-	Page        int    `form:"page" example:"1"`                                           // 页码
-	PageSize    int    `form:"pageSize" example:"20"`                                      // 每页数量
-	WarehouseID string `form:"warehouseId" example:"550e8400-e29b-41d4-a716-446655440000"` // 仓库ID
-	SkuCode     string `form:"skuCode" example:"SKU000001"`                                // SKU编码
-	BatchNo     string `form:"batchNo" example:"B20260731001"`                             // 批号
-	Sorts       string `form:"sorts" example:"updateDate,desc"`                            // 排序
+	Page         int    `form:"page" example:"1"`                                           // 页码
+	PageSize     int    `form:"pageSize" example:"20"`                                      // 每页数量
+	WarehouseID  string `form:"warehouseId" example:"550e8400-e29b-41d4-a716-446655440000"` // 仓库ID
+	BalanceIDs   string `form:"balanceIds" example:"550e8400-e29b-41d4-a716-446655440000"`  // 库存余额ID，多个ID以逗号分隔
+	SkuCode      string `form:"skuCode" example:"SKU000001"`                                // SKU编码
+	BatchNo      string `form:"batchNo" example:"B20260731001"`                             // 批号
+	OnlyPositive bool   `form:"onlyPositive" example:"true"`                                // 是否仅返回包装单位库存大于0的余额
+	Sorts        string `form:"sorts" example:"updateDate,desc"`                            // 排序
 }
 
 type ErpInventoryMovementListRequest struct {

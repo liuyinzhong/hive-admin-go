@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -140,7 +139,7 @@ func (s *MenuService) CreateMenu(req models.CreateMenuRequest) error {
 				return err
 			}
 		}
-		authCode, err := s.normalizeAndValidateAuthCode(tx, req.Type, req.AuthCode, "")
+		authCode, err := normalizeAuthCode(req.Type, req.AuthCode)
 		if err != nil {
 			return err
 		}
@@ -169,7 +168,7 @@ func (s *MenuService) UpdateMenu(id string, req models.UpdateMenuRequest) error 
 	}
 
 	return database.DB.Transaction(func(tx *gorm.DB) error {
-		authCode, err := s.normalizeAndValidateAuthCode(tx, req.Type, req.AuthCode, id)
+		authCode, err := normalizeAuthCode(req.Type, req.AuthCode)
 		if err != nil {
 			return err
 		}
@@ -296,7 +295,7 @@ func pointerValue(value *string) string {
 	return strings.TrimSpace(*value)
 }
 
-func (s *MenuService) normalizeAndValidateAuthCode(tx *gorm.DB, menuType string, raw *string, excludeID string) (*string, error) {
+func normalizeAuthCode(menuType string, raw *string) (*string, error) {
 	if menuType != "button" {
 		return nil, nil
 	}
@@ -308,27 +307,6 @@ func (s *MenuService) normalizeAndValidateAuthCode(tx *gorm.DB, menuType string,
 	if err != nil {
 		return nil, err
 	}
-
-	var menus []models.SysMenu
-	if err := tx.Model(&models.SysMenu{}).
-		Select("id", "auth_code").
-		Where("del_flag = 0").
-		Order("id").
-		Clauses(clause.Locking{Strength: "UPDATE"}).
-		Find(&menus).Error; err != nil {
-		return nil, err
-	}
-
-	existingBundles := make([]string, 0, len(menus))
-	for _, menu := range menus {
-		if menu.ID != excludeID && menu.AuthCode != nil && *menu.AuthCode != "" {
-			existingBundles = append(existingBundles, *menu.AuthCode)
-		}
-	}
-	if duplicate := findDuplicatePermissionCode(normalized, existingBundles); duplicate != "" {
-		return nil, fmt.Errorf("%w: %s 已存在", ErrPermissionCodeConflict, duplicate)
-	}
-
 	return &normalized, nil
 }
 

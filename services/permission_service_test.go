@@ -89,23 +89,3 @@ func TestPermissionServiceFailsClosedWhenPermissionsCannotBeLoaded(t *testing.T)
 		t.Fatal("HasCode() = true when permissions cannot be loaded")
 	}
 }
-
-func TestFindDuplicatePermissionCodeComparesAtomicCodes(t *testing.T) {
-	got := findDuplicatePermissionCode(
-		"dev:story:transition,dev:story:update",
-		[]string{"dev:story:update,dev:story:editorView", "medical:doctor:list"},
-	)
-	if want := "dev:story:update"; got != want {
-		t.Fatalf("findDuplicatePermissionCode() = %q, want %q", got, want)
-	}
-}
-
-func TestFindDuplicatePermissionCodeAllowsDistinctCodes(t *testing.T) {
-	got := findDuplicatePermissionCode(
-		"dev:story:transition,dev:story:update",
-		[]string{"dev:story:editorView", "medical:doctor:list"},
-	)
-	if got != "" {
-		t.Fatalf("findDuplicatePermissionCode() = %q, want empty", got)
-	}
-}
