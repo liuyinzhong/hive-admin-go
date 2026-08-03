@@ -56,7 +56,7 @@ func SetupRouter() *gin.Engine {
 				messages.GET("/unreadSummary", menuMessageController.GetUnreadSummary)
 				messages.GET("/stream", menuMessageController.StreamUnreadSummary)
 				messages.POST("/read", menuMessageController.MarkRead)
-				messages.POST("/demo", permissionGuard.Require("system:message:demo:create"), menuMessageController.CreateDemoMessages)
+				messages.POST("/demo", permissionGuard.Require("system:messageDemo:create"), menuMessageController.CreateDemoMessages)
 			}
 
 			system.POST("/upload", systemController.UploadFile)
