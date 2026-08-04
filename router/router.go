@@ -25,6 +25,8 @@ func SetupRouter() *gin.Engine {
 	erpInventoryController := controllers.NewErpInventoryController()
 	erpPurchaseInboundController := controllers.NewErpPurchaseInboundController()
 	erpOtherOutboundController := controllers.NewErpOtherOutboundController()
+	printTemplateController := controllers.NewPrintTemplateController()
+	printDocumentController := controllers.NewPrintDocumentController()
 	productSpuController := controllers.NewProductSpuController()
 	productRpController := controllers.NewProductRpController()
 	productMpController := controllers.NewProductMpController()
@@ -339,6 +341,23 @@ func SetupRouter() *gin.Engine {
 				otherOutbounds.POST("", permissionGuard.Require("erp:otherOutbound:create"), erpOtherOutboundController.CreateOtherOutbound)
 				otherOutbounds.GET("/:outboundId", permissionGuard.Require("erp:otherOutbound:detail"), erpOtherOutboundController.GetOtherOutboundDetail)
 			}
+		}
+
+		printTemplates := api.Group("/printTemplates", middleware.AuthMiddleware())
+		{
+			printTemplates.GET("", permissionGuard.Require("print:template:list"), printTemplateController.GetPrintTemplateList)
+			printTemplates.GET("/metadata", permissionGuard.Require("print:template:metadata"), printTemplateController.GetPrintTemplateMetadata)
+			printTemplates.POST("", permissionGuard.Require("print:template:create"), printTemplateController.CreatePrintTemplate)
+			printTemplates.GET("/:templateId", permissionGuard.Require("print:template:detail"), printTemplateController.GetPrintTemplateDetail)
+			printTemplates.PUT("/:templateId", permissionGuard.Require("print:template:update"), printTemplateController.UpdatePrintTemplate)
+			printTemplates.POST("/:templateId/publish", permissionGuard.Require("print:template:publish"), printTemplateController.PublishPrintTemplate)
+			printTemplates.DELETE("/:templateId", permissionGuard.Require("print:template:delete"), printTemplateController.DeletePrintTemplate)
+		}
+
+		printDocuments := api.Group("/printDocuments", middleware.AuthMiddleware())
+		{
+			printDocuments.GET("/purchaseInbound/:inboundId/data", permissionGuard.Require("print:template:preview"), printDocumentController.GetPurchaseInboundPrintData)
+			printDocuments.GET("/purchaseInbound/:inboundId", permissionGuard.Require("print:purchaseInbound:print"), printDocumentController.GetPurchaseInboundPrintDocument)
 		}
 
 		product := api.Group("/product", middleware.AuthMiddleware())

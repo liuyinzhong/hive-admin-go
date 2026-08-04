@@ -199,7 +199,7 @@ func buildMenuTree(menus []models.SysMenu) []*models.MenuTreeResponse {
 				DomCached:                menu.DomCached == 1,
 				MenuVisibleWithForbidden: menu.MenuVisibleWithForbidden == 1,
 			},
-			Name:        menu.Name,
+			Name:        resolveMenuName(menu.Type, menu.ID, menu.Name),
 			Path:        menu.Path,
 			CreatorId:   menu.CreatorID,
 			CreatorName: menu.CreatorName,

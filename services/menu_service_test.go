@@ -26,6 +26,35 @@ func TestNormalizeMenuNameAllowsCatalogNameToBeEmpty(t *testing.T) {
 	}
 }
 
+func TestNormalizeMenuNameKeepsProvidedCatalogName(t *testing.T) {
+	raw := "  print  "
+	name, err := normalizeMenuName("catalog", &raw)
+	if err != nil {
+		t.Fatalf("normalizeMenuName() error = %v", err)
+	}
+	if name == nil || *name != "print" {
+		t.Fatalf("normalizeMenuName() = %v, want print", name)
+	}
+}
+
+func TestNormalizeMenuRouteIdentityGeneratesCatalogName(t *testing.T) {
+	name, path, err := normalizeMenuRouteIdentity(
+		"catalog",
+		"32ce976f-6d8c-4366-a0ef-449e54310327",
+		nil,
+		nil,
+	)
+	if err != nil {
+		t.Fatalf("normalizeMenuRouteIdentity() error = %v", err)
+	}
+	if name == nil || *name != "catalog32ce976f6d8c4366a0ef449e54310327" {
+		t.Fatalf("name = %v, want stable generated catalog name", name)
+	}
+	if path != nil {
+		t.Fatalf("path = %v, want nil", path)
+	}
+}
+
 func TestNormalizeMenuNameAllowsEmbeddedAndLinkNameToBeEmpty(t *testing.T) {
 	for _, menuType := range []string{"embedded", "link"} {
 		t.Run(menuType, func(t *testing.T) {

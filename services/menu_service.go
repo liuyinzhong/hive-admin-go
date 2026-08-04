@@ -247,7 +247,7 @@ func normalizeMenuRouteIdentity(menuType, menuID string, rawName, rawPath *strin
 	if err != nil {
 		return nil, nil, err
 	}
-	return name, rawPath, nil
+	return resolveMenuName(menuType, menuID, name), rawPath, nil
 }
 
 func generatedMenuRouteIdentity(menuType, menuID string) (*string, *string) {
@@ -269,6 +269,13 @@ func normalizeMenuName(menuType string, raw *string) (*string, error) {
 	if menuType == "button" {
 		return nil, nil
 	}
+	if menuType == "catalog" {
+		if raw == nil || strings.TrimSpace(*raw) == "" {
+			return nil, nil
+		}
+		name := strings.TrimSpace(*raw)
+		return &name, nil
+	}
 	if menuType != "menu" {
 		return nil, nil
 	}
@@ -277,6 +284,23 @@ func normalizeMenuName(menuType string, raw *string) (*string, error) {
 	}
 	name := strings.TrimSpace(*raw)
 	return &name, nil
+}
+
+func resolveMenuName(menuType, menuID string, raw *string) *string {
+	if raw != nil && strings.TrimSpace(*raw) != "" {
+		name := strings.TrimSpace(*raw)
+		return &name
+	}
+	if menuType != "catalog" || strings.TrimSpace(menuID) == "" {
+		return raw
+	}
+
+	name := generatedCatalogMenuName(menuID)
+	return &name
+}
+
+func generatedCatalogMenuName(menuID string) string {
+	return "catalog" + strings.ReplaceAll(strings.TrimSpace(menuID), "-", "")
 }
 
 func isSystemMenuType(menuType string) bool {
@@ -364,7 +388,7 @@ func (s *MenuService) sysMenuToResponse(menu models.SysMenu, children []*models.
 		AuthCode:    menu.AuthCode,
 		Children:    children,
 		Component:   menu.Component,
-		Name:        menu.Name,
+		Name:        resolveMenuName(menu.Type, menu.ID, menu.Name),
 		Path:        menu.Path,
 		CreatorId:   menu.CreatorID,
 		CreatorName: menu.CreatorName,

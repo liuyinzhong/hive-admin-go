@@ -9938,6 +9938,700 @@ const docTemplate = `{
                 }
             }
         },
+        "/printDocuments/purchaseInbound/{inboundId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "返回统一打印数据协议和当前已发布模板；动态字段使用当前业务关联数据，不保存打印快照",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "打印管理/打印数据"
+                ],
+                "summary": "获取采购入库单打印数据",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "采购入库单ID，UUID格式",
+                        "name": "inboundId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrintDocumentBundleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "采购入库单不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "未配置可用打印模板",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/printDocuments/purchaseInbound/{inboundId}/data": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "仅返回真实业务单据的统一打印数据，不要求已有已发布模板，供模板设计器实时预览使用",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "打印管理/打印数据"
+                ],
+                "summary": "获取采购入库单打印预览数据",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "采购入库单ID，UUID格式",
+                        "name": "inboundId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrintDocumentResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "采购入库单不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/printTemplates": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "查询打印管理中的模板；一个单据类型只允许一条逻辑模板记录",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "打印管理/打印模板"
+                ],
+                "summary": "获取打印模板列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量，最大100",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "单据类型",
+                        "name": "documentType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "模板状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PaginationResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.PrintTemplateListResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "创建指定单据类型的唯一打印模板，初始保存为草稿",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "打印管理/打印模板"
+                ],
+                "summary": "创建打印模板",
+                "parameters": [
+                    {
+                        "description": "打印模板",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreatePrintTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrintTemplateResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "模板已存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/printTemplates/metadata": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "返回可绑定的系统定义单据类型和打印字段，设计器不得使用未注册字段",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "打印管理/打印模板"
+                ],
+                "summary": "获取打印字段注册表",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrintTemplateMetadataResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/printTemplates/{templateId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取当前草稿和当前已发布内容，不返回历史版本",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "打印管理/打印模板"
+                ],
+                "summary": "获取打印模板详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "模板ID",
+                        "name": "templateId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrintTemplateResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "模板不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "只更新当前草稿；已发布内容保持不变，发布前草稿不影响业务打印",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "打印管理/打印模板"
+                ],
+                "summary": "更新打印模板草稿",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "模板ID",
+                        "name": "templateId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "打印模板草稿",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdatePrintTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrintTemplateResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "模板不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "模板已被修改",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "删除当前单据类型的逻辑模板；删除后业务打印将明确提示未配置模板",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "打印管理/打印模板"
+                ],
+                "summary": "删除打印模板",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "模板ID",
+                        "name": "templateId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "模板不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/printTemplates/{templateId}/publish": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "校验当前草稿后覆盖当前已发布内容；不生成历史版本",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "打印管理/打印模板"
+                ],
+                "summary": "发布打印模板",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "模板ID",
+                        "name": "templateId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "模板版本",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.PublishPrintTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "发布成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrintTemplateResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误或布局校验失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或Token无效",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "模板不存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "模板已被修改",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/product/mps": {
             "get": {
                 "security": [
@@ -19293,6 +19987,28 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CreatePrintTemplateRequest": {
+            "type": "object",
+            "required": [
+                "documentType",
+                "draftLayout",
+                "templateName"
+            ],
+            "properties": {
+                "documentType": {
+                    "type": "string",
+                    "example": "PURCHASE_INBOUND"
+                },
+                "draftLayout": {
+                    "$ref": "#/definitions/models.PrintLayout"
+                },
+                "templateName": {
+                    "type": "string",
+                    "maxLength": 128,
+                    "example": "采购入库单默认模板"
+                }
+            }
+        },
         "models.CreateProjectRequest": {
             "type": "object",
             "required": [
@@ -22145,6 +22861,393 @@ const docTemplate = `{
                 }
             }
         },
+        "models.PrintBodySection": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number"
+                },
+                "table": {
+                    "$ref": "#/definitions/models.PrintDetailTable"
+                }
+            }
+        },
+        "models.PrintDetailTable": {
+            "type": "object",
+            "properties": {
+                "columns": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PrintTableColumn"
+                    }
+                },
+                "height": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "number"
+                },
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.PrintDocumentBundleResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.PrintDocumentResponse"
+                },
+                "template": {
+                    "$ref": "#/definitions/models.PrintTemplateResponse"
+                }
+            }
+        },
+        "models.PrintDocumentResponse": {
+            "type": "object",
+            "properties": {
+                "documentType": {
+                    "type": "string",
+                    "example": "PURCHASE_INBOUND"
+                },
+                "header": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "schemaVersion": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "summary": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "models.PrintDocumentTypeDefinition": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "PURCHASE_INBOUND"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "采购入库单"
+                }
+            }
+        },
+        "models.PrintElementStyle": {
+            "type": "object",
+            "properties": {
+                "border": {
+                    "type": "string"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "fontSize": {
+                    "type": "number"
+                },
+                "fontWeight": {
+                    "type": "string"
+                },
+                "lineHeight": {
+                    "type": "number"
+                },
+                "textAlign": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.PrintFieldDefinition": {
+            "type": "object",
+            "properties": {
+                "dataType": {
+                    "type": "string",
+                    "example": "string"
+                },
+                "example": {
+                    "type": "string",
+                    "example": "PIN00000001"
+                },
+                "label": {
+                    "type": "string",
+                    "example": "入库单号"
+                },
+                "path": {
+                    "type": "string",
+                    "example": "header.inboundNo"
+                },
+                "scope": {
+                    "type": "string",
+                    "example": "header"
+                }
+            }
+        },
+        "models.PrintFieldGroup": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "header"
+                },
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PrintFieldDefinition"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "example": "单据头"
+                }
+            }
+        },
+        "models.PrintLayout": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "$ref": "#/definitions/models.PrintPageSettings"
+                },
+                "sections": {
+                    "$ref": "#/definitions/models.PrintLayoutSections"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.PrintLayoutElement": {
+            "type": "object",
+            "properties": {
+                "fieldPath": {
+                    "type": "string"
+                },
+                "height": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "imageUrl": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "style": {
+                    "$ref": "#/definitions/models.PrintElementStyle"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "number"
+                },
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.PrintLayoutSections": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/models.PrintBodySection"
+                },
+                "documentFooter": {
+                    "$ref": "#/definitions/models.PrintSection"
+                },
+                "documentHeader": {
+                    "$ref": "#/definitions/models.PrintSection"
+                },
+                "pageFooter": {
+                    "$ref": "#/definitions/models.PrintSection"
+                },
+                "pageHeader": {
+                    "$ref": "#/definitions/models.PrintSection"
+                }
+            }
+        },
+        "models.PrintPageMargins": {
+            "type": "object",
+            "properties": {
+                "bottom": {
+                    "type": "number"
+                },
+                "left": {
+                    "type": "number"
+                },
+                "right": {
+                    "type": "number"
+                },
+                "top": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.PrintPageSettings": {
+            "type": "object",
+            "properties": {
+                "margin": {
+                    "$ref": "#/definitions/models.PrintPageMargins"
+                },
+                "orientation": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.PrintSection": {
+            "type": "object",
+            "properties": {
+                "elements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PrintLayoutElement"
+                    }
+                },
+                "height": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.PrintTableColumn": {
+            "type": "object",
+            "properties": {
+                "fieldPath": {
+                    "type": "string"
+                },
+                "format": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.PrintTemplateListResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "type": "string",
+                    "example": "2026-08-03 10:00:00"
+                },
+                "documentType": {
+                    "type": "string",
+                    "example": "PURCHASE_INBOUND"
+                },
+                "hasDraft": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "hasPublished": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "rowVersion": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "status": {
+                    "type": "string",
+                    "example": "PUBLISHED"
+                },
+                "templateId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "templateName": {
+                    "type": "string",
+                    "example": "采购入库单默认模板"
+                },
+                "updateDate": {
+                    "type": "string",
+                    "example": "2026-08-03 10:00:00"
+                }
+            }
+        },
+        "models.PrintTemplateMetadataResponse": {
+            "type": "object",
+            "properties": {
+                "documentTypes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PrintDocumentTypeDefinition"
+                    }
+                },
+                "fieldGroups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PrintFieldGroup"
+                    }
+                }
+            }
+        },
+        "models.PrintTemplateResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "type": "string",
+                    "example": "2026-08-03 10:00:00"
+                },
+                "documentType": {
+                    "type": "string",
+                    "example": "PURCHASE_INBOUND"
+                },
+                "draftLayout": {
+                    "$ref": "#/definitions/models.PrintLayout"
+                },
+                "publishedLayout": {
+                    "$ref": "#/definitions/models.PrintLayout"
+                },
+                "rowVersion": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "status": {
+                    "type": "string",
+                    "example": "PUBLISHED"
+                },
+                "templateId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "templateName": {
+                    "type": "string",
+                    "example": "采购入库单默认模板"
+                },
+                "updateDate": {
+                    "type": "string",
+                    "example": "2026-08-03 10:00:00"
+                }
+            }
+        },
         "models.ProductMpResponse": {
             "type": "object",
             "properties": {
@@ -23330,6 +24433,19 @@ const docTemplate = `{
                 "path": {
                     "type": "string",
                     "example": "/external/demo"
+                }
+            }
+        },
+        "models.PublishPrintTemplateRequest": {
+            "type": "object",
+            "required": [
+                "rowVersion"
+            ],
+            "properties": {
+                "rowVersion": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 3
                 }
             }
         },
@@ -25653,6 +26769,29 @@ const docTemplate = `{
                     "description": "启用状态 0=禁用 1=启用",
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "models.UpdatePrintTemplateRequest": {
+            "type": "object",
+            "required": [
+                "draftLayout",
+                "rowVersion",
+                "templateName"
+            ],
+            "properties": {
+                "draftLayout": {
+                    "$ref": "#/definitions/models.PrintLayout"
+                },
+                "rowVersion": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 3
+                },
+                "templateName": {
+                    "type": "string",
+                    "maxLength": 128,
+                    "example": "采购入库单默认模板"
                 }
             }
         },

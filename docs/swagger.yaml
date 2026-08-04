@@ -706,6 +706,22 @@ definitions:
     - channelType
     - envMode
     type: object
+  models.CreatePrintTemplateRequest:
+    properties:
+      documentType:
+        example: PURCHASE_INBOUND
+        type: string
+      draftLayout:
+        $ref: '#/definitions/models.PrintLayout'
+      templateName:
+        example: 采购入库单默认模板
+        maxLength: 128
+        type: string
+    required:
+    - documentType
+    - draftLayout
+    - templateName
+    type: object
   models.CreateProjectRequest:
     properties:
       description:
@@ -2891,6 +2907,268 @@ definitions:
         example: "2026-07-31 12:00:00"
         type: string
     type: object
+  models.PrintBodySection:
+    properties:
+      height:
+        type: number
+      table:
+        $ref: '#/definitions/models.PrintDetailTable'
+    type: object
+  models.PrintDetailTable:
+    properties:
+      columns:
+        items:
+          $ref: '#/definitions/models.PrintTableColumn'
+        type: array
+      height:
+        type: number
+      id:
+        type: string
+      width:
+        type: number
+      x:
+        type: number
+      "y":
+        type: number
+    type: object
+  models.PrintDocumentBundleResponse:
+    properties:
+      data:
+        $ref: '#/definitions/models.PrintDocumentResponse'
+      template:
+        $ref: '#/definitions/models.PrintTemplateResponse'
+    type: object
+  models.PrintDocumentResponse:
+    properties:
+      documentType:
+        example: PURCHASE_INBOUND
+        type: string
+      header:
+        additionalProperties: true
+        type: object
+      items:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+      schemaVersion:
+        example: 1
+        type: integer
+      summary:
+        additionalProperties: true
+        type: object
+    type: object
+  models.PrintDocumentTypeDefinition:
+    properties:
+      code:
+        example: PURCHASE_INBOUND
+        type: string
+      name:
+        example: 采购入库单
+        type: string
+    type: object
+  models.PrintElementStyle:
+    properties:
+      border:
+        type: string
+      color:
+        type: string
+      fontSize:
+        type: number
+      fontWeight:
+        type: string
+      lineHeight:
+        type: number
+      textAlign:
+        type: string
+    type: object
+  models.PrintFieldDefinition:
+    properties:
+      dataType:
+        example: string
+        type: string
+      example:
+        example: PIN00000001
+        type: string
+      label:
+        example: 入库单号
+        type: string
+      path:
+        example: header.inboundNo
+        type: string
+      scope:
+        example: header
+        type: string
+    type: object
+  models.PrintFieldGroup:
+    properties:
+      code:
+        example: header
+        type: string
+      fields:
+        items:
+          $ref: '#/definitions/models.PrintFieldDefinition'
+        type: array
+      name:
+        example: 单据头
+        type: string
+    type: object
+  models.PrintLayout:
+    properties:
+      page:
+        $ref: '#/definitions/models.PrintPageSettings'
+      sections:
+        $ref: '#/definitions/models.PrintLayoutSections'
+      version:
+        type: integer
+    type: object
+  models.PrintLayoutElement:
+    properties:
+      fieldPath:
+        type: string
+      height:
+        type: number
+      id:
+        type: string
+      imageUrl:
+        type: string
+      kind:
+        type: string
+      style:
+        $ref: '#/definitions/models.PrintElementStyle'
+      text:
+        type: string
+      width:
+        type: number
+      x:
+        type: number
+      "y":
+        type: number
+    type: object
+  models.PrintLayoutSections:
+    properties:
+      body:
+        $ref: '#/definitions/models.PrintBodySection'
+      documentFooter:
+        $ref: '#/definitions/models.PrintSection'
+      documentHeader:
+        $ref: '#/definitions/models.PrintSection'
+      pageFooter:
+        $ref: '#/definitions/models.PrintSection'
+      pageHeader:
+        $ref: '#/definitions/models.PrintSection'
+    type: object
+  models.PrintPageMargins:
+    properties:
+      bottom:
+        type: number
+      left:
+        type: number
+      right:
+        type: number
+      top:
+        type: number
+    type: object
+  models.PrintPageSettings:
+    properties:
+      margin:
+        $ref: '#/definitions/models.PrintPageMargins'
+      orientation:
+        type: string
+      size:
+        type: string
+    type: object
+  models.PrintSection:
+    properties:
+      elements:
+        items:
+          $ref: '#/definitions/models.PrintLayoutElement'
+        type: array
+      height:
+        type: number
+    type: object
+  models.PrintTableColumn:
+    properties:
+      fieldPath:
+        type: string
+      format:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      width:
+        type: number
+    type: object
+  models.PrintTemplateListResponse:
+    properties:
+      createDate:
+        example: "2026-08-03 10:00:00"
+        type: string
+      documentType:
+        example: PURCHASE_INBOUND
+        type: string
+      hasDraft:
+        example: true
+        type: boolean
+      hasPublished:
+        example: true
+        type: boolean
+      rowVersion:
+        example: 3
+        type: integer
+      status:
+        example: PUBLISHED
+        type: string
+      templateId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      templateName:
+        example: 采购入库单默认模板
+        type: string
+      updateDate:
+        example: "2026-08-03 10:00:00"
+        type: string
+    type: object
+  models.PrintTemplateMetadataResponse:
+    properties:
+      documentTypes:
+        items:
+          $ref: '#/definitions/models.PrintDocumentTypeDefinition'
+        type: array
+      fieldGroups:
+        items:
+          $ref: '#/definitions/models.PrintFieldGroup'
+        type: array
+    type: object
+  models.PrintTemplateResponse:
+    properties:
+      createDate:
+        example: "2026-08-03 10:00:00"
+        type: string
+      documentType:
+        example: PURCHASE_INBOUND
+        type: string
+      draftLayout:
+        $ref: '#/definitions/models.PrintLayout'
+      publishedLayout:
+        $ref: '#/definitions/models.PrintLayout'
+      rowVersion:
+        example: 3
+        type: integer
+      status:
+        example: PUBLISHED
+        type: string
+      templateId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      templateName:
+        example: 采购入库单默认模板
+        type: string
+      updateDate:
+        example: "2026-08-03 10:00:00"
+        type: string
+    type: object
   models.ProductMpResponse:
     properties:
       approvalNo:
@@ -3823,6 +4101,15 @@ definitions:
       path:
         example: /external/demo
         type: string
+    type: object
+  models.PublishPrintTemplateRequest:
+    properties:
+      rowVersion:
+        example: 3
+        minimum: 1
+        type: integer
+    required:
+    - rowVersion
     type: object
   models.PublishSchedulesRequest:
     properties:
@@ -5597,6 +5884,23 @@ definitions:
         type: integer
     required:
     - status
+    type: object
+  models.UpdatePrintTemplateRequest:
+    properties:
+      draftLayout:
+        $ref: '#/definitions/models.PrintLayout'
+      rowVersion:
+        example: 3
+        minimum: 1
+        type: integer
+      templateName:
+        example: 采购入库单默认模板
+        maxLength: 128
+        type: string
+    required:
+    - draftLayout
+    - rowVersion
+    - templateName
     type: object
   models.UpdateProductMpStatusRequest:
     properties:
@@ -12749,6 +13053,427 @@ paths:
       summary: 批量发布草稿排班
       tags:
       - 医疗管理/排班
+  /printDocuments/purchaseInbound/{inboundId}:
+    get:
+      description: 返回统一打印数据协议和当前已发布模板；动态字段使用当前业务关联数据，不保存打印快照
+      parameters:
+      - description: 采购入库单ID，UUID格式
+        in: path
+        name: inboundId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrintDocumentBundleResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 采购入库单不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 未配置可用打印模板
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取采购入库单打印数据
+      tags:
+      - 打印管理/打印数据
+  /printDocuments/purchaseInbound/{inboundId}/data:
+    get:
+      description: 仅返回真实业务单据的统一打印数据，不要求已有已发布模板，供模板设计器实时预览使用
+      parameters:
+      - description: 采购入库单ID，UUID格式
+        in: path
+        name: inboundId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrintDocumentResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 采购入库单不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取采购入库单打印预览数据
+      tags:
+      - 打印管理/打印数据
+  /printTemplates:
+    get:
+      description: 查询打印管理中的模板；一个单据类型只允许一条逻辑模板记录
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 单据类型
+        in: query
+        name: documentType
+        type: string
+      - description: 模板状态
+        in: query
+        name: status
+        type: string
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.PrintTemplateListResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取打印模板列表
+      tags:
+      - 打印管理/打印模板
+    post:
+      consumes:
+      - application/json
+      description: 创建指定单据类型的唯一打印模板，初始保存为草稿
+      parameters:
+      - description: 打印模板
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePrintTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrintTemplateResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 模板已存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建打印模板
+      tags:
+      - 打印管理/打印模板
+  /printTemplates/{templateId}:
+    delete:
+      description: 删除当前单据类型的逻辑模板；删除后业务打印将明确提示未配置模板
+      parameters:
+      - description: 模板ID
+        in: path
+        name: templateId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 模板不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除打印模板
+      tags:
+      - 打印管理/打印模板
+    get:
+      description: 获取当前草稿和当前已发布内容，不返回历史版本
+      parameters:
+      - description: 模板ID
+        in: path
+        name: templateId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrintTemplateResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 模板不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取打印模板详情
+      tags:
+      - 打印管理/打印模板
+    put:
+      consumes:
+      - application/json
+      description: 只更新当前草稿；已发布内容保持不变，发布前草稿不影响业务打印
+      parameters:
+      - description: 模板ID
+        in: path
+        name: templateId
+        required: true
+        type: string
+      - description: 打印模板草稿
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePrintTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrintTemplateResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 模板不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 模板已被修改
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新打印模板草稿
+      tags:
+      - 打印管理/打印模板
+  /printTemplates/{templateId}/publish:
+    post:
+      consumes:
+      - application/json
+      description: 校验当前草稿后覆盖当前已发布内容；不生成历史版本
+      parameters:
+      - description: 模板ID
+        in: path
+        name: templateId
+        required: true
+        type: string
+      - description: 模板版本
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.PublishPrintTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 发布成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrintTemplateResponse'
+              type: object
+        "400":
+          description: 参数错误或布局校验失败
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 模板不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 模板已被修改
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 发布打印模板
+      tags:
+      - 打印管理/打印模板
+  /printTemplates/metadata:
+    get:
+      description: 返回可绑定的系统定义单据类型和打印字段，设计器不得使用未注册字段
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrintTemplateMetadataResponse'
+              type: object
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取打印字段注册表
+      tags:
+      - 打印管理/打印模板
   /product/mps:
     get:
       description: 分页查询厂家产品列表，支持按所属规格产品筛选
