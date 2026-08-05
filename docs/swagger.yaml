@@ -15224,7 +15224,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 批量删除字典
+      description: 批量逻辑删除字典，存在子字典时禁止删除
       parameters:
       - description: 字典ID列表
         in: body
@@ -15263,9 +15263,21 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取字典树结构
+      description: 获取字典树结构，支持按名称、值、类型筛选，支持多字段排序
       parameters:
-      - description: 排序参数 排序时仅支持：label、type、value
+      - description: 字典标题，模糊搜索
+        in: query
+        name: label
+        type: string
+      - description: 字典值，模糊搜索
+        in: query
+        name: value
+        type: string
+      - description: 字典类型，精确匹配
+        in: query
+        name: type
+        type: string
+      - description: 排序参数，格式 field,direction;field2,direction2，仅支持：label、type、value
         in: query
         name: sorts
         type: string
@@ -15422,21 +15434,19 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新字典启用/禁用状态
+      description: 更新字典启用/禁用状态，同时级联更新所有子字典的状态
       parameters:
       - description: 字典ID
         in: path
         name: id
         required: true
         type: string
-      - description: 状态
+      - description: 状态信息
         in: body
         name: request
         required: true
         schema:
-          additionalProperties:
-            type: integer
-          type: object
+          $ref: '#/definitions/models.UpdateStatusRequest'
       produces:
       - application/json
       responses:

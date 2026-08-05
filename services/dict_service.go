@@ -20,12 +20,7 @@ func NewDictService() *DictService {
 func (s *DictService) GetDictTree(req models.DictListRequest) ([]*models.DictTreeResponse, error) {
 	query := database.DB.Model(&models.SysDict{}).Where("del_flag = 0")
 
-	if req.Label != "" {
-		query = query.Where("label LIKE ?", "%"+req.Label+"%")
-	}
-	if req.Value != "" {
-		query = query.Where("value LIKE ?", "%"+req.Value+"%")
-	}
+	// type 为精确匹配，且同一字典树通常 type 一致，可在 SQL 层直接过滤
 	if req.Type != "" {
 		query = query.Where("type = ?", req.Type)
 	}
@@ -34,6 +29,11 @@ func (s *DictService) GetDictTree(req models.DictListRequest) ([]*models.DictTre
 	err := query.Find(&dicts).Error
 	if err != nil {
 		return nil, err
+	}
+
+	// label/value 为模糊搜索，需保留匹配节点的祖先链与子孙树，故在内存中做树形过滤
+	if req.Label != "" || req.Value != "" {
+		dicts = s.filterDictTree(dicts, req.Label, req.Value)
 	}
 
 	tree := s.buildDictTree(dicts)
@@ -161,6 +161,88 @@ func (s *DictService) getAllChildIds(id string) []string {
 	}
 
 	return childIds
+}
+
+// filterDictTree 树形搜索过滤：保留匹配节点及其祖先链与子孙树
+// 规则：子级匹配则保留其父级链；父级匹配则保留其全部子孙；全树无匹配则返回空
+func (s *DictService) filterDictTree(dicts []models.SysDict, label, value string) []models.SysDict {
+	// 构建 id->dict 与 parentID->childIDs 索引
+	dictMap := make(map[string]models.SysDict, len(dicts))
+	childrenMap := make(map[string][]string, len(dicts))
+	for _, d := range dicts {
+		dictMap[d.ID] = d
+		if d.Pid != nil && *d.Pid != "" {
+			childrenMap[*d.Pid] = append(childrenMap[*d.Pid], d.ID)
+		}
+	}
+
+	// 查找匹配节点（label 与 value 同时填写时取交集）
+	var matchedIDs []string
+	for _, d := range dicts {
+		if matchesDictFilter(d, label, value) {
+			matchedIDs = append(matchedIDs, d.ID)
+		}
+	}
+	if len(matchedIDs) == 0 {
+		return nil
+	}
+
+	// 收集需保留的节点ID：匹配节点 + 祖先链 + 子孙树
+	keepSet := make(map[string]bool, len(dicts))
+	var collectAncestors func(id string)
+	collectAncestors = func(id string) {
+		keepSet[id] = true
+		d, ok := dictMap[id]
+		if !ok || d.Pid == nil || *d.Pid == "" {
+			return
+		}
+		if _, parentExists := dictMap[*d.Pid]; parentExists {
+			collectAncestors(*d.Pid)
+		}
+	}
+	var collectDescendants func(id string)
+	collectDescendants = func(id string) {
+		keepSet[id] = true
+		for _, childID := range childrenMap[id] {
+			collectDescendants(childID)
+		}
+	}
+	for _, id := range matchedIDs {
+		collectAncestors(id)
+		collectDescendants(id)
+	}
+
+	// 按原顺序输出保留节点
+	result := make([]models.SysDict, 0, len(keepSet))
+	for _, d := range dicts {
+		if keepSet[d.ID] {
+			result = append(result, d)
+		}
+	}
+	return result
+}
+
+// matchesDictFilter 判断节点是否匹配搜索条件（label/value 均为大小写不敏感的包含匹配，两者同时填写时取交集）
+func matchesDictFilter(d models.SysDict, label, value string) bool {
+	if label != "" {
+		l := ""
+		if d.Label != nil {
+			l = *d.Label
+		}
+		if !strings.Contains(strings.ToLower(l), strings.ToLower(label)) {
+			return false
+		}
+	}
+	if value != "" {
+		v := ""
+		if d.Value != nil {
+			v = *d.Value
+		}
+		if !strings.Contains(strings.ToLower(v), strings.ToLower(value)) {
+			return false
+		}
+	}
+	return true
 }
 
 func (s *DictService) buildDictTree(dicts []models.SysDict) []*models.DictTreeResponse {

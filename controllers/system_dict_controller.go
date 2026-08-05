@@ -10,12 +10,15 @@ import (
 
 // GetDictTree 获取字典树
 // @Summary 获取字典树
-// @Description 获取字典树结构
+// @Description 获取字典树结构，支持按名称、值、类型筛选，支持多字段排序
 // @Tags 系统管理/字典管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param sorts query string false "排序参数 排序时仅支持：label、type、value"
+// @Param label query string false "字典标题，模糊搜索"
+// @Param value query string false "字典值，模糊搜索"
+// @Param type query string false "字典类型，精确匹配"
+// @Param sorts query string false "排序参数，格式 field,direction;field2,direction2，仅支持：label、type、value"
 // @Success 200 {object} models.Response{data=[]models.DictTreeResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Failure 403 {object} models.Response "无接口访问权限"
@@ -130,13 +133,13 @@ func (ctrl *SystemController) UpdateDict(c *gin.Context) {
 
 // UpdateDictStatus 更新字典状态
 // @Summary 更新字典状态
-// @Description 更新字典启用/禁用状态
+// @Description 更新字典启用/禁用状态，同时级联更新所有子字典的状态
 // @Tags 系统管理/字典管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param id path string true "字典ID"
-// @Param request body map[string]int true "状态"
+// @Param request body models.UpdateStatusRequest true "状态信息"
 // @Success 200 {object} models.Response "更新成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
@@ -165,7 +168,7 @@ func (ctrl *SystemController) UpdateDictStatus(c *gin.Context) {
 
 // DeleteDicts 删除字典
 // @Summary 删除字典
-// @Description 批量删除字典
+// @Description 批量逻辑删除字典，存在子字典时禁止删除
 // @Tags 系统管理/字典管理
 // @Accept json
 // @Produce json

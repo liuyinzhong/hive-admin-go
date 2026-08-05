@@ -13522,7 +13522,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "获取字典树结构",
+                "description": "获取字典树结构，支持按名称、值、类型筛选，支持多字段排序",
                 "consumes": [
                     "application/json"
                 ],
@@ -13536,7 +13536,25 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "排序参数 排序时仅支持：label、type、value",
+                        "description": "字典标题，模糊搜索",
+                        "name": "label",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "字典值，模糊搜索",
+                        "name": "value",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "字典类型，精确匹配",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序参数，格式 field,direction;field2,direction2，仅支持：label、type、value",
                         "name": "sorts",
                         "in": "query"
                     }
@@ -13641,7 +13659,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "批量删除字典",
+                "description": "批量逻辑删除字典，存在子字典时禁止删除",
                 "consumes": [
                     "application/json"
                 ],
@@ -13836,7 +13854,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "更新字典启用/禁用状态",
+                "description": "更新字典启用/禁用状态，同时级联更新所有子字典的状态",
                 "consumes": [
                     "application/json"
                 ],
@@ -13856,15 +13874,12 @@
                         "required": true
                     },
                     {
-                        "description": "状态",
+                        "description": "状态信息",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "integer"
-                            }
+                            "$ref": "#/definitions/models.UpdateStatusRequest"
                         }
                     }
                 ],
