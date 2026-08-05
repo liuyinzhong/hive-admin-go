@@ -14,16 +14,20 @@ import (
 type MedicalController struct {
 	departmentService      *services.MedicalDepartmentService
 	doctorService          *services.MedicalDoctorService
+	patientService         *services.MedicalPatientService
 	registrationFeeService *services.MedicalRegistrationFeeService
 	scheduleService        *services.MedicalScheduleService
+	permissionService      *services.PermissionService
 }
 
 func NewMedicalController() *MedicalController {
 	return &MedicalController{
 		departmentService:      services.NewMedicalDepartmentService(),
 		doctorService:          services.NewMedicalDoctorService(),
+		patientService:         services.NewMedicalPatientService(),
 		registrationFeeService: services.NewMedicalRegistrationFeeService(),
 		scheduleService:        services.NewMedicalScheduleService(),
+		permissionService:      services.NewPermissionService(),
 	}
 }
 

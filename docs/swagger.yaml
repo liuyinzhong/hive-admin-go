@@ -2856,6 +2856,57 @@ definitions:
           type: string
         type: array
     type: object
+  models.PatientResponse:
+    properties:
+      address:
+        example: 上海市浦东新区
+        type: string
+      birthDate:
+        example: "1990-01-01"
+        type: string
+      createDate:
+        example: "2026-01-15 09:00:00"
+        type: string
+      emergencyContactName:
+        example: 李四
+        type: string
+      emergencyContactPhone:
+        example: 139****5678
+        type: string
+      emergencyContactRelation:
+        example: 配偶
+        type: string
+      gender:
+        example: male
+        type: string
+      idNumber:
+        example: 110***********1234
+        type: string
+      idType:
+        example: ID_CARD
+        type: string
+      name:
+        example: 张*
+        type: string
+      patientId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      patientNo:
+        example: PAT000001
+        type: string
+      phone:
+        example: 138****5678
+        type: string
+      remark:
+        example: 首次建档
+        type: string
+      status:
+        example: 1
+        type: integer
+      updateDate:
+        example: "2026-01-15 09:00:00"
+        type: string
+    type: object
   models.PayChannelResponse:
     properties:
       appId:
@@ -4552,6 +4603,40 @@ definitions:
     - zoneName
     - zoneType
     type: object
+  models.SavePatientRequest:
+    properties:
+      address:
+        type: string
+      birthDate:
+        type: string
+      emergencyContactName:
+        type: string
+      emergencyContactPhone:
+        type: string
+      emergencyContactRelation:
+        type: string
+      gender:
+        type: string
+      idNumber:
+        maxLength: 128
+        type: string
+      idType:
+        type: string
+      name:
+        maxLength: 64
+        type: string
+      phone:
+        type: string
+      remark:
+        type: string
+    required:
+    - birthDate
+    - gender
+    - idNumber
+    - idType
+    - name
+    - phone
+    type: object
   models.SaveProductMpRequest:
     properties:
       approvalNo:
@@ -5831,6 +5916,15 @@ definitions:
     - paramKey
     - paramType
     - paramValue
+    type: object
+  models.UpdatePatientStatusRequest:
+    properties:
+      status:
+        enum:
+        - 0
+        - 1
+        example: 1
+        type: integer
     type: object
   models.UpdatePayChannelDefaultRequest:
     properties:
@@ -12280,6 +12374,240 @@ paths:
       summary: 获取所有启用医生选项
       tags:
       - 医疗管理/医生档案
+  /medical/patients:
+    get:
+      description: 分页查询患者主档案，列表中的姓名、证件号码和手机号始终脱敏
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 患者编号、姓名、手机号或证件号码
+        in: query
+        name: keyword
+        type: string
+      - description: 性别字典值
+        in: query
+        name: gender
+        type: string
+      - description: 状态 0停用 1启用
+        in: query
+        name: status
+        type: integer
+      - description: 创建开始日期，格式YYYY-MM-DD
+        in: query
+        name: createDateFrom
+        type: string
+      - description: 创建结束日期，格式YYYY-MM-DD
+        in: query
+        name: createDateTo
+        type: string
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.PatientResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取患者列表
+      tags:
+      - 医疗管理/患者档案
+    post:
+      consumes:
+      - application/json
+      description: 创建完整实名患者档案，姓名、证件号码和手机号属于敏感信息
+      parameters:
+      - description: 患者档案
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SavePatientRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无患者敏感信息访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 患者身份凭证已存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建患者档案
+      tags:
+      - 医疗管理/患者档案
+  /medical/patients/{patientId}:
+    get:
+      description: 获取患者主档案详情；拥有敏感信息权限时返回姓名、证件号码和手机号完整值，否则返回脱敏值
+      parameters:
+      - description: 患者ID
+        in: path
+        name: patientId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PatientResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取患者详情
+      tags:
+      - 医疗管理/患者档案
+    put:
+      consumes:
+      - application/json
+      description: 更新患者完整实名档案，需要同时拥有修改权限和敏感信息权限
+      parameters:
+      - description: 患者ID
+        in: path
+        name: patientId
+        required: true
+        type: string
+      - description: 患者档案
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SavePatientRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无患者敏感信息访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 患者身份凭证已存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新患者档案
+      tags:
+      - 医疗管理/患者档案
+  /medical/patients/{patientId}/status:
+    put:
+      consumes:
+      - application/json
+      description: 启用或停用患者档案，停用不删除档案
+      parameters:
+      - description: 患者ID
+        in: path
+        name: patientId
+        required: true
+        type: string
+      - description: 患者状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePatientStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新患者状态
+      tags:
+      - 医疗管理/患者档案
   /medical/registrationFeeRules:
     get:
       description: 分页查询挂号费规则列表，支持按医生、科室、挂号类型、有效期状态等条件筛选

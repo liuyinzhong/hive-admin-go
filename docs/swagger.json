@@ -8691,6 +8691,383 @@
                 }
             }
         },
+        "/medical/patients": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "分页查询患者主档案，列表中的姓名、证件号码和手机号始终脱敏",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/患者档案"
+                ],
+                "summary": "获取患者列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小，最大100",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "患者编号、姓名、手机号或证件号码",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "性别字典值",
+                        "name": "gender",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态 0停用 1启用",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "创建开始日期，格式YYYY-MM-DD",
+                        "name": "createDateFrom",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "创建结束日期，格式YYYY-MM-DD",
+                        "name": "createDateTo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.PatientResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "创建完整实名患者档案，姓名、证件号码和手机号属于敏感信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/患者档案"
+                ],
+                "summary": "创建患者档案",
+                "parameters": [
+                    {
+                        "description": "患者档案",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SavePatientRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无患者敏感信息访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "患者身份凭证已存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/patients/{patientId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取患者主档案详情；拥有敏感信息权限时返回姓名、证件号码和手机号完整值，否则返回脱敏值",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/患者档案"
+                ],
+                "summary": "获取患者详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "患者ID",
+                        "name": "patientId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PatientResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "更新患者完整实名档案，需要同时拥有修改权限和敏感信息权限",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/患者档案"
+                ],
+                "summary": "更新患者档案",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "患者ID",
+                        "name": "patientId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "患者档案",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SavePatientRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无患者敏感信息访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "患者身份凭证已存在",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/patients/{patientId}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "启用或停用患者档案，停用不删除档案",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/患者档案"
+                ],
+                "summary": "更新患者状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "患者ID",
+                        "name": "patientId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "患者状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdatePatientStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/medical/registrationFeeRules": {
             "get": {
                 "security": [
@@ -22809,6 +23186,75 @@
                 }
             }
         },
+        "models.PatientResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "上海市浦东新区"
+                },
+                "birthDate": {
+                    "type": "string",
+                    "example": "1990-01-01"
+                },
+                "createDate": {
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "emergencyContactName": {
+                    "type": "string",
+                    "example": "李四"
+                },
+                "emergencyContactPhone": {
+                    "type": "string",
+                    "example": "139****5678"
+                },
+                "emergencyContactRelation": {
+                    "type": "string",
+                    "example": "配偶"
+                },
+                "gender": {
+                    "type": "string",
+                    "example": "male"
+                },
+                "idNumber": {
+                    "type": "string",
+                    "example": "110***********1234"
+                },
+                "idType": {
+                    "type": "string",
+                    "example": "ID_CARD"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "张*"
+                },
+                "patientId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "patientNo": {
+                    "type": "string",
+                    "example": "PAT000001"
+                },
+                "phone": {
+                    "type": "string",
+                    "example": "138****5678"
+                },
+                "remark": {
+                    "type": "string",
+                    "example": "首次建档"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "updateDate": {
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                }
+            }
+        },
         "models.PayChannelResponse": {
             "type": "object",
             "properties": {
@@ -25042,6 +25488,54 @@
                 }
             }
         },
+        "models.SavePatientRequest": {
+            "type": "object",
+            "required": [
+                "birthDate",
+                "gender",
+                "idNumber",
+                "idType",
+                "name",
+                "phone"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "birthDate": {
+                    "type": "string"
+                },
+                "emergencyContactName": {
+                    "type": "string"
+                },
+                "emergencyContactPhone": {
+                    "type": "string"
+                },
+                "emergencyContactRelation": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "idNumber": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "idType": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                }
+            }
+        },
         "models.SaveProductMpRequest": {
             "type": "object",
             "required": [
@@ -26709,6 +27203,19 @@
                     "description": "备注",
                     "type": "string",
                     "example": "会话超时分钟数"
+                }
+            }
+        },
+        "models.UpdatePatientStatusRequest": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ],
+                    "example": 1
                 }
             }
         },

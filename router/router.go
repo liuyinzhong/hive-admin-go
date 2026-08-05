@@ -430,6 +430,15 @@ func SetupRouter() *gin.Engine {
 				doctors.DELETE("", permissionGuard.Require("medical:doctor:delete"), medicalController.DeleteDoctors)
 			}
 
+			patients := medical.Group("/patients")
+			{
+				patients.GET("", permissionGuard.Require("medical:patient:list"), medicalController.GetPatientList)
+				patients.POST("", permissionGuard.Require("medical:patient:create"), medicalController.CreatePatient)
+				patients.GET("/:patientId", permissionGuard.Require("medical:patient:detail"), medicalController.GetPatientDetail)
+				patients.PUT("/:patientId", permissionGuard.Require("medical:patient:update"), medicalController.UpdatePatient)
+				patients.PUT("/:patientId/status", permissionGuard.Require("medical:patient:status"), medicalController.UpdatePatientStatus)
+			}
+
 			registrationFeeRules := medical.Group("/registrationFeeRules")
 			{
 				registrationFeeRules.GET("", permissionGuard.Require("medical:registrationFee:list"), medicalController.GetRegistrationFeeRuleList)
