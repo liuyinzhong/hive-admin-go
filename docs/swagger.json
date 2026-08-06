@@ -1397,6 +1397,128 @@
                 }
             }
         },
+        "/base/institution": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取当前系统唯一的机构资料聚合，未初始化时返回空数据。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/机构资料"
+                ],
+                "summary": "获取机构资料",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.InstitutionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "无权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "使用一个聚合请求保存机构主档及全部当前子资料。集合型子资料会按请求全量替换，空数组表示清空，资质附件为单个对象。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "基础资料/机构资料"
+                ],
+                "summary": "保存机构资料",
+                "parameters": [
+                    {
+                        "description": "机构资料",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveInstitutionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.InstitutionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "数据冲突",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/dev/bugs": {
             "get": {
                 "security": [
@@ -22510,6 +22632,282 @@
                 }
             }
         },
+        "models.InstitutionAddressResponse": {
+            "type": "object",
+            "properties": {
+                "addressId": {
+                    "type": "string"
+                },
+                "addressType": {
+                    "type": "string"
+                },
+                "fullAddress": {
+                    "type": "string"
+                },
+                "isPrimary": {
+                    "type": "boolean"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "postalCode": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.InstitutionAttachmentResponse": {
+            "type": "object",
+            "properties": {
+                "attachmentId": {
+                    "type": "string"
+                },
+                "attachmentType": {
+                    "type": "string"
+                },
+                "expiryDate": {
+                    "type": "string"
+                },
+                "fileName": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.InstitutionBankAccountResponse": {
+            "type": "object",
+            "properties": {
+                "accountName": {
+                    "type": "string"
+                },
+                "accountNumber": {
+                    "type": "string"
+                },
+                "accountType": {
+                    "type": "string"
+                },
+                "bankAccountId": {
+                    "type": "string"
+                },
+                "bankName": {
+                    "type": "string"
+                },
+                "isDefault": {
+                    "type": "boolean"
+                },
+                "remark": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.InstitutionBrandResponse": {
+            "type": "object",
+            "properties": {
+                "brandId": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "logoUrl": {
+                    "type": "string"
+                },
+                "slogan": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.InstitutionContactResponse": {
+            "type": "object",
+            "properties": {
+                "contactId": {
+                    "type": "string"
+                },
+                "contactName": {
+                    "type": "string"
+                },
+                "contactType": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "isPrimary": {
+                    "type": "boolean"
+                },
+                "jobTitle": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.InstitutionOverviewResponse": {
+            "type": "object",
+            "properties": {
+                "diagnosisSubjects": {
+                    "type": "string"
+                },
+                "emergencyDescription": {
+                    "type": "string"
+                },
+                "introduction": {
+                    "type": "string"
+                },
+                "keySpecialties": {
+                    "type": "string"
+                },
+                "overviewId": {
+                    "type": "string"
+                },
+                "serviceFeatures": {
+                    "type": "string"
+                },
+                "serviceHours": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.InstitutionQualificationResponse": {
+            "type": "object",
+            "properties": {
+                "attachment": {
+                    "$ref": "#/definitions/models.InstitutionAttachmentResponse"
+                },
+                "certificateName": {
+                    "type": "string"
+                },
+                "certificateNo": {
+                    "type": "string"
+                },
+                "expiryDate": {
+                    "type": "string"
+                },
+                "issueDate": {
+                    "type": "string"
+                },
+                "issuingAuthority": {
+                    "type": "string"
+                },
+                "qualificationId": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.InstitutionResponse": {
+            "type": "object",
+            "properties": {
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.InstitutionAddressResponse"
+                    }
+                },
+                "aliases": {
+                    "type": "string"
+                },
+                "brand": {
+                    "$ref": "#/definitions/models.InstitutionBrandResponse"
+                },
+                "contacts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.InstitutionContactResponse"
+                    }
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "englishName": {
+                    "type": "string"
+                },
+                "establishmentDate": {
+                    "type": "string"
+                },
+                "hospitalCategory": {
+                    "type": "string"
+                },
+                "hospitalLevel": {
+                    "type": "string"
+                },
+                "institutionId": {
+                    "type": "string"
+                },
+                "institutionName": {
+                    "type": "string"
+                },
+                "institutionNature": {
+                    "type": "string"
+                },
+                "institutionType": {
+                    "type": "string"
+                },
+                "overview": {
+                    "$ref": "#/definitions/models.InstitutionOverviewResponse"
+                },
+                "qualifications": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.InstitutionQualificationResponse"
+                    }
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "settlement": {
+                    "$ref": "#/definitions/models.InstitutionSettlementResponse"
+                },
+                "shortName": {
+                    "type": "string"
+                },
+                "unifiedCreditCode": {
+                    "type": "string"
+                },
+                "updateDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.InstitutionSettlementResponse": {
+            "type": "object",
+            "properties": {
+                "bankAccounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.InstitutionBankAccountResponse"
+                    }
+                },
+                "invoiceTitle": {
+                    "type": "string"
+                },
+                "settlementId": {
+                    "type": "string"
+                },
+                "taxpayerId": {
+                    "type": "string"
+                },
+                "taxpayerType": {
+                    "type": "string"
+                }
+            }
+        },
         "models.LoginLogDetailResponse": {
             "type": "object",
             "properties": {
@@ -25485,6 +25883,341 @@
                     "type": "string",
                     "maxLength": 32,
                     "example": "QUALIFIED"
+                }
+            }
+        },
+        "models.SaveInstitutionAddressRequest": {
+            "type": "object",
+            "required": [
+                "addressType",
+                "fullAddress"
+            ],
+            "properties": {
+                "addressType": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "fullAddress": {
+                    "type": "string",
+                    "maxLength": 512
+                },
+                "isPrimary": {
+                    "type": "boolean"
+                },
+                "phone": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "postalCode": {
+                    "type": "string",
+                    "maxLength": 16
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512
+                }
+            }
+        },
+        "models.SaveInstitutionAttachmentRequest": {
+            "type": "object",
+            "required": [
+                "fileName",
+                "url"
+            ],
+            "properties": {
+                "attachmentType": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "expiryDate": {
+                    "type": "string"
+                },
+                "fileName": {
+                    "type": "string",
+                    "maxLength": 256
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512
+                },
+                "url": {
+                    "type": "string",
+                    "maxLength": 512
+                }
+            }
+        },
+        "models.SaveInstitutionBankAccountRequest": {
+            "type": "object",
+            "required": [
+                "accountName",
+                "accountNumber",
+                "bankName"
+            ],
+            "properties": {
+                "accountName": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "accountNumber": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "accountType": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "bankName": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "isDefault": {
+                    "type": "boolean"
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512
+                }
+            }
+        },
+        "models.SaveInstitutionBrandRequest": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "logoUrl": {
+                    "type": "string",
+                    "maxLength": 512
+                },
+                "slogan": {
+                    "type": "string",
+                    "maxLength": 256
+                }
+            }
+        },
+        "models.SaveInstitutionContactRequest": {
+            "type": "object",
+            "required": [
+                "contactName",
+                "contactType"
+            ],
+            "properties": {
+                "contactName": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "contactType": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "email": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "isPrimary": {
+                    "type": "boolean"
+                },
+                "jobTitle": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "phone": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512
+                }
+            }
+        },
+        "models.SaveInstitutionOverviewRequest": {
+            "type": "object",
+            "properties": {
+                "diagnosisSubjects": {
+                    "type": "string",
+                    "maxLength": 5000
+                },
+                "emergencyDescription": {
+                    "type": "string",
+                    "maxLength": 2000
+                },
+                "introduction": {
+                    "type": "string",
+                    "maxLength": 5000
+                },
+                "keySpecialties": {
+                    "type": "string",
+                    "maxLength": 5000
+                },
+                "serviceFeatures": {
+                    "type": "string",
+                    "maxLength": 5000
+                },
+                "serviceHours": {
+                    "type": "string",
+                    "maxLength": 2000
+                }
+            }
+        },
+        "models.SaveInstitutionQualificationRequest": {
+            "type": "object",
+            "required": [
+                "certificateName",
+                "certificateNo"
+            ],
+            "properties": {
+                "attachment": {
+                    "$ref": "#/definitions/models.SaveInstitutionAttachmentRequest"
+                },
+                "certificateName": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "certificateNo": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "expiryDate": {
+                    "type": "string"
+                },
+                "issueDate": {
+                    "type": "string"
+                },
+                "issuingAuthority": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512
+                },
+                "scope": {
+                    "type": "string",
+                    "maxLength": 512
+                }
+            }
+        },
+        "models.SaveInstitutionRequest": {
+            "type": "object",
+            "required": [
+                "addresses",
+                "brand",
+                "contacts",
+                "hospitalCategory",
+                "hospitalLevel",
+                "institutionName",
+                "institutionNature",
+                "institutionType",
+                "overview",
+                "qualifications",
+                "settlement",
+                "unifiedCreditCode"
+            ],
+            "properties": {
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SaveInstitutionAddressRequest"
+                    }
+                },
+                "aliases": {
+                    "type": "string",
+                    "maxLength": 256
+                },
+                "brand": {
+                    "$ref": "#/definitions/models.SaveInstitutionBrandRequest"
+                },
+                "contacts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SaveInstitutionContactRequest"
+                    }
+                },
+                "englishName": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "establishmentDate": {
+                    "type": "string",
+                    "example": "2026-01-01"
+                },
+                "hospitalCategory": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "example": "GENERAL"
+                },
+                "hospitalLevel": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "example": "TERTIARY_A"
+                },
+                "institutionName": {
+                    "type": "string",
+                    "maxLength": 128,
+                    "example": "示例医院"
+                },
+                "institutionNature": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "example": "PUBLIC"
+                },
+                "institutionType": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "example": "HOSPITAL"
+                },
+                "overview": {
+                    "$ref": "#/definitions/models.SaveInstitutionOverviewRequest"
+                },
+                "qualifications": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SaveInstitutionQualificationRequest"
+                    }
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512
+                },
+                "settlement": {
+                    "$ref": "#/definitions/models.SaveInstitutionSettlementRequest"
+                },
+                "shortName": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "unifiedCreditCode": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "example": "91110108MA01XXXXXX"
+                }
+            }
+        },
+        "models.SaveInstitutionSettlementRequest": {
+            "type": "object",
+            "required": [
+                "bankAccounts"
+            ],
+            "properties": {
+                "bankAccounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SaveInstitutionBankAccountRequest"
+                    }
+                },
+                "invoiceTitle": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "taxpayerId": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "taxpayerType": {
+                    "type": "string",
+                    "maxLength": 32
                 }
             }
         },

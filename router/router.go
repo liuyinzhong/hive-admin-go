@@ -21,6 +21,7 @@ func SetupRouter() *gin.Engine {
 	formSchemaController := controllers.FormSchemaController{}
 	medicalController := controllers.NewMedicalController()
 	baseEnterpriseController := controllers.NewBaseEnterpriseController()
+	baseInstitutionController := controllers.NewBaseInstitutionController()
 	erpWarehouseController := controllers.NewErpWarehouseController()
 	erpInventoryController := controllers.NewErpInventoryController()
 	erpPurchaseInboundController := controllers.NewErpPurchaseInboundController()
@@ -264,6 +265,12 @@ func SetupRouter() *gin.Engine {
 
 		base := api.Group("/base", middleware.AuthMiddleware())
 		{
+			institution := base.Group("/institution")
+			{
+				institution.GET("", permissionGuard.Require("base:institution:detail"), baseInstitutionController.GetInstitution)
+				institution.PUT("", permissionGuard.Require("base:institution:update"), baseInstitutionController.SaveInstitution)
+			}
+
 			enterprises := base.Group("/enterprises")
 			{
 				enterprises.GET("", permissionGuard.Require("base:enterprise:list"), baseEnterpriseController.GetEnterpriseList)

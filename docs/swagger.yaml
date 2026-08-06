@@ -2334,6 +2334,187 @@ definitions:
         example: 5
         type: integer
     type: object
+  models.InstitutionAddressResponse:
+    properties:
+      addressId:
+        type: string
+      addressType:
+        type: string
+      fullAddress:
+        type: string
+      isPrimary:
+        type: boolean
+      phone:
+        type: string
+      postalCode:
+        type: string
+      remark:
+        type: string
+    type: object
+  models.InstitutionAttachmentResponse:
+    properties:
+      attachmentId:
+        type: string
+      attachmentType:
+        type: string
+      expiryDate:
+        type: string
+      fileName:
+        type: string
+      remark:
+        type: string
+      url:
+        type: string
+    type: object
+  models.InstitutionBankAccountResponse:
+    properties:
+      accountName:
+        type: string
+      accountNumber:
+        type: string
+      accountType:
+        type: string
+      bankAccountId:
+        type: string
+      bankName:
+        type: string
+      isDefault:
+        type: boolean
+      remark:
+        type: string
+    type: object
+  models.InstitutionBrandResponse:
+    properties:
+      brandId:
+        type: string
+      displayName:
+        type: string
+      logoUrl:
+        type: string
+      slogan:
+        type: string
+    type: object
+  models.InstitutionContactResponse:
+    properties:
+      contactId:
+        type: string
+      contactName:
+        type: string
+      contactType:
+        type: string
+      email:
+        type: string
+      isPrimary:
+        type: boolean
+      jobTitle:
+        type: string
+      phone:
+        type: string
+      remark:
+        type: string
+    type: object
+  models.InstitutionOverviewResponse:
+    properties:
+      diagnosisSubjects:
+        type: string
+      emergencyDescription:
+        type: string
+      introduction:
+        type: string
+      keySpecialties:
+        type: string
+      overviewId:
+        type: string
+      serviceFeatures:
+        type: string
+      serviceHours:
+        type: string
+    type: object
+  models.InstitutionQualificationResponse:
+    properties:
+      attachment:
+        $ref: '#/definitions/models.InstitutionAttachmentResponse'
+      certificateName:
+        type: string
+      certificateNo:
+        type: string
+      expiryDate:
+        type: string
+      issueDate:
+        type: string
+      issuingAuthority:
+        type: string
+      qualificationId:
+        type: string
+      remark:
+        type: string
+      scope:
+        type: string
+    type: object
+  models.InstitutionResponse:
+    properties:
+      addresses:
+        items:
+          $ref: '#/definitions/models.InstitutionAddressResponse'
+        type: array
+      aliases:
+        type: string
+      brand:
+        $ref: '#/definitions/models.InstitutionBrandResponse'
+      contacts:
+        items:
+          $ref: '#/definitions/models.InstitutionContactResponse'
+        type: array
+      createDate:
+        type: string
+      englishName:
+        type: string
+      establishmentDate:
+        type: string
+      hospitalCategory:
+        type: string
+      hospitalLevel:
+        type: string
+      institutionId:
+        type: string
+      institutionName:
+        type: string
+      institutionNature:
+        type: string
+      institutionType:
+        type: string
+      overview:
+        $ref: '#/definitions/models.InstitutionOverviewResponse'
+      qualifications:
+        items:
+          $ref: '#/definitions/models.InstitutionQualificationResponse'
+        type: array
+      remark:
+        type: string
+      settlement:
+        $ref: '#/definitions/models.InstitutionSettlementResponse'
+      shortName:
+        type: string
+      unifiedCreditCode:
+        type: string
+      updateDate:
+        type: string
+    type: object
+  models.InstitutionSettlementResponse:
+    properties:
+      bankAccounts:
+        items:
+          $ref: '#/definitions/models.InstitutionBankAccountResponse'
+        type: array
+      invoiceTitle:
+        type: string
+      settlementId:
+        type: string
+      taxpayerId:
+        type: string
+      taxpayerType:
+        type: string
+    type: object
   models.LoginLogDetailResponse:
     properties:
       contentType:
@@ -4602,6 +4783,250 @@ definitions:
     required:
     - zoneName
     - zoneType
+    type: object
+  models.SaveInstitutionAddressRequest:
+    properties:
+      addressType:
+        maxLength: 32
+        type: string
+      fullAddress:
+        maxLength: 512
+        type: string
+      isPrimary:
+        type: boolean
+      phone:
+        maxLength: 32
+        type: string
+      postalCode:
+        maxLength: 16
+        type: string
+      remark:
+        maxLength: 512
+        type: string
+    required:
+    - addressType
+    - fullAddress
+    type: object
+  models.SaveInstitutionAttachmentRequest:
+    properties:
+      attachmentType:
+        maxLength: 64
+        type: string
+      expiryDate:
+        type: string
+      fileName:
+        maxLength: 256
+        type: string
+      remark:
+        maxLength: 512
+        type: string
+      url:
+        maxLength: 512
+        type: string
+    required:
+    - fileName
+    - url
+    type: object
+  models.SaveInstitutionBankAccountRequest:
+    properties:
+      accountName:
+        maxLength: 128
+        type: string
+      accountNumber:
+        maxLength: 64
+        type: string
+      accountType:
+        maxLength: 32
+        type: string
+      bankName:
+        maxLength: 128
+        type: string
+      isDefault:
+        type: boolean
+      remark:
+        maxLength: 512
+        type: string
+    required:
+    - accountName
+    - accountNumber
+    - bankName
+    type: object
+  models.SaveInstitutionBrandRequest:
+    properties:
+      displayName:
+        maxLength: 128
+        type: string
+      logoUrl:
+        maxLength: 512
+        type: string
+      slogan:
+        maxLength: 256
+        type: string
+    type: object
+  models.SaveInstitutionContactRequest:
+    properties:
+      contactName:
+        maxLength: 64
+        type: string
+      contactType:
+        maxLength: 32
+        type: string
+      email:
+        maxLength: 128
+        type: string
+      isPrimary:
+        type: boolean
+      jobTitle:
+        maxLength: 64
+        type: string
+      phone:
+        maxLength: 32
+        type: string
+      remark:
+        maxLength: 512
+        type: string
+    required:
+    - contactName
+    - contactType
+    type: object
+  models.SaveInstitutionOverviewRequest:
+    properties:
+      diagnosisSubjects:
+        maxLength: 5000
+        type: string
+      emergencyDescription:
+        maxLength: 2000
+        type: string
+      introduction:
+        maxLength: 5000
+        type: string
+      keySpecialties:
+        maxLength: 5000
+        type: string
+      serviceFeatures:
+        maxLength: 5000
+        type: string
+      serviceHours:
+        maxLength: 2000
+        type: string
+    type: object
+  models.SaveInstitutionQualificationRequest:
+    properties:
+      attachment:
+        $ref: '#/definitions/models.SaveInstitutionAttachmentRequest'
+      certificateName:
+        maxLength: 128
+        type: string
+      certificateNo:
+        maxLength: 128
+        type: string
+      expiryDate:
+        type: string
+      issueDate:
+        type: string
+      issuingAuthority:
+        maxLength: 128
+        type: string
+      remark:
+        maxLength: 512
+        type: string
+      scope:
+        maxLength: 512
+        type: string
+    required:
+    - certificateName
+    - certificateNo
+    type: object
+  models.SaveInstitutionRequest:
+    properties:
+      addresses:
+        items:
+          $ref: '#/definitions/models.SaveInstitutionAddressRequest'
+        type: array
+      aliases:
+        maxLength: 256
+        type: string
+      brand:
+        $ref: '#/definitions/models.SaveInstitutionBrandRequest'
+      contacts:
+        items:
+          $ref: '#/definitions/models.SaveInstitutionContactRequest'
+        type: array
+      englishName:
+        maxLength: 128
+        type: string
+      establishmentDate:
+        example: "2026-01-01"
+        type: string
+      hospitalCategory:
+        example: GENERAL
+        maxLength: 32
+        type: string
+      hospitalLevel:
+        example: TERTIARY_A
+        maxLength: 32
+        type: string
+      institutionName:
+        example: 示例医院
+        maxLength: 128
+        type: string
+      institutionNature:
+        example: PUBLIC
+        maxLength: 32
+        type: string
+      institutionType:
+        example: HOSPITAL
+        maxLength: 32
+        type: string
+      overview:
+        $ref: '#/definitions/models.SaveInstitutionOverviewRequest'
+      qualifications:
+        items:
+          $ref: '#/definitions/models.SaveInstitutionQualificationRequest'
+        type: array
+      remark:
+        maxLength: 512
+        type: string
+      settlement:
+        $ref: '#/definitions/models.SaveInstitutionSettlementRequest'
+      shortName:
+        maxLength: 64
+        type: string
+      unifiedCreditCode:
+        example: 91110108MA01XXXXXX
+        maxLength: 32
+        type: string
+    required:
+    - addresses
+    - brand
+    - contacts
+    - hospitalCategory
+    - hospitalLevel
+    - institutionName
+    - institutionNature
+    - institutionType
+    - overview
+    - qualifications
+    - settlement
+    - unifiedCreditCode
+    type: object
+  models.SaveInstitutionSettlementRequest:
+    properties:
+      bankAccounts:
+        items:
+          $ref: '#/definitions/models.SaveInstitutionBankAccountRequest'
+        type: array
+      invoiceTitle:
+        maxLength: 128
+        type: string
+      taxpayerId:
+        maxLength: 32
+        type: string
+      taxpayerType:
+        maxLength: 32
+        type: string
+    required:
+    - bankAccounts
     type: object
   models.SavePatientRequest:
     properties:
@@ -7832,6 +8257,78 @@ paths:
       summary: 获取启用企业主体选项
       tags:
       - 基础资料/企业主体
+  /base/institution:
+    get:
+      description: 获取当前系统唯一的机构资料聚合，未初始化时返回空数据。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.InstitutionResponse'
+              type: object
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取机构资料
+      tags:
+      - 基础资料/机构资料
+    put:
+      consumes:
+      - application/json
+      description: 使用一个聚合请求保存机构主档及全部当前子资料。集合型子资料会按请求全量替换，空数组表示清空，资质附件为单个对象。
+      parameters:
+      - description: 机构资料
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveInstitutionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.InstitutionResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 数据冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 保存机构资料
+      tags:
+      - 基础资料/机构资料
   /dev/bugs:
     delete:
       consumes:
