@@ -446,6 +446,21 @@ func SetupRouter() *gin.Engine {
 				patients.PUT("/:patientId/status", permissionGuard.Require("medical:patient:status"), medicalController.UpdatePatientStatus)
 			}
 
+			registrations := medical.Group("/registrations")
+			{
+				registrations.GET("", permissionGuard.Require("medical:registration:list"), medicalController.GetRegistrationList)
+				registrations.POST("", permissionGuard.Require("medical:registration:create"), medicalController.CreateRegistration)
+				registrations.GET("/:registrationId", permissionGuard.Require("medical:registration:detail"), medicalController.GetRegistrationDetail)
+				registrations.POST("/:registrationId/confirmPayment", permissionGuard.Require("medical:registration:confirmPayment"), medicalController.ConfirmRegistrationPayment)
+				registrations.POST("/:registrationId/cancel", permissionGuard.Require("medical:registration:cancel"), medicalController.CancelRegistration)
+				registrations.POST("/:registrationId/checkIn", permissionGuard.Require("medical:registration:checkIn"), medicalController.CheckInRegistration)
+				registrations.POST("/:registrationId/complete", permissionGuard.Require("medical:registration:complete"), medicalController.CompleteRegistration)
+				registrations.POST("/:registrationId/noShow", permissionGuard.Require("medical:registration:noShow"), medicalController.MarkRegistrationNoShow)
+				registrations.POST("/:registrationId/refundStart", permissionGuard.Require("medical:registration:refundStart"), medicalController.StartRegistrationRefund)
+				registrations.POST("/:registrationId/refundProcess", permissionGuard.Require("medical:registration:refundProcess"), medicalController.ProcessRegistrationRefund)
+				registrations.POST("/:registrationId/refundComplete", permissionGuard.Require("medical:registration:refundComplete"), medicalController.CompleteRegistrationRefund)
+			}
+
 			registrationFeeRules := medical.Group("/registrationFeeRules")
 			{
 				registrationFeeRules.GET("", permissionGuard.Require("medical:registrationFee:list"), medicalController.GetRegistrationFeeRuleList)

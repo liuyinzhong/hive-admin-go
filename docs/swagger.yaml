@@ -763,6 +763,29 @@ definitions:
     - feeAmount
     - registrationType
     type: object
+  models.CreateRegistrationRequest:
+    properties:
+      patientId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      registrationMethod:
+        enum:
+        - 0
+        - 10
+        example: 10
+        type: integer
+      remark:
+        example: 患者预约挂号
+        maxLength: 512
+        type: string
+      slotId:
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+    required:
+    - patientId
+    - registrationMethod
+    - slotId
+    type: object
   models.CreateRoleRequest:
     properties:
       permissions:
@@ -4428,6 +4451,100 @@ definitions:
         description: 版本号
         example: 1
         type: integer
+    type: object
+  models.RegistrationLifecycleResponse:
+    properties:
+      fromStatus:
+        type: integer
+      lifecycleId:
+        type: string
+      operatedAt:
+        type: string
+      operatorId:
+        type: string
+      operatorName:
+        type: string
+      reason:
+        type: string
+      refundAmount:
+        type: string
+      toStatus:
+        type: integer
+    type: object
+  models.RegistrationReasonRequest:
+    properties:
+      reason:
+        maxLength: 512
+        type: string
+    required:
+    - reason
+    type: object
+  models.RegistrationResponse:
+    properties:
+      createDate:
+        type: string
+      creatorId:
+        type: string
+      departmentId:
+        type: string
+      departmentName:
+        type: string
+      doctorId:
+        type: string
+      doctorName:
+        type: string
+      endTime:
+        type: string
+      feeAmount:
+        type: string
+      feeRuleId:
+        type: string
+      feeRuleVersion:
+        type: integer
+      lifecycleRecords:
+        items:
+          $ref: '#/definitions/models.RegistrationLifecycleResponse'
+        type: array
+      patientBirthDate:
+        type: string
+      patientGender:
+        type: string
+      patientId:
+        type: string
+      patientIdNumber:
+        type: string
+      patientIdType:
+        type: string
+      patientName:
+        type: string
+      patientNo:
+        type: string
+      patientPhone:
+        type: string
+      registrationId:
+        type: string
+      registrationMethod:
+        type: integer
+      registrationNo:
+        type: string
+      registrationType:
+        type: string
+      registrationTypeName:
+        type: string
+      remark:
+        type: string
+      scheduleDate:
+        type: string
+      scheduleId:
+        type: string
+      slotId:
+        type: string
+      startTime:
+        type: string
+      status:
+        type: integer
+      updateDate:
+        type: string
     type: object
   models.Response:
     properties:
@@ -13253,6 +13370,553 @@ paths:
       summary: 调整挂号费并生成新版本
       tags:
       - 医疗管理/挂号费
+  /medical/registrations:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 挂号单号
+        in: query
+        name: registrationNo
+        type: string
+      - description: 患者编号、姓名或手机号
+        in: query
+        name: patientKeyword
+        type: string
+      - description: 就诊开始日期，YYYY-MM-DD
+        in: query
+        name: startDate
+        type: string
+      - description: 就诊结束日期，YYYY-MM-DD
+        in: query
+        name: endDate
+        type: string
+      - description: 科室ID
+        in: query
+        name: departmentId
+        type: string
+      - description: 医生ID
+        in: query
+        name: doctorId
+        type: string
+      - description: 挂号类型
+        in: query
+        name: registrationType
+        type: string
+      - description: 挂号方式 0现场 10预约
+        in: query
+        name: registrationMethod
+        type: integer
+      - description: 挂号状态
+        in: query
+        name: status
+        type: integer
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.RegistrationResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取挂号单列表
+      tags:
+      - 医疗管理/挂号管理
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 挂号信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateRegistrationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RegistrationResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建挂号单
+      tags:
+      - 医疗管理/挂号管理
+  /medical/registrations/{registrationId}:
+    get:
+      parameters:
+      - description: 挂号单ID
+        in: path
+        name: registrationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RegistrationResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取挂号单详情
+      tags:
+      - 医疗管理/挂号管理
+  /medical/registrations/{registrationId}/cancel:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 挂号单ID
+        in: path
+        name: registrationId
+        required: true
+        type: string
+      - description: 取消原因
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegistrationReasonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RegistrationResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 取消挂号单
+      tags:
+      - 医疗管理/挂号管理
+  /medical/registrations/{registrationId}/checkIn:
+    post:
+      parameters:
+      - description: 挂号单ID
+        in: path
+        name: registrationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RegistrationResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 挂号单签到
+      tags:
+      - 医疗管理/挂号管理
+  /medical/registrations/{registrationId}/complete:
+    post:
+      parameters:
+      - description: 挂号单ID
+        in: path
+        name: registrationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RegistrationResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 完成挂号单
+      tags:
+      - 医疗管理/挂号管理
+  /medical/registrations/{registrationId}/confirmPayment:
+    post:
+      parameters:
+      - description: 挂号单ID
+        in: path
+        name: registrationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RegistrationResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 确认挂号单支付
+      tags:
+      - 医疗管理/挂号管理
+  /medical/registrations/{registrationId}/noShow:
+    post:
+      parameters:
+      - description: 挂号单ID
+        in: path
+        name: registrationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RegistrationResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 标记挂号单爽约
+      tags:
+      - 医疗管理/挂号管理
+  /medical/registrations/{registrationId}/refundComplete:
+    post:
+      parameters:
+      - description: 挂号单ID
+        in: path
+        name: registrationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RegistrationResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 完成挂号单退款
+      tags:
+      - 医疗管理/挂号管理
+  /medical/registrations/{registrationId}/refundProcess:
+    post:
+      parameters:
+      - description: 挂号单ID
+        in: path
+        name: registrationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RegistrationResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 推进挂号单退款中
+      tags:
+      - 医疗管理/挂号管理
+  /medical/registrations/{registrationId}/refundStart:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 挂号单ID
+        in: path
+        name: registrationId
+        required: true
+        type: string
+      - description: 退款原因
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegistrationReasonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RegistrationResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 发起挂号单退款
+      tags:
+      - 医疗管理/挂号管理
   /medical/scheduleTasks:
     get:
       description: 分页查询自动任务执行记录，支持按任务类型、状态、日期范围等条件筛选

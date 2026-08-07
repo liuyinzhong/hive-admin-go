@@ -15,6 +15,7 @@ type MedicalController struct {
 	departmentService      *services.MedicalDepartmentService
 	doctorService          *services.MedicalDoctorService
 	patientService         *services.MedicalPatientService
+	registrationService    *services.MedicalRegistrationService
 	registrationFeeService *services.MedicalRegistrationFeeService
 	scheduleService        *services.MedicalScheduleService
 	permissionService      *services.PermissionService
@@ -25,6 +26,7 @@ func NewMedicalController() *MedicalController {
 		departmentService:      services.NewMedicalDepartmentService(),
 		doctorService:          services.NewMedicalDoctorService(),
 		patientService:         services.NewMedicalPatientService(),
+		registrationService:    services.NewMedicalRegistrationService(),
 		registrationFeeService: services.NewMedicalRegistrationFeeService(),
 		scheduleService:        services.NewMedicalScheduleService(),
 		permissionService:      services.NewPermissionService(),
