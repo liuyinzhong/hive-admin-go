@@ -55,35 +55,12 @@ func (s *BaseInstitutionService) GetInstitution() (*models.InstitutionResponse, 
 		return nil, err
 	}
 
-	var overview models.BaseInstitutionOverview
-	if err := database.DB.Where("institution_id = ?", institution.InstitutionID).First(&overview).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
-	}
-	var brand models.BaseInstitutionBrand
-	if err := database.DB.Where("institution_id = ?", institution.InstitutionID).First(&brand).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
-	}
-	var settlement models.BaseInstitutionSettlement
-	if err := database.DB.Where("institution_id = ?", institution.InstitutionID).First(&settlement).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
-	}
-
 	var bankAccounts []models.BaseInstitutionBankAccount
 	if err := database.DB.Where("institution_id = ?", institution.InstitutionID).
 		Order("is_default desc, bank_account_id asc").Find(&bankAccounts).Error; err != nil {
 		return nil, err
 	}
-	qualificationIDs := make([]string, 0, len(qualifications))
-	for _, item := range qualifications {
-		qualificationIDs = append(qualificationIDs, item.QualificationID)
-	}
-	qualificationAttachments, err := s.getAttachmentsByOwnerIDs(qualificationIDs, models.InstitutionAttachmentOwnerQualification)
-	if err != nil {
-		return nil, err
-	}
-	return s.institutionToResponse(institution, qualifications, qualificationAttachments, contacts, addresses,
-		optionalInstitutionOverview(overview), optionalInstitutionBrand(brand), optionalInstitutionSettlement(settlement),
-		bankAccounts), nil
+	return s.institutionToResponse(institution, qualifications, contacts, addresses, bankAccounts), nil
 }
 
 // SaveInstitution 保存机构资料聚合。子资料采用当前集合全量替换，不保留历史。
@@ -125,6 +102,18 @@ func (s *BaseInstitutionService) SaveInstitution(req models.SaveInstitutionReque
 		institution.UnifiedCreditCode = normalized.UnifiedCreditCode
 		institution.EstablishmentDate = normalized.EstablishmentDate
 		institution.Remark = normalized.Remark
+		institution.LogoURL = normalized.LogoURL
+		institution.DisplayName = normalized.DisplayName
+		institution.Slogan = normalized.Slogan
+		institution.Introduction = normalized.Introduction
+		institution.DiagnosisSubjects = normalized.DiagnosisSubjects
+		institution.KeySpecialties = normalized.KeySpecialties
+		institution.ServiceHours = normalized.ServiceHours
+		institution.EmergencyDescription = normalized.EmergencyDescription
+		institution.ServiceFeatures = normalized.ServiceFeatures
+		institution.InvoiceTitle = normalized.InvoiceTitle
+		institution.TaxpayerID = normalized.TaxpayerID
+		institution.TaxpayerType = normalized.TaxpayerType
 		institution.UpdaterID = optionalInstitutionOperatorID(operatorID)
 		institution.UpdateDate = &now
 		if institution.CreateDate == nil {
@@ -146,23 +135,33 @@ func (s *BaseInstitutionService) SaveInstitution(req models.SaveInstitutionReque
 }
 
 type normalizedInstitutionSave struct {
-	InstitutionName   string
-	ShortName         *string
-	EnglishName       *string
-	Aliases           *string
-	InstitutionType   string
-	InstitutionNature string
-	HospitalCategory  string
-	HospitalLevel     string
-	UnifiedCreditCode string
-	EstablishmentDate *time.Time
-	Remark            *string
-	Qualifications    []normalizedInstitutionQualification
-	Contacts          []normalizedInstitutionContact
-	Addresses         []normalizedInstitutionAddress
-	Overview          normalizedInstitutionOverview
-	Brand             normalizedInstitutionBrand
-	Settlement        normalizedInstitutionSettlement
+	InstitutionName      string
+	ShortName            *string
+	EnglishName          *string
+	Aliases              *string
+	InstitutionType      string
+	InstitutionNature    string
+	HospitalCategory     string
+	HospitalLevel        string
+	UnifiedCreditCode    string
+	EstablishmentDate    *time.Time
+	Remark               *string
+	LogoURL              *string
+	DisplayName          *string
+	Slogan               *string
+	Introduction         *string
+	DiagnosisSubjects    *string
+	KeySpecialties       *string
+	ServiceHours         *string
+	EmergencyDescription *string
+	ServiceFeatures      *string
+	InvoiceTitle         *string
+	TaxpayerID           *string
+	TaxpayerType         *string
+	Qualifications       []normalizedInstitutionQualification
+	Contacts             []normalizedInstitutionContact
+	Addresses            []normalizedInstitutionAddress
+	BankAccounts         []normalizedInstitutionBankAccount
 }
 
 type normalizedInstitutionQualification struct {
@@ -173,7 +172,7 @@ type normalizedInstitutionQualification struct {
 	ExpiryDate       *time.Time
 	Scope            *string
 	Remark           *string
-	Attachment       *normalizedInstitutionAttachment
+	Attachment       *string
 }
 
 type normalizedInstitutionContact struct {
@@ -195,28 +194,6 @@ type normalizedInstitutionAddress struct {
 	Remark      *string
 }
 
-type normalizedInstitutionOverview struct {
-	Introduction         *string
-	DiagnosisSubjects    *string
-	KeySpecialties       *string
-	ServiceHours         *string
-	EmergencyDescription *string
-	ServiceFeatures      *string
-}
-
-type normalizedInstitutionBrand struct {
-	LogoURL     *string
-	DisplayName *string
-	Slogan      *string
-}
-
-type normalizedInstitutionSettlement struct {
-	InvoiceTitle *string
-	TaxpayerID   *string
-	TaxpayerType *string
-	BankAccounts []normalizedInstitutionBankAccount
-}
-
 type normalizedInstitutionBankAccount struct {
 	AccountName   string
 	BankName      string
@@ -226,20 +203,9 @@ type normalizedInstitutionBankAccount struct {
 	Remark        *string
 }
 
-type normalizedInstitutionAttachment struct {
-	AttachmentType *string
-	FileName       string
-	URL            string
-	ExpiryDate     *time.Time
-	Remark         *string
-}
-
 func normalizeInstitutionSaveRequest(req models.SaveInstitutionRequest) (*normalizedInstitutionSave, error) {
-	if req.Qualifications == nil || req.Contacts == nil || req.Addresses == nil || req.Overview == nil || req.Brand == nil || req.Settlement == nil {
-		return nil, fmt.Errorf("%w: 子资料必须以完整集合提交，未填写的集合请传空数组或空对象", ErrBaseInstitutionInvalidInput)
-	}
-	if req.Settlement.BankAccounts == nil {
-		return nil, fmt.Errorf("%w: 结算资料的银行账户必须以完整集合提交", ErrBaseInstitutionInvalidInput)
+	if req.Qualifications == nil || req.Contacts == nil || req.Addresses == nil || req.BankAccounts == nil {
+		return nil, fmt.Errorf("%w: 资质、联系人、地址和银行账户必须以完整集合提交，未填写的集合请传空数组", ErrBaseInstitutionInvalidInput)
 	}
 
 	institutionName := strings.TrimSpace(req.InstitutionName)
@@ -281,35 +247,29 @@ func normalizeInstitutionSaveRequest(req models.SaveInstitutionRequest) (*normal
 	}
 
 	result := &normalizedInstitutionSave{
-		InstitutionName:   institutionName,
-		ShortName:         normalizeInstitutionOptionalString(req.ShortName),
-		EnglishName:       normalizeInstitutionOptionalString(req.EnglishName),
-		Aliases:           normalizeInstitutionOptionalString(req.Aliases),
-		InstitutionType:   institutionType,
-		InstitutionNature: institutionNature,
-		HospitalCategory:  hospitalCategory,
-		HospitalLevel:     hospitalLevel,
-		UnifiedCreditCode: creditCode,
-		EstablishmentDate: establishmentDate,
-		Remark:            normalizeInstitutionOptionalString(req.Remark),
-		Overview: normalizedInstitutionOverview{
-			Introduction:         normalizeInstitutionOptionalString(req.Overview.Introduction),
-			DiagnosisSubjects:    normalizeInstitutionOptionalString(req.Overview.DiagnosisSubjects),
-			KeySpecialties:       normalizeInstitutionOptionalString(req.Overview.KeySpecialties),
-			ServiceHours:         normalizeInstitutionOptionalString(req.Overview.ServiceHours),
-			EmergencyDescription: normalizeInstitutionOptionalString(req.Overview.EmergencyDescription),
-			ServiceFeatures:      normalizeInstitutionOptionalString(req.Overview.ServiceFeatures),
-		},
-		Brand: normalizedInstitutionBrand{
-			LogoURL:     normalizeInstitutionOptionalString(req.Brand.LogoURL),
-			DisplayName: normalizeInstitutionOptionalString(req.Brand.DisplayName),
-			Slogan:      normalizeInstitutionOptionalString(req.Brand.Slogan),
-		},
-		Settlement: normalizedInstitutionSettlement{
-			InvoiceTitle: normalizeInstitutionOptionalString(req.Settlement.InvoiceTitle),
-			TaxpayerID:   normalizeInstitutionOptionalString(req.Settlement.TaxpayerID),
-			TaxpayerType: normalizeInstitutionOptionalString(req.Settlement.TaxpayerType),
-		},
+		InstitutionName:      institutionName,
+		ShortName:            normalizeInstitutionOptionalString(req.ShortName),
+		EnglishName:          normalizeInstitutionOptionalString(req.EnglishName),
+		Aliases:              normalizeInstitutionOptionalString(req.Aliases),
+		InstitutionType:      institutionType,
+		InstitutionNature:    institutionNature,
+		HospitalCategory:     hospitalCategory,
+		HospitalLevel:        hospitalLevel,
+		UnifiedCreditCode:    creditCode,
+		EstablishmentDate:    establishmentDate,
+		Remark:               normalizeInstitutionOptionalString(req.Remark),
+		LogoURL:              normalizeInstitutionOptionalString(req.LogoURL),
+		DisplayName:          normalizeInstitutionOptionalString(req.DisplayName),
+		Slogan:               normalizeInstitutionOptionalString(req.Slogan),
+		Introduction:         normalizeInstitutionOptionalString(req.Introduction),
+		DiagnosisSubjects:    normalizeInstitutionOptionalString(req.DiagnosisSubjects),
+		KeySpecialties:       normalizeInstitutionOptionalString(req.KeySpecialties),
+		ServiceHours:         normalizeInstitutionOptionalString(req.ServiceHours),
+		EmergencyDescription: normalizeInstitutionOptionalString(req.EmergencyDescription),
+		ServiceFeatures:      normalizeInstitutionOptionalString(req.ServiceFeatures),
+		InvoiceTitle:         normalizeInstitutionOptionalString(req.InvoiceTitle),
+		TaxpayerID:           normalizeInstitutionOptionalString(req.TaxpayerID),
+		TaxpayerType:         normalizeInstitutionOptionalString(req.TaxpayerType),
 	}
 
 	for _, item := range req.Qualifications {
@@ -329,10 +289,6 @@ func normalizeInstitutionSaveRequest(req models.SaveInstitutionRequest) (*normal
 		if certificateName == "" || certificateNo == "" {
 			return nil, fmt.Errorf("%w: 资质名称和证书编号不能为空", ErrBaseInstitutionInvalidInput)
 		}
-		attachment, err := normalizeInstitutionAttachment(item.Attachment)
-		if err != nil {
-			return nil, err
-		}
 		result.Qualifications = append(result.Qualifications, normalizedInstitutionQualification{
 			CertificateName:  certificateName,
 			CertificateNo:    certificateNo,
@@ -341,7 +297,7 @@ func normalizeInstitutionSaveRequest(req models.SaveInstitutionRequest) (*normal
 			ExpiryDate:       expiryDate,
 			Scope:            normalizeInstitutionOptionalString(item.Scope),
 			Remark:           normalizeInstitutionOptionalString(item.Remark),
-			Attachment:       attachment,
+			Attachment:       normalizeInstitutionOptionalString(item.Attachment),
 		})
 	}
 
@@ -398,19 +354,18 @@ func normalizeInstitutionSaveRequest(req models.SaveInstitutionRequest) (*normal
 		return nil, fmt.Errorf("%w: 地址最多只能设置一个主要地址", ErrBaseInstitutionInvalidInput)
 	}
 
-	bankAccounts, err := normalizeInstitutionBankAccounts(req.Settlement.BankAccounts)
+	bankAccounts, err := normalizeInstitutionBankAccounts(req.BankAccounts)
 	if err != nil {
 		return nil, err
 	}
-	result.Settlement.BankAccounts = bankAccounts
+	result.BankAccounts = bankAccounts
 	return result, nil
 }
 
 func (s *BaseInstitutionService) replaceInstitutionChildren(tx *gorm.DB, institutionID string, data *normalizedInstitutionSave) error {
 	tables := []interface{}{
 		&models.BaseInstitutionQualification{}, &models.BaseInstitutionContact{}, &models.BaseInstitutionAddress{},
-		&models.BaseInstitutionOverview{}, &models.BaseInstitutionBrand{}, &models.BaseInstitutionSettlement{},
-		&models.BaseInstitutionBankAccount{}, &models.BaseInstitutionAttachment{},
+		&models.BaseInstitutionBankAccount{},
 	}
 	for _, table := range tables {
 		if err := tx.Where("institution_id = ?", institutionID).Delete(table).Error; err != nil {
@@ -423,15 +378,10 @@ func (s *BaseInstitutionService) replaceInstitutionChildren(tx *gorm.DB, institu
 		row := models.BaseInstitutionQualification{
 			QualificationID: qualificationID, InstitutionID: institutionID,
 			CertificateName: item.CertificateName, CertificateNo: item.CertificateNo, IssuingAuthority: item.IssuingAuthority,
-			IssueDate: item.IssueDate, ExpiryDate: item.ExpiryDate, Scope: item.Scope, Remark: item.Remark,
+			IssueDate: item.IssueDate, ExpiryDate: item.ExpiryDate, Scope: item.Scope, Remark: item.Remark, Attachment: item.Attachment,
 		}
 		if err := tx.Create(&row).Error; err != nil {
 			return err
-		}
-		if item.Attachment != nil {
-			if err := s.createInstitutionAttachment(tx, institutionID, models.InstitutionAttachmentOwnerQualification, qualificationID, *item.Attachment); err != nil {
-				return err
-			}
 		}
 	}
 
@@ -463,33 +413,8 @@ func (s *BaseInstitutionService) replaceInstitutionChildren(tx *gorm.DB, institu
 		}
 	}
 
-	overview := models.BaseInstitutionOverview{
-		OverviewID: utils.GenerateUUID(), InstitutionID: institutionID, Introduction: data.Overview.Introduction,
-		DiagnosisSubjects: data.Overview.DiagnosisSubjects, KeySpecialties: data.Overview.KeySpecialties,
-		ServiceHours: data.Overview.ServiceHours, EmergencyDescription: data.Overview.EmergencyDescription,
-		ServiceFeatures: data.Overview.ServiceFeatures,
-	}
-	if err := tx.Create(&overview).Error; err != nil {
-		return err
-	}
-	brand := models.BaseInstitutionBrand{
-		BrandID: utils.GenerateUUID(), InstitutionID: institutionID, LogoURL: data.Brand.LogoURL,
-		DisplayName: data.Brand.DisplayName, Slogan: data.Brand.Slogan,
-	}
-	if err := tx.Create(&brand).Error; err != nil {
-		return err
-	}
-
-	settlementID := utils.GenerateUUID()
-	settlement := models.BaseInstitutionSettlement{
-		SettlementID: settlementID, InstitutionID: institutionID, InvoiceTitle: data.Settlement.InvoiceTitle,
-		TaxpayerID: data.Settlement.TaxpayerID, TaxpayerType: data.Settlement.TaxpayerType,
-	}
-	if err := tx.Create(&settlement).Error; err != nil {
-		return err
-	}
-	bankAccounts := make([]models.BaseInstitutionBankAccount, 0, len(data.Settlement.BankAccounts))
-	for _, item := range data.Settlement.BankAccounts {
+	bankAccounts := make([]models.BaseInstitutionBankAccount, 0, len(data.BankAccounts))
+	for _, item := range data.BankAccounts {
 		bankAccounts = append(bankAccounts, models.BaseInstitutionBankAccount{
 			BankAccountID: utils.GenerateUUID(), InstitutionID: institutionID, AccountName: item.AccountName,
 			BankName: item.BankName, AccountNumber: item.AccountNumber, AccountType: item.AccountType,
@@ -504,36 +429,13 @@ func (s *BaseInstitutionService) replaceInstitutionChildren(tx *gorm.DB, institu
 	return nil
 }
 
-func (s *BaseInstitutionService) createInstitutionAttachment(tx *gorm.DB, institutionID, ownerType, ownerID string, item normalizedInstitutionAttachment) error {
-	return tx.Create(&models.BaseInstitutionAttachment{
-		AttachmentID: utils.GenerateUUID(), InstitutionID: institutionID, OwnerType: ownerType, OwnerID: ownerID,
-		AttachmentType: item.AttachmentType, FileName: item.FileName, URL: item.URL, ExpiryDate: item.ExpiryDate, Remark: item.Remark,
-	}).Error
-}
-
-func (s *BaseInstitutionService) getAttachmentsByOwnerIDs(ownerIDs []string, ownerType string) (map[string][]models.BaseInstitutionAttachment, error) {
-	result := make(map[string][]models.BaseInstitutionAttachment, len(ownerIDs))
-	if len(ownerIDs) == 0 {
-		return result, nil
-	}
-	var rows []models.BaseInstitutionAttachment
-	if err := database.DB.Where("owner_type = ? AND owner_id IN ?", ownerType, ownerIDs).Order("attachment_id asc").Find(&rows).Error; err != nil {
-		return nil, err
-	}
-	for _, row := range rows {
-		result[row.OwnerID] = append(result[row.OwnerID], row)
-	}
-	return result, nil
-}
-
-func (s *BaseInstitutionService) institutionToResponse(institution models.BaseInstitution, qualifications []models.BaseInstitutionQualification, qualificationAttachments map[string][]models.BaseInstitutionAttachment, contacts []models.BaseInstitutionContact, addresses []models.BaseInstitutionAddress, overview *models.BaseInstitutionOverview, brand *models.BaseInstitutionBrand, settlement *models.BaseInstitutionSettlement, bankAccounts []models.BaseInstitutionBankAccount) *models.InstitutionResponse {
+func (s *BaseInstitutionService) institutionToResponse(institution models.BaseInstitution, qualifications []models.BaseInstitutionQualification, contacts []models.BaseInstitutionContact, addresses []models.BaseInstitutionAddress, bankAccounts []models.BaseInstitutionBankAccount) *models.InstitutionResponse {
 	qualificationResponses := make([]models.InstitutionQualificationResponse, 0, len(qualifications))
 	for _, item := range qualifications {
 		qualificationResponses = append(qualificationResponses, models.InstitutionQualificationResponse{
 			QualificationID: item.QualificationID, CertificateName: item.CertificateName,
 			CertificateNo: item.CertificateNo, IssuingAuthority: item.IssuingAuthority, IssueDate: institutionDateString(item.IssueDate),
-			ExpiryDate: institutionDateString(item.ExpiryDate), Scope: item.Scope, Remark: item.Remark,
-			Attachment: institutionAttachmentResponse(qualificationAttachments[item.QualificationID]),
+			ExpiryDate: institutionDateString(item.ExpiryDate), Scope: item.Scope, Remark: item.Remark, Attachment: item.Attachment,
 		})
 	}
 	contactResponses := make([]models.InstitutionContactResponse, 0, len(contacts))
@@ -550,81 +452,25 @@ func (s *BaseInstitutionService) institutionToResponse(institution models.BaseIn
 			Phone: item.Phone, IsPrimary: item.IsPrimary == 1, Remark: item.Remark,
 		})
 	}
-	var overviewResponse *models.InstitutionOverviewResponse
-	if overview != nil {
-		overviewResponse = &models.InstitutionOverviewResponse{
-			OverviewID: overview.OverviewID, Introduction: overview.Introduction, DiagnosisSubjects: overview.DiagnosisSubjects,
-			KeySpecialties: overview.KeySpecialties, ServiceHours: overview.ServiceHours,
-			EmergencyDescription: overview.EmergencyDescription, ServiceFeatures: overview.ServiceFeatures,
-		}
-	}
-	var brandResponse *models.InstitutionBrandResponse
-	if brand != nil {
-		brandResponse = &models.InstitutionBrandResponse{BrandID: brand.BrandID, LogoURL: brand.LogoURL, DisplayName: brand.DisplayName, Slogan: brand.Slogan}
-	}
-	var settlementResponse *models.InstitutionSettlementResponse
-	if settlement != nil {
-		bankResponses := make([]models.InstitutionBankAccountResponse, 0, len(bankAccounts))
-		for _, item := range bankAccounts {
-			bankResponses = append(bankResponses, models.InstitutionBankAccountResponse{
-				BankAccountID: item.BankAccountID, AccountName: item.AccountName, BankName: item.BankName,
-				AccountNumber: item.AccountNumber, AccountType: item.AccountType, IsDefault: item.IsDefault == 1, Remark: item.Remark,
-			})
-		}
-		settlementResponse = &models.InstitutionSettlementResponse{
-			SettlementID: settlement.SettlementID, InvoiceTitle: settlement.InvoiceTitle, TaxpayerID: settlement.TaxpayerID,
-			TaxpayerType: settlement.TaxpayerType, BankAccounts: bankResponses,
-		}
+	bankResponses := make([]models.InstitutionBankAccountResponse, 0, len(bankAccounts))
+	for _, item := range bankAccounts {
+		bankResponses = append(bankResponses, models.InstitutionBankAccountResponse{
+			BankAccountID: item.BankAccountID, AccountName: item.AccountName, BankName: item.BankName,
+			AccountNumber: item.AccountNumber, AccountType: item.AccountType, IsDefault: item.IsDefault == 1, Remark: item.Remark,
+		})
 	}
 	return &models.InstitutionResponse{
 		InstitutionID: institution.InstitutionID, InstitutionName: institution.InstitutionName, ShortName: institution.ShortName,
 		EnglishName: institution.EnglishName, Aliases: institution.Aliases, InstitutionType: institution.InstitutionType,
 		InstitutionNature: institution.InstitutionNature, HospitalCategory: institution.HospitalCategory, HospitalLevel: institution.HospitalLevel,
 		UnifiedCreditCode: institution.UnifiedCreditCode, EstablishmentDate: institutionDateString(institution.EstablishmentDate), Remark: institution.Remark,
+		LogoURL: institution.LogoURL, DisplayName: institution.DisplayName, Slogan: institution.Slogan,
+		Introduction: institution.Introduction, DiagnosisSubjects: institution.DiagnosisSubjects, KeySpecialties: institution.KeySpecialties,
+		ServiceHours: institution.ServiceHours, EmergencyDescription: institution.EmergencyDescription, ServiceFeatures: institution.ServiceFeatures,
+		InvoiceTitle: institution.InvoiceTitle, TaxpayerID: institution.TaxpayerID, TaxpayerType: institution.TaxpayerType,
 		CreateDate: models.TimeToStringPtr(institution.CreateDate), UpdateDate: models.TimeToStringPtr(institution.UpdateDate),
-		Qualifications: qualificationResponses, Contacts: contactResponses, Addresses: addressResponses, Overview: overviewResponse,
-		Brand: brandResponse, Settlement: settlementResponse,
+		Qualifications: qualificationResponses, Contacts: contactResponses, Addresses: addressResponses, BankAccounts: bankResponses,
 	}
-}
-
-func institutionAttachmentResponse(rows []models.BaseInstitutionAttachment) *models.InstitutionAttachmentResponse {
-	if len(rows) == 0 {
-		return nil
-	}
-	responses := institutionAttachmentResponses(rows)
-	return &responses[0]
-}
-
-func institutionAttachmentResponses(rows []models.BaseInstitutionAttachment) []models.InstitutionAttachmentResponse {
-	result := make([]models.InstitutionAttachmentResponse, 0, len(rows))
-	for _, item := range rows {
-		result = append(result, models.InstitutionAttachmentResponse{
-			AttachmentID: item.AttachmentID, AttachmentType: item.AttachmentType, FileName: item.FileName,
-			URL: item.URL, ExpiryDate: institutionDateString(item.ExpiryDate), Remark: item.Remark,
-		})
-	}
-	return result
-}
-
-func optionalInstitutionOverview(value models.BaseInstitutionOverview) *models.BaseInstitutionOverview {
-	if value.OverviewID == "" {
-		return nil
-	}
-	return &value
-}
-
-func optionalInstitutionBrand(value models.BaseInstitutionBrand) *models.BaseInstitutionBrand {
-	if value.BrandID == "" {
-		return nil
-	}
-	return &value
-}
-
-func optionalInstitutionSettlement(value models.BaseInstitutionSettlement) *models.BaseInstitutionSettlement {
-	if value.SettlementID == "" {
-		return nil
-	}
-	return &value
 }
 
 func institutionContactTypes() map[string]struct{} {
@@ -663,25 +509,6 @@ func normalizeInstitutionBankAccounts(values []models.SaveInstitutionBankAccount
 		return nil, fmt.Errorf("%w: 银行账户最多只能设置一个默认账户", ErrBaseInstitutionInvalidInput)
 	}
 	return result, nil
-}
-
-func normalizeInstitutionAttachment(value *models.SaveInstitutionAttachmentRequest) (*normalizedInstitutionAttachment, error) {
-	if value == nil {
-		return nil, nil
-	}
-	fileName := strings.TrimSpace(value.FileName)
-	url := strings.TrimSpace(value.URL)
-	if fileName == "" || url == "" {
-		return nil, fmt.Errorf("%w: 附件名称和URL不能为空", ErrBaseInstitutionInvalidInput)
-	}
-	expiryDate, err := parseInstitutionDate(value.ExpiryDate, "附件有效期至")
-	if err != nil {
-		return nil, err
-	}
-	return &normalizedInstitutionAttachment{
-		AttachmentType: normalizeInstitutionOptionalString(value.AttachmentType), FileName: fileName, URL: url,
-		ExpiryDate: expiryDate, Remark: normalizeInstitutionOptionalString(value.Remark),
-	}, nil
 }
 
 func normalizeInstitutionEnum(value string, allowed map[string]struct{}, label string) (string, error) {

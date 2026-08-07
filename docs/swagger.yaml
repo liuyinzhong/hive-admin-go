@@ -2374,21 +2374,6 @@ definitions:
       remark:
         type: string
     type: object
-  models.InstitutionAttachmentResponse:
-    properties:
-      attachmentId:
-        type: string
-      attachmentType:
-        type: string
-      expiryDate:
-        type: string
-      fileName:
-        type: string
-      remark:
-        type: string
-      url:
-        type: string
-    type: object
   models.InstitutionBankAccountResponse:
     properties:
       accountName:
@@ -2404,17 +2389,6 @@ definitions:
       isDefault:
         type: boolean
       remark:
-        type: string
-    type: object
-  models.InstitutionBrandResponse:
-    properties:
-      brandId:
-        type: string
-      displayName:
-        type: string
-      logoUrl:
-        type: string
-      slogan:
         type: string
     type: object
   models.InstitutionContactResponse:
@@ -2436,27 +2410,10 @@ definitions:
       remark:
         type: string
     type: object
-  models.InstitutionOverviewResponse:
-    properties:
-      diagnosisSubjects:
-        type: string
-      emergencyDescription:
-        type: string
-      introduction:
-        type: string
-      keySpecialties:
-        type: string
-      overviewId:
-        type: string
-      serviceFeatures:
-        type: string
-      serviceHours:
-        type: string
-    type: object
   models.InstitutionQualificationResponse:
     properties:
       attachment:
-        $ref: '#/definitions/models.InstitutionAttachmentResponse'
+        type: string
       certificateName:
         type: string
       certificateNo:
@@ -2482,13 +2439,21 @@ definitions:
         type: array
       aliases:
         type: string
-      brand:
-        $ref: '#/definitions/models.InstitutionBrandResponse'
+      bankAccounts:
+        items:
+          $ref: '#/definitions/models.InstitutionBankAccountResponse'
+        type: array
       contacts:
         items:
           $ref: '#/definitions/models.InstitutionContactResponse'
         type: array
       createDate:
+        type: string
+      diagnosisSubjects:
+        type: string
+      displayName:
+        type: string
+      emergencyDescription:
         type: string
       englishName:
         type: string
@@ -2506,36 +2471,35 @@ definitions:
         type: string
       institutionType:
         type: string
-      overview:
-        $ref: '#/definitions/models.InstitutionOverviewResponse'
+      introduction:
+        type: string
+      invoiceTitle:
+        type: string
+      keySpecialties:
+        type: string
+      logoUrl:
+        type: string
       qualifications:
         items:
           $ref: '#/definitions/models.InstitutionQualificationResponse'
         type: array
       remark:
         type: string
-      settlement:
-        $ref: '#/definitions/models.InstitutionSettlementResponse'
+      serviceFeatures:
+        type: string
+      serviceHours:
+        type: string
       shortName:
         type: string
-      unifiedCreditCode:
-        type: string
-      updateDate:
-        type: string
-    type: object
-  models.InstitutionSettlementResponse:
-    properties:
-      bankAccounts:
-        items:
-          $ref: '#/definitions/models.InstitutionBankAccountResponse'
-        type: array
-      invoiceTitle:
-        type: string
-      settlementId:
+      slogan:
         type: string
       taxpayerId:
         type: string
       taxpayerType:
+        type: string
+      unifiedCreditCode:
+        type: string
+      updateDate:
         type: string
     type: object
   models.LoginLogDetailResponse:
@@ -4924,26 +4888,6 @@ definitions:
     - addressType
     - fullAddress
     type: object
-  models.SaveInstitutionAttachmentRequest:
-    properties:
-      attachmentType:
-        maxLength: 64
-        type: string
-      expiryDate:
-        type: string
-      fileName:
-        maxLength: 256
-        type: string
-      remark:
-        maxLength: 512
-        type: string
-      url:
-        maxLength: 512
-        type: string
-    required:
-    - fileName
-    - url
-    type: object
   models.SaveInstitutionBankAccountRequest:
     properties:
       accountName:
@@ -4967,18 +4911,6 @@ definitions:
     - accountName
     - accountNumber
     - bankName
-    type: object
-  models.SaveInstitutionBrandRequest:
-    properties:
-      displayName:
-        maxLength: 128
-        type: string
-      logoUrl:
-        maxLength: 512
-        type: string
-      slogan:
-        maxLength: 256
-        type: string
     type: object
   models.SaveInstitutionContactRequest:
     properties:
@@ -5006,31 +4938,11 @@ definitions:
     - contactName
     - contactType
     type: object
-  models.SaveInstitutionOverviewRequest:
-    properties:
-      diagnosisSubjects:
-        maxLength: 5000
-        type: string
-      emergencyDescription:
-        maxLength: 2000
-        type: string
-      introduction:
-        maxLength: 5000
-        type: string
-      keySpecialties:
-        maxLength: 5000
-        type: string
-      serviceFeatures:
-        maxLength: 5000
-        type: string
-      serviceHours:
-        maxLength: 2000
-        type: string
-    type: object
   models.SaveInstitutionQualificationRequest:
     properties:
       attachment:
-        $ref: '#/definitions/models.SaveInstitutionAttachmentRequest'
+        maxLength: 512
+        type: string
       certificateName:
         maxLength: 128
         type: string
@@ -5063,12 +4975,23 @@ definitions:
       aliases:
         maxLength: 256
         type: string
-      brand:
-        $ref: '#/definitions/models.SaveInstitutionBrandRequest'
+      bankAccounts:
+        items:
+          $ref: '#/definitions/models.SaveInstitutionBankAccountRequest'
+        type: array
       contacts:
         items:
           $ref: '#/definitions/models.SaveInstitutionContactRequest'
         type: array
+      diagnosisSubjects:
+        maxLength: 5000
+        type: string
+      displayName:
+        maxLength: 128
+        type: string
+      emergencyDescription:
+        maxLength: 2000
+        type: string
       englishName:
         maxLength: 128
         type: string
@@ -5095,8 +5018,18 @@ definitions:
         example: HOSPITAL
         maxLength: 32
         type: string
-      overview:
-        $ref: '#/definitions/models.SaveInstitutionOverviewRequest'
+      introduction:
+        maxLength: 5000
+        type: string
+      invoiceTitle:
+        maxLength: 128
+        type: string
+      keySpecialties:
+        maxLength: 5000
+        type: string
+      logoUrl:
+        maxLength: 512
+        type: string
       qualifications:
         items:
           $ref: '#/definitions/models.SaveInstitutionQualificationRequest'
@@ -5104,37 +5037,17 @@ definitions:
       remark:
         maxLength: 512
         type: string
-      settlement:
-        $ref: '#/definitions/models.SaveInstitutionSettlementRequest'
+      serviceFeatures:
+        maxLength: 5000
+        type: string
+      serviceHours:
+        maxLength: 2000
+        type: string
       shortName:
         maxLength: 64
         type: string
-      unifiedCreditCode:
-        example: 91110108MA01XXXXXX
-        maxLength: 32
-        type: string
-    required:
-    - addresses
-    - brand
-    - contacts
-    - hospitalCategory
-    - hospitalLevel
-    - institutionName
-    - institutionNature
-    - institutionType
-    - overview
-    - qualifications
-    - settlement
-    - unifiedCreditCode
-    type: object
-  models.SaveInstitutionSettlementRequest:
-    properties:
-      bankAccounts:
-        items:
-          $ref: '#/definitions/models.SaveInstitutionBankAccountRequest'
-        type: array
-      invoiceTitle:
-        maxLength: 128
+      slogan:
+        maxLength: 256
         type: string
       taxpayerId:
         maxLength: 32
@@ -5142,8 +5055,21 @@ definitions:
       taxpayerType:
         maxLength: 32
         type: string
+      unifiedCreditCode:
+        example: 91110108MA01XXXXXX
+        maxLength: 32
+        type: string
     required:
+    - addresses
     - bankAccounts
+    - contacts
+    - hospitalCategory
+    - hospitalLevel
+    - institutionName
+    - institutionNature
+    - institutionType
+    - qualifications
+    - unifiedCreditCode
     type: object
   models.SavePatientRequest:
     properties:
@@ -8405,7 +8331,8 @@ paths:
     put:
       consumes:
       - application/json
-      description: 使用一个聚合请求保存机构主档及全部当前子资料。集合型子资料会按请求全量替换，空数组表示清空，资质附件为单个对象。
+      description: 使用一个平铺聚合请求保存机构主档及全部当前子资料。集合型子资料会按请求全量替换，空数组表示清空，资质附件直接提交上传后返回的
+        URL 字符串。
       parameters:
       - description: 机构资料
         in: body

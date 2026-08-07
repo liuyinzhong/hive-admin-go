@@ -42,7 +42,7 @@ func (ctrl *BaseInstitutionController) GetInstitution(c *gin.Context) {
 
 // SaveInstitution 保存机构资料。
 // @Summary 保存机构资料
-// @Description 使用一个聚合请求保存机构主档及全部当前子资料。集合型子资料会按请求全量替换，空数组表示清空，资质附件为单个对象。
+// @Description 使用一个平铺聚合请求保存机构主档及全部当前子资料。集合型子资料会按请求全量替换，空数组表示清空，资质附件直接提交上传后返回的 URL 字符串。
 // @Tags 基础资料/机构资料
 // @Accept json
 // @Produce json

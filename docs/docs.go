@@ -1453,7 +1453,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "使用一个聚合请求保存机构主档及全部当前子资料。集合型子资料会按请求全量替换，空数组表示清空，资质附件为单个对象。",
+                "description": "使用一个平铺聚合请求保存机构主档及全部当前子资料。集合型子资料会按请求全量替换，空数组表示清空，资质附件直接提交上传后返回的 URL 字符串。",
                 "consumes": [
                     "application/json"
                 ],
@@ -23599,29 +23599,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.InstitutionAttachmentResponse": {
-            "type": "object",
-            "properties": {
-                "attachmentId": {
-                    "type": "string"
-                },
-                "attachmentType": {
-                    "type": "string"
-                },
-                "expiryDate": {
-                    "type": "string"
-                },
-                "fileName": {
-                    "type": "string"
-                },
-                "remark": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
         "models.InstitutionBankAccountResponse": {
             "type": "object",
             "properties": {
@@ -23644,23 +23621,6 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "remark": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.InstitutionBrandResponse": {
-            "type": "object",
-            "properties": {
-                "brandId": {
-                    "type": "string"
-                },
-                "displayName": {
-                    "type": "string"
-                },
-                "logoUrl": {
-                    "type": "string"
-                },
-                "slogan": {
                     "type": "string"
                 }
             }
@@ -23694,37 +23654,11 @@ const docTemplate = `{
                 }
             }
         },
-        "models.InstitutionOverviewResponse": {
-            "type": "object",
-            "properties": {
-                "diagnosisSubjects": {
-                    "type": "string"
-                },
-                "emergencyDescription": {
-                    "type": "string"
-                },
-                "introduction": {
-                    "type": "string"
-                },
-                "keySpecialties": {
-                    "type": "string"
-                },
-                "overviewId": {
-                    "type": "string"
-                },
-                "serviceFeatures": {
-                    "type": "string"
-                },
-                "serviceHours": {
-                    "type": "string"
-                }
-            }
-        },
         "models.InstitutionQualificationResponse": {
             "type": "object",
             "properties": {
                 "attachment": {
-                    "$ref": "#/definitions/models.InstitutionAttachmentResponse"
+                    "type": "string"
                 },
                 "certificateName": {
                     "type": "string"
@@ -23764,8 +23698,11 @@ const docTemplate = `{
                 "aliases": {
                     "type": "string"
                 },
-                "brand": {
-                    "$ref": "#/definitions/models.InstitutionBrandResponse"
+                "bankAccounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.InstitutionBankAccountResponse"
+                    }
                 },
                 "contacts": {
                     "type": "array",
@@ -23774,6 +23711,15 @@ const docTemplate = `{
                     }
                 },
                 "createDate": {
+                    "type": "string"
+                },
+                "diagnosisSubjects": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "emergencyDescription": {
                     "type": "string"
                 },
                 "englishName": {
@@ -23800,8 +23746,17 @@ const docTemplate = `{
                 "institutionType": {
                     "type": "string"
                 },
-                "overview": {
-                    "$ref": "#/definitions/models.InstitutionOverviewResponse"
+                "introduction": {
+                    "type": "string"
+                },
+                "invoiceTitle": {
+                    "type": "string"
+                },
+                "keySpecialties": {
+                    "type": "string"
+                },
+                "logoUrl": {
+                    "type": "string"
                 },
                 "qualifications": {
                     "type": "array",
@@ -23812,39 +23767,28 @@ const docTemplate = `{
                 "remark": {
                     "type": "string"
                 },
-                "settlement": {
-                    "$ref": "#/definitions/models.InstitutionSettlementResponse"
+                "serviceFeatures": {
+                    "type": "string"
+                },
+                "serviceHours": {
+                    "type": "string"
                 },
                 "shortName": {
                     "type": "string"
                 },
-                "unifiedCreditCode": {
-                    "type": "string"
-                },
-                "updateDate": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.InstitutionSettlementResponse": {
-            "type": "object",
-            "properties": {
-                "bankAccounts": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.InstitutionBankAccountResponse"
-                    }
-                },
-                "invoiceTitle": {
-                    "type": "string"
-                },
-                "settlementId": {
+                "slogan": {
                     "type": "string"
                 },
                 "taxpayerId": {
                     "type": "string"
                 },
                 "taxpayerType": {
+                    "type": "string"
+                },
+                "unifiedCreditCode": {
+                    "type": "string"
+                },
+                "updateDate": {
                     "type": "string"
                 }
             }
@@ -27001,34 +26945,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SaveInstitutionAttachmentRequest": {
-            "type": "object",
-            "required": [
-                "fileName",
-                "url"
-            ],
-            "properties": {
-                "attachmentType": {
-                    "type": "string",
-                    "maxLength": 64
-                },
-                "expiryDate": {
-                    "type": "string"
-                },
-                "fileName": {
-                    "type": "string",
-                    "maxLength": 256
-                },
-                "remark": {
-                    "type": "string",
-                    "maxLength": 512
-                },
-                "url": {
-                    "type": "string",
-                    "maxLength": 512
-                }
-            }
-        },
         "models.SaveInstitutionBankAccountRequest": {
             "type": "object",
             "required": [
@@ -27059,23 +26975,6 @@ const docTemplate = `{
                 "remark": {
                     "type": "string",
                     "maxLength": 512
-                }
-            }
-        },
-        "models.SaveInstitutionBrandRequest": {
-            "type": "object",
-            "properties": {
-                "displayName": {
-                    "type": "string",
-                    "maxLength": 128
-                },
-                "logoUrl": {
-                    "type": "string",
-                    "maxLength": 512
-                },
-                "slogan": {
-                    "type": "string",
-                    "maxLength": 256
                 }
             }
         },
@@ -27115,35 +27014,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SaveInstitutionOverviewRequest": {
-            "type": "object",
-            "properties": {
-                "diagnosisSubjects": {
-                    "type": "string",
-                    "maxLength": 5000
-                },
-                "emergencyDescription": {
-                    "type": "string",
-                    "maxLength": 2000
-                },
-                "introduction": {
-                    "type": "string",
-                    "maxLength": 5000
-                },
-                "keySpecialties": {
-                    "type": "string",
-                    "maxLength": 5000
-                },
-                "serviceFeatures": {
-                    "type": "string",
-                    "maxLength": 5000
-                },
-                "serviceHours": {
-                    "type": "string",
-                    "maxLength": 2000
-                }
-            }
-        },
         "models.SaveInstitutionQualificationRequest": {
             "type": "object",
             "required": [
@@ -27152,7 +27022,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "attachment": {
-                    "$ref": "#/definitions/models.SaveInstitutionAttachmentRequest"
+                    "type": "string",
+                    "maxLength": 512
                 },
                 "certificateName": {
                     "type": "string",
@@ -27186,16 +27057,14 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "addresses",
-                "brand",
+                "bankAccounts",
                 "contacts",
                 "hospitalCategory",
                 "hospitalLevel",
                 "institutionName",
                 "institutionNature",
                 "institutionType",
-                "overview",
                 "qualifications",
-                "settlement",
                 "unifiedCreditCode"
             ],
             "properties": {
@@ -27209,14 +27078,29 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 256
                 },
-                "brand": {
-                    "$ref": "#/definitions/models.SaveInstitutionBrandRequest"
+                "bankAccounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SaveInstitutionBankAccountRequest"
+                    }
                 },
                 "contacts": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.SaveInstitutionContactRequest"
                     }
+                },
+                "diagnosisSubjects": {
+                    "type": "string",
+                    "maxLength": 5000
+                },
+                "displayName": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "emergencyDescription": {
+                    "type": "string",
+                    "maxLength": 2000
                 },
                 "englishName": {
                     "type": "string",
@@ -27251,8 +27135,21 @@ const docTemplate = `{
                     "maxLength": 32,
                     "example": "HOSPITAL"
                 },
-                "overview": {
-                    "$ref": "#/definitions/models.SaveInstitutionOverviewRequest"
+                "introduction": {
+                    "type": "string",
+                    "maxLength": 5000
+                },
+                "invoiceTitle": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "keySpecialties": {
+                    "type": "string",
+                    "maxLength": 5000
+                },
+                "logoUrl": {
+                    "type": "string",
+                    "maxLength": 512
                 },
                 "qualifications": {
                     "type": "array",
@@ -27264,35 +27161,21 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 512
                 },
-                "settlement": {
-                    "$ref": "#/definitions/models.SaveInstitutionSettlementRequest"
+                "serviceFeatures": {
+                    "type": "string",
+                    "maxLength": 5000
+                },
+                "serviceHours": {
+                    "type": "string",
+                    "maxLength": 2000
                 },
                 "shortName": {
                     "type": "string",
                     "maxLength": 64
                 },
-                "unifiedCreditCode": {
+                "slogan": {
                     "type": "string",
-                    "maxLength": 32,
-                    "example": "91110108MA01XXXXXX"
-                }
-            }
-        },
-        "models.SaveInstitutionSettlementRequest": {
-            "type": "object",
-            "required": [
-                "bankAccounts"
-            ],
-            "properties": {
-                "bankAccounts": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.SaveInstitutionBankAccountRequest"
-                    }
-                },
-                "invoiceTitle": {
-                    "type": "string",
-                    "maxLength": 128
+                    "maxLength": 256
                 },
                 "taxpayerId": {
                     "type": "string",
@@ -27301,6 +27184,11 @@ const docTemplate = `{
                 "taxpayerType": {
                     "type": "string",
                     "maxLength": 32
+                },
+                "unifiedCreditCode": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "example": "91110108MA01XXXXXX"
                 }
             }
         },
