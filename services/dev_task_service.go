@@ -13,41 +13,51 @@ import (
 )
 
 func GetTasks(page, pageSize int, params map[string]interface{}) (*utils.PaginationResponse, error) {
-	db := database.DB.Model(&models.DevTask{}).Where("del_flag = ?", 0)
-
-	if taskNum, ok := params["taskNum"].(int); ok && taskNum > 0 {
-		db = db.Where("task_num = ?", taskNum)
-	}
-	if taskTitle, ok := params["taskTitle"].(string); ok && taskTitle != "" {
-		db = db.Where("task_title LIKE ?", "%"+taskTitle+"%")
-	}
-	if projectID, ok := params["projectId"].(string); ok && projectID != "" {
-		db = db.Where("project_id = ?", projectID)
-	}
-	if versionID, ok := params["versionId"].(string); ok && versionID != "" {
-		db = db.Where("version_id = ?", versionID)
-	}
-	if taskStatuses, ok := params["taskStatuses"].([]int); ok && len(taskStatuses) > 0 {
-		db = db.Where("task_status IN ?", taskStatuses)
-	}
-	if storyID, ok := params["storyId"].(string); ok && storyID != "" {
-		db = db.Where("story_id = ?", storyID)
-	}
-
-	sorts := params["sorts"].(string)
-	order := utils.BuildOrderBy(sorts, map[string]string{
-		"taskTitle":  "task_title",
-		"taskStatus": "task_status",
-		"startDate":  "start_date",
-		"endDate":    "end_date",
-	})
-	if order == "" {
-		order = "create_date DESC"
-	}
+	db := buildDevTaskQuery(params)
+	order := buildDevTaskOrder(params)
 
 	return utils.PaginateWithTransform[models.DevTask](db, page, pageSize, order, func(items []models.DevTask) interface{} {
 		return buildTaskResponses(items)
 	})
+}
+
+func buildDevTaskQuery(params map[string]interface{}) *gorm.DB {
+	db := database.DB.Model(&models.DevTask{}).Where("dev_task.del_flag = ?", 0)
+
+	if taskNum, ok := params["taskNum"].(int); ok && taskNum > 0 {
+		db = db.Where("dev_task.task_num = ?", taskNum)
+	}
+	if taskTitle, ok := params["taskTitle"].(string); ok && taskTitle != "" {
+		db = db.Where("dev_task.task_title LIKE ?", "%"+taskTitle+"%")
+	}
+	if projectID, ok := params["projectId"].(string); ok && projectID != "" {
+		db = db.Where("dev_task.project_id = ?", projectID)
+	}
+	if versionID, ok := params["versionId"].(string); ok && versionID != "" {
+		db = db.Where("dev_task.version_id = ?", versionID)
+	}
+	if taskStatuses, ok := params["taskStatuses"].([]int); ok && len(taskStatuses) > 0 {
+		db = db.Where("dev_task.task_status IN ?", taskStatuses)
+	}
+	if storyID, ok := params["storyId"].(string); ok && storyID != "" {
+		db = db.Where("dev_task.story_id = ?", storyID)
+	}
+	return db
+}
+
+func buildDevTaskOrder(params map[string]interface{}) string {
+	sorts, _ := params["sorts"].(string)
+	order := utils.BuildOrderBy(sorts, map[string]string{
+		"taskTitle":  "dev_task.task_title",
+		"taskStatus": "dev_task.task_status",
+		"startDate":  "dev_task.start_date",
+		"endDate":    "dev_task.end_date",
+		"createDate": "dev_task.create_date",
+	})
+	if order == "" {
+		order = "dev_task.create_date DESC"
+	}
+	return order
 }
 
 func GetAllTasks(params map[string]interface{}) ([]models.TaskResponse, error) {

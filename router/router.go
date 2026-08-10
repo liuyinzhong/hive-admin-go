@@ -15,6 +15,7 @@ func SetupRouter() *gin.Engine {
 	authController := controllers.NewAuthController()
 	systemController := controllers.NewSystemController()
 	menuMessageController := controllers.NewMenuMessageController()
+	downloadTaskController := controllers.NewDownloadTaskController()
 	externalPageController := controllers.NewExternalPageController()
 	devController := controllers.DevController{}
 	workflowController := controllers.WorkflowController{}
@@ -24,6 +25,7 @@ func SetupRouter() *gin.Engine {
 	baseInstitutionController := controllers.NewBaseInstitutionController()
 	erpWarehouseController := controllers.NewErpWarehouseController()
 	erpInventoryController := controllers.NewErpInventoryController()
+	erpPurchaseOrderController := controllers.NewErpPurchaseOrderController()
 	erpPurchaseInboundController := controllers.NewErpPurchaseInboundController()
 	erpOtherOutboundController := controllers.NewErpOtherOutboundController()
 	printTemplateController := controllers.NewPrintTemplateController()
@@ -55,6 +57,12 @@ func SetupRouter() *gin.Engine {
 
 		system := api.Group("/system", middleware.AuthMiddleware())
 		{
+			downloads := system.Group("/downloads")
+			{
+				downloads.GET("", downloadTaskController.GetList)
+				downloads.GET("/:id/file", downloadTaskController.DownloadFile)
+			}
+
 			messages := system.Group("/messages")
 			{
 				messages.GET("/unreadSummary", menuMessageController.GetUnreadSummary)
@@ -213,6 +221,7 @@ func SetupRouter() *gin.Engine {
 			{
 				tasks.GET("", permissionGuard.Require("dev:task:list"), devController.GetTasks)
 				tasks.GET("/all", devController.GetAllTasks)
+				tasks.POST("/exports", permissionGuard.Require("dev:task:export"), devController.CreateTaskExport)
 				tasks.POST("", permissionGuard.Require("dev:task:create"), devController.CreateTask)
 				tasks.POST("/batch", permissionGuard.Require("dev:task:batchCreate"), devController.CreateTasks)
 				tasks.GET("/:taskNum", permissionGuard.Require("dev:task:detail"), devController.GetTask)
@@ -330,8 +339,11 @@ func SetupRouter() *gin.Engine {
 			inventory := erp.Group("/inventory")
 			{
 				inventory.GET("/balances", permissionGuard.Require("erp:inventoryBalance:list"), erpInventoryController.GetInventoryBalanceList)
+				inventory.POST("/balances/exports", permissionGuard.Require("erp:inventoryBalance:export"), erpInventoryController.CreateInventoryBalanceExport)
 				inventory.GET("/balances/:balanceId/movements", permissionGuard.Require("erp:inventoryMovement:list"), erpInventoryController.GetInventoryMovements)
 				inventory.GET("/movements", permissionGuard.Require("erp:inventorySourceMovement:list"), erpInventoryController.GetInventoryMovementsBySource)
+				inventory.GET("/traceCodes", permissionGuard.Require("erp:inventoryTraceCode:list"), erpInventoryController.GetInventoryTraceCodeList)
+				inventory.GET("/traceCodes/:traceId/movements", permissionGuard.Require("erp:inventoryTraceCode:movements"), erpInventoryController.GetInventoryTraceCodeMovements)
 				inventory.POST("/initialStocks", permissionGuard.Require("erp:inventoryInitial:create"), erpInventoryController.CreateInitialStocks)
 			}
 
@@ -340,6 +352,18 @@ func SetupRouter() *gin.Engine {
 				purchaseInbounds.GET("", permissionGuard.Require("erp:purchaseInbound:list"), erpPurchaseInboundController.GetPurchaseInboundList)
 				purchaseInbounds.POST("", permissionGuard.Require("erp:purchaseInbound:create"), erpPurchaseInboundController.CreatePurchaseInbound)
 				purchaseInbounds.GET("/:inboundId", permissionGuard.Require("erp:purchaseInbound:detail"), erpPurchaseInboundController.GetPurchaseInboundDetail)
+			}
+
+			purchaseOrders := erp.Group("/purchaseOrders")
+			{
+				purchaseOrders.GET("", permissionGuard.Require("erp:purchaseOrder:list"), erpPurchaseOrderController.GetPurchaseOrderList)
+				purchaseOrders.POST("", permissionGuard.Require("erp:purchaseOrder:create"), erpPurchaseOrderController.CreatePurchaseOrder)
+				purchaseOrders.GET("/:purchaseOrderId", permissionGuard.Require("erp:purchaseOrder:detail"), erpPurchaseOrderController.GetPurchaseOrderDetail)
+				purchaseOrders.PUT("/:purchaseOrderId", permissionGuard.Require("erp:purchaseOrder:update"), erpPurchaseOrderController.UpdatePurchaseOrder)
+				purchaseOrders.POST("/:purchaseOrderId/confirm", permissionGuard.Require("erp:purchaseOrder:confirm"), erpPurchaseOrderController.ConfirmPurchaseOrder)
+				purchaseOrders.POST("/:purchaseOrderId/cancel", permissionGuard.Require("erp:purchaseOrder:cancel"), erpPurchaseOrderController.CancelPurchaseOrder)
+				purchaseOrders.POST("/:purchaseOrderId/close", permissionGuard.Require("erp:purchaseOrder:close"), erpPurchaseOrderController.ClosePurchaseOrder)
+				purchaseOrders.GET("/:purchaseOrderId/logs", permissionGuard.Require("erp:purchaseOrder:logs"), erpPurchaseOrderController.GetPurchaseOrderLogs)
 			}
 
 			otherOutbounds := erp.Group("/otherOutbounds")

@@ -80,12 +80,8 @@ func (s *ErpPurchaseInboundService) GetPurchaseInboundDetail(inboundID string) (
 }
 
 func (s *ErpPurchaseInboundService) CreatePurchaseInbound(req models.CreateErpPurchaseInboundRequest, operatorID string) (*models.ErpPurchaseInboundResponse, error) {
-	supplierID := strings.TrimSpace(req.SupplierID)
-	warehouseID := strings.TrimSpace(req.WarehouseID)
-	if err := validateErpPurchaseInboundUUID(supplierID, "供应商ID"); err != nil {
-		return nil, err
-	}
-	if err := validateErpPurchaseInboundUUID(warehouseID, "仓库ID"); err != nil {
+	purchaseOrderID := strings.TrimSpace(req.PurchaseOrderID)
+	if err := validateErpPurchaseInboundUUID(purchaseOrderID, "采购单ID"); err != nil {
 		return nil, err
 	}
 
@@ -104,18 +100,57 @@ func (s *ErpPurchaseInboundService) CreatePurchaseInbound(req models.CreateErpPu
 
 	inboundID := utils.GenerateUUID()
 	if err := database.DB.Transaction(func(tx *gorm.DB) error {
-		if err := s.lockEnabledSupplier(tx, supplierID); err != nil {
+		var purchaseOrder models.ErpPurchaseOrder
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("purchase_order_id = ?", purchaseOrderID).First(&purchaseOrder).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("%w: 采购单不存在", ErrErpPurchaseInboundNotFound)
+			}
 			return err
 		}
-		warehouse, err := s.inventoryService.lockEnabledWarehouse(tx, warehouseID)
+		if purchaseOrder.Status != models.ErpPurchaseOrderStatusWaitingReceipt && purchaseOrder.Status != models.ErpPurchaseOrderStatusPartialReceipt {
+			return fmt.Errorf("%w: 只有待收货或部分入库采购单可以入库", ErrErpPurchaseInboundConflict)
+		}
+		warehouse, err := s.inventoryService.lockEnabledWarehouse(tx, purchaseOrder.WarehouseID)
 		if err != nil {
 			return err
 		}
-		inventoryItems := make([]normalizedErpInventoryInboundItem, 0, len(items))
+		orderItemIDs := make([]string, 0, len(items))
+		orderItemIDSet := make(map[string]struct{}, len(items))
 		for _, item := range items {
-			inventoryItems = append(inventoryItems, item.normalizedErpInventoryInboundItem)
+			if _, exists := orderItemIDSet[item.PurchaseOrderItemID]; !exists {
+				orderItemIDs = append(orderItemIDs, item.PurchaseOrderItemID)
+				orderItemIDSet[item.PurchaseOrderItemID] = struct{}{}
+			}
 		}
-		skuMap, err := s.inventoryService.lockEnabledSkuMap(tx, inventoryItems)
+		var orderItems []models.ErpPurchaseOrderItem
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("purchase_order_id = ?", purchaseOrderID).Order("purchase_order_item_id asc").Find(&orderItems).Error; err != nil {
+			return err
+		}
+		orderItemMap := make(map[string]models.ErpPurchaseOrderItem, len(orderItems))
+		for _, orderItem := range orderItems {
+			orderItemMap[orderItem.PurchaseOrderItemID] = orderItem
+		}
+		for _, orderItemID := range orderItemIDs {
+			if _, exists := orderItemMap[orderItemID]; !exists {
+				return fmt.Errorf("%w: 存在不属于当前采购单的采购明细", ErrErpPurchaseInboundNotFound)
+			}
+		}
+		requestedQuantity := make(map[string]int, len(orderItems))
+		inventoryItems := make([]normalizedErpInventoryInboundItem, 0, len(items))
+		for index := range items {
+			orderItem := orderItemMap[items[index].PurchaseOrderItemID]
+			requestedQuantity[orderItem.PurchaseOrderItemID] += items[index].Quantity
+			items[index].SkuID = orderItem.SkuID
+			items[index].UnitCost = orderItem.UnitPrice
+			inventoryItems = append(inventoryItems, items[index].normalizedErpInventoryInboundItem)
+		}
+		for orderItemID, quantity := range requestedQuantity {
+			orderItem := orderItemMap[orderItemID]
+			if quantity > orderItem.OrderedQuantity-orderItem.InboundQuantity {
+				return fmt.Errorf("%w: SKU%s本次入库数量超过采购单剩余数量", ErrErpPurchaseInboundConflict, orderItem.SkuCodeSnapshot)
+			}
+		}
+		skuMap, err := s.inventoryService.lockReferencedSkuMap(tx, inventoryItems)
 		if err != nil {
 			return err
 		}
@@ -126,14 +161,15 @@ func (s *ErpPurchaseInboundService) CreatePurchaseInbound(req models.CreateErpPu
 		}
 		now := time.Now().In(erpInventoryLocation)
 		inbound := models.ErpPurchaseInbound{
-			InboundID:   inboundID,
-			InboundNo:   inboundNo,
-			SupplierID:  supplierID,
-			WarehouseID: warehouseID,
-			InboundDate: inboundDate,
-			Remark:      remark,
-			CreatorID:   optionalErpPurchaseInboundOperatorID(operatorID),
-			CreateDate:  &now,
+			InboundID:       inboundID,
+			InboundNo:       inboundNo,
+			PurchaseOrderID: purchaseOrderID,
+			SupplierID:      purchaseOrder.SupplierID,
+			WarehouseID:     purchaseOrder.WarehouseID,
+			InboundDate:     inboundDate,
+			Remark:          remark,
+			CreatorID:       optionalErpPurchaseInboundOperatorID(operatorID),
+			CreateDate:      &now,
 		}
 		if err := tx.Create(&inbound).Error; err != nil {
 			return err
@@ -141,16 +177,17 @@ func (s *ErpPurchaseInboundService) CreatePurchaseInbound(req models.CreateErpPu
 
 		for _, item := range items {
 			itemRow := models.ErpPurchaseInboundItem{
-				InboundItemID: utils.GenerateUUID(),
-				InboundID:     inboundID,
-				LineNo:        item.LineNo,
-				SkuID:         item.SkuID,
-				BatchNo:       item.BatchNo,
-				ExpiryDate:    item.ExpiryDate,
-				UnitCost:      item.UnitCost,
-				Quantity:      item.Quantity,
-				Remark:        item.Remark,
-				CreateDate:    &now,
+				InboundItemID:       utils.GenerateUUID(),
+				InboundID:           inboundID,
+				PurchaseOrderItemID: item.PurchaseOrderItemID,
+				LineNo:              item.LineNo,
+				SkuID:               item.SkuID,
+				BatchNo:             item.BatchNo,
+				ExpiryDate:          item.ExpiryDate,
+				UnitCost:            item.UnitCost,
+				Quantity:            item.Quantity,
+				Remark:              item.Remark,
+				CreateDate:          &now,
 			}
 			if err := tx.Create(&itemRow).Error; err != nil {
 				return err
@@ -167,7 +204,39 @@ func (s *ErpPurchaseInboundService) CreatePurchaseInbound(req models.CreateErpPu
 			}
 		}
 
-		return nil
+		allCompleted := true
+		for _, orderItem := range orderItems {
+			newInboundQuantity := orderItem.InboundQuantity + requestedQuantity[orderItem.PurchaseOrderItemID]
+			if newInboundQuantity < orderItem.OrderedQuantity {
+				allCompleted = false
+			}
+			if err := tx.Model(&models.ErpPurchaseOrderItem{}).Where("purchase_order_item_id = ?", orderItem.PurchaseOrderItemID).Updates(map[string]any{
+				"inbound_quantity": newInboundQuantity,
+				"update_date":      now,
+			}).Error; err != nil {
+				return err
+			}
+		}
+		toStatus := models.ErpPurchaseOrderStatusPartialReceipt
+		if allCompleted {
+			toStatus = models.ErpPurchaseOrderStatusCompleted
+		}
+		if err := tx.Model(&models.ErpPurchaseOrder{}).Where("purchase_order_id = ?", purchaseOrderID).Updates(map[string]any{
+			"status":      toStatus,
+			"row_version": purchaseOrder.RowVersion + 1,
+			"updater_id":  optionalErpPurchaseInboundOperatorID(operatorID),
+			"update_date": now,
+		}).Error; err != nil {
+			return err
+		}
+		skuSet := make(map[string]struct{})
+		for _, item := range items {
+			skuSet[item.SkuID] = struct{}{}
+		}
+		summary := fmt.Sprintf("采购入库单%s，涉及%d个SKU、%d条入库明细", inboundNo, len(skuSet), len(items))
+		return NewErpPurchaseOrderService().createPurchaseOrderLog(tx, purchaseOrderID, models.ErpPurchaseOrderLogActionInbound,
+			purchaseOrderStringPtr(purchaseOrder.Status), purchaseOrderStringPtr(toStatus), summary, &inbound, nil, operatorID, now)
+
 	}); err != nil {
 		return nil, err
 	}
@@ -177,57 +246,64 @@ func (s *ErpPurchaseInboundService) CreatePurchaseInbound(req models.CreateErpPu
 
 type normalizedErpPurchaseInboundItem struct {
 	normalizedErpInventoryInboundItem
-	LineNo int
+	PurchaseOrderItemID string
+	LineNo              int
 }
 
 type erpPurchaseInboundListQueryRow struct {
-	InboundID     string
-	InboundNo     string
-	SupplierID    string
-	SupplierName  string
-	WarehouseID   string
-	WarehouseName string
-	InboundDate   time.Time
-	LineCount     int
-	TotalAmount   string
-	Remark        *string
-	CreatorID     *string
-	CreateDate    *time.Time
+	InboundID       string
+	InboundNo       string
+	PurchaseOrderID string
+	PurchaseOrderNo string
+	SupplierID      string
+	SupplierName    string
+	WarehouseID     string
+	WarehouseName   string
+	InboundDate     time.Time
+	LineCount       int
+	TotalAmount     string
+	Remark          *string
+	CreatorID       *string
+	CreateDate      *time.Time
 }
 
 type erpPurchaseInboundDetailQueryRow struct {
-	InboundID     string
-	InboundNo     string
-	SupplierID    string
-	SupplierName  string
-	WarehouseID   string
-	WarehouseName string
-	InboundDate   time.Time
-	Remark        *string
-	CreatorID     *string
-	CreateDate    *time.Time
+	InboundID       string
+	InboundNo       string
+	PurchaseOrderID string
+	PurchaseOrderNo string
+	SupplierID      string
+	SupplierName    string
+	WarehouseID     string
+	WarehouseName   string
+	InboundDate     time.Time
+	Remark          *string
+	CreatorID       *string
+	CreateDate      *time.Time
 }
 
 type erpPurchaseInboundItemQueryRow struct {
-	InboundItemID   string
-	LineNo          int
-	SkuID           string
-	SkuCode         string
-	ProductName     string
-	SpecName        string
-	EnterpriseName  string
-	PackageSpecName string
-	PackageUnitName string
-	MinUnitName     string
-	BatchNo         string
-	ExpiryDate      time.Time
-	UnitCost        string
-	Quantity        int
-	Remark          *string
+	InboundItemID       string
+	PurchaseOrderItemID string
+	LineNo              int
+	SkuID               string
+	SkuCode             string
+	ProductName         string
+	SpecName            string
+	EnterpriseName      string
+	PackageSpecName     string
+	PackageUnitName     string
+	MinUnitName         string
+	BatchNo             string
+	ExpiryDate          time.Time
+	UnitCost            string
+	Quantity            int
+	Remark              *string
 }
 
 func (s *ErpPurchaseInboundService) basePurchaseInboundQuery(db *gorm.DB) *gorm.DB {
 	return db.Table("erp_purchase_inbound").
+		Joins("LEFT JOIN erp_purchase_order ON erp_purchase_order.purchase_order_id = erp_purchase_inbound.purchase_order_id").
 		Joins("LEFT JOIN base_enterprise supplier ON supplier.enterprise_id = erp_purchase_inbound.supplier_id").
 		Joins("LEFT JOIN erp_warehouse ON erp_warehouse.warehouse_id = erp_purchase_inbound.warehouse_id").
 		Joins("LEFT JOIN (?) AS item_stat ON item_stat.inbound_id = erp_purchase_inbound.inbound_id", erpPurchaseInboundItemStatSubquery(db))
@@ -236,6 +312,9 @@ func (s *ErpPurchaseInboundService) basePurchaseInboundQuery(db *gorm.DB) *gorm.
 func (s *ErpPurchaseInboundService) applyPurchaseInboundFilters(query *gorm.DB, req models.ErpPurchaseInboundListRequest) (*gorm.DB, error) {
 	if value := strings.TrimSpace(req.InboundNo); value != "" {
 		query = query.Where("LOWER(erp_purchase_inbound.inbound_no) LIKE ?", "%"+strings.ToLower(value)+"%")
+	}
+	if value := strings.TrimSpace(req.PurchaseOrderNo); value != "" {
+		query = query.Where("LOWER(erp_purchase_order.purchase_order_no) LIKE ?", "%"+strings.ToLower(value)+"%")
 	}
 	if value := strings.TrimSpace(req.SupplierID); value != "" {
 		if err := validateErpPurchaseInboundUUID(value, "供应商ID"); err != nil {
@@ -300,40 +379,43 @@ func (s *ErpPurchaseInboundService) getPurchaseInboundDetail(db *gorm.DB, inboun
 	for _, item := range items {
 		amount := multiplyErpInventoryAmount(item.UnitCost, item.Quantity)
 		itemResponses = append(itemResponses, models.ErpPurchaseInboundItemResponse{
-			InboundItemID:   item.InboundItemID,
-			LineNo:          item.LineNo,
-			SkuID:           item.SkuID,
-			SkuCode:         item.SkuCode,
-			ProductName:     item.ProductName,
-			SpecName:        item.SpecName,
-			EnterpriseName:  item.EnterpriseName,
-			PackageSpecName: item.PackageSpecName,
-			PackageUnitName: item.PackageUnitName,
-			MinUnitName:     item.MinUnitName,
-			BatchNo:         item.BatchNo,
-			ExpiryDate:      formatErpInventoryDate(item.ExpiryDate),
-			UnitCost:        item.UnitCost,
-			Quantity:        item.Quantity,
-			Amount:          amount,
-			Remark:          item.Remark,
+			InboundItemID:       item.InboundItemID,
+			PurchaseOrderItemID: item.PurchaseOrderItemID,
+			LineNo:              item.LineNo,
+			SkuID:               item.SkuID,
+			SkuCode:             item.SkuCode,
+			ProductName:         item.ProductName,
+			SpecName:            item.SpecName,
+			EnterpriseName:      item.EnterpriseName,
+			PackageSpecName:     item.PackageSpecName,
+			PackageUnitName:     item.PackageUnitName,
+			MinUnitName:         item.MinUnitName,
+			BatchNo:             item.BatchNo,
+			ExpiryDate:          formatErpInventoryDate(item.ExpiryDate),
+			UnitCost:            item.UnitCost,
+			Quantity:            item.Quantity,
+			Amount:              amount,
+			Remark:              item.Remark,
 		})
 		totalAmount = addErpInventoryAmounts(totalAmount, amount)
 	}
 
 	return &models.ErpPurchaseInboundResponse{
-		InboundID:     inbound.InboundID,
-		InboundNo:     inbound.InboundNo,
-		SupplierID:    inbound.SupplierID,
-		SupplierName:  inbound.SupplierName,
-		WarehouseID:   inbound.WarehouseID,
-		WarehouseName: inbound.WarehouseName,
-		InboundDate:   formatErpInventoryDate(inbound.InboundDate),
-		Remark:        inbound.Remark,
-		CreatorID:     inbound.CreatorID,
-		CreateDate:    models.TimeToStringPtr(inbound.CreateDate),
-		LineCount:     len(itemResponses),
-		TotalAmount:   totalAmount,
-		Items:         itemResponses,
+		InboundID:       inbound.InboundID,
+		InboundNo:       inbound.InboundNo,
+		PurchaseOrderID: inbound.PurchaseOrderID,
+		PurchaseOrderNo: inbound.PurchaseOrderNo,
+		SupplierID:      inbound.SupplierID,
+		SupplierName:    inbound.SupplierName,
+		WarehouseID:     inbound.WarehouseID,
+		WarehouseName:   inbound.WarehouseName,
+		InboundDate:     formatErpInventoryDate(inbound.InboundDate),
+		Remark:          inbound.Remark,
+		CreatorID:       inbound.CreatorID,
+		CreateDate:      models.TimeToStringPtr(inbound.CreateDate),
+		LineCount:       len(itemResponses),
+		TotalAmount:     totalAmount,
+		Items:           itemResponses,
 	}, nil
 }
 
@@ -347,6 +429,8 @@ func erpPurchaseInboundListSelectFields() string {
 	return strings.Join([]string{
 		"erp_purchase_inbound.inbound_id",
 		"erp_purchase_inbound.inbound_no",
+		"erp_purchase_inbound.purchase_order_id",
+		"COALESCE(erp_purchase_order.purchase_order_no, '') AS purchase_order_no",
 		"erp_purchase_inbound.supplier_id",
 		"COALESCE(supplier.enterprise_name, '') AS supplier_name",
 		"erp_purchase_inbound.warehouse_id",
@@ -364,6 +448,8 @@ func erpPurchaseInboundDetailSelectFields() string {
 	return strings.Join([]string{
 		"erp_purchase_inbound.inbound_id",
 		"erp_purchase_inbound.inbound_no",
+		"erp_purchase_inbound.purchase_order_id",
+		"COALESCE(erp_purchase_order.purchase_order_no, '') AS purchase_order_no",
 		"erp_purchase_inbound.supplier_id",
 		"COALESCE(supplier.enterprise_name, '') AS supplier_name",
 		"erp_purchase_inbound.warehouse_id",
@@ -378,6 +464,7 @@ func erpPurchaseInboundDetailSelectFields() string {
 func erpPurchaseInboundItemSelectFields() string {
 	return strings.Join([]string{
 		"erp_purchase_inbound_item.inbound_item_id",
+		"erp_purchase_inbound_item.purchase_order_item_id",
 		"erp_purchase_inbound_item.line_no",
 		"erp_purchase_inbound_item.sku_id",
 		"COALESCE(product_sku.sku_code, '') AS sku_code",
@@ -399,18 +486,20 @@ func erpPurchaseInboundListRowsToResponses(rows []erpPurchaseInboundListQueryRow
 	responses := make([]models.ErpPurchaseInboundListResponse, 0, len(rows))
 	for _, row := range rows {
 		responses = append(responses, models.ErpPurchaseInboundListResponse{
-			InboundID:     row.InboundID,
-			InboundNo:     row.InboundNo,
-			SupplierID:    row.SupplierID,
-			SupplierName:  row.SupplierName,
-			WarehouseID:   row.WarehouseID,
-			WarehouseName: row.WarehouseName,
-			InboundDate:   formatErpInventoryDate(row.InboundDate),
-			LineCount:     row.LineCount,
-			TotalAmount:   normalizePurchaseInboundAmount(row.TotalAmount),
-			Remark:        row.Remark,
-			CreatorID:     row.CreatorID,
-			CreateDate:    models.TimeToStringPtr(row.CreateDate),
+			InboundID:       row.InboundID,
+			InboundNo:       row.InboundNo,
+			PurchaseOrderID: row.PurchaseOrderID,
+			PurchaseOrderNo: row.PurchaseOrderNo,
+			SupplierID:      row.SupplierID,
+			SupplierName:    row.SupplierName,
+			WarehouseID:     row.WarehouseID,
+			WarehouseName:   row.WarehouseName,
+			InboundDate:     formatErpInventoryDate(row.InboundDate),
+			LineCount:       row.LineCount,
+			TotalAmount:     normalizePurchaseInboundAmount(row.TotalAmount),
+			Remark:          row.Remark,
+			CreatorID:       row.CreatorID,
+			CreateDate:      models.TimeToStringPtr(row.CreateDate),
 		})
 	}
 	return responses
@@ -444,10 +533,11 @@ func normalizePurchaseInboundItems(items []models.CreateErpPurchaseInboundItem) 
 
 	normalized := make([]normalizedErpPurchaseInboundItem, 0, len(items))
 	seen := make(map[string]int, len(items))
+	traceCodeSeen := make(map[string]int)
 	for index, item := range items {
 		lineNo := index + 1
-		skuID := strings.TrimSpace(item.SkuID)
-		if err := validateErpPurchaseInboundUUID(skuID, fmt.Sprintf("第%d行SKU ID", lineNo)); err != nil {
+		purchaseOrderItemID := strings.TrimSpace(item.PurchaseOrderItemID)
+		if err := validateErpPurchaseInboundUUID(purchaseOrderItemID, fmt.Sprintf("第%d行采购明细ID", lineNo)); err != nil {
 			return nil, err
 		}
 		batchNo := strings.TrimSpace(item.BatchNo)
@@ -461,37 +551,43 @@ func normalizePurchaseInboundItems(items []models.CreateErpPurchaseInboundItem) 
 		if err != nil {
 			return nil, fmt.Errorf("%w: 第%d行%s", ErrErpPurchaseInboundInvalidInput, lineNo, strings.TrimPrefix(err.Error(), ErrErpPurchaseInboundInvalidInput.Error()+": "))
 		}
-		unitCost, err := normalizeErpInventoryAmount(item.UnitCost)
-		if err != nil {
-			return nil, fmt.Errorf("%w: 第%d行成本价不合法", ErrErpPurchaseInboundInvalidInput, lineNo)
-		}
 		if item.Quantity <= 0 {
 			return nil, fmt.Errorf("%w: 第%d行入库数量必须为正整数", ErrErpPurchaseInboundInvalidInput, lineNo)
 		}
 		if item.Quantity > 999999999 {
 			return nil, fmt.Errorf("%w: 第%d行入库数量不能超过999999999", ErrErpPurchaseInboundInvalidInput, lineNo)
 		}
+		traceCodes, err := normalizeErpInventoryTraceCodes(item.TraceCodes)
+		if err != nil {
+			return nil, fmt.Errorf("%w: 第%d行%s", ErrErpPurchaseInboundInvalidInput, lineNo, strings.TrimPrefix(err.Error(), ErrErpInventoryInvalidInput.Error()+": "))
+		}
+		for _, traceCode := range traceCodes {
+			if previousLine, exists := traceCodeSeen[traceCode]; exists {
+				return nil, fmt.Errorf("%w: 第%d行与第%d行存在重复追溯码%s", ErrErpPurchaseInboundConflict, lineNo, previousLine, traceCode)
+			}
+			traceCodeSeen[traceCode] = lineNo
+		}
 		remark := normalizePurchaseInboundOptionalString(item.Remark)
 		if remark != nil && len([]rune(*remark)) > 512 {
 			return nil, fmt.Errorf("%w: 第%d行备注不能超过512个字符", ErrErpPurchaseInboundInvalidInput, lineNo)
 		}
 
-		duplicateKey := strings.Join([]string{skuID, batchNo, expiryDate.Format("2006-01-02"), unitCost}, "|")
+		duplicateKey := strings.Join([]string{purchaseOrderItemID, batchNo, expiryDate.Format("2006-01-02")}, "|")
 		if previousLine, exists := seen[duplicateKey]; exists {
-			return nil, fmt.Errorf("%w: 第%d行与第%d行的SKU、批号、有效期和成本价重复，请合并数量", ErrErpPurchaseInboundConflict, previousLine, lineNo)
+			return nil, fmt.Errorf("%w: 第%d行与第%d行的采购明细、批号和有效期重复，请合并数量", ErrErpPurchaseInboundConflict, previousLine, lineNo)
 		}
 		seen[duplicateKey] = lineNo
 
 		normalized = append(normalized, normalizedErpPurchaseInboundItem{
 			normalizedErpInventoryInboundItem: normalizedErpInventoryInboundItem{
-				SkuID:      skuID,
 				BatchNo:    batchNo,
 				ExpiryDate: expiryDate,
-				UnitCost:   unitCost,
 				Quantity:   item.Quantity,
+				TraceCodes: traceCodes,
 				Remark:     remark,
 			},
-			LineNo: lineNo,
+			PurchaseOrderItemID: purchaseOrderItemID,
+			LineNo:              lineNo,
 		})
 	}
 	return normalized, nil

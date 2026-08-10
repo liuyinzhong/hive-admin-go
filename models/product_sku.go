@@ -2,6 +2,11 @@ package models
 
 import "time"
 
+const (
+	ProductSkuTraceModeNone     = "NONE"
+	ProductSkuTraceModeRequired = "REQUIRED"
+)
+
 type ProductSku struct {
 	SkuID             string     `gorm:"column:sku_id;type:char(36);primaryKey" json:"skuId"`
 	SkuCode           string     `gorm:"column:sku_code;type:varchar(16)" json:"skuCode"`
@@ -18,6 +23,7 @@ type ProductSku struct {
 	Gtin              *string    `gorm:"column:gtin;type:varchar(64)" json:"gtin"`
 	UdiDi             *string    `gorm:"column:udi_di;type:varchar(128)" json:"udiDi"`
 	AllowSplit        int        `gorm:"column:allow_split;type:tinyint;default:0" json:"allowSplit"`
+	TraceMode         string     `gorm:"column:trace_mode;type:varchar(16);default:NONE" json:"traceMode"`
 	Description       *string    `gorm:"column:description;type:varchar(2000)" json:"description"`
 	Status            int        `gorm:"column:status;type:tinyint;default:1" json:"status"`
 	RowVersion        int        `gorm:"column:row_version;type:int;default:1" json:"rowVersion"`
@@ -50,6 +56,7 @@ type SaveProductSkuRequest struct {
 	Gtin               *string `json:"gtin" binding:"omitempty,max=64" example:"06901234567890"`               // GTIN码
 	UdiDi              *string `json:"udiDi" binding:"omitempty,max=128" example:"(01)06901234567890"`         // UDI-DI码
 	AllowSplit         int     `json:"allowSplit" binding:"oneof=0 1" example:"0"`                             // 是否允许拆零
+	TraceMode          string  `json:"traceMode" binding:"required,oneof=NONE REQUIRED" example:"NONE"`        // 追溯码管理模式
 	Description        *string `json:"description" binding:"omitempty,max=2000" example:"包装描述"`                // 包装描述
 	Status             int     `json:"status" binding:"oneof=0 1" example:"1"`                                 // 状态
 	ExpectedRowVersion int     `json:"expectedRowVersion" example:"1"`                                         // 期望行版本号
@@ -95,6 +102,7 @@ type ProductSkuResponse struct {
 	Gtin              *string `json:"gtin" example:"06901234567890"`                               // GTIN码
 	UdiDi             *string `json:"udiDi" example:"(01)06901234567890"`                          // UDI-DI码
 	AllowSplit        int     `json:"allowSplit" example:"0"`                                      // 是否允许拆零
+	TraceMode         string  `json:"traceMode" example:"REQUIRED"`                                // 追溯码管理模式
 	Description       *string `json:"description" example:"包装描述"`                                  // 包装描述
 	Status            int     `json:"status" example:"1"`                                          // 状态
 	RowVersion        int     `json:"rowVersion" example:"1"`                                      // 版本号
@@ -137,6 +145,7 @@ type ProductSkuOptionResponse struct {
 	Gtin              *string `json:"gtin" example:"06901234567890"`                               // GTIN码
 	UdiDi             *string `json:"udiDi" example:"(01)06901234567890"`                          // UDI-DI码
 	AllowSplit        int     `json:"allowSplit" example:"0"`                                      // 是否允许拆零
+	TraceMode         string  `json:"traceMode" example:"REQUIRED"`                                // 追溯码管理模式
 	Description       *string `json:"description" example:"包装描述"`                                  // SKU描述
 	RowVersion        int     `json:"rowVersion" example:"1"`                                      // SKU版本号
 	CreateDate        *string `json:"createDate" example:"2026-01-15 09:00:00"`                    // SKU创建时间

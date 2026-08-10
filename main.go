@@ -56,6 +56,7 @@ func startServer() {
 	}
 	services.StartMedicalScheduleAutoScheduler()
 	services.StartAuditLogCleanupScheduler(config.AppConfig.AuditLog.RetentionDays, config.AppConfig.AuditLog.CleanupHour)
+	services.StartDownloadTaskWorker()
 
 	// 设置 GIN 为 release 模式，减少日志输出
 	gin.SetMode(gin.ReleaseMode)

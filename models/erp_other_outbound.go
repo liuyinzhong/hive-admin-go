@@ -50,9 +50,10 @@ type CreateErpOtherOutboundRequest struct {
 }
 
 type CreateErpOtherOutboundItem struct {
-	BalanceID string  `json:"balanceId" binding:"required" example:"550e8400-e29b-41d4-a716-446655440000"`
-	Quantity  int     `json:"quantity" binding:"required,min=1" example:"2"`
-	Remark    *string `json:"remark" binding:"omitempty,max=500" example:"日常领用"`
+	BalanceID  string   `json:"balanceId" binding:"required" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Quantity   int      `json:"quantity" binding:"required,min=1" example:"2"`
+	TraceCodes []string `json:"traceCodes" example:"[\"81000000000000000001\"]"`
+	Remark     *string  `json:"remark" binding:"omitempty,max=500" example:"日常领用"`
 }
 
 type ErpOtherOutboundListResponse struct {

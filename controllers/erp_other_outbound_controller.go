@@ -81,7 +81,7 @@ func (ctrl *ErpOtherOutboundController) GetOtherOutboundDetail(c *gin.Context) {
 
 // CreateOtherOutbound 新增其它出库单
 // @Summary 新增其它出库单
-// @Description 提交即完成其它出库，批量保存单据和明细并原子扣减库存余额、写入库存流水；数量按SKU包装单位录入
+// @Description 提交即完成其它出库，批量保存单据和明细并原子扣减库存余额、写入库存流水；启用追溯的SKU必须提交属于所选库存余额且当前在库的小包装追溯码，数量与追溯码个数一致
 // @Tags 进销存/其它出库
 // @Accept json
 // @Produce json

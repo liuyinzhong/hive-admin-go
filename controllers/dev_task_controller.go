@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -10,6 +11,50 @@ import (
 	"hive-admin-go/models"
 	"hive-admin-go/services"
 )
+
+// CreateTaskExport 创建任务管理导出任务。
+// @Summary 创建任务管理导出任务
+// @Description 按当前筛选和排序创建异步XLSX导出任务
+// @Tags 开发管理/任务管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param request body models.DevTaskExportRequest true "导出条件"
+// @Success 200 {object} models.Response{data=models.DownloadTaskCreatedResponse} "创建成功"
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 401 {object} models.Response "未登录"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 409 {object} models.Response "活动任务数量已达上限"
+// @Failure 500 {object} models.Response "创建失败"
+// @Router /dev/tasks/exports [post]
+func (dc *DevController) CreateTaskExport(c *gin.Context) {
+	userID, ok := currentUserID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, models.NewErrorResponse(nil, "用户未登录"))
+		return
+	}
+	var req models.DevTaskExportRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
+		return
+	}
+	result, err := services.NewDownloadTaskService().CreateTask(
+		userID,
+		models.DownloadTaskTypeDevTask,
+		"任务管理导出",
+		"任务管理",
+		req,
+	)
+	if err != nil {
+		if errors.Is(err, services.ErrDownloadTaskLimitReached) {
+			c.JSON(http.StatusConflict, models.NewErrorResponse(nil, err.Error()))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, "创建导出任务失败"))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
 
 // GetTasks 获取任务列表
 // @Summary 获取任务列表

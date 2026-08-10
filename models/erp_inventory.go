@@ -11,6 +11,9 @@ const (
 	InventoryMovementTypeOtherOut          = "OTHER_OUT"
 	InventoryMovementDirectionIn           = "IN"
 	InventoryMovementDirectionOut          = "OUT"
+	InventoryTraceCodeStatusInStock        = "IN_STOCK"
+	InventoryTraceCodeStatusOutbound       = "OUTBOUND"
+	InventoryTraceCodePackageLevelSmall    = "SMALL"
 )
 
 type ErpInventoryBatch struct {
@@ -77,6 +80,37 @@ func (ErpInventoryMovement) TableName() string {
 	return "erp_inventory_movement"
 }
 
+type ErpInventoryTraceCode struct {
+	TraceID          string     `gorm:"column:trace_id;type:char(36);primaryKey" json:"traceId"`
+	TraceCode        string     `gorm:"column:trace_code;type:varchar(64)" json:"traceCode"`
+	SkuID            string     `gorm:"column:sku_id;type:char(36)" json:"skuId"`
+	BatchID          string     `gorm:"column:batch_id;type:char(36)" json:"batchId"`
+	CurrentBalanceID *string    `gorm:"column:current_balance_id;type:char(36)" json:"currentBalanceId"`
+	Status           string     `gorm:"column:status;type:varchar(16)" json:"status"`
+	PackageLevel     string     `gorm:"column:package_level;type:varchar(16)" json:"packageLevel"`
+	ParentTraceID    *string    `gorm:"column:parent_trace_id;type:char(36)" json:"parentTraceId"`
+	RowVersion       int        `gorm:"column:row_version;type:int;default:1" json:"rowVersion"`
+	CreatorID        *string    `gorm:"column:creator_id;type:char(36)" json:"creatorId"`
+	UpdaterID        *string    `gorm:"column:updater_id;type:char(36)" json:"updaterId"`
+	CreateDate       *time.Time `gorm:"column:create_date" json:"createDate"`
+	UpdateDate       *time.Time `gorm:"column:update_date" json:"updateDate"`
+}
+
+func (ErpInventoryTraceCode) TableName() string {
+	return "erp_inventory_trace_code"
+}
+
+type ErpInventoryMovementTraceCode struct {
+	MovementTraceCodeID string     `gorm:"column:movement_trace_code_id;type:char(36);primaryKey" json:"movementTraceCodeId"`
+	MovementID          string     `gorm:"column:movement_id;type:char(36)" json:"movementId"`
+	TraceID             string     `gorm:"column:trace_id;type:char(36)" json:"traceId"`
+	CreateDate          *time.Time `gorm:"column:create_date" json:"createDate"`
+}
+
+func (ErpInventoryMovementTraceCode) TableName() string {
+	return "erp_inventory_movement_trace_code"
+}
+
 type ErpInventoryBalanceListRequest struct {
 	Page         int    `form:"page" example:"1"`                                           // 页码
 	PageSize     int    `form:"pageSize" example:"20"`                                      // 每页数量
@@ -102,18 +136,30 @@ type ErpInventorySourceMovementListRequest struct {
 	Sorts          string `form:"sorts" example:"createDate,desc"`
 }
 
+type ErpInventoryTraceCodeListRequest struct {
+	Page        int    `form:"page" example:"1"`
+	PageSize    int    `form:"pageSize" example:"20"`
+	TraceCode   string `form:"traceCode" example:"81000000000000000001"`
+	SkuCode     string `form:"skuCode" example:"SKU000001"`
+	BatchNo     string `form:"batchNo" example:"B20260731001"`
+	WarehouseID string `form:"warehouseId" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Status      string `form:"status" example:"IN_STOCK"`
+	Sorts       string `form:"sorts" example:"updateDate,desc"`
+}
+
 type CreateErpInventoryInitialStockRequest struct {
 	WarehouseID string                         `json:"warehouseId" binding:"required" example:"550e8400-e29b-41d4-a716-446655440000"` // 入库仓库ID
 	Items       []ErpInventoryInitialStockItem `json:"items" binding:"required"`                                                      // 初始库存明细
 }
 
 type ErpInventoryInitialStockItem struct {
-	SkuID      string  `json:"skuId" binding:"required" example:"550e8400-e29b-41d4-a716-446655440000"` // SKU ID
-	BatchNo    string  `json:"batchNo" binding:"required,max=64" example:"B20260731001"`                // 批号
-	ExpiryDate string  `json:"expiryDate" binding:"required" example:"2028-12-31"`                      // 有效期，格式YYYY-MM-DD
-	UnitCost   string  `json:"unitCost" binding:"required" example:"12.0000"`                           // 包装单位成本价
-	Quantity   int     `json:"quantity" binding:"required,min=1" example:"20"`                          // 包装单位入库数量
-	Remark     *string `json:"remark" binding:"omitempty,max=512" example:"初始库存导入"`                     // 备注
+	SkuID      string   `json:"skuId" binding:"required" example:"550e8400-e29b-41d4-a716-446655440000"` // SKU ID
+	BatchNo    string   `json:"batchNo" binding:"required,max=64" example:"B20260731001"`                // 批号
+	ExpiryDate string   `json:"expiryDate" binding:"required" example:"2028-12-31"`                      // 有效期，格式YYYY-MM-DD
+	UnitCost   string   `json:"unitCost" binding:"required" example:"12.0000"`                           // 包装单位成本价
+	Quantity   int      `json:"quantity" binding:"required,min=1" example:"20"`                          // 包装单位入库数量
+	TraceCodes []string `json:"traceCodes" example:"[\"81000000000000000001\"]"`                         // 小包装追溯码
+	Remark     *string  `json:"remark" binding:"omitempty,max=512" example:"初始库存导入"`                     // 备注
 }
 
 type CreateErpInventoryInitialStockResponse struct {
@@ -134,6 +180,7 @@ type ErpInventoryBalanceResponse struct {
 	ApprovalNo       string  `json:"approvalNo" example:"国药准字H20260001"`                         // 批准文号
 	BrandName        *string `json:"brandName" example:"品牌名"`                                    // 品牌名
 	PackageSpecName  string  `json:"packageSpecName" example:"10粒/盒"`                            // 包装规格
+	TraceMode        string  `json:"traceMode" example:"REQUIRED"`                               // 追溯码管理模式
 	BatchID          string  `json:"batchId" example:"550e8400-e29b-41d4-a716-446655440000"`     // 批次ID
 	BatchNo          string  `json:"batchNo" example:"B20260731001"`                             // 批号
 	ExpiryDate       string  `json:"expiryDate" example:"2028-12-31"`                            // 有效期
@@ -182,4 +229,26 @@ type ErpInventoryMovementResponse struct {
 	MinUnitName            string  `json:"minUnitName" example:"粒"`                                     // 最小单位名称
 	Remark                 *string `json:"remark" example:"初始库存导入"`                                     // 备注
 	CreateDate             *string `json:"createDate" example:"2026-01-15 09:00:00"`                    // 创建时间
+}
+
+type ErpInventoryTraceCodeResponse struct {
+	TraceID          string  `json:"traceId" example:"550e8400-e29b-41d4-a716-446655440000"`
+	TraceCode        string  `json:"traceCode" example:"81000000000000000001"`
+	SkuID            string  `json:"skuId" example:"550e8400-e29b-41d4-a716-446655440000"`
+	SkuCode          string  `json:"skuCode" example:"SKU000001"`
+	ProductName      string  `json:"productName" example:"阿莫西林胶囊"`
+	SpecName         string  `json:"specName" example:"0.25g"`
+	PackageSpecName  string  `json:"packageSpecName" example:"10粒/盒"`
+	BatchID          string  `json:"batchId" example:"550e8400-e29b-41d4-a716-446655440000"`
+	BatchNo          string  `json:"batchNo" example:"B20260731001"`
+	ExpiryDate       string  `json:"expiryDate" example:"2028-12-31"`
+	CurrentBalanceID *string `json:"currentBalanceId" example:"550e8400-e29b-41d4-a716-446655440000"`
+	WarehouseID      *string `json:"warehouseId" example:"550e8400-e29b-41d4-a716-446655440000"`
+	WarehouseName    *string `json:"warehouseName" example:"中心库"`
+	Status           string  `json:"status" example:"IN_STOCK"`
+	PackageLevel     string  `json:"packageLevel" example:"SMALL"`
+	ParentTraceID    *string `json:"parentTraceId" example:"550e8400-e29b-41d4-a716-446655440000"`
+	RowVersion       int     `json:"rowVersion" example:"1"`
+	CreateDate       *string `json:"createDate" example:"2026-08-07 09:00:00"`
+	UpdateDate       *string `json:"updateDate" example:"2026-08-07 09:30:00"`
 }

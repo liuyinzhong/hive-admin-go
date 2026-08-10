@@ -138,7 +138,7 @@ func (s *ErpOtherOutboundService) CreateOtherOutbound(req models.CreateErpOtherO
 				return fmt.Errorf("第%d行：%w", item.LineNo, err)
 			}
 
-			if err := s.inventoryService.createInventoryOutMovement(tx, *warehouse, item.BalanceID, item.Quantity, item.Remark, erpInventoryInMovementContext{
+			if err := s.inventoryService.createInventoryOutMovement(tx, *warehouse, item.BalanceID, item.Quantity, item.TraceCodes, item.Remark, erpInventoryInMovementContext{
 				SourceBillType: models.InventorySourceBillTypeOtherOutbound,
 				SourceBillID:   &sourceBillID,
 				SourceBillNo:   outboundNo,
@@ -156,10 +156,11 @@ func (s *ErpOtherOutboundService) CreateOtherOutbound(req models.CreateErpOtherO
 }
 
 type normalizedErpOtherOutboundItem struct {
-	LineNo    int
-	BalanceID string
-	Quantity  int
-	Remark    *string
+	LineNo     int
+	BalanceID  string
+	Quantity   int
+	TraceCodes []string
+	Remark     *string
 }
 
 type erpOtherOutboundListQueryRow struct {
@@ -383,6 +384,7 @@ func normalizeOtherOutboundItems(items []models.CreateErpOtherOutboundItem) ([]n
 
 	normalized := make([]normalizedErpOtherOutboundItem, 0, len(items))
 	seen := make(map[string]int, len(items))
+	traceCodeSeen := make(map[string]int)
 	for lineNo, item := range items {
 		currentLineNo := lineNo + 1
 		balanceID := strings.TrimSpace(item.BalanceID)
@@ -399,15 +401,26 @@ func normalizeOtherOutboundItems(items []models.CreateErpOtherOutboundItem) ([]n
 		if item.Quantity > 999999999 {
 			return nil, fmt.Errorf("%w: 第%d行出库数量不能超过999999999", ErrErpOtherOutboundInvalidInput, currentLineNo)
 		}
+		traceCodes, err := normalizeErpInventoryTraceCodes(item.TraceCodes)
+		if err != nil {
+			return nil, fmt.Errorf("%w: 第%d行%s", ErrErpOtherOutboundInvalidInput, currentLineNo, strings.TrimPrefix(err.Error(), ErrErpInventoryInvalidInput.Error()+": "))
+		}
+		for _, traceCode := range traceCodes {
+			if previousLine, exists := traceCodeSeen[traceCode]; exists {
+				return nil, fmt.Errorf("%w: 第%d行与第%d行存在重复追溯码%s", ErrErpOtherOutboundConflict, currentLineNo, previousLine, traceCode)
+			}
+			traceCodeSeen[traceCode] = currentLineNo
+		}
 		remark := normalizeErpOtherOutboundOptionalString(item.Remark)
 		if remark != nil && len([]rune(*remark)) > 500 {
 			return nil, fmt.Errorf("%w: 第%d行备注不能超过500个字符", ErrErpOtherOutboundInvalidInput, currentLineNo)
 		}
 		normalized = append(normalized, normalizedErpOtherOutboundItem{
-			LineNo:    currentLineNo,
-			BalanceID: balanceID,
-			Quantity:  item.Quantity,
-			Remark:    remark,
+			LineNo:     currentLineNo,
+			BalanceID:  balanceID,
+			Quantity:   item.Quantity,
+			TraceCodes: traceCodes,
+			Remark:     remark,
 		})
 	}
 	return normalized, nil

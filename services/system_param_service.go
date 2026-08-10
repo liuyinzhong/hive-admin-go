@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"errors"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -187,6 +188,22 @@ func (s *SystemParamService) GetParamValues(keys []string) (map[string]interface
 		values[p.ParamKey] = formatParamValue(p.ParamValue, p.ParamType)
 	}
 	return values, nil
+}
+
+// GetInt 读取一个内部整数参数。参数缺失、类型不符、越界或无法解析时返回默认值。
+func (s *SystemParamService) GetInt(key string, defaultValue, minValue, maxValue int) int {
+	var param models.SysParam
+	if err := database.DB.Where("param_key = ? AND del_flag = 0", key).First(&param).Error; err != nil {
+		return defaultValue
+	}
+	if param.ParamType != models.ParamTypeNumber {
+		return defaultValue
+	}
+	parsed, err := strconv.ParseFloat(strings.TrimSpace(param.ParamValue), 64)
+	if err != nil || parsed != math.Trunc(parsed) || parsed < float64(minValue) || parsed > float64(maxValue) {
+		return defaultValue
+	}
+	return int(parsed)
 }
 
 // formatParamValue 按 paramType 将字符串值格式化为对应 Go 类型

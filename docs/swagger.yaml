@@ -439,6 +439,12 @@ definitions:
         example: 日常领用
         maxLength: 500
         type: string
+      traceCodes:
+        example:
+        - '["81000000000000000001"]'
+        items:
+          type: string
+        type: array
     required:
     - balanceId
     - quantity
@@ -473,6 +479,9 @@ definitions:
       expiryDate:
         example: "2028-12-31"
         type: string
+      purchaseOrderItemId:
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
       quantity:
         example: 20
         minimum: 1
@@ -481,18 +490,17 @@ definitions:
         example: 首批到货
         maxLength: 512
         type: string
-      skuId:
-        example: 550e8400-e29b-41d4-a716-446655440000
-        type: string
-      unitCost:
-        example: "12.0000"
-        type: string
+      traceCodes:
+        example:
+        - '["81000000000000000001"]'
+        items:
+          type: string
+        type: array
     required:
     - batchNo
     - expiryDate
+    - purchaseOrderItemId
     - quantity
-    - skuId
-    - unitCost
     type: object
   models.CreateErpPurchaseInboundRequest:
     properties:
@@ -503,21 +511,17 @@ definitions:
         items:
           $ref: '#/definitions/models.CreateErpPurchaseInboundItem'
         type: array
+      purchaseOrderId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
       remark:
         example: 采购到货入库
         maxLength: 512
         type: string
-      supplierId:
-        example: 550e8400-e29b-41d4-a716-446655440000
-        type: string
-      warehouseId:
-        example: 550e8400-e29b-41d4-a716-446655440000
-        type: string
     required:
     - inboundDate
     - items
-    - supplierId
-    - warehouseId
+    - purchaseOrderId
     type: object
   models.CreateExternalPageRequest:
     properties:
@@ -1113,6 +1117,28 @@ definitions:
         example: 1
         type: integer
     type: object
+  models.DevTaskExportRequest:
+    properties:
+      projectId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      sorts:
+        example: createDate,desc
+        type: string
+      taskStatus:
+        example:
+        - 1
+        - 2
+        items:
+          type: integer
+        type: array
+      taskTitle:
+        example: 下载中心开发
+        type: string
+      versionId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    type: object
   models.DictTreeResponse:
     properties:
       children:
@@ -1366,6 +1392,43 @@ definitions:
         example: 张三
         type: string
     type: object
+  models.DownloadTaskCreatedResponse:
+    properties:
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    type: object
+  models.DownloadTaskResponse:
+    properties:
+      completedDate:
+        type: string
+      createDate:
+        type: string
+      errorMessage:
+        type: string
+      expireDate:
+        type: string
+      fileName:
+        type: string
+      fileSize:
+        type: integer
+      id:
+        type: string
+      processedRows:
+        type: integer
+      progress:
+        type: integer
+      sourceModule:
+        type: string
+      status:
+        type: string
+      taskName:
+        type: string
+      totalRows:
+        type: integer
+      updateDate:
+        type: string
+    type: object
   models.EnterpriseOptionResponse:
     properties:
       enterpriseCode:
@@ -1546,6 +1609,10 @@ definitions:
         description: 规格名称
         example: 0.25g
         type: string
+      traceMode:
+        description: 追溯码管理模式
+        example: REQUIRED
+        type: string
       unitCost:
         description: 包装单位成本价
         example: "12.0000"
@@ -1592,6 +1659,13 @@ definitions:
         description: SKU ID
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
+      traceCodes:
+        description: 小包装追溯码
+        example:
+        - '["81000000000000000001"]'
+        items:
+          type: string
+        type: array
       unitCost:
         description: 包装单位成本价
         example: "12.0000"
@@ -1731,6 +1805,66 @@ definitions:
         type: string
       warehouseName:
         description: 仓库名称
+        example: 中心库
+        type: string
+    type: object
+  models.ErpInventoryTraceCodeResponse:
+    properties:
+      batchId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      batchNo:
+        example: B20260731001
+        type: string
+      createDate:
+        example: "2026-08-07 09:00:00"
+        type: string
+      currentBalanceId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      expiryDate:
+        example: "2028-12-31"
+        type: string
+      packageLevel:
+        example: SMALL
+        type: string
+      packageSpecName:
+        example: 10粒/盒
+        type: string
+      parentTraceId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      productName:
+        example: 阿莫西林胶囊
+        type: string
+      rowVersion:
+        example: 1
+        type: integer
+      skuCode:
+        example: SKU000001
+        type: string
+      skuId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      specName:
+        example: 0.25g
+        type: string
+      status:
+        example: IN_STOCK
+        type: string
+      traceCode:
+        example: "81000000000000000001"
+        type: string
+      traceId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      updateDate:
+        example: "2026-08-07 09:30:00"
+        type: string
+      warehouseId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      warehouseName:
         example: 中心库
         type: string
     type: object
@@ -1878,6 +2012,9 @@ definitions:
       productName:
         example: 阿莫西林胶囊
         type: string
+      purchaseOrderItemId:
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
       quantity:
         example: 20
         type: integer
@@ -1917,6 +2054,12 @@ definitions:
       lineCount:
         example: 2
         type: integer
+      purchaseOrderId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      purchaseOrderNo:
+        example: PO000001
+        type: string
       remark:
         example: 采购到货入库
         type: string
@@ -1960,6 +2103,12 @@ definitions:
       lineCount:
         example: 2
         type: integer
+      purchaseOrderId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      purchaseOrderNo:
+        example: PO000001
+        type: string
       remark:
         example: 采购到货入库
         type: string
@@ -1971,6 +2120,211 @@ definitions:
         type: string
       totalAmount:
         example: "240.0000"
+        type: string
+      warehouseId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      warehouseName:
+        example: 中心库
+        type: string
+    type: object
+  models.ErpPurchaseOrderItemResponse:
+    properties:
+      amount:
+        example: "1200.0000"
+        type: string
+      inboundQuantity:
+        example: 40
+        type: integer
+      lineNo:
+        example: 1
+        type: integer
+      orderedQuantity:
+        example: 100
+        type: integer
+      packageSpecName:
+        example: 10粒/盒
+        type: string
+      packageUnitName:
+        example: 盒
+        type: string
+      productName:
+        example: 阿莫西林胶囊
+        type: string
+      purchaseOrderItemId:
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      remainingQuantity:
+        example: 60
+        type: integer
+      remark:
+        example: 采购明细备注
+        type: string
+      skuCode:
+        example: SKU000001
+        type: string
+      skuId:
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      specName:
+        example: 0.25g
+        type: string
+      traceMode:
+        example: REQUIRED
+        type: string
+      unitPrice:
+        example: "12.0000"
+        type: string
+    type: object
+  models.ErpPurchaseOrderListResponse:
+    properties:
+      createDate:
+        example: "2026-08-08 10:00:00"
+        type: string
+      creatorId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      expectedArrivalDate:
+        example: "2026-08-15"
+        type: string
+      lineCount:
+        example: 2
+        type: integer
+      orderDate:
+        example: "2026-08-08"
+        type: string
+      purchaseOrderId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      purchaseOrderNo:
+        example: PO000001
+        type: string
+      remark:
+        example: 常规采购
+        type: string
+      rowVersion:
+        example: 1
+        type: integer
+      status:
+        example: WAITING_RECEIPT
+        type: string
+      supplierId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      supplierName:
+        example: 示例供应商
+        type: string
+      totalAmount:
+        example: "1200.0000"
+        type: string
+      updateDate:
+        example: "2026-08-08 10:30:00"
+        type: string
+      warehouseId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      warehouseName:
+        example: 中心库
+        type: string
+    type: object
+  models.ErpPurchaseOrderLogResponse:
+    properties:
+      actionType:
+        example: INBOUND
+        type: string
+      fromStatus:
+        example: WAITING_RECEIPT
+        type: string
+      operatedAt:
+        example: "2026-08-08 12:00:00"
+        type: string
+      operatorId:
+        example: 550e8400-e29b-41d4-a716-446655440004
+        type: string
+      operatorName:
+        example: 仓库管理员
+        type: string
+      purchaseOrderLogId:
+        example: 550e8400-e29b-41d4-a716-446655440002
+        type: string
+      reason:
+        example: 供应商无法继续供货
+        type: string
+      relatedInboundId:
+        example: 550e8400-e29b-41d4-a716-446655440003
+        type: string
+      relatedInboundNo:
+        example: PIN00000001
+        type: string
+      summary:
+        example: 采购入库单PIN00000001，涉及2个SKU、3条入库明细
+        type: string
+      toStatus:
+        example: PARTIAL_RECEIPT
+        type: string
+    type: object
+  models.ErpPurchaseOrderReasonRequest:
+    properties:
+      reason:
+        example: 供应商无法继续供货
+        maxLength: 500
+        type: string
+    required:
+    - reason
+    type: object
+  models.ErpPurchaseOrderResponse:
+    properties:
+      confirmedAt:
+        example: "2026-08-08 11:00:00"
+        type: string
+      confirmedBy:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      createDate:
+        example: "2026-08-08 10:00:00"
+        type: string
+      creatorId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      expectedArrivalDate:
+        example: "2026-08-15"
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/models.ErpPurchaseOrderItemResponse'
+        type: array
+      lineCount:
+        example: 2
+        type: integer
+      orderDate:
+        example: "2026-08-08"
+        type: string
+      purchaseOrderId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      purchaseOrderNo:
+        example: PO000001
+        type: string
+      remark:
+        example: 常规采购
+        type: string
+      rowVersion:
+        example: 1
+        type: integer
+      status:
+        example: WAITING_RECEIPT
+        type: string
+      supplierId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      supplierName:
+        example: 示例供应商
+        type: string
+      totalAmount:
+        example: "1200.0000"
+        type: string
+      updateDate:
+        example: "2026-08-08 10:30:00"
         type: string
       warehouseId:
         example: 550e8400-e29b-41d4-a716-446655440000
@@ -2500,6 +2854,24 @@ definitions:
       unifiedCreditCode:
         type: string
       updateDate:
+        type: string
+    type: object
+  models.InventoryBalanceExportRequest:
+    properties:
+      batchNo:
+        example: B20260731001
+        type: string
+      onlyPositive:
+        example: true
+        type: boolean
+      skuCode:
+        example: SKU000001
+        type: string
+      sorts:
+        example: updateDate,desc
+        type: string
+      warehouseId:
+        example: 550e8400-e29b-41d4-a716-446655440000
         type: string
     type: object
   models.LoginLogDetailResponse:
@@ -3703,6 +4075,10 @@ definitions:
         description: 规格含量
         example: 0.25g
         type: string
+      traceMode:
+        description: 追溯码管理模式
+        example: REQUIRED
+        type: string
       udiDi:
         description: UDI-DI码
         example: (01)06901234567890
@@ -3944,6 +4320,10 @@ definitions:
         description: 状态
         example: 1
         type: integer
+      traceMode:
+        description: 追溯码管理模式
+        example: REQUIRED
+        type: string
       udiDi:
         description: UDI-DI码
         example: (01)06901234567890
@@ -4778,6 +5158,58 @@ definitions:
     - enterpriseType
     - roles
     type: object
+  models.SaveErpPurchaseOrderItem:
+    properties:
+      orderedQuantity:
+        example: 100
+        minimum: 1
+        type: integer
+      remark:
+        example: 采购明细备注
+        maxLength: 512
+        type: string
+      skuId:
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      unitPrice:
+        example: "12.0000"
+        type: string
+    required:
+    - orderedQuantity
+    - skuId
+    - unitPrice
+    type: object
+  models.SaveErpPurchaseOrderRequest:
+    properties:
+      expectedArrivalDate:
+        example: "2026-08-15"
+        type: string
+      expectedRowVersion:
+        example: 1
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/models.SaveErpPurchaseOrderItem'
+        type: array
+      orderDate:
+        example: "2026-08-08"
+        type: string
+      remark:
+        example: 常规采购
+        maxLength: 512
+        type: string
+      supplierId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      warehouseId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    required:
+    - items
+    - orderDate
+    - supplierId
+    - warehouseId
+    type: object
   models.SaveErpWarehouseLocationRequest:
     properties:
       expectedRowVersion:
@@ -5355,6 +5787,13 @@ definitions:
         - 1
         example: 1
         type: integer
+      traceMode:
+        description: 追溯码管理模式
+        enum:
+        - NONE
+        - REQUIRED
+        example: NONE
+        type: string
       udiDi:
         description: UDI-DI码
         example: (01)06901234567890
@@ -5367,6 +5806,7 @@ definitions:
     - mpId
     - packConversion
     - packageUnitName
+    - traceMode
     type: object
   models.SaveProductSpuRequest:
     properties:
@@ -10105,6 +10545,55 @@ paths:
       summary: 批量创建任务
       tags:
       - 开发管理/任务管理
+  /dev/tasks/exports:
+    post:
+      consumes:
+      - application/json
+      description: 按当前筛选和排序创建异步XLSX导出任务
+      parameters:
+      - description: 导出条件
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.DevTaskExportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DownloadTaskCreatedResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 活动任务数量已达上限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 创建失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建任务管理导出任务
+      tags:
+      - 开发管理/任务管理
   /dev/versions:
     delete:
       consumes:
@@ -10604,11 +11093,60 @@ paths:
       summary: 获取库存流水列表
       tags:
       - 进销存/库存管理
+  /erp/inventory/balances/exports:
+    post:
+      consumes:
+      - application/json
+      description: 按当前筛选和排序创建异步XLSX导出任务
+      parameters:
+      - description: 导出条件
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.InventoryBalanceExportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DownloadTaskCreatedResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 活动任务数量已达上限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 创建失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建库存余额导出任务
+      tags:
+      - 进销存/库存管理
   /erp/inventory/initialStocks:
     post:
       consumes:
       - application/json
-      description: 批量写入初始库存，数量按SKU包装单位录入；同一批次再次写入是追加库存而不是覆盖库存；整批提交原子成功或失败
+      description: 批量写入初始库存；启用追溯的SKU必须提交纯数字小包装追溯码且数量与追溯码个数一致；同一批次再次写入是追加库存而不是覆盖库存；整批提交原子成功或失败
       parameters:
       - description: 初始库存
         in: body
@@ -10723,6 +11261,150 @@ paths:
       summary: 获取来源单据库存流水列表
       tags:
       - 进销存/库存管理
+  /erp/inventory/traceCodes:
+    get:
+      description: 分页查询小包装追溯码，可按追溯码、SKU编码、批号、当前仓库和当前状态筛选
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 追溯码，精确匹配
+        in: query
+        name: traceCode
+        type: string
+      - description: SKU编码，模糊匹配
+        in: query
+        name: skuCode
+        type: string
+      - description: 批号，模糊匹配
+        in: query
+        name: batchNo
+        type: string
+      - description: 当前所在仓库ID，UUID格式；已出库追溯码无当前仓库
+        in: query
+        name: warehouseId
+        type: string
+      - description: 状态
+        enum:
+        - IN_STOCK
+        - OUTBOUND
+        in: query
+        name: status
+        type: string
+      - description: 排序，支持traceCode、skuCode、batchNo、status、createDate、updateDate
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ErpInventoryTraceCodeResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取库存追溯码列表
+      tags:
+      - 进销存/库存管理
+  /erp/inventory/traceCodes/{traceId}/movements:
+    get:
+      description: 根据追溯码ID分页查询其关联的全部库存流水，仅展示来源单据编号，不提供页面跳转
+      parameters:
+      - description: 追溯码ID，UUID格式
+        in: path
+        name: traceId
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 排序，支持sourceBillType、sourceBillNo、movementType、direction、createDate
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ErpInventoryMovementResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 追溯码不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取追溯码库存流水
+      tags:
+      - 进销存/库存管理
   /erp/otherOutbounds:
     get:
       description: 分页查询其它出库单，支持按单号、仓库、SKU编码、批号和出库日期范围筛选
@@ -10806,7 +11488,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 提交即完成其它出库，批量保存单据和明细并原子扣减库存余额、写入库存流水；数量按SKU包装单位录入
+      description: 提交即完成其它出库，批量保存单据和明细并原子扣减库存余额、写入库存流水；启用追溯的SKU必须提交属于所选库存余额且当前在库的小包装追溯码，数量与追溯码个数一致
       parameters:
       - description: 其它出库单
         in: body
@@ -10903,7 +11585,7 @@ paths:
       - 进销存/其它出库
   /erp/purchaseInbounds:
     get:
-      description: 分页查询采购入库单，支持按单号、供应商、仓库、SKU编码、批号和入库日期范围筛选
+      description: 分页查询采购入库单，支持按入库单号、采购单号、供应商、仓库、SKU编码、批号和入库日期范围筛选
       parameters:
       - description: 页码
         in: query
@@ -10916,6 +11598,10 @@ paths:
       - description: 采购入库单号
         in: query
         name: inboundNo
+        type: string
+      - description: 来源采购单号
+        in: query
+        name: purchaseOrderNo
         type: string
       - description: 供应商ID，UUID格式
         in: query
@@ -10988,7 +11674,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 提交即完成采购入库，批量保存单据和明细并原子写入库存批次、库存余额和库存流水；数量按SKU包装单位录入
+      description: 只能从待收货或部分入库采购单发起；供应商、仓库、SKU和成本价继承采购单，批量保存单据和明细并原子更新采购单收货进度、库存与采购单日志；启用追溯的SKU必须提交纯数字小包装追溯码且数量与追溯码个数一致
       parameters:
       - description: 采购入库单
         in: body
@@ -11021,11 +11707,11 @@ paths:
           schema:
             $ref: '#/definitions/models.Response'
         "404":
-          description: 供应商、仓库或SKU不存在或未启用
+          description: 采购单、采购明细、仓库或SKU不存在
           schema:
             $ref: '#/definitions/models.Response'
         "409":
-          description: 明细重复或库存写入冲突
+          description: 采购单状态、剩余数量、明细或库存写入冲突
           schema:
             $ref: '#/definitions/models.Response'
         "500":
@@ -11083,6 +11769,463 @@ paths:
       summary: 获取采购入库单详情
       tags:
       - 进销存/采购入库
+  /erp/purchaseOrders:
+    get:
+      description: 分页查询采购单，支持单号、供应商、仓库、SKU编码、状态和采购日期范围筛选
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 采购单号
+        in: query
+        name: purchaseOrderNo
+        type: string
+      - description: 供应商ID
+        in: query
+        name: supplierId
+        type: string
+      - description: 仓库ID
+        in: query
+        name: warehouseId
+        type: string
+      - description: SKU编码
+        in: query
+        name: skuCode
+        type: string
+      - description: 状态
+        enum:
+        - DRAFT
+        - WAITING_RECEIPT
+        - PARTIAL_RECEIPT
+        - COMPLETED
+        - CANCELLED
+        - CLOSED
+        in: query
+        name: status
+        type: string
+      - description: 采购日期起，YYYY-MM-DD
+        in: query
+        name: orderDateFrom
+        type: string
+      - description: 采购日期止，YYYY-MM-DD
+        in: query
+        name: orderDateTo
+        type: string
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PaginationResponse'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.ErpPurchaseOrderListResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取采购单列表
+      tags:
+      - 进销存/采购单
+    post:
+      consumes:
+      - application/json
+      description: 创建结构完整的采购单草稿并生成不可复用的采购单号
+      parameters:
+      - description: 采购单
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveErpPurchaseOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpPurchaseOrderResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 供应商、仓库或SKU不存在或未启用
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 明细重复
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建采购单草稿
+      tags:
+      - 进销存/采购单
+  /erp/purchaseOrders/{purchaseOrderId}:
+    get:
+      parameters:
+      - description: 采购单ID，UUID格式
+        in: path
+        name: purchaseOrderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpPurchaseOrderResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 采购单不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取采购单详情
+      tags:
+      - 进销存/采购单
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 采购单ID，UUID格式
+        in: path
+        name: purchaseOrderId
+        required: true
+        type: string
+      - description: 采购单及期望版本
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveErpPurchaseOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 修改成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpPurchaseOrderResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 采购单或基础资料不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 状态或并发版本冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 修改采购单草稿
+      tags:
+      - 进销存/采购单
+  /erp/purchaseOrders/{purchaseOrderId}/cancel:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 采购单ID，UUID格式
+        in: path
+        name: purchaseOrderId
+        required: true
+        type: string
+      - description: 取消原因
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ErpPurchaseOrderReasonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 取消成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpPurchaseOrderResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 采购单不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 状态冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 取消采购单
+      tags:
+      - 进销存/采购单
+  /erp/purchaseOrders/{purchaseOrderId}/close:
+    post:
+      consumes:
+      - application/json
+      description: 关闭部分入库采购单，未入库的剩余数量永久失效
+      parameters:
+      - description: 采购单ID，UUID格式
+        in: path
+        name: purchaseOrderId
+        required: true
+        type: string
+      - description: 关闭原因
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ErpPurchaseOrderReasonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 关闭成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpPurchaseOrderResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 采购单不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 状态冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 关闭采购单
+      tags:
+      - 进销存/采购单
+  /erp/purchaseOrders/{purchaseOrderId}/confirm:
+    post:
+      description: 将草稿确认并锁定，状态变更为待收货
+      parameters:
+      - description: 采购单ID，UUID格式
+        in: path
+        name: purchaseOrderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 确认成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ErpPurchaseOrderResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 采购单或基础资料不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 状态冲突
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 确认采购单
+      tags:
+      - 进销存/采购单
+  /erp/purchaseOrders/{purchaseOrderId}/logs:
+    get:
+      description: 返回不可修改的创建、修改、确认、入库、取消和关闭日志
+      parameters:
+      - description: 采购单ID，UUID格式
+        in: path
+        name: purchaseOrderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ErpPurchaseOrderLogResponse'
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录或Token无效
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 采购单不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取采购单业务日志
+      tags:
+      - 进销存/采购单
   /erp/warehouses:
     get:
       description: 分页查询仓库基础资料列表，支持按仓库编码/名称、储存类型、业务范围和状态筛选
@@ -16889,6 +18032,112 @@ paths:
       summary: 更新字典状态
       tags:
       - 系统管理/字典管理
+  /system/downloads:
+    get:
+      description: 仅返回当前登录用户创建的下载任务，文件保留7天，任务记录保留30天
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 任务名称，模糊匹配
+        in: query
+        name: taskName
+        type: string
+      - description: 状态
+        enum:
+        - pending
+        - running
+        - succeeded
+        - failed
+        in: query
+        name: status
+        type: string
+      - description: 创建时间起，格式 YYYY-MM-DD HH:mm:ss
+        in: query
+        name: createDateStart
+        type: string
+      - description: 创建时间止，格式 YYYY-MM-DD HH:mm:ss
+        in: query
+        name: createDateEnd
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.DownloadTaskResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 获取失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取下载中心列表
+      tags:
+      - 系统管理/下载中心
+  /system/downloads/{id}/file:
+    get:
+      description: 下载当前用户自己的、未过期且已生成的导出文件
+      parameters:
+      - description: 下载任务ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 文件流
+          schema:
+            type: file
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 任务不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 文件不可用
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 下载失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 下载导出文件
+      tags:
+      - 系统管理/下载中心
   /system/externalPages:
     delete:
       consumes:

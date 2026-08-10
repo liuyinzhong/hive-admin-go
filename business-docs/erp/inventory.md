@@ -1,0 +1,86 @@
+# 库存业务规则
+
+库存模块维护库存批次、库存余额、库存流水和追溯码。业务单据不能直接覆盖库存余额，所有数量变化都必须通过统一库存变动完成。
+
+## 核算维度
+
+```text
+库存批次唯一维度 = 产品品规 + 批号 + 有效期 + 包装单位成本
+库存余额唯一维度 = 仓库 + 库存批次
+```
+
+当前库存不细分到库区或货位。同一库存批次可以在多个仓库形成不同库存余额；同一产品品规的批号相同但有效期或成本不同，会形成不同库存批次。
+
+## 业务规则
+
+### ERP-INV-001 库存余额只能由库存变动生成
+
+库存余额不能人工编辑或删除。余额减为零后继续保留，以维持固定的 `balanceId` 和完整流水追溯。
+
+### ERP-INV-002 每次库存变动必须写流水
+
+库存变动在同一事务中维护库存批次、库存余额和库存流水。流水记录来源单据、业务类型、方向，以及包装单位和最小单位的变动前、本次变动、变动后数量。
+
+### ERP-INV-003 流水是不可变事实
+
+库存流水写入后不修改、不删除。库存错误应通过后续盘点或调整能力更正，不能删除历史事实。
+
+### ERP-INV-004 ERP 数量按包装单位输入
+
+入库和出库请求中的 `quantity` 表示产品品规包装单位数量，必须是正整数。最小单位数量由后端使用产品品规包装换算系数计算，仅用于库存展示和核对。
+
+### ERP-INV-005 不允许负库存
+
+出库时锁定库存余额并校验最新数量。余额不足时整项业务失败，不更新余额、不写流水，也不允许部分成功。
+
+### ERP-INV-006 库存变动使用事务和行锁
+
+当前通过数据库事务、库存余额行锁和行版本维护一致性。并发创建相同余额发生唯一冲突时返回冲突并要求刷新重试；当前没有通用请求幂等键或自动重试机制。
+
+### ERP-INV-007 期初库存整批成功或失败
+
+一次期初库存只针对一个启用仓库，包含 1 至 100 条明细。每条填写产品品规、批号、有效期、成本、包装单位数量和可选备注。
+
+同次提交不允许出现产品品规、批号、有效期和成本完全相同的重复行；不同提交可以对相同库存批次继续追加。提交成功返回来源批次号和流水数量，不建立可编辑的期初单。
+
+### ERP-INV-008 追溯模式决定码数量
+
+产品品规追溯模式当前只有：
+
+- `NONE`：禁止提交追溯码。
+- `REQUIRED`：追溯码数量必须等于包装单位数量。
+
+追溯码去除首尾空白后不能为空，最长 64 位且只能包含数字；同次业务不能重复，数据库中也不能重复入库。
+
+### ERP-INV-009 追溯码跟随库存流转
+
+必须追溯的产品入库时，追溯码进入 `IN_STOCK` 并关联当前库存余额；出库必须明确提交属于该余额且当前在库的追溯码，成功后状态变为 `OUTBOUND` 并解除当前余额关联。
+
+每次追溯产品库存变动前后，系统校验该余额的包装单位数量与在库追溯码数量一致；不一致时拒绝继续变动。
+
+### ERP-INV-010 来源、业务类型和方向相互独立
+
+| 场景 | 来源单据类型 | 库存业务类型 | 方向 |
+|---|---|---|---|
+| 期初库存 | `INITIAL_STOCK` | `INITIAL_IN` | `IN` |
+| 采购入库 | `PURCHASE_INBOUND` | `PURCHASE_IN` | `IN` |
+| 其它出库 | `OTHER_OUTBOUND` | `OTHER_OUT` | `OUT` |
+
+## 查询与权限
+
+- 库存余额默认保留并展示零余额，可用 `onlyPositive=true` 只查正库存。
+- 余额列表支持仓库、余额 ID 集合、产品编码、批号和排序。
+- 可从余额查看该余额的流水，也可按来源单据查看整单流水。
+- 追溯码列表支持追溯码、产品编码、批号、仓库和状态筛选，并可查看单码流水。
+- 权限：`erp:inventoryBalance:list`、`erp:inventoryBalance:export`、`erp:inventoryMovement:list`、`erp:inventorySourceMovement:list`、`erp:inventoryInitial:create`、`erp:inventoryTraceCode:list`、`erp:inventoryTraceCode:movements`。
+
+## 代码入口
+
+- Model/DTO：`models/erp_inventory.go`，追溯模式来源于 `models/product_sku.go`。
+- Service：`services/erp_inventory_service.go`。
+- 导出：`services/erp_inventory_download_exporter.go`。
+- 异步导出通用规则：[系统下载中心](../system/download-center.md)。
+- Controller：`controllers/erp_inventory_controller.go`。
+- Router：`router/router.go` 中 `/api/erp/inventory`。
+- 前端余额：`hive/apps/web-antdv-next/src/views/erp/inventory`。
+- 前端追溯码：`hive/apps/web-antdv-next/src/views/erp/traceCode`。

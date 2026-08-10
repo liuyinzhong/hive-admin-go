@@ -119,6 +119,7 @@ func (s *ProductSkuService) CreateProductSku(req models.SaveProductSkuRequest, o
 			Gtin:              normalized.Gtin,
 			UdiDi:             normalized.UdiDi,
 			AllowSplit:        normalized.AllowSplit,
+			TraceMode:         normalized.TraceMode,
 			Description:       normalized.Description,
 			Status:            normalized.Status,
 			RowVersion:        1,
@@ -179,6 +180,7 @@ func (s *ProductSkuService) UpdateProductSku(skuID string, req models.SaveProduc
 			"gtin":                 normalized.Gtin,
 			"udi_di":               normalized.UdiDi,
 			"allow_split":          normalized.AllowSplit,
+			"trace_mode":           normalized.TraceMode,
 			"description":          normalized.Description,
 			"status":               normalized.Status,
 			"row_version":          sku.RowVersion + 1,
@@ -300,6 +302,7 @@ func (s *ProductSkuService) GetProductSkuOptions(req models.ProductSkuOptionsReq
 			Gtin:              row.Gtin,
 			UdiDi:             row.UdiDi,
 			AllowSplit:        row.AllowSplit,
+			TraceMode:         row.TraceMode,
 			Description:       row.Description,
 			RowVersion:        row.RowVersion,
 			CreateDate:        models.TimeToStringPtr(row.CreateDate),
@@ -323,6 +326,7 @@ type normalizedProductSkuSave struct {
 	Gtin               *string
 	UdiDi              *string
 	AllowSplit         int
+	TraceMode          string
 	Description        *string
 	Status             int
 	ExpectedRowVersion int
@@ -363,6 +367,7 @@ type productSkuQueryRow struct {
 	Gtin              *string
 	UdiDi             *string
 	AllowSplit        int
+	TraceMode         string
 	Description       *string
 	Status            int
 	RowVersion        int
@@ -410,6 +415,10 @@ func (s *ProductSkuService) normalizeSaveRequest(req models.SaveProductSkuReques
 	if err := validateProductSkuBoolFlag(req.AllowSplit, "是否允许拆零"); err != nil {
 		return nil, err
 	}
+	traceMode := strings.TrimSpace(req.TraceMode)
+	if traceMode != models.ProductSkuTraceModeNone && traceMode != models.ProductSkuTraceModeRequired {
+		return nil, fmt.Errorf("%w: 追溯码管理模式不正确", ErrProductSkuInvalidInput)
+	}
 
 	barcode := normalizeProductSkuOptionalString(req.Barcode)
 	if barcode != nil && len([]rune(*barcode)) > 64 {
@@ -446,6 +455,7 @@ func (s *ProductSkuService) normalizeSaveRequest(req models.SaveProductSkuReques
 		Gtin:               gtin,
 		UdiDi:              udiDi,
 		AllowSplit:         req.AllowSplit,
+		TraceMode:          traceMode,
 		Description:        description,
 		Status:             req.Status,
 		ExpectedRowVersion: req.ExpectedRowVersion,
@@ -536,6 +546,7 @@ func productSkuSelectFields() string {
 		"product_sku.gtin",
 		"product_sku.udi_di",
 		"product_sku.allow_split",
+		"product_sku.trace_mode",
 		"product_sku.description",
 		"product_sku.status",
 		"product_sku.row_version",
@@ -582,6 +593,7 @@ func productSkuRowToResponse(row productSkuQueryRow) *models.ProductSkuResponse 
 		Gtin:              row.Gtin,
 		UdiDi:             row.UdiDi,
 		AllowSplit:        row.AllowSplit,
+		TraceMode:         row.TraceMode,
 		Description:       row.Description,
 		Status:            row.Status,
 		RowVersion:        row.RowVersion,

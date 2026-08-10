@@ -31,8 +31,10 @@ type MenuMessageService struct {
 	hub *menuMessageHub
 }
 
+var sharedMenuMessageHub = newMenuMessageHub()
+
 func NewMenuMessageService() *MenuMessageService {
-	return &MenuMessageService{hub: newMenuMessageHub()}
+	return &MenuMessageService{hub: sharedMenuMessageHub}
 }
 
 // GetUnreadSummary 返回当前用户按菜单聚合的未读数量。
@@ -137,6 +139,37 @@ func (s *MenuMessageService) MarkRead(userID, menuID string) error {
 	return nil
 }
 
+// CreateMenuMessageForMenuName 为指定用户创建一条菜单消息。
+func (s *MenuMessageService) CreateMenuMessageForMenuName(userID, menuName, title, content string) error {
+	var menu models.SysMenu
+	if err := database.DB.Where(
+		"name = ? AND status = 1 AND del_flag = 0 AND type IN ?",
+		menuName,
+		[]string{"menu", "embedded", "link"},
+	).First(&menu).Error; err != nil {
+		return err
+	}
+	now := time.Now()
+	message := models.SysMenuMessage{
+		ID:         utils.GenerateUUID(),
+		UserID:     userID,
+		MenuID:     menu.ID,
+		Title:      title,
+		Content:    content,
+		CreateDate: &now,
+	}
+	if err := database.DB.Create(&message).Error; err != nil {
+		return err
+	}
+	s.notifyUnreadSummary(userID)
+	return nil
+}
+
+// PublishDownloadTaskChanged 将下载任务进度作为瞬时事件推送给当前用户。
+func (s *MenuMessageService) PublishDownloadTaskChanged(userID string, event models.DownloadTaskChangedEvent) {
+	s.hub.publish(userID, menuMessageEvent{name: "downloadTaskChanged", data: event})
+}
+
 // StreamUnreadSummary 将当前用户的汇总以 SSE 推送，直到客户端断开。
 func (s *MenuMessageService) StreamUnreadSummary(c *gin.Context, userID string) error {
 	channel, unsubscribe := s.hub.subscribe(userID)
@@ -157,7 +190,7 @@ func (s *MenuMessageService) StreamUnreadSummary(c *gin.Context, userID string) 
 		return errors.New("当前响应不支持 SSE")
 	}
 
-	if err := writeMenuMessageSSE(c.Writer, summary); err != nil {
+	if err := writeMenuMessageSSE(c.Writer, menuMessageEvent{name: "unreadSummary", data: summary}); err != nil {
 		return err
 	}
 	flusher.Flush()
@@ -167,8 +200,8 @@ func (s *MenuMessageService) StreamUnreadSummary(c *gin.Context, userID string) 
 
 	for {
 		select {
-		case nextSummary := <-channel:
-			if err := writeMenuMessageSSE(c.Writer, nextSummary); err != nil {
+		case event := <-channel:
+			if err := writeMenuMessageSSE(c.Writer, event); err != nil {
 				return err
 			}
 			flusher.Flush()
@@ -189,15 +222,15 @@ func (s *MenuMessageService) notifyUnreadSummary(userID string) {
 		log.Printf("menu message summary notification failed for user %s: %v", userID, err)
 		return
 	}
-	s.hub.publish(userID, summary)
+	s.hub.publish(userID, menuMessageEvent{name: "unreadSummary", data: summary})
 }
 
-func writeMenuMessageSSE(w interface{ Write([]byte) (int, error) }, summary []models.MenuMessageUnreadSummary) error {
-	payload, err := json.Marshal(summary)
+func writeMenuMessageSSE(w interface{ Write([]byte) (int, error) }, event menuMessageEvent) error {
+	payload, err := json.Marshal(event.data)
 	if err != nil {
 		return err
 	}
-	_, err = w.Write([]byte("event: unreadSummary\ndata: " + string(payload) + "\n\n"))
+	_, err = w.Write([]byte("event: " + event.name + "\ndata: " + string(payload) + "\n\n"))
 	return err
 }
 
@@ -219,21 +252,26 @@ func uniqueNonEmptyStrings(values []string) []string {
 
 type menuMessageHub struct {
 	mu          sync.RWMutex
-	subscribers map[string]map[chan []models.MenuMessageUnreadSummary]struct{}
+	subscribers map[string]map[chan menuMessageEvent]struct{}
+}
+
+type menuMessageEvent struct {
+	name string
+	data interface{}
 }
 
 func newMenuMessageHub() *menuMessageHub {
 	return &menuMessageHub{
-		subscribers: make(map[string]map[chan []models.MenuMessageUnreadSummary]struct{}),
+		subscribers: make(map[string]map[chan menuMessageEvent]struct{}),
 	}
 }
 
-func (h *menuMessageHub) subscribe(userID string) (chan []models.MenuMessageUnreadSummary, func()) {
-	channel := make(chan []models.MenuMessageUnreadSummary, 1)
+func (h *menuMessageHub) subscribe(userID string) (chan menuMessageEvent, func()) {
+	channel := make(chan menuMessageEvent, 8)
 
 	h.mu.Lock()
 	if h.subscribers[userID] == nil {
-		h.subscribers[userID] = make(map[chan []models.MenuMessageUnreadSummary]struct{})
+		h.subscribers[userID] = make(map[chan menuMessageEvent]struct{})
 	}
 	h.subscribers[userID][channel] = struct{}{}
 	h.mu.Unlock()
@@ -250,9 +288,9 @@ func (h *menuMessageHub) subscribe(userID string) (chan []models.MenuMessageUnre
 	}
 }
 
-func (h *menuMessageHub) publish(userID string, summary []models.MenuMessageUnreadSummary) {
+func (h *menuMessageHub) publish(userID string, event menuMessageEvent) {
 	h.mu.RLock()
-	channels := make([]chan []models.MenuMessageUnreadSummary, 0, len(h.subscribers[userID]))
+	channels := make([]chan menuMessageEvent, 0, len(h.subscribers[userID]))
 	for channel := range h.subscribers[userID] {
 		channels = append(channels, channel)
 	}
@@ -260,14 +298,14 @@ func (h *menuMessageHub) publish(userID string, summary []models.MenuMessageUnre
 
 	for _, channel := range channels {
 		select {
-		case channel <- summary:
+		case channel <- event:
 		default:
 			select {
 			case <-channel:
 			default:
 			}
 			select {
-			case channel <- summary:
+			case channel <- event:
 			default:
 			}
 		}
