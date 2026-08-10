@@ -42,6 +42,12 @@ SPU、RP、MP、SKU 的修改和状态切换必须提交 `expectedRowVersion`。
 
 SPU、RP、MP、SKU 当前只有创建、详情、修改和启停接口，没有删除接口。停用用于阻止其进入新的业务选择，历史单据和库存引用继续保留。
 
+### PROD-ARC-008 SKU 档案按最末级扁平查询
+
+SKU 档案列表以真实 SKU 为分页边界，一行对应一条 SKU，并在同一响应中扁平返回所属 SPU、RP 和 MP 的关键字段。没有 SKU 的上级节点不会生成占位行。
+
+列表支持按 SKU 编码、通用名称、简称、批准文号和生产企业名称模糊匹配，按产品类型和 SKU 状态精确匹配；多个条件同时提交时按 AND 组合。`mpId` 是兼容层级内查询的可选精确条件，不是 SKU 档案全量查询的必填条件。
+
 ## 页面动作与权限
 
 | 资源 | 动作权限 |
@@ -58,5 +64,4 @@ SPU、RP、MP、SKU 当前只有创建、详情、修改和启停接口，没有
 - Model/DTO：`models/product_spu.go`、`product_rp.go`、`product_mp.go`、`product_sku.go`。
 - Service：`services/product_spu_service.go`、`product_rp_service.go`、`product_mp_service.go`、`product_sku_service.go`。
 - Router：`router/router.go` 中 `/api/product/spus`、`rps`、`mps`、`skus`。
-- 前端：`hive/apps/web-antdv-next/src/views/product/spu`。
-
+- 前端：`hive/apps/web-antdv-next/src/views/product/spu`、`hive/apps/web-antdv-next/src/views/product/sku`。

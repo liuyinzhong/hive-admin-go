@@ -39,10 +39,17 @@ func (ProductSku) TableName() string {
 }
 
 type ProductSkuListRequest struct {
-	MpID     string `form:"mpId" binding:"required" example:"550e8400-e29b-41d4-a716-446655440000"` // 产品MP ID
-	Page     int    `form:"page" example:"1"`                                                       // 页码
-	PageSize int    `form:"pageSize" example:"20"`                                                  // 每页数量
-	Sorts    string `form:"sorts" example:"packageSpecName,desc;createDate,desc"`                   // 排序
+	SkuCode        string `form:"skuCode" example:"SKU000001"`                                                            // SKU编码，模糊匹配
+	ProductName    string `form:"productName" example:"阿莫西林"`                                                             // 通用名称，模糊匹配
+	ShortName      string `form:"shortName" example:"阿莫西林"`                                                               // 简称，模糊匹配
+	ApprovalNo     string `form:"approvalNo" example:"国药准字H20260001"`                                                     // 批准文号，模糊匹配
+	EnterpriseName string `form:"enterpriseName" example:"某制药有限公司"`                                                       // 生产企业名称，模糊匹配
+	ProductType    string `form:"productType" binding:"omitempty,oneof=DRUG DEVICE CONSUMABLE FSMP OTHER" example:"DRUG"` // 产品类型，精确匹配
+	Status         *int   `form:"status" binding:"omitempty,oneof=0 1" example:"1"`                                       // SKU状态，精确匹配
+	MpID           string `form:"mpId" example:"550e8400-e29b-41d4-a716-446655440000"`                                    // 产品MP ID，精确匹配
+	Page           int    `form:"page" example:"1"`                                                                       // 页码
+	PageSize       int    `form:"pageSize" example:"20"`                                                                  // 每页数量
+	Sorts          string `form:"sorts" example:"packageSpecName,desc;createDate,desc"`                                   // 排序
 }
 
 type SaveProductSkuRequest struct {
@@ -77,10 +84,13 @@ type ProductSkuResponse struct {
 	SpuID             string  `json:"spuId" example:"550e8400-e29b-41d4-a716-446655440000"`        // 产品SPU ID
 	SpuCode           string  `json:"spuCode" example:"SPU001"`                                    // SPU编码
 	ProductName       string  `json:"productName" example:"阿莫西林胶囊"`                                // 产品名称
+	ShortName         *string `json:"shortName" example:"阿莫西林"`                                    // 产品简称
 	ProductType       string  `json:"productType" example:"DRUG"`                                  // 产品类型
 	RpID              string  `json:"rpId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 产品规格ID
 	RpCode            string  `json:"rpCode" example:"RP001"`                                      // 规格编码
 	SpecName          string  `json:"specName" example:"0.25g"`                                    // 规格名称
+	DosageForm        *string `json:"dosageForm" example:"胶囊剂"`                                    // 剂型/形态
+	StrengthText      *string `json:"strengthText" example:"0.25g"`                                // 含量/规格文本
 	MpID              string  `json:"mpId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 产品MP ID
 	MpCode            string  `json:"mpCode" example:"MP001"`                                      // MP编码
 	EnterpriseID      string  `json:"enterpriseId" example:"550e8400-e29b-41d4-a716-446655440000"` // 企业主体ID

@@ -23,16 +23,25 @@ func NewProductSkuController() *ProductSkuController {
 
 // GetProductSkuList 获取SKU列表
 // @Summary 获取SKU列表
-// @Description 分页查询SKU列表，按所属厂家产品ID筛选及排序
+// @Description 分页查询SKU档案列表，直接返回扁平化的SPU、RP、MP和SKU字段；文本条件使用模糊匹配，产品类型、状态和所属厂家产品使用精确匹配
 // @Tags 产品档案/SKU
 // @Produce json
 // @Security ApiKeyAuth
-// @Param mpId query string true "所属厂家产品ID"
-// @Param page query int false "页码"
-// @Param pageSize query int false "每页数量"
-// @Param sorts query string false "排序"
+// @Param skuCode query string false "SKU编码（模糊匹配）" example(SKU000001)
+// @Param productName query string false "通用名称（模糊匹配）" example(阿莫西林)
+// @Param shortName query string false "简称（模糊匹配）" example(阿莫西林)
+// @Param approvalNo query string false "批准文号（模糊匹配）" example(国药准字H20260001)
+// @Param enterpriseName query string false "生产企业名称（模糊匹配）" example(某制药有限公司)
+// @Param productType query string false "产品类型（精确匹配）" Enums(DRUG, DEVICE, CONSUMABLE, FSMP, OTHER)
+// @Param status query int false "SKU状态（0停用，1启用）" Enums(0, 1)
+// @Param mpId query string false "所属厂家产品ID（精确匹配）"
+// @Param page query int false "页码，默认1" example(1)
+// @Param pageSize query int false "每页数量，默认20，最大100" example(20)
+// @Param sorts query string false "排序；支持skuCode、productName、shortName、productType、dosageForm、specName、enterpriseName、approvalNo、brandName、packageSpecName、cartonSpecName、fullChainSpecName、barcode、gtin、udiDi、allowSplit、status、createDate、updateDate" example(createDate,desc)
 // @Success 200 {object} models.Response{data=utils.PaginationResponse{items=[]models.ProductSkuResponse}} "获取成功"
 // @Failure 400 {object} models.Response "参数错误"
+// @Failure 401 {object} models.Response "未认证"
+// @Failure 403 {object} models.Response "无SKU列表查询权限"
 // @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /product/skus [get]
 func (ctrl *ProductSkuController) GetProductSkuList(c *gin.Context) {

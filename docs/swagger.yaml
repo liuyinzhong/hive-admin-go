@@ -4232,6 +4232,10 @@ definitions:
         description: 包装描述
         example: 包装描述
         type: string
+      dosageForm:
+        description: 剂型/形态
+        example: 胶囊剂
+        type: string
       enterpriseCode:
         description: 企业编码
         example: ENT001
@@ -4296,6 +4300,10 @@ definitions:
         description: 产品规格ID
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
+      shortName:
+        description: 产品简称
+        example: 阿莫西林
+        type: string
       skuCode:
         description: SKU编码
         example: SKU001
@@ -4320,6 +4328,10 @@ definitions:
         description: 状态
         example: 1
         type: integer
+      strengthText:
+        description: 含量/规格文本
+        example: 0.25g
+        type: string
       traceMode:
         description: 追溯码管理模式
         example: REQUIRED
@@ -16493,22 +16505,66 @@ paths:
       - 产品档案/规格产品
   /product/skus:
     get:
-      description: 分页查询SKU列表，按所属厂家产品ID筛选及排序
+      description: 分页查询SKU档案列表，直接返回扁平化的SPU、RP、MP和SKU字段；文本条件使用模糊匹配，产品类型、状态和所属厂家产品使用精确匹配
       parameters:
-      - description: 所属厂家产品ID
+      - description: SKU编码（模糊匹配）
+        example: SKU000001
+        in: query
+        name: skuCode
+        type: string
+      - description: 通用名称（模糊匹配）
+        example: 阿莫西林
+        in: query
+        name: productName
+        type: string
+      - description: 简称（模糊匹配）
+        example: 阿莫西林
+        in: query
+        name: shortName
+        type: string
+      - description: 批准文号（模糊匹配）
+        example: 国药准字H20260001
+        in: query
+        name: approvalNo
+        type: string
+      - description: 生产企业名称（模糊匹配）
+        example: 某制药有限公司
+        in: query
+        name: enterpriseName
+        type: string
+      - description: 产品类型（精确匹配）
+        enum:
+        - DRUG
+        - DEVICE
+        - CONSUMABLE
+        - FSMP
+        - OTHER
+        in: query
+        name: productType
+        type: string
+      - description: SKU状态（0停用，1启用）
+        enum:
+        - 0
+        - 1
+        in: query
+        name: status
+        type: integer
+      - description: 所属厂家产品ID（精确匹配）
         in: query
         name: mpId
-        required: true
         type: string
-      - description: 页码
+      - description: 页码，默认1
+        example: 1
         in: query
         name: page
         type: integer
-      - description: 每页数量
+      - description: 每页数量，默认20，最大100
+        example: 20
         in: query
         name: pageSize
         type: integer
-      - description: 排序
+      - description: 排序；支持skuCode、productName、shortName、productType、dosageForm、specName、enterpriseName、approvalNo、brandName、packageSpecName、cartonSpecName、fullChainSpecName、barcode、gtin、udiDi、allowSplit、status、createDate、updateDate
+        example: createDate,desc
         in: query
         name: sorts
         type: string
@@ -16533,6 +16589,14 @@ paths:
               type: object
         "400":
           description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无SKU列表查询权限
           schema:
             $ref: '#/definitions/models.Response'
         "500":

@@ -28,12 +28,39 @@ func NewProductSkuService() *ProductSkuService {
 }
 
 func (s *ProductSkuService) GetProductSkuList(req models.ProductSkuListRequest) (*utils.PaginationResponse, error) {
-	if err := validateProductSkuUUID(req.MpID, "厂家产品ID"); err != nil {
-		return nil, err
+	mpID := strings.TrimSpace(req.MpID)
+	if mpID != "" {
+		if err := validateProductSkuUUID(mpID, "厂家产品ID"); err != nil {
+			return nil, err
+		}
 	}
 
 	page, pageSize := normalizeProductSkuPage(req.Page, req.PageSize, 20, 100)
-	query := s.baseProductSkuQuery().Where("product_sku.mp_id = ?", strings.TrimSpace(req.MpID))
+	query := s.baseProductSkuQuery()
+	if mpID != "" {
+		query = query.Where("product_sku.mp_id = ?", mpID)
+	}
+	if skuCode := strings.TrimSpace(req.SkuCode); skuCode != "" {
+		query = query.Where("LOWER(product_sku.sku_code) LIKE ?", productSkuLikeValue(skuCode))
+	}
+	if productName := strings.TrimSpace(req.ProductName); productName != "" {
+		query = query.Where("LOWER(product_spu.product_name) LIKE ?", productSkuLikeValue(productName))
+	}
+	if shortName := strings.TrimSpace(req.ShortName); shortName != "" {
+		query = query.Where("LOWER(IFNULL(product_spu.short_name, '')) LIKE ?", productSkuLikeValue(shortName))
+	}
+	if approvalNo := strings.TrimSpace(req.ApprovalNo); approvalNo != "" {
+		query = query.Where("LOWER(product_mp.approval_no) LIKE ?", productSkuLikeValue(approvalNo))
+	}
+	if enterpriseName := strings.TrimSpace(req.EnterpriseName); enterpriseName != "" {
+		query = query.Where("LOWER(base_enterprise.enterprise_name) LIKE ?", productSkuLikeValue(enterpriseName))
+	}
+	if productType := strings.TrimSpace(req.ProductType); productType != "" {
+		query = query.Where("product_spu.product_type = ?", productType)
+	}
+	if req.Status != nil {
+		query = query.Where("product_sku.status = ?", *req.Status)
+	}
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
@@ -41,12 +68,25 @@ func (s *ProductSkuService) GetProductSkuList(req models.ProductSkuListRequest) 
 	}
 
 	order := utils.BuildOrderBy(req.Sorts, map[string]string{
-		"skuCode":         "product_sku.sku_code",
-		"packageSpecName": "product_sku.package_spec_name",
-		"cartonSpecName":  "product_sku.carton_spec_name",
-		"status":          "product_sku.status",
-		"createDate":      "product_sku.create_date",
-		"updateDate":      "product_sku.update_date",
+		"skuCode":           "product_sku.sku_code",
+		"productName":       "product_spu.product_name",
+		"shortName":         "product_spu.short_name",
+		"productType":       "product_spu.product_type",
+		"dosageForm":        "product_rp.dosage_form",
+		"specName":          "product_rp.spec_name",
+		"enterpriseName":    "base_enterprise.enterprise_name",
+		"approvalNo":        "product_mp.approval_no",
+		"brandName":         "product_mp.brand_name",
+		"packageSpecName":   "product_sku.package_spec_name",
+		"cartonSpecName":    "product_sku.carton_spec_name",
+		"fullChainSpecName": "product_sku.full_chain_spec_name",
+		"barcode":           "product_sku.barcode",
+		"gtin":              "product_sku.gtin",
+		"udiDi":             "product_sku.udi_di",
+		"allowSplit":        "product_sku.allow_split",
+		"status":            "product_sku.status",
+		"createDate":        "product_sku.create_date",
+		"updateDate":        "product_sku.update_date",
 	})
 	if order == "" {
 		order = "product_sku.create_date desc"
@@ -568,10 +608,13 @@ func productSkuRowToResponse(row productSkuQueryRow) *models.ProductSkuResponse 
 		SpuID:             row.SpuID,
 		SpuCode:           row.SpuCode,
 		ProductName:       row.ProductName,
+		ShortName:         row.ShortName,
 		ProductType:       row.ProductType,
 		RpID:              row.RpID,
 		RpCode:            row.RpCode,
 		SpecName:          row.SpecName,
+		DosageForm:        row.DosageForm,
+		StrengthText:      row.StrengthText,
 		MpID:              row.MpID,
 		MpCode:            row.MpCode,
 		EnterpriseID:      row.EnterpriseID,
@@ -600,6 +643,10 @@ func productSkuRowToResponse(row productSkuQueryRow) *models.ProductSkuResponse 
 		CreateDate:        models.TimeToStringPtr(row.CreateDate),
 		UpdateDate:        models.TimeToStringPtr(row.UpdateDate),
 	}
+}
+
+func productSkuLikeValue(value string) string {
+	return "%" + strings.ToLower(value) + "%"
 }
 
 func validateProductSkuUUID(value, label string) error {

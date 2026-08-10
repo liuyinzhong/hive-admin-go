@@ -13971,7 +13971,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "分页查询SKU列表，按所属厂家产品ID筛选及排序",
+                "description": "分页查询SKU档案列表，直接返回扁平化的SPU、RP、MP和SKU字段；文本条件使用模糊匹配，产品类型、状态和所属厂家产品使用精确匹配",
                 "produces": [
                     "application/json"
                 ],
@@ -13982,26 +13982,86 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "所属厂家产品ID",
+                        "example": "SKU000001",
+                        "description": "SKU编码（模糊匹配）",
+                        "name": "skuCode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "阿莫西林",
+                        "description": "通用名称（模糊匹配）",
+                        "name": "productName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "阿莫西林",
+                        "description": "简称（模糊匹配）",
+                        "name": "shortName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "国药准字H20260001",
+                        "description": "批准文号（模糊匹配）",
+                        "name": "approvalNo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "某制药有限公司",
+                        "description": "生产企业名称（模糊匹配）",
+                        "name": "enterpriseName",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "DRUG",
+                            "DEVICE",
+                            "CONSUMABLE",
+                            "FSMP",
+                            "OTHER"
+                        ],
+                        "type": "string",
+                        "description": "产品类型（精确匹配）",
+                        "name": "productType",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            0,
+                            1
+                        ],
+                        "type": "integer",
+                        "description": "SKU状态（0停用，1启用）",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "所属厂家产品ID（精确匹配）",
                         "name": "mpId",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "页码",
+                        "example": 1,
+                        "description": "页码，默认1",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "每页数量",
+                        "example": 20,
+                        "description": "每页数量，默认20，最大100",
                         "name": "pageSize",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "排序",
+                        "example": "createDate,desc",
+                        "description": "排序；支持skuCode、productName、shortName、productType、dosageForm、specName、enterpriseName、approvalNo、brandName、packageSpecName、cartonSpecName、fullChainSpecName、barcode、gtin、udiDi、allowSplit、status、createDate、updateDate",
                         "name": "sorts",
                         "in": "query"
                     }
@@ -14042,6 +14102,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无SKU列表查询权限",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -27427,6 +27499,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "包装描述"
                 },
+                "dosageForm": {
+                    "description": "剂型/形态",
+                    "type": "string",
+                    "example": "胶囊剂"
+                },
                 "enterpriseCode": {
                     "description": "企业编码",
                     "type": "string",
@@ -27507,6 +27584,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
+                "shortName": {
+                    "description": "产品简称",
+                    "type": "string",
+                    "example": "阿莫西林"
+                },
                 "skuCode": {
                     "description": "SKU编码",
                     "type": "string",
@@ -27536,6 +27618,11 @@ const docTemplate = `{
                     "description": "状态",
                     "type": "integer",
                     "example": 1
+                },
+                "strengthText": {
+                    "description": "含量/规格文本",
+                    "type": "string",
+                    "example": "0.25g"
                 },
                 "traceMode": {
                     "description": "追溯码管理模式",
