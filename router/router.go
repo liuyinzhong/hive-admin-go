@@ -504,10 +504,12 @@ func SetupRouter() *gin.Engine {
 			schedules := medical.Group("/schedules")
 			{
 				schedules.GET("", permissionGuard.Require("medical:schedule:list"), medicalController.GetScheduleList)
+				schedules.GET("/:scheduleId", permissionGuard.Require("medical:schedule:detail"), medicalController.GetScheduleDetail)
 				schedules.POST("", permissionGuard.Require("medical:schedule:create"), medicalController.CreateSchedule)
 				schedules.DELETE("", permissionGuard.Require("medical:schedule:delete"), medicalController.DeleteDraftSchedules)
 				schedules.POST("/generate", permissionGuard.Require("medical:schedule:generate"), medicalController.GenerateSchedules)
 				schedules.POST("/publish", permissionGuard.Require("medical:schedule:publish"), medicalController.PublishSchedules)
+				schedules.GET("/:scheduleId/visitQueues", permissionGuard.Require("medical:visitQueue:list"), medicalController.GetVisitQueueList)
 				schedules.PUT("/:scheduleId", permissionGuard.Require("medical:schedule:update"), medicalController.UpdateSchedule)
 				schedules.PUT("/:scheduleId/stop", permissionGuard.Require("medical:schedule:stop"), medicalController.StopSchedule)
 				schedules.PUT("/:scheduleId/finish", permissionGuard.Require("medical:schedule:finish"), medicalController.FinishSchedule)

@@ -174,6 +174,49 @@ func (ctrl *MedicalController) GetScheduleList(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
 }
 
+// GetScheduleDetail 获取实际排班详情。
+// @Summary 获取实际排班详情
+// @Description 获取指定实际排班及其半小时号源档位的完整信息
+// @Tags 医疗管理/排班
+// @Produce json
+// @Security ApiKeyAuth
+// @Param scheduleId path string true "排班ID"
+// @Success 200 {object} models.Response{data=models.ScheduleResponse}
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 500 {object} models.Response "服务器内部错误"
+// @Router /medical/schedules/{scheduleId} [get]
+func (ctrl *MedicalController) GetScheduleDetail(c *gin.Context) {
+	result, err := ctrl.scheduleService.GetScheduleDetail(c.Param("scheduleId"))
+	if err != nil {
+		writeMedicalError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
+// GetVisitQueueList 获取实际排班的候诊队列。
+// @Summary 获取候诊队列
+// @Description 按签到序号升序返回指定实际排班的全部候诊记录；患者姓名和手机号始终脱敏
+// @Tags 医疗管理/排班
+// @Produce json
+// @Security ApiKeyAuth
+// @Param scheduleId path string true "排班ID"
+// @Success 200 {object} models.Response{data=[]models.VisitQueueListItemResponse}
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 404 {object} models.Response "排班不存在"
+// @Failure 500 {object} models.Response "服务器内部错误"
+// @Router /medical/schedules/{scheduleId}/visitQueues [get]
+func (ctrl *MedicalController) GetVisitQueueList(c *gin.Context) {
+	result, err := ctrl.registrationService.GetVisitQueueList(c.Param("scheduleId"))
+	if err != nil {
+		writeMedicalError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
 // CreateSchedule 手工创建实际排班。
 // @Summary 手工创建实际排班
 // @Description 手工创建实际排班记录

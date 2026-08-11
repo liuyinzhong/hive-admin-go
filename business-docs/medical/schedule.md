@@ -74,10 +74,23 @@ stateDiagram-v2
 
 自动发布和生成均按医生分组执行，一个医生失败不会阻止其他医生；任务记录成功医生数、失败医生及原因，状态为成功、部分成功、失败或处理中。服务重启会把遗留的处理中任务标记为失败。
 
+## 候诊队列
+
+### MED-SCH-012 排班汇总并查询候诊队列
+
+排班列表为每条实际排班返回 `queueCount`，表示该排班下全部候诊记录总数，不按候诊状态过滤。草稿排班不展示候诊入口；已发布、已停诊和已结束排班可以通过只读抽屉查看候诊队列。
+
+候诊列表不分页，按签到序号升序返回。患者姓名和手机号始终由服务端脱敏，不受患者敏感信息查看权限影响。候诊状态推进规则见 `visit-queue.md`。
+
+### MED-SCH-013 排班详情返回当前完整快照
+
+排班详情通过 `GET /medical/schedules/{scheduleId}` 查询，返回医生、科室、出诊日期和时段、挂号类型、状态、费用快照、号源汇总、候诊总人数、状态时间、备注及半小时号源档位。详情查询只读，不触发排班状态或号源变化。
+
 ## 权限
 
 - 模板：`medical:scheduleTemplate:list`、`create`、`update`、`status`、`delete`。
-- 排班：`medical:schedule:list`、`create`、`update`、`delete`、`generate`、`publish`、`stop`、`finish`。
+- 排班：`medical:schedule:list`、`detail`、`create`、`update`、`delete`、`generate`、`publish`、`stop`、`finish`。
+- 候诊队列：`medical:visitQueue:list`。
 - 自动任务：`medical:scheduleTask:list`。
 
 ## 代码入口
@@ -87,4 +100,3 @@ stateDiagram-v2
 - Controller：`controllers/medical_schedule_controller.go`。
 - Router：`router/router.go` 中 `/api/medical/scheduleTemplates`、`schedules`、`scheduleTasks`。
 - 前端：`hive/apps/web-antdv-next/src/views/medical/schedule`。
-

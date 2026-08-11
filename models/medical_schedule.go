@@ -212,6 +212,7 @@ type ScheduleResponse struct {
 	TotalQuota        int                    `json:"totalQuota" example:"60"`                                          // 总号源配额
 	BookedQuota       int                    `json:"bookedQuota" example:"5"`                                          // 已预约号源
 	RemainingQuota    int                    `json:"remainingQuota" example:"55"`                                      // 剩余号源
+	QueueCount        int                    `json:"queueCount" example:"8"`                                           // 候诊队列总人数，统计该排班全部候诊记录
 	Status            int                    `json:"status" example:"1"`                                               // 状态(0-草稿 1-已发布 2-已停诊 3-已结束)
 	StopReason        *string                `json:"stopReason" example:"医生请假"`                                        // 停诊原因
 	PublishedAt       *string                `json:"publishedAt" example:"2026-01-15 09:00:00"`                        // 发布时间

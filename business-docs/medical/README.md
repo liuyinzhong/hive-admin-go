@@ -1,14 +1,15 @@
 # 医疗业务手册
 
-本目录记录 Hive 医疗域的当前业务规则。本轮先覆盖医生管理和医生排班；患者、挂号、挂号费等历史内容仍在根目录 `CONTEXT.md`，后续按模块逐步迁移。
+本目录记录 Hive 医疗域的当前业务规则，当前覆盖医生管理、医生排班和挂号候诊队列；患者、挂号主流程和挂号费等历史内容仍在根目录 `CONTEXT.md`，后续按模块逐步迁移。
 
 ## 阅读顺序
 
 1. 先读 [医疗领域词汇](./CONTEXT.md)。
 2. 医生档案任务读 [医生管理规则](./doctor.md)。
 3. 出诊任务读 [医生排班规则](./schedule.md)，并同时核对医生、科室和挂号费规则。
-4. 涉及页面时继续阅读前端 `hive/business-docs/medical`。
-5. 文档与代码不一致时列出差异和影响，不静默选择。
+4. 挂号签到和候诊排号任务读 [挂号候诊队列规则](./visit-queue.md)，并同时核对根目录 `CONTEXT.md` 的挂号主流程。
+5. 涉及页面时继续阅读前端 `hive/business-docs/medical`。
+6. 文档与代码不一致时列出差异和影响，不静默选择。
 
 ## 模块关系
 
@@ -21,17 +22,20 @@ flowchart LR
   TEMPLATE -->|生成草稿| SCHEDULE[出诊排班]
   FEE[挂号费规则] -->|发布时固化快照| SCHEDULE
   SCHEDULE --> REG[挂号 / 预约]
+  REG -->|签到排号| QUEUE[候诊队列]
 ```
 
 | 模块 | 职责 | 文档 |
 |---|---|---|
 | 医生管理 | 医生档案、用户绑定、出诊科室和启停 | [doctor.md](./doctor.md) |
 | 医生排班 | 周期模板、实际排班、号源、发布和自动任务 | [schedule.md](./schedule.md) |
+| 挂号候诊队列 | 挂号签到、候诊记录、队列查询和候诊完成状态 | [visit-queue.md](./visit-queue.md) |
 
 ## 规则编号
 
 - `MED-DOC-*`：医生档案和医生科室关系。
 - `MED-SCH-*`：排班模板、实际排班、号源和自动任务。
+- `MED-QUE-*`：挂号签到和候诊队列。
 
 已有编号不得分配给新的含义。
 
@@ -49,4 +53,3 @@ flowchart LR
 - 排班：`models/medical_schedule*.go`、`services/medical_schedule*.go`。
 - 前端页面：`hive/apps/web-antdv-next/src/views/medical/doctor`、`medical/schedule`。
 - 前端 API：`hive/apps/web-antdv-next/src/api/medical`。
-

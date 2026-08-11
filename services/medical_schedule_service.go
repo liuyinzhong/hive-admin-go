@@ -37,6 +37,11 @@ type scheduleListRow struct {
 	DepartmentName string `gorm:"column:department_name"`
 }
 
+type visitQueueCountRow struct {
+	ScheduleID string `gorm:"column:schedule_id"`
+	QueueCount int    `gorm:"column:queue_count"`
+}
+
 func (s *MedicalScheduleService) GetScheduleTemplateList(req models.ScheduleTemplateListRequest) (*utils.PageResult, error) {
 	query := database.DB.Table("med_schedule_template AS template").
 		Select("template.*, doctor.doctor_no, doctor.name AS doctor_name, department.department_code, department.department_name, template_weekday.first_weekday").
@@ -367,6 +372,7 @@ func (s *MedicalScheduleService) GetScheduleList(req models.ScheduleListRequest)
 		scheduleIDs = append(scheduleIDs, row.ScheduleID)
 	}
 	slotsBySchedule := make(map[string][]models.MedScheduleSlot, len(scheduleIDs))
+	queueCountBySchedule := make(map[string]int, len(scheduleIDs))
 	if len(scheduleIDs) > 0 {
 		var slots []models.MedScheduleSlot
 		if err := database.DB.Where("schedule_id IN ? AND del_flag = 0", scheduleIDs).
@@ -376,13 +382,55 @@ func (s *MedicalScheduleService) GetScheduleList(req models.ScheduleListRequest)
 		for _, slot := range slots {
 			slotsBySchedule[slot.ScheduleID] = append(slotsBySchedule[slot.ScheduleID], slot)
 		}
+		var queueCounts []visitQueueCountRow
+		if err := database.DB.Model(&models.MedVisitQueue{}).
+			Select("schedule_id, COUNT(*) AS queue_count").
+			Where("schedule_id IN ?", scheduleIDs).
+			Group("schedule_id").Scan(&queueCounts).Error; err != nil {
+			return nil, err
+		}
+		for _, item := range queueCounts {
+			queueCountBySchedule[item.ScheduleID] = item.QueueCount
+		}
 	}
 	items := make([]*models.ScheduleResponse, 0, len(rows))
 	for _, row := range rows {
-		items = append(items, scheduleToResponse(row, slotsBySchedule[row.ScheduleID]))
+		items = append(items, scheduleToResponse(row, slotsBySchedule[row.ScheduleID], queueCountBySchedule[row.ScheduleID]))
 	}
 	pageResult.Items = items
 	return pageResult, nil
+}
+
+// GetScheduleDetail 获取实际排班详情及其号源档位。
+func (s *MedicalScheduleService) GetScheduleDetail(scheduleID string) (*models.ScheduleResponse, error) {
+	if err := validateMedicalUUID(scheduleID, "排班ID"); err != nil {
+		return nil, err
+	}
+
+	var row scheduleListRow
+	if err := database.DB.Table("med_schedule AS schedule").
+		Select("schedule.*, doctor.doctor_no, doctor.name AS doctor_name, department.department_code, department.department_name").
+		Joins("JOIN med_doctor AS doctor ON doctor.doctor_id = schedule.doctor_id AND doctor.del_flag = 0").
+		Joins("JOIN med_department AS department ON department.department_id = schedule.department_id AND department.del_flag = 0").
+		Where("schedule.schedule_id = ? AND schedule.del_flag = 0", scheduleID).
+		First(&row).Error; err != nil {
+		return nil, scheduleRecordError(err, "排班不存在")
+	}
+
+	var slots []models.MedScheduleSlot
+	if err := database.DB.Where("schedule_id = ? AND del_flag = 0", scheduleID).
+		Order("start_time asc").Find(&slots).Error; err != nil {
+		return nil, err
+	}
+
+	var queueCount int64
+	if err := database.DB.Model(&models.MedVisitQueue{}).
+		Where("schedule_id = ?", scheduleID).
+		Count(&queueCount).Error; err != nil {
+		return nil, err
+	}
+
+	return scheduleToResponse(row, slots, int(queueCount)), nil
 }
 
 func (s *MedicalScheduleService) CreateSchedule(req models.SaveScheduleRequest, operatorID string) error {
@@ -812,7 +860,7 @@ func replaceScheduleTemplateWeekdays(tx *gorm.DB, templateID string, weekdays []
 	return tx.Create(&rows).Error
 }
 
-func scheduleToResponse(row scheduleListRow, slots []models.MedScheduleSlot) *models.ScheduleResponse {
+func scheduleToResponse(row scheduleListRow, slots []models.MedScheduleSlot, queueCount int) *models.ScheduleResponse {
 	remainingQuota := row.TotalQuota - row.BookedQuota
 	if remainingQuota < 0 {
 		remainingQuota = 0
@@ -874,6 +922,7 @@ func scheduleToResponse(row scheduleListRow, slots []models.MedScheduleSlot) *mo
 		TotalQuota:        row.TotalQuota,
 		BookedQuota:       row.BookedQuota,
 		RemainingQuota:    remainingQuota,
+		QueueCount:        queueCount,
 		Status:            row.Status,
 		StopReason:        row.StopReason,
 		PublishedAt:       models.TimeToStringPtr(row.PublishedAt),

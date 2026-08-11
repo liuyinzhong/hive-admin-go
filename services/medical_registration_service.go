@@ -23,6 +23,16 @@ type registrationLogRow struct {
 	OperatorName *string `gorm:"column:operator_name"`
 }
 
+type visitQueueListRow struct {
+	models.MedVisitQueue
+	PatientNo      string `gorm:"column:patient_no"`
+	PatientName    string `gorm:"column:patient_name"`
+	PatientPhone   string `gorm:"column:patient_phone"`
+	RegistrationNo string `gorm:"column:registration_no"`
+	StartTime      string `gorm:"column:start_time"`
+	EndTime        string `gorm:"column:end_time"`
+}
+
 func NewMedicalRegistrationService() *MedicalRegistrationService {
 	return &MedicalRegistrationService{codeSequenceService: NewBaseCodeSequenceService()}
 }
@@ -127,10 +137,45 @@ func (s *MedicalRegistrationService) GetRegistrationList(req models.Registration
 }
 
 func (s *MedicalRegistrationService) GetRegistrationDetail(registrationID string, showSensitive bool) (*models.RegistrationResponse, error) {
-	return s.getRegistrationDetail(database.DB, registrationID, showSensitive)
+	return s.getRegistrationDetail(database.DB, registrationID, showSensitive, true)
 }
 
-func (s *MedicalRegistrationService) getRegistrationDetail(db *gorm.DB, registrationID string, showSensitive bool) (*models.RegistrationResponse, error) {
+// GetVisitQueueList 按签到序号返回实际排班下的完整候诊队列。
+// 队列场景固定返回脱敏后的患者姓名和手机号，不开放敏感信息权限例外。
+func (s *MedicalRegistrationService) GetVisitQueueList(scheduleID string) ([]models.VisitQueueListItemResponse, error) {
+	if err := validateMedicalUUID(scheduleID, "排班ID"); err != nil {
+		return nil, err
+	}
+	var schedule models.MedSchedule
+	if err := database.DB.Select("schedule_id").Where("schedule_id = ? AND del_flag = 0", scheduleID).First(&schedule).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("%w: 排班不存在", ErrMedicalNotFound)
+		}
+		return nil, err
+	}
+
+	var rows []visitQueueListRow
+	if err := database.DB.Table("med_visit_queue AS visit_queue").
+		Select("visit_queue.*, registration.patient_no, registration.patient_name, registration.patient_phone, registration.registration_no, registration.start_time, registration.end_time").
+		Joins("JOIN med_registration AS registration ON registration.registration_id = visit_queue.registration_id").
+		Where("visit_queue.schedule_id = ?", scheduleID).
+		Order("visit_queue.queue_sequence ASC").Scan(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	items := make([]models.VisitQueueListItemResponse, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, models.VisitQueueListItemResponse{
+			QueueID: row.QueueID, QueueSequence: row.QueueSequence, QueueStatus: row.QueueStatus, CallCount: row.CallCount,
+			PatientNo: row.PatientNo, PatientName: maskPatientName(row.PatientName), PatientPhone: maskPatientPhone(row.PatientPhone),
+			RegistrationNo: row.RegistrationNo, StartTime: trimScheduleTime(row.StartTime), EndTime: trimScheduleTime(row.EndTime),
+			CheckInTime: row.CreateDate.In(medicalBusinessLocation).Format("2006-01-02 15:04:05"),
+		})
+	}
+	return items, nil
+}
+
+func (s *MedicalRegistrationService) getRegistrationDetail(db *gorm.DB, registrationID string, showSensitive, includeQueue bool) (*models.RegistrationResponse, error) {
 	if err := validateMedicalUUID(registrationID, "挂号单ID"); err != nil {
 		return nil, err
 	}
@@ -147,6 +192,13 @@ func (s *MedicalRegistrationService) getRegistrationDetail(db *gorm.DB, registra
 		return nil, err
 	}
 	response.LifecycleRecords = lifecycles
+	if includeQueue {
+		queueInfo, err := loadVisitQueue(db, registrationID)
+		if err != nil {
+			return nil, err
+		}
+		response.QueueInfo = queueInfo
+	}
 	return response, nil
 }
 
@@ -252,7 +304,7 @@ func (s *MedicalRegistrationService) CreateRegistration(req models.CreateRegistr
 		if err := createRegistrationLog(tx, registrationID, nil, models.MedRegistrationStatusPendingPayment, operatorID, now, nil, nil); err != nil {
 			return err
 		}
-		response, err = s.getRegistrationDetail(tx, registrationID, showSensitive)
+		response, err = s.getRegistrationDetail(tx, registrationID, showSensitive, false)
 		return err
 	})
 	if err != nil {
@@ -324,6 +376,16 @@ func (s *MedicalRegistrationService) transition(id string, toStatus int, operato
 				return err
 			}
 		}
+		if toStatus == models.MedRegistrationStatusCheckedIn {
+			if err := createVisitQueue(tx, registration, operatorID, now); err != nil {
+				return err
+			}
+		}
+		if toStatus == models.MedRegistrationStatusCompleted {
+			if err := completeVisitQueue(tx, registration.RegistrationID); err != nil {
+				return err
+			}
+		}
 		fromStatus := registration.Status
 		if err := tx.Model(&registration).Updates(map[string]interface{}{"status": toStatus, "updater_id": optionalOperatorID(operatorID), "update_date": now}).Error; err != nil {
 			return err
@@ -335,7 +397,7 @@ func (s *MedicalRegistrationService) transition(id string, toStatus int, operato
 		if err := createRegistrationLog(tx, id, &fromStatus, toStatus, operatorID, now, normalizedReason, refundAmount); err != nil {
 			return err
 		}
-		response, err = s.getRegistrationDetail(tx, id, showSensitive)
+		response, err = s.getRegistrationDetail(tx, id, showSensitive, toStatus == models.MedRegistrationStatusCheckedIn)
 		return err
 	})
 	if err != nil {
@@ -366,6 +428,56 @@ func createRegistrationLog(tx *gorm.DB, registrationID string, fromStatus *int, 
 	return tx.Create(&models.MedRegistrationLog{LogID: utils.GenerateUUID(), RegistrationID: registrationID, FromStatus: fromStatus, ToStatus: toStatus, OperatorID: optionalOperatorID(operatorID), OperatedAt: operatedAt, Reason: reason, RefundAmount: refundAmount}).Error
 }
 
+func createVisitQueue(tx *gorm.DB, registration models.MedRegistration, operatorID string, createdAt time.Time) error {
+	var schedule models.MedSchedule
+	if err := tx.Select("schedule_id").Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("schedule_id = ? AND del_flag = 0", registration.ScheduleID).First(&schedule).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("%w: 排班不存在", ErrMedicalNotFound)
+		}
+		return err
+	}
+
+	var existing models.MedVisitQueue
+	if err := tx.Select("queue_id").Where("registration_id = ?", registration.RegistrationID).First(&existing).Error; err == nil {
+		return fmt.Errorf("%w: 挂号单已生成候诊序号", ErrMedicalConflict)
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+
+	var maxSequence int
+	if err := tx.Model(&models.MedVisitQueue{}).
+		Where("schedule_id = ?", registration.ScheduleID).
+		Select("COALESCE(MAX(queue_sequence), 0)").Scan(&maxSequence).Error; err != nil {
+		return err
+	}
+
+	queue := models.MedVisitQueue{
+		QueueID:        utils.GenerateUUID(),
+		RegistrationID: registration.RegistrationID,
+		ScheduleID:     registration.ScheduleID,
+		QueueSequence:  maxSequence + 1,
+		QueueStatus:    models.MedVisitQueueStatusWaiting,
+		CallCount:      0,
+		CreateDate:     createdAt,
+		CreatorID:      optionalOperatorID(operatorID),
+	}
+	return tx.Create(&queue).Error
+}
+
+func completeVisitQueue(tx *gorm.DB, registrationID string) error {
+	result := tx.Model(&models.MedVisitQueue{}).
+		Where("registration_id = ? AND queue_status = ?", registrationID, models.MedVisitQueueStatusWaiting).
+		Update("queue_status", models.MedVisitQueueStatusCompleted)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected != 1 {
+		return fmt.Errorf("%w: 候诊记录不存在或状态不允许完成", ErrMedicalConflict)
+	}
+	return nil
+}
+
 func loadRegistrationLogs(db *gorm.DB, registrationID string) ([]models.RegistrationLifecycleResponse, error) {
 	var rows []registrationLogRow
 	err := db.Table("med_registration_log AS registration_log").
@@ -380,6 +492,24 @@ func loadRegistrationLogs(db *gorm.DB, registrationID string) ([]models.Registra
 		result = append(result, models.RegistrationLifecycleResponse{LifecycleID: row.LogID, FromStatus: row.FromStatus, ToStatus: row.ToStatus, OperatorID: row.OperatorID, OperatorName: row.OperatorName, OperatedAt: row.OperatedAt.In(medicalBusinessLocation).Format("2006-01-02 15:04:05"), Reason: row.Reason, RefundAmount: row.RefundAmount})
 	}
 	return result, nil
+}
+
+func loadVisitQueue(db *gorm.DB, registrationID string) (*models.VisitQueueResponse, error) {
+	var queue models.MedVisitQueue
+	if err := db.Where("registration_id = ?", registrationID).First(&queue).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &models.VisitQueueResponse{
+		QueueID:       queue.QueueID,
+		QueueSequence: queue.QueueSequence,
+		QueueStatus:   queue.QueueStatus,
+		CallCount:     queue.CallCount,
+		CreateDate:    queue.CreateDate.In(medicalBusinessLocation).Format("2006-01-02 15:04:05"),
+		CreatorID:     queue.CreatorID,
+	}, nil
 }
 
 func registrationToResponse(value models.MedRegistration, showSensitive bool) *models.RegistrationResponse {

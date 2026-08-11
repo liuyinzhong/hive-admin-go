@@ -12318,6 +12318,68 @@ const docTemplate = `{
             }
         },
         "/medical/schedules/{scheduleId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取指定实际排班及其半小时号源档位的完整信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/排班"
+                ],
+                "summary": "获取实际排班详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排班ID",
+                        "name": "scheduleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.ScheduleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
             "put": {
                 "security": [
                     {
@@ -12484,6 +12546,79 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/schedules/{scheduleId}/visitQueues": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "按签到序号升序返回指定实际排班的全部候诊记录；患者姓名和手机号始终脱敏",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/排班"
+                ],
+                "summary": "获取候诊队列",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排班ID",
+                        "name": "scheduleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.VisitQueueListItemResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "排班不存在",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -28344,6 +28479,9 @@ const docTemplate = `{
                 "patientPhone": {
                     "type": "string"
                 },
+                "queueInfo": {
+                    "$ref": "#/definitions/models.VisitQueueResponse"
+                },
                 "registrationId": {
                     "type": "string"
                 },
@@ -29915,6 +30053,11 @@ const docTemplate = `{
                     "description": "发布时间",
                     "type": "string",
                     "example": "2026-01-15 09:00:00"
+                },
+                "queueCount": {
+                    "description": "候诊队列总人数，统计该排班全部候诊记录",
+                    "type": "integer",
+                    "example": 8
                 },
                 "registrationType": {
                     "description": "号别",
@@ -31702,6 +31845,101 @@ const docTemplate = `{
                     "description": "版本类型",
                     "type": "string",
                     "example": "0"
+                }
+            }
+        },
+        "models.VisitQueueListItemResponse": {
+            "type": "object",
+            "properties": {
+                "callCount": {
+                    "description": "累计叫号次数",
+                    "type": "integer",
+                    "example": 0
+                },
+                "checkInTime": {
+                    "description": "签到排号时间",
+                    "type": "string",
+                    "example": "2026-08-10 08:55:00"
+                },
+                "endTime": {
+                    "description": "号源结束时间",
+                    "type": "string",
+                    "example": "09:30"
+                },
+                "patientName": {
+                    "description": "无条件脱敏后的患者姓名",
+                    "type": "string",
+                    "example": "张*"
+                },
+                "patientNo": {
+                    "description": "患者编号",
+                    "type": "string",
+                    "example": "PAT000001"
+                },
+                "patientPhone": {
+                    "description": "无条件脱敏后的手机号",
+                    "type": "string",
+                    "example": "138****5678"
+                },
+                "queueId": {
+                    "description": "候诊记录ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "queueSequence": {
+                    "description": "同一实际排班内从1开始的签到序号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "queueStatus": {
+                    "description": "候诊状态(0-候诊中 30-已完成)",
+                    "type": "integer",
+                    "example": 0
+                },
+                "registrationNo": {
+                    "description": "挂号单号",
+                    "type": "string",
+                    "example": "REG000001"
+                },
+                "startTime": {
+                    "description": "号源开始时间",
+                    "type": "string",
+                    "example": "09:00"
+                }
+            }
+        },
+        "models.VisitQueueResponse": {
+            "type": "object",
+            "properties": {
+                "callCount": {
+                    "description": "累计叫号次数，创建时为0",
+                    "type": "integer",
+                    "example": 0
+                },
+                "createDate": {
+                    "description": "签到排号时间，格式为YYYY-MM-DD HH:mm:ss",
+                    "type": "string",
+                    "example": "2026-08-10 09:30:00"
+                },
+                "creatorId": {
+                    "description": "创建人系统用户ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                },
+                "queueId": {
+                    "description": "候诊记录ID",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "queueSequence": {
+                    "description": "同一实际排班内从1开始的签到序号",
+                    "type": "integer",
+                    "example": 1
+                },
+                "queueStatus": {
+                    "description": "候诊状态(0-候诊中 30-已完成)",
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },

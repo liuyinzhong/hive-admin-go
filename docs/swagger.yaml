@@ -4877,6 +4877,8 @@ definitions:
         type: string
       patientPhone:
         type: string
+      queueInfo:
+        $ref: '#/definitions/models.VisitQueueResponse'
       registrationId:
         type: string
       registrationMethod:
@@ -6071,6 +6073,10 @@ definitions:
         description: 发布时间
         example: "2026-01-15 09:00:00"
         type: string
+      queueCount:
+        description: 候诊队列总人数，统计该排班全部候诊记录
+        example: 8
+        type: integer
       registrationType:
         description: 号别
         example: 普通
@@ -7419,6 +7425,80 @@ definitions:
         description: 版本类型
         example: "0"
         type: string
+    type: object
+  models.VisitQueueListItemResponse:
+    properties:
+      callCount:
+        description: 累计叫号次数
+        example: 0
+        type: integer
+      checkInTime:
+        description: 签到排号时间
+        example: "2026-08-10 08:55:00"
+        type: string
+      endTime:
+        description: 号源结束时间
+        example: "09:30"
+        type: string
+      patientName:
+        description: 无条件脱敏后的患者姓名
+        example: 张*
+        type: string
+      patientNo:
+        description: 患者编号
+        example: PAT000001
+        type: string
+      patientPhone:
+        description: 无条件脱敏后的手机号
+        example: 138****5678
+        type: string
+      queueId:
+        description: 候诊记录ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      queueSequence:
+        description: 同一实际排班内从1开始的签到序号
+        example: 1
+        type: integer
+      queueStatus:
+        description: 候诊状态(0-候诊中 30-已完成)
+        example: 0
+        type: integer
+      registrationNo:
+        description: 挂号单号
+        example: REG000001
+        type: string
+      startTime:
+        description: 号源开始时间
+        example: "09:00"
+        type: string
+    type: object
+  models.VisitQueueResponse:
+    properties:
+      callCount:
+        description: 累计叫号次数，创建时为0
+        example: 0
+        type: integer
+      createDate:
+        description: 签到排号时间，格式为YYYY-MM-DD HH:mm:ss
+        example: "2026-08-10 09:30:00"
+        type: string
+      creatorId:
+        description: 创建人系统用户ID
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      queueId:
+        description: 候诊记录ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      queueSequence:
+        description: 同一实际排班内从1开始的签到序号
+        example: 1
+        type: integer
+      queueStatus:
+        description: 候诊状态(0-候诊中 30-已完成)
+        example: 0
+        type: integer
     type: object
   models.WorkflowCopyResponse:
     properties:
@@ -15433,6 +15513,43 @@ paths:
       tags:
       - 医疗管理/排班
   /medical/schedules/{scheduleId}:
+    get:
+      description: 获取指定实际排班及其半小时号源档位的完整信息
+      parameters:
+      - description: 排班ID
+        in: path
+        name: scheduleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ScheduleResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取实际排班详情
+      tags:
+      - 医疗管理/排班
     put:
       consumes:
       - application/json
@@ -15545,6 +15662,50 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 停诊
+      tags:
+      - 医疗管理/排班
+  /medical/schedules/{scheduleId}/visitQueues:
+    get:
+      description: 按签到序号升序返回指定实际排班的全部候诊记录；患者姓名和手机号始终脱敏
+      parameters:
+      - description: 排班ID
+        in: path
+        name: scheduleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.VisitQueueListItemResponse'
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 排班不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取候诊队列
       tags:
       - 医疗管理/排班
   /medical/schedules/generate:

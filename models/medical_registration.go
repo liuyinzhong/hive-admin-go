@@ -19,6 +19,11 @@ const (
 	MedRegistrationStatusRefunded       = 100
 )
 
+const (
+	MedVisitQueueStatusWaiting   = 0
+	MedVisitQueueStatusCompleted = 30
+)
+
 type MedRegistration struct {
 	RegistrationID       string     `gorm:"column:registration_id;type:char(36);primaryKey" json:"registrationId"`
 	RegistrationNo       string     `gorm:"column:registration_no;type:varchar(32)" json:"registrationNo"`
@@ -68,6 +73,19 @@ type MedRegistrationLog struct {
 
 func (MedRegistrationLog) TableName() string { return "med_registration_log" }
 
+type MedVisitQueue struct {
+	QueueID        string    `gorm:"column:queue_id;type:char(36);primaryKey" json:"queueId"`
+	RegistrationID string    `gorm:"column:registration_id;type:char(36)" json:"registrationId"`
+	ScheduleID     string    `gorm:"column:schedule_id;type:char(36)" json:"scheduleId"`
+	QueueSequence  int       `gorm:"column:queue_sequence;type:int" json:"queueSequence"`
+	QueueStatus    int       `gorm:"column:queue_status;type:smallint" json:"queueStatus"`
+	CallCount      int       `gorm:"column:call_count;type:int" json:"callCount"`
+	CreateDate     time.Time `gorm:"column:create_date" json:"createDate"`
+	CreatorID      *string   `gorm:"column:creator_id;type:char(36)" json:"creatorId"`
+}
+
+func (MedVisitQueue) TableName() string { return "med_visit_queue" }
+
 type RegistrationListRequest struct {
 	Page               int    `form:"page" example:"1"`
 	PageSize           int    `form:"pageSize" example:"20"`
@@ -105,6 +123,31 @@ type RegistrationLifecycleResponse struct {
 	RefundAmount *string `json:"refundAmount"`
 }
 
+type VisitQueueResponse struct {
+	QueueID       string  `json:"queueId" example:"550e8400-e29b-41d4-a716-446655440000"`   // 候诊记录ID
+	QueueSequence int     `json:"queueSequence" example:"1"`                                // 同一实际排班内从1开始的签到序号
+	QueueStatus   int     `json:"queueStatus" example:"0"`                                  // 候诊状态(0-候诊中 30-已完成)
+	CallCount     int     `json:"callCount" example:"0"`                                    // 累计叫号次数，创建时为0
+	CreateDate    string  `json:"createDate" example:"2026-08-10 09:30:00"`                 // 签到排号时间，格式为YYYY-MM-DD HH:mm:ss
+	CreatorID     *string `json:"creatorId" example:"550e8400-e29b-41d4-a716-446655440001"` // 创建人系统用户ID
+}
+
+// VisitQueueListItemResponse 候诊队列只读列表项。
+// 患者姓名和手机号由服务端无条件脱敏，不受患者敏感信息权限影响。
+type VisitQueueListItemResponse struct {
+	QueueID        string `json:"queueId" example:"550e8400-e29b-41d4-a716-446655440000"` // 候诊记录ID
+	QueueSequence  int    `json:"queueSequence" example:"1"`                              // 同一实际排班内从1开始的签到序号
+	QueueStatus    int    `json:"queueStatus" example:"0"`                                // 候诊状态(0-候诊中 30-已完成)
+	CallCount      int    `json:"callCount" example:"0"`                                  // 累计叫号次数
+	PatientNo      string `json:"patientNo" example:"PAT000001"`                          // 患者编号
+	PatientName    string `json:"patientName" example:"张*"`                               // 无条件脱敏后的患者姓名
+	PatientPhone   string `json:"patientPhone" example:"138****5678"`                     // 无条件脱敏后的手机号
+	RegistrationNo string `json:"registrationNo" example:"REG000001"`                     // 挂号单号
+	StartTime      string `json:"startTime" example:"09:00"`                              // 号源开始时间
+	EndTime        string `json:"endTime" example:"09:30"`                                // 号源结束时间
+	CheckInTime    string `json:"checkInTime" example:"2026-08-10 08:55:00"`              // 签到排号时间
+}
+
 type RegistrationResponse struct {
 	RegistrationID       string                          `json:"registrationId"`
 	RegistrationNo       string                          `json:"registrationNo"`
@@ -136,5 +179,6 @@ type RegistrationResponse struct {
 	CreatorID            *string                         `json:"creatorId"`
 	CreateDate           *string                         `json:"createDate"`
 	UpdateDate           *string                         `json:"updateDate"`
+	QueueInfo            *VisitQueueResponse             `json:"queueInfo,omitempty"`
 	LifecycleRecords     []RegistrationLifecycleResponse `json:"lifecycleRecords"`
 }
