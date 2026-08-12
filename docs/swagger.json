@@ -9496,6 +9496,849 @@
                 }
             }
         },
+        "/medical/diagnoses": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "获取疾病诊断档案列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小，最大100",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ICD编码、名称或拼音",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态 0停用 1启用",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.DiagnosisResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/疾病诊断档案"
+                ],
+                "summary": "创建疾病诊断档案",
+                "parameters": [
+                    {
+                        "description": "疾病诊断档案",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveDiagnosisRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/diagnoses/{diagnosisId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/疾病诊断档案"
+                ],
+                "summary": "获取疾病诊断详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "诊断ID",
+                        "name": "diagnosisId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.DiagnosisResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/疾病诊断档案"
+                ],
+                "summary": "修改疾病诊断档案",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "诊断ID",
+                        "name": "diagnosisId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "疾病诊断档案",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveDiagnosisRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/疾病诊断档案"
+                ],
+                "summary": "删除疾病诊断档案",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "诊断ID",
+                        "name": "diagnosisId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/diagnoses/{diagnosisId}/status": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/疾病诊断档案"
+                ],
+                "summary": "更新疾病诊断状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "诊断ID",
+                        "name": "diagnosisId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateDiagnosisStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/doctorWorkbench": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "获取医生工作台",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.DoctorWorkbenchResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/doctorWorkbench/diagnosisOptions": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/疾病诊断档案"
+                ],
+                "summary": "获取疾病诊断选项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ICD编码、名称或拼音",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "返回数量，最大100",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.DiagnosisResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/doctorWorkbench/queues/{queueId}/pass": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "患者过号",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "候诊记录ID",
+                        "name": "queueId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/doctorWorkbench/queues/{queueId}/recall": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "重新叫号",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "候诊记录ID",
+                        "name": "queueId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/doctorWorkbench/queues/{queueId}/repeatCall": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "再次叫号",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "候诊记录ID",
+                        "name": "queueId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/doctorWorkbench/queues/{queueId}/start": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "开始接诊",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "候诊记录ID",
+                        "name": "queueId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.OutpatientRecordResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/doctorWorkbench/schedules/{scheduleId}/callNext": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "叫下一位患者",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排班ID",
+                        "name": "scheduleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/medical/doctors": {
             "get": {
                 "security": [
@@ -9965,6 +10808,382 @@
                 }
             }
         },
+        "/medical/outpatientRecords/{recordId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "获取门诊病历",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "门诊病历ID",
+                        "name": "recordId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.OutpatientRecordResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "保存门诊病历",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "门诊病历ID",
+                        "name": "recordId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "门诊病历",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveOutpatientRecordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.OutpatientRecordResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/outpatientRecords/{recordId}/complete": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "完成接诊",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "门诊病历ID",
+                        "name": "recordId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.OutpatientRecordResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/outpatientRecords/{recordId}/history": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "获取患者历史病历",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "当前门诊病历ID",
+                        "name": "recordId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.OutpatientRecordResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/outpatientRecords/{recordId}/prescriptions": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "创建处方草稿",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "门诊病历ID",
+                        "name": "recordId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "处方",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SavePrescriptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrescriptionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/medical/patients": {
             "get": {
                 "security": [
@@ -10335,6 +11554,612 @@
                     },
                     "500": {
                         "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/prescriptionReviews": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/处方审核"
+                ],
+                "summary": "获取处方审核列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小，最大100",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "处方编号",
+                        "name": "prescriptionNo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "患者编号或姓名",
+                        "name": "patientKeyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "处方状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sorts",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.PrescriptionResponse"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/prescriptionReviews/{prescriptionId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/处方审核"
+                ],
+                "summary": "获取处方审核详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "处方ID",
+                        "name": "prescriptionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrescriptionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/prescriptionReviews/{prescriptionId}/review": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/处方审核"
+                ],
+                "summary": "审核处方",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "处方ID",
+                        "name": "prescriptionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "审核结果",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ReviewPrescriptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrescriptionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/prescriptions/{prescriptionId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/处方"
+                ],
+                "summary": "获取处方详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "处方ID",
+                        "name": "prescriptionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrescriptionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "修改处方",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "处方ID",
+                        "name": "prescriptionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "处方",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SavePrescriptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrescriptionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/prescriptions/{prescriptionId}/submit": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "提交处方审核",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "处方ID",
+                        "name": "prescriptionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrescriptionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/prescriptions/{prescriptionId}/void": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "作废处方",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "处方ID",
+                        "name": "prescriptionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrescriptionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/medical/prescriptions/{prescriptionId}/withdraw": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "医疗管理/医生工作台"
+                ],
+                "summary": "撤回处方",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "处方ID",
+                        "name": "prescriptionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PrescriptionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -10966,81 +12791,6 @@
                     "医疗管理/挂号管理"
                 ],
                 "summary": "挂号单签到",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "挂号单ID",
-                        "name": "registrationId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/models.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/models.RegistrationResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/medical/registrations/{registrationId}/complete": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "医疗管理/挂号管理"
-                ],
-                "summary": "完成挂号单",
                 "parameters": [
                     {
                         "type": "string",
@@ -23520,6 +25270,38 @@
                 }
             }
         },
+        "models.DiagnosisResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "type": "string"
+                },
+                "diagnosisId": {
+                    "type": "string"
+                },
+                "icdCode": {
+                    "type": "string"
+                },
+                "icdName": {
+                    "type": "string"
+                },
+                "namePinyin": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "updateDate": {
+                    "type": "string"
+                }
+            }
+        },
         "models.DictTreeResponse": {
             "type": "object",
             "properties": {
@@ -23842,6 +25624,102 @@
                     "description": "用户名",
                     "type": "string",
                     "example": "张三"
+                }
+            }
+        },
+        "models.DoctorWorkbenchQueueResponse": {
+            "type": "object",
+            "properties": {
+                "callCount": {
+                    "type": "integer"
+                },
+                "checkInTime": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "patientName": {
+                    "type": "string"
+                },
+                "patientNo": {
+                    "type": "string"
+                },
+                "patientPhone": {
+                    "type": "string"
+                },
+                "queueId": {
+                    "type": "string"
+                },
+                "queueSequence": {
+                    "type": "integer"
+                },
+                "queueStatus": {
+                    "type": "integer"
+                },
+                "recordId": {
+                    "type": "string"
+                },
+                "registrationId": {
+                    "type": "string"
+                },
+                "registrationNo": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.DoctorWorkbenchResponse": {
+            "type": "object",
+            "properties": {
+                "doctorId": {
+                    "type": "string"
+                },
+                "doctorName": {
+                    "type": "string"
+                },
+                "doctorNo": {
+                    "type": "string"
+                },
+                "schedules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DoctorWorkbenchScheduleResponse"
+                    }
+                }
+            }
+        },
+        "models.DoctorWorkbenchScheduleResponse": {
+            "type": "object",
+            "properties": {
+                "departmentId": {
+                    "type": "string"
+                },
+                "departmentName": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "queues": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DoctorWorkbenchQueueResponse"
+                    }
+                },
+                "registrationType": {
+                    "type": "string"
+                },
+                "scheduleDate": {
+                    "type": "string"
+                },
+                "scheduleId": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
                 }
             }
         },
@@ -25986,6 +27864,239 @@
                 }
             }
         },
+        "models.MedPrescriptionItem": {
+            "type": "object",
+            "properties": {
+                "allowSplit": {
+                    "type": "integer"
+                },
+                "approvalNo": {
+                    "type": "string"
+                },
+                "courseDays": {
+                    "type": "integer"
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "creatorId": {
+                    "type": "string"
+                },
+                "dispenseQuantity": {
+                    "type": "string"
+                },
+                "dispenseUnit": {
+                    "type": "string"
+                },
+                "dosageForm": {
+                    "type": "string"
+                },
+                "doseUnit": {
+                    "type": "string"
+                },
+                "enterpriseName": {
+                    "type": "string"
+                },
+                "frequency": {
+                    "type": "string"
+                },
+                "itemId": {
+                    "type": "string"
+                },
+                "medicationRoute": {
+                    "type": "string"
+                },
+                "minUnitName": {
+                    "type": "string"
+                },
+                "packConversion": {
+                    "type": "integer"
+                },
+                "packageSpecName": {
+                    "type": "string"
+                },
+                "packageUnitName": {
+                    "type": "string"
+                },
+                "prescriptionId": {
+                    "type": "string"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "singleDose": {
+                    "type": "string"
+                },
+                "skuCode": {
+                    "type": "string"
+                },
+                "skuId": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "specName": {
+                    "type": "string"
+                },
+                "totalMinQuantity": {
+                    "type": "string"
+                },
+                "updateDate": {
+                    "type": "string"
+                },
+                "updaterId": {
+                    "type": "string"
+                },
+                "usageInstructions": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MedPrescriptionSubmission": {
+            "type": "object",
+            "properties": {
+                "allergyHistory": {
+                    "type": "string"
+                },
+                "prescriptionId": {
+                    "type": "string"
+                },
+                "reviewOpinion": {
+                    "type": "string"
+                },
+                "reviewedAt": {
+                    "type": "string"
+                },
+                "reviewerId": {
+                    "type": "string"
+                },
+                "submissionId": {
+                    "type": "string"
+                },
+                "submissionStatus": {
+                    "type": "integer"
+                },
+                "submittedAt": {
+                    "type": "string"
+                },
+                "submittedBy": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.MedPrescriptionSubmissionDiagnosis": {
+            "type": "object",
+            "properties": {
+                "diagnosisId": {
+                    "type": "string"
+                },
+                "icdCode": {
+                    "type": "string"
+                },
+                "icdName": {
+                    "type": "string"
+                },
+                "isPrimary": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "submissionDiagnosisId": {
+                    "type": "string"
+                },
+                "submissionId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MedPrescriptionSubmissionItem": {
+            "type": "object",
+            "properties": {
+                "allowSplit": {
+                    "type": "integer"
+                },
+                "approvalNo": {
+                    "type": "string"
+                },
+                "courseDays": {
+                    "type": "integer"
+                },
+                "dispenseQuantity": {
+                    "type": "string"
+                },
+                "dispenseUnit": {
+                    "type": "string"
+                },
+                "dosageForm": {
+                    "type": "string"
+                },
+                "doseUnit": {
+                    "type": "string"
+                },
+                "enterpriseName": {
+                    "type": "string"
+                },
+                "frequency": {
+                    "type": "string"
+                },
+                "medicationRoute": {
+                    "type": "string"
+                },
+                "minUnitName": {
+                    "type": "string"
+                },
+                "packConversion": {
+                    "type": "integer"
+                },
+                "packageSpecName": {
+                    "type": "string"
+                },
+                "packageUnitName": {
+                    "type": "string"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "singleDose": {
+                    "type": "string"
+                },
+                "skuCode": {
+                    "type": "string"
+                },
+                "skuId": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "specName": {
+                    "type": "string"
+                },
+                "submissionId": {
+                    "type": "string"
+                },
+                "submissionItemId": {
+                    "type": "string"
+                },
+                "totalMinQuantity": {
+                    "type": "string"
+                },
+                "usageInstructions": {
+                    "type": "string"
+                }
+            }
+        },
         "models.MedicalDepartmentTreeResponse": {
             "type": "object",
             "properties": {
@@ -26452,6 +28563,184 @@
                 }
             }
         },
+        "models.OutpatientDiagnosisResponse": {
+            "type": "object",
+            "properties": {
+                "diagnosisId": {
+                    "type": "string"
+                },
+                "icdCode": {
+                    "type": "string"
+                },
+                "icdName": {
+                    "type": "string"
+                },
+                "isPrimary": {
+                    "type": "integer"
+                },
+                "recordDiagnosisId": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.OutpatientRecordResponse": {
+            "type": "object",
+            "properties": {
+                "allergyHistory": {
+                    "type": "string"
+                },
+                "auxiliaryExamination": {
+                    "type": "string"
+                },
+                "chiefComplaint": {
+                    "type": "string"
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "creatorId": {
+                    "type": "string"
+                },
+                "departmentId": {
+                    "type": "string"
+                },
+                "departmentName": {
+                    "type": "string"
+                },
+                "diagnoses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.OutpatientDiagnosisResponse"
+                    }
+                },
+                "diastolicPressure": {
+                    "type": "integer"
+                },
+                "doctorId": {
+                    "type": "string"
+                },
+                "doctorName": {
+                    "type": "string"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "familyHistory": {
+                    "type": "string"
+                },
+                "followUpAdvice": {
+                    "type": "string"
+                },
+                "height": {
+                    "type": "string"
+                },
+                "informant": {
+                    "type": "string"
+                },
+                "maritalReproductive": {
+                    "type": "string"
+                },
+                "medicalAdvice": {
+                    "type": "string"
+                },
+                "menstrualHistory": {
+                    "type": "string"
+                },
+                "pastHistory": {
+                    "type": "string"
+                },
+                "patientBirthDate": {
+                    "type": "string"
+                },
+                "patientGender": {
+                    "type": "string"
+                },
+                "patientId": {
+                    "type": "string"
+                },
+                "patientName": {
+                    "type": "string"
+                },
+                "patientNo": {
+                    "type": "string"
+                },
+                "patientPhone": {
+                    "type": "string"
+                },
+                "personalHistory": {
+                    "type": "string"
+                },
+                "physicalExamination": {
+                    "type": "string"
+                },
+                "prescriptions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PrescriptionResponse"
+                    }
+                },
+                "presentIllness": {
+                    "type": "string"
+                },
+                "pulse": {
+                    "type": "integer"
+                },
+                "queueId": {
+                    "type": "string"
+                },
+                "queueSequence": {
+                    "type": "integer"
+                },
+                "queueStatus": {
+                    "type": "integer"
+                },
+                "recordId": {
+                    "type": "string"
+                },
+                "registrationId": {
+                    "type": "string"
+                },
+                "registrationNo": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "respiratoryRate": {
+                    "type": "integer"
+                },
+                "specialistExamination": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "systolicPressure": {
+                    "type": "integer"
+                },
+                "temperature": {
+                    "type": "string"
+                },
+                "treatmentPlan": {
+                    "type": "string"
+                },
+                "updateDate": {
+                    "type": "string"
+                },
+                "updaterId": {
+                    "type": "string"
+                },
+                "visitType": {
+                    "type": "integer"
+                },
+                "weight": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ParamResponse": {
             "type": "object",
             "properties": {
@@ -26644,6 +28933,89 @@
                     "description": "更新时间",
                     "type": "string",
                     "example": "2026-07-31 12:00:00"
+                }
+            }
+        },
+        "models.PrescriptionResponse": {
+            "type": "object",
+            "properties": {
+                "createDate": {
+                    "type": "string"
+                },
+                "creatorId": {
+                    "type": "string"
+                },
+                "currentVersion": {
+                    "type": "integer"
+                },
+                "departmentName": {
+                    "type": "string"
+                },
+                "doctorId": {
+                    "type": "string"
+                },
+                "doctorName": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MedPrescriptionItem"
+                    }
+                },
+                "latestSubmission": {
+                    "$ref": "#/definitions/models.MedPrescriptionSubmission"
+                },
+                "patientId": {
+                    "type": "string"
+                },
+                "patientName": {
+                    "type": "string"
+                },
+                "patientNo": {
+                    "type": "string"
+                },
+                "prescriptionId": {
+                    "type": "string"
+                },
+                "prescriptionNo": {
+                    "type": "string"
+                },
+                "prescriptionType": {
+                    "type": "integer"
+                },
+                "recordId": {
+                    "type": "string"
+                },
+                "registrationId": {
+                    "type": "string"
+                },
+                "registrationNo": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "submissionDiagnoses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MedPrescriptionSubmissionDiagnosis"
+                    }
+                },
+                "submissionItems": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MedPrescriptionSubmissionItem"
+                    }
+                },
+                "updateDate": {
+                    "type": "string"
+                },
+                "updaterId": {
+                    "type": "string"
                 }
             }
         },
@@ -28539,6 +30911,22 @@
                 }
             }
         },
+        "models.ReviewPrescriptionRequest": {
+            "type": "object",
+            "properties": {
+                "approved": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
+                },
+                "opinion": {
+                    "type": "string",
+                    "maxLength": 1000
+                }
+            }
+        },
         "models.RoleDetailResponse": {
             "type": "object",
             "properties": {
@@ -28690,6 +31078,49 @@
                     "type": "string",
                     "maxLength": 128,
                     "example": "财务分类"
+                }
+            }
+        },
+        "models.SaveDiagnosisRequest": {
+            "type": "object",
+            "required": [
+                "icdCode",
+                "icdName"
+            ],
+            "properties": {
+                "icdCode": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "example": "I10"
+                },
+                "icdName": {
+                    "type": "string",
+                    "maxLength": 128,
+                    "example": "原发性高血压"
+                },
+                "namePinyin": {
+                    "type": "string",
+                    "maxLength": 256,
+                    "example": "yuanfaxinggaoxueya"
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512,
+                    "example": "常见慢性病"
+                },
+                "sort": {
+                    "type": "integer",
+                    "maximum": 999999,
+                    "minimum": 0,
+                    "example": 10
+                },
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ],
+                    "example": 1
                 }
             }
         },
@@ -29334,6 +31765,125 @@
                 }
             }
         },
+        "models.SaveOutpatientDiagnosisRequest": {
+            "type": "object",
+            "required": [
+                "diagnosisId"
+            ],
+            "properties": {
+                "diagnosisId": {
+                    "type": "string"
+                },
+                "isPrimary": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
+                },
+                "sort": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "models.SaveOutpatientRecordRequest": {
+            "type": "object",
+            "properties": {
+                "allergyHistory": {
+                    "type": "string"
+                },
+                "auxiliaryExamination": {
+                    "type": "string"
+                },
+                "chiefComplaint": {
+                    "type": "string"
+                },
+                "diagnoses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SaveOutpatientDiagnosisRequest"
+                    }
+                },
+                "diastolicPressure": {
+                    "type": "integer",
+                    "maximum": 200,
+                    "minimum": 1
+                },
+                "familyHistory": {
+                    "type": "string"
+                },
+                "followUpAdvice": {
+                    "type": "string"
+                },
+                "height": {
+                    "type": "string"
+                },
+                "informant": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "maritalReproductive": {
+                    "type": "string"
+                },
+                "medicalAdvice": {
+                    "type": "string"
+                },
+                "menstrualHistory": {
+                    "type": "string"
+                },
+                "pastHistory": {
+                    "type": "string"
+                },
+                "personalHistory": {
+                    "type": "string"
+                },
+                "physicalExamination": {
+                    "type": "string"
+                },
+                "presentIllness": {
+                    "type": "string"
+                },
+                "pulse": {
+                    "type": "integer",
+                    "maximum": 300,
+                    "minimum": 1
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 1000
+                },
+                "respiratoryRate": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                },
+                "specialistExamination": {
+                    "type": "string"
+                },
+                "systolicPressure": {
+                    "type": "integer",
+                    "maximum": 300,
+                    "minimum": 1
+                },
+                "temperature": {
+                    "type": "string"
+                },
+                "treatmentPlan": {
+                    "type": "string"
+                },
+                "visitType": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        10
+                    ]
+                },
+                "weight": {
+                    "type": "string"
+                }
+            }
+        },
         "models.SavePatientRequest": {
             "type": "object",
             "required": [
@@ -29379,6 +31929,76 @@
                 },
                 "remark": {
                     "type": "string"
+                }
+            }
+        },
+        "models.SavePrescriptionItemRequest": {
+            "type": "object",
+            "required": [
+                "courseDays",
+                "frequency",
+                "medicationRoute",
+                "singleDose",
+                "skuId"
+            ],
+            "properties": {
+                "courseDays": {
+                    "type": "integer",
+                    "maximum": 365,
+                    "minimum": 1
+                },
+                "frequency": {
+                    "type": "string",
+                    "maxLength": 16
+                },
+                "medicationRoute": {
+                    "type": "string",
+                    "maxLength": 36
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512
+                },
+                "singleDose": {
+                    "type": "string"
+                },
+                "skuId": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "totalMinQuantity": {
+                    "type": "string"
+                },
+                "usageInstructions": {
+                    "type": "string",
+                    "maxLength": 1000
+                }
+            }
+        },
+        "models.SavePrescriptionRequest": {
+            "type": "object",
+            "required": [
+                "prescriptionType"
+            ],
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SavePrescriptionItemRequest"
+                    }
+                },
+                "prescriptionType": {
+                    "type": "integer",
+                    "enum": [
+                        10
+                    ]
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 512
                 }
             }
         },
@@ -30801,6 +33421,19 @@
                 "status": {
                     "description": "状态 0=禁用 1=启用",
                     "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "models.UpdateDiagnosisStatusRequest": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ],
                     "example": 1
                 }
             }

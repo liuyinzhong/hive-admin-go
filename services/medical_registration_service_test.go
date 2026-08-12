@@ -14,7 +14,6 @@ func TestValidateRegistrationTransitionAllowsOnlyApprovedLifecycle(t *testing.T)
 		{models.MedRegistrationStatusPaid, models.MedRegistrationStatusCheckedIn},
 		{models.MedRegistrationStatusPaid, models.MedRegistrationStatusNoShow},
 		{models.MedRegistrationStatusPaid, models.MedRegistrationStatusRefundStarted},
-		{models.MedRegistrationStatusCheckedIn, models.MedRegistrationStatusCompleted},
 		{models.MedRegistrationStatusRefundStarted, models.MedRegistrationStatusRefunding},
 		{models.MedRegistrationStatusRefunding, models.MedRegistrationStatusRefunded},
 	}

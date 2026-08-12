@@ -20,7 +20,7 @@
 
 ### MED-DOC-004 字典字段必须使用启用值
 
-专业职称使用 `MED_DOCTOR_TITLE`，用工类型使用 `MED_EMPLOYMENT_TYPE`，性别使用 `SYS_USER_GENDER`。必填字典值为空、值不存在或已停用时拒绝保存。
+专业职称使用 `MED_DOCTOR_TITLE`，用工类型使用 `MED_EMPLOYMENT_TYPE`，性别使用 `GENDER`（与患者性别字典一致）。必填字典值为空、值不存在或已停用时拒绝保存。
 
 ### MED-DOC-005 服务能力字段有明确范围
 

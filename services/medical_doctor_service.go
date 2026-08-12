@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	doctorGenderDictType     = "MED_DOCTOR_GENDER"
+	doctorGenderDictType     = "GENDER"
 	doctorTitleDictType      = "MED_DOCTOR_TITLE"
 	doctorEmploymentDictType = "MED_EMPLOYMENT_TYPE"
 )

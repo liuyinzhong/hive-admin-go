@@ -45,7 +45,6 @@ func ValidateRegistrationTransition(fromStatus, toStatus int) error {
 		models.MedRegistrationStatusPaid: {
 			models.MedRegistrationStatusCheckedIn: {}, models.MedRegistrationStatusNoShow: {}, models.MedRegistrationStatusRefundStarted: {},
 		},
-		models.MedRegistrationStatusCheckedIn:     {models.MedRegistrationStatusCompleted: {}},
 		models.MedRegistrationStatusRefundStarted: {models.MedRegistrationStatusRefunding: {}},
 		models.MedRegistrationStatusRefunding:     {models.MedRegistrationStatusRefunded: {}},
 	}
@@ -322,9 +321,6 @@ func (s *MedicalRegistrationService) Cancel(id, operatorID, reason string, showS
 func (s *MedicalRegistrationService) CheckIn(id, operatorID string, showSensitive bool) (*models.RegistrationResponse, error) {
 	return s.transition(id, models.MedRegistrationStatusCheckedIn, operatorID, nil, false, showSensitive)
 }
-func (s *MedicalRegistrationService) Complete(id, operatorID string, showSensitive bool) (*models.RegistrationResponse, error) {
-	return s.transition(id, models.MedRegistrationStatusCompleted, operatorID, nil, false, showSensitive)
-}
 func (s *MedicalRegistrationService) NoShow(id, operatorID string, showSensitive bool) (*models.RegistrationResponse, error) {
 	return s.transition(id, models.MedRegistrationStatusNoShow, operatorID, nil, true, showSensitive)
 }
@@ -378,11 +374,6 @@ func (s *MedicalRegistrationService) transition(id string, toStatus int, operato
 		}
 		if toStatus == models.MedRegistrationStatusCheckedIn {
 			if err := createVisitQueue(tx, registration, operatorID, now); err != nil {
-				return err
-			}
-		}
-		if toStatus == models.MedRegistrationStatusCompleted {
-			if err := completeVisitQueue(tx, registration.RegistrationID); err != nil {
 				return err
 			}
 		}
@@ -463,19 +454,6 @@ func createVisitQueue(tx *gorm.DB, registration models.MedRegistration, operator
 		CreatorID:      optionalOperatorID(operatorID),
 	}
 	return tx.Create(&queue).Error
-}
-
-func completeVisitQueue(tx *gorm.DB, registrationID string) error {
-	result := tx.Model(&models.MedVisitQueue{}).
-		Where("registration_id = ? AND queue_status = ?", registrationID, models.MedVisitQueueStatusWaiting).
-		Update("queue_status", models.MedVisitQueueStatusCompleted)
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected != 1 {
-		return fmt.Errorf("%w: 候诊记录不存在或状态不允许完成", ErrMedicalConflict)
-	}
-	return nil
 }
 
 func loadRegistrationLogs(db *gorm.DB, registrationID string) ([]models.RegistrationLifecycleResponse, error) {

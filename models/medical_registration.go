@@ -19,11 +19,6 @@ const (
 	MedRegistrationStatusRefunded       = 100
 )
 
-const (
-	MedVisitQueueStatusWaiting   = 0
-	MedVisitQueueStatusCompleted = 30
-)
-
 type MedRegistration struct {
 	RegistrationID       string     `gorm:"column:registration_id;type:char(36);primaryKey" json:"registrationId"`
 	RegistrationNo       string     `gorm:"column:registration_no;type:varchar(32)" json:"registrationNo"`

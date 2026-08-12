@@ -148,23 +148,6 @@ func (ctrl *MedicalController) CheckInRegistration(c *gin.Context) {
 	ctrl.registrationAction(c, ctrl.registrationService.CheckIn)
 }
 
-// CompleteRegistration 完成接诊。
-// @Summary 完成挂号单
-// @Tags 医疗管理/挂号管理
-// @Produce json
-// @Security ApiKeyAuth
-// @Param registrationId path string true "挂号单ID"
-// @Success 200 {object} models.Response{data=models.RegistrationResponse}
-// @Failure 400 {object} models.Response
-// @Failure 403 {object} models.Response
-// @Failure 404 {object} models.Response
-// @Failure 409 {object} models.Response
-// @Failure 500 {object} models.Response
-// @Router /medical/registrations/{registrationId}/complete [post]
-func (ctrl *MedicalController) CompleteRegistration(c *gin.Context) {
-	ctrl.registrationAction(c, ctrl.registrationService.Complete)
-}
-
 // MarkRegistrationNoShow 标记爽约。
 // @Summary 标记挂号单爽约
 // @Tags 医疗管理/挂号管理

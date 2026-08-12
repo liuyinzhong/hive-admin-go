@@ -1139,6 +1139,27 @@ definitions:
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
     type: object
+  models.DiagnosisResponse:
+    properties:
+      createDate:
+        type: string
+      diagnosisId:
+        type: string
+      icdCode:
+        type: string
+      icdName:
+        type: string
+      namePinyin:
+        type: string
+      remark:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: integer
+      updateDate:
+        type: string
+    type: object
   models.DictTreeResponse:
     properties:
       children:
@@ -1390,6 +1411,69 @@ definitions:
       userName:
         description: 用户名
         example: 张三
+        type: string
+    type: object
+  models.DoctorWorkbenchQueueResponse:
+    properties:
+      callCount:
+        type: integer
+      checkInTime:
+        type: string
+      endTime:
+        type: string
+      patientName:
+        type: string
+      patientNo:
+        type: string
+      patientPhone:
+        type: string
+      queueId:
+        type: string
+      queueSequence:
+        type: integer
+      queueStatus:
+        type: integer
+      recordId:
+        type: string
+      registrationId:
+        type: string
+      registrationNo:
+        type: string
+      startTime:
+        type: string
+    type: object
+  models.DoctorWorkbenchResponse:
+    properties:
+      doctorId:
+        type: string
+      doctorName:
+        type: string
+      doctorNo:
+        type: string
+      schedules:
+        items:
+          $ref: '#/definitions/models.DoctorWorkbenchScheduleResponse'
+        type: array
+    type: object
+  models.DoctorWorkbenchScheduleResponse:
+    properties:
+      departmentId:
+        type: string
+      departmentName:
+        type: string
+      endTime:
+        type: string
+      queues:
+        items:
+          $ref: '#/definitions/models.DoctorWorkbenchQueueResponse'
+        type: array
+      registrationType:
+        type: string
+      scheduleDate:
+        type: string
+      scheduleId:
+        type: string
+      startTime:
         type: string
     type: object
   models.DownloadTaskCreatedResponse:
@@ -2989,6 +3073,160 @@ definitions:
         example: eyJhbGciOiJIUzI1NiIs...
         type: string
     type: object
+  models.MedPrescriptionItem:
+    properties:
+      allowSplit:
+        type: integer
+      approvalNo:
+        type: string
+      courseDays:
+        type: integer
+      createDate:
+        type: string
+      creatorId:
+        type: string
+      dispenseQuantity:
+        type: string
+      dispenseUnit:
+        type: string
+      dosageForm:
+        type: string
+      doseUnit:
+        type: string
+      enterpriseName:
+        type: string
+      frequency:
+        type: string
+      itemId:
+        type: string
+      medicationRoute:
+        type: string
+      minUnitName:
+        type: string
+      packConversion:
+        type: integer
+      packageSpecName:
+        type: string
+      packageUnitName:
+        type: string
+      prescriptionId:
+        type: string
+      productName:
+        type: string
+      remark:
+        type: string
+      singleDose:
+        type: string
+      skuCode:
+        type: string
+      skuId:
+        type: string
+      sort:
+        type: integer
+      specName:
+        type: string
+      totalMinQuantity:
+        type: string
+      updateDate:
+        type: string
+      updaterId:
+        type: string
+      usageInstructions:
+        type: string
+    type: object
+  models.MedPrescriptionSubmission:
+    properties:
+      allergyHistory:
+        type: string
+      prescriptionId:
+        type: string
+      reviewOpinion:
+        type: string
+      reviewedAt:
+        type: string
+      reviewerId:
+        type: string
+      submissionId:
+        type: string
+      submissionStatus:
+        type: integer
+      submittedAt:
+        type: string
+      submittedBy:
+        type: string
+      version:
+        type: integer
+    type: object
+  models.MedPrescriptionSubmissionDiagnosis:
+    properties:
+      diagnosisId:
+        type: string
+      icdCode:
+        type: string
+      icdName:
+        type: string
+      isPrimary:
+        type: integer
+      sort:
+        type: integer
+      submissionDiagnosisId:
+        type: string
+      submissionId:
+        type: string
+    type: object
+  models.MedPrescriptionSubmissionItem:
+    properties:
+      allowSplit:
+        type: integer
+      approvalNo:
+        type: string
+      courseDays:
+        type: integer
+      dispenseQuantity:
+        type: string
+      dispenseUnit:
+        type: string
+      dosageForm:
+        type: string
+      doseUnit:
+        type: string
+      enterpriseName:
+        type: string
+      frequency:
+        type: string
+      medicationRoute:
+        type: string
+      minUnitName:
+        type: string
+      packConversion:
+        type: integer
+      packageSpecName:
+        type: string
+      packageUnitName:
+        type: string
+      productName:
+        type: string
+      remark:
+        type: string
+      singleDose:
+        type: string
+      skuCode:
+        type: string
+      skuId:
+        type: string
+      sort:
+        type: integer
+      specName:
+        type: string
+      submissionId:
+        type: string
+      submissionItemId:
+        type: string
+      totalMinQuantity:
+        type: string
+      usageInstructions:
+        type: string
+    type: object
   models.MedicalDepartmentTreeResponse:
     properties:
       children:
@@ -3350,6 +3588,124 @@ definitions:
         example: admin
         type: string
     type: object
+  models.OutpatientDiagnosisResponse:
+    properties:
+      diagnosisId:
+        type: string
+      icdCode:
+        type: string
+      icdName:
+        type: string
+      isPrimary:
+        type: integer
+      recordDiagnosisId:
+        type: string
+      sort:
+        type: integer
+    type: object
+  models.OutpatientRecordResponse:
+    properties:
+      allergyHistory:
+        type: string
+      auxiliaryExamination:
+        type: string
+      chiefComplaint:
+        type: string
+      createDate:
+        type: string
+      creatorId:
+        type: string
+      departmentId:
+        type: string
+      departmentName:
+        type: string
+      diagnoses:
+        items:
+          $ref: '#/definitions/models.OutpatientDiagnosisResponse'
+        type: array
+      diastolicPressure:
+        type: integer
+      doctorId:
+        type: string
+      doctorName:
+        type: string
+      endDate:
+        type: string
+      familyHistory:
+        type: string
+      followUpAdvice:
+        type: string
+      height:
+        type: string
+      informant:
+        type: string
+      maritalReproductive:
+        type: string
+      medicalAdvice:
+        type: string
+      menstrualHistory:
+        type: string
+      pastHistory:
+        type: string
+      patientBirthDate:
+        type: string
+      patientGender:
+        type: string
+      patientId:
+        type: string
+      patientName:
+        type: string
+      patientNo:
+        type: string
+      patientPhone:
+        type: string
+      personalHistory:
+        type: string
+      physicalExamination:
+        type: string
+      prescriptions:
+        items:
+          $ref: '#/definitions/models.PrescriptionResponse'
+        type: array
+      presentIllness:
+        type: string
+      pulse:
+        type: integer
+      queueId:
+        type: string
+      queueSequence:
+        type: integer
+      queueStatus:
+        type: integer
+      recordId:
+        type: string
+      registrationId:
+        type: string
+      registrationNo:
+        type: string
+      remark:
+        type: string
+      respiratoryRate:
+        type: integer
+      specialistExamination:
+        type: string
+      startDate:
+        type: string
+      systolicPressure:
+        type: integer
+      temperature:
+        type: string
+      treatmentPlan:
+        type: string
+      updateDate:
+        type: string
+      updaterId:
+        type: string
+      visitType:
+        type: integer
+      weight:
+        type: string
+    type: object
   models.ParamResponse:
     properties:
       createDate:
@@ -3496,6 +3852,61 @@ definitions:
       updateDate:
         description: 更新时间
         example: "2026-07-31 12:00:00"
+        type: string
+    type: object
+  models.PrescriptionResponse:
+    properties:
+      createDate:
+        type: string
+      creatorId:
+        type: string
+      currentVersion:
+        type: integer
+      departmentName:
+        type: string
+      doctorId:
+        type: string
+      doctorName:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/models.MedPrescriptionItem'
+        type: array
+      latestSubmission:
+        $ref: '#/definitions/models.MedPrescriptionSubmission'
+      patientId:
+        type: string
+      patientName:
+        type: string
+      patientNo:
+        type: string
+      prescriptionId:
+        type: string
+      prescriptionNo:
+        type: string
+      prescriptionType:
+        type: integer
+      recordId:
+        type: string
+      registrationId:
+        type: string
+      registrationNo:
+        type: string
+      remark:
+        type: string
+      status:
+        type: integer
+      submissionDiagnoses:
+        items:
+          $ref: '#/definitions/models.MedPrescriptionSubmissionDiagnosis'
+        type: array
+      submissionItems:
+        items:
+          $ref: '#/definitions/models.MedPrescriptionSubmissionItem'
+        type: array
+      updateDate:
+        type: string
+      updaterId:
         type: string
     type: object
   models.PrintBodySection:
@@ -4919,6 +5330,17 @@ definitions:
         example: ok
         type: string
     type: object
+  models.ReviewPrescriptionRequest:
+    properties:
+      approved:
+        enum:
+        - 0
+        - 1
+        type: integer
+      opinion:
+        maxLength: 1000
+        type: string
+    type: object
   models.RoleDetailResponse:
     properties:
       createDate:
@@ -5037,6 +5459,39 @@ definitions:
     required:
     - systemCode
     - systemName
+    type: object
+  models.SaveDiagnosisRequest:
+    properties:
+      icdCode:
+        example: I10
+        maxLength: 32
+        type: string
+      icdName:
+        example: 原发性高血压
+        maxLength: 128
+        type: string
+      namePinyin:
+        example: yuanfaxinggaoxueya
+        maxLength: 256
+        type: string
+      remark:
+        example: 常见慢性病
+        maxLength: 512
+        type: string
+      sort:
+        example: 10
+        maximum: 999999
+        minimum: 0
+        type: integer
+      status:
+        enum:
+        - 0
+        - 1
+        example: 1
+        type: integer
+    required:
+    - icdCode
+    - icdName
     type: object
   models.SaveDoctorRequest:
     properties:
@@ -5517,6 +5972,89 @@ definitions:
     - qualifications
     - unifiedCreditCode
     type: object
+  models.SaveOutpatientDiagnosisRequest:
+    properties:
+      diagnosisId:
+        type: string
+      isPrimary:
+        enum:
+        - 0
+        - 1
+        type: integer
+      sort:
+        minimum: 0
+        type: integer
+    required:
+    - diagnosisId
+    type: object
+  models.SaveOutpatientRecordRequest:
+    properties:
+      allergyHistory:
+        type: string
+      auxiliaryExamination:
+        type: string
+      chiefComplaint:
+        type: string
+      diagnoses:
+        items:
+          $ref: '#/definitions/models.SaveOutpatientDiagnosisRequest'
+        type: array
+      diastolicPressure:
+        maximum: 200
+        minimum: 1
+        type: integer
+      familyHistory:
+        type: string
+      followUpAdvice:
+        type: string
+      height:
+        type: string
+      informant:
+        maxLength: 64
+        type: string
+      maritalReproductive:
+        type: string
+      medicalAdvice:
+        type: string
+      menstrualHistory:
+        type: string
+      pastHistory:
+        type: string
+      personalHistory:
+        type: string
+      physicalExamination:
+        type: string
+      presentIllness:
+        type: string
+      pulse:
+        maximum: 300
+        minimum: 1
+        type: integer
+      remark:
+        maxLength: 1000
+        type: string
+      respiratoryRate:
+        maximum: 100
+        minimum: 1
+        type: integer
+      specialistExamination:
+        type: string
+      systolicPressure:
+        maximum: 300
+        minimum: 1
+        type: integer
+      temperature:
+        type: string
+      treatmentPlan:
+        type: string
+      visitType:
+        enum:
+        - 0
+        - 10
+        type: integer
+      weight:
+        type: string
+    type: object
   models.SavePatientRequest:
     properties:
       address:
@@ -5550,6 +6088,56 @@ definitions:
     - idType
     - name
     - phone
+    type: object
+  models.SavePrescriptionItemRequest:
+    properties:
+      courseDays:
+        maximum: 365
+        minimum: 1
+        type: integer
+      frequency:
+        maxLength: 16
+        type: string
+      medicationRoute:
+        maxLength: 36
+        type: string
+      remark:
+        maxLength: 512
+        type: string
+      singleDose:
+        type: string
+      skuId:
+        type: string
+      sort:
+        minimum: 0
+        type: integer
+      totalMinQuantity:
+        type: string
+      usageInstructions:
+        maxLength: 1000
+        type: string
+    required:
+    - courseDays
+    - frequency
+    - medicationRoute
+    - singleDose
+    - skuId
+    type: object
+  models.SavePrescriptionRequest:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.SavePrescriptionItemRequest'
+        type: array
+      prescriptionType:
+        enum:
+        - 10
+        type: integer
+      remark:
+        maxLength: 512
+        type: string
+    required:
+    - prescriptionType
     type: object
   models.SaveProductMpRequest:
     properties:
@@ -6650,6 +7238,15 @@ definitions:
         type: integer
     required:
     - deptTitle
+    type: object
+  models.UpdateDiagnosisStatusRequest:
+    properties:
+      status:
+        enum:
+        - 0
+        - 1
+        example: 1
+        type: integer
     type: object
   models.UpdateDictRequest:
     properties:
@@ -13861,6 +14458,524 @@ paths:
       summary: 获取所有启用的临床科室
       tags:
       - 医疗管理/临床科室
+  /medical/diagnoses:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: ICD编码、名称或拼音
+        in: query
+        name: keyword
+        type: string
+      - description: 状态 0停用 1启用
+        in: query
+        name: status
+        type: integer
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.DiagnosisResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取疾病诊断档案列表
+      tags:
+      - 医疗管理/医生工作台
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 疾病诊断档案
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveDiagnosisRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建疾病诊断档案
+      tags:
+      - 医疗管理/疾病诊断档案
+  /medical/diagnoses/{diagnosisId}:
+    delete:
+      parameters:
+      - description: 诊断ID
+        in: path
+        name: diagnosisId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除疾病诊断档案
+      tags:
+      - 医疗管理/疾病诊断档案
+    get:
+      parameters:
+      - description: 诊断ID
+        in: path
+        name: diagnosisId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DiagnosisResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取疾病诊断详情
+      tags:
+      - 医疗管理/疾病诊断档案
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 诊断ID
+        in: path
+        name: diagnosisId
+        required: true
+        type: string
+      - description: 疾病诊断档案
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveDiagnosisRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 修改疾病诊断档案
+      tags:
+      - 医疗管理/疾病诊断档案
+  /medical/diagnoses/{diagnosisId}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 诊断ID
+        in: path
+        name: diagnosisId
+        required: true
+        type: string
+      - description: 状态
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateDiagnosisStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新疾病诊断状态
+      tags:
+      - 医疗管理/疾病诊断档案
+  /medical/doctorWorkbench:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DoctorWorkbenchResponse'
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取医生工作台
+      tags:
+      - 医疗管理/医生工作台
+  /medical/doctorWorkbench/diagnosisOptions:
+    get:
+      parameters:
+      - description: ICD编码、名称或拼音
+        in: query
+        name: keyword
+        type: string
+      - description: 返回数量，最大100
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.DiagnosisResponse'
+                  type: array
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取疾病诊断选项
+      tags:
+      - 医疗管理/疾病诊断档案
+  /medical/doctorWorkbench/queues/{queueId}/pass:
+    post:
+      parameters:
+      - description: 候诊记录ID
+        in: path
+        name: queueId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 患者过号
+      tags:
+      - 医疗管理/医生工作台
+  /medical/doctorWorkbench/queues/{queueId}/recall:
+    post:
+      parameters:
+      - description: 候诊记录ID
+        in: path
+        name: queueId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 重新叫号
+      tags:
+      - 医疗管理/医生工作台
+  /medical/doctorWorkbench/queues/{queueId}/repeatCall:
+    post:
+      parameters:
+      - description: 候诊记录ID
+        in: path
+        name: queueId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 再次叫号
+      tags:
+      - 医疗管理/医生工作台
+  /medical/doctorWorkbench/queues/{queueId}/start:
+    post:
+      parameters:
+      - description: 候诊记录ID
+        in: path
+        name: queueId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.OutpatientRecordResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 开始接诊
+      tags:
+      - 医疗管理/医生工作台
+  /medical/doctorWorkbench/schedules/{scheduleId}/callNext:
+    post:
+      parameters:
+      - description: 排班ID
+        in: path
+        name: scheduleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 叫下一位患者
+      tags:
+      - 医疗管理/医生工作台
   /medical/doctors:
     delete:
       consumes:
@@ -14150,6 +15265,232 @@ paths:
       summary: 获取所有启用医生选项
       tags:
       - 医疗管理/医生档案
+  /medical/outpatientRecords/{recordId}:
+    get:
+      parameters:
+      - description: 门诊病历ID
+        in: path
+        name: recordId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.OutpatientRecordResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取门诊病历
+      tags:
+      - 医疗管理/医生工作台
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 门诊病历ID
+        in: path
+        name: recordId
+        required: true
+        type: string
+      - description: 门诊病历
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveOutpatientRecordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.OutpatientRecordResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 保存门诊病历
+      tags:
+      - 医疗管理/医生工作台
+  /medical/outpatientRecords/{recordId}/complete:
+    post:
+      parameters:
+      - description: 门诊病历ID
+        in: path
+        name: recordId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.OutpatientRecordResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 完成接诊
+      tags:
+      - 医疗管理/医生工作台
+  /medical/outpatientRecords/{recordId}/history:
+    get:
+      parameters:
+      - description: 当前门诊病历ID
+        in: path
+        name: recordId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.OutpatientRecordResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取患者历史病历
+      tags:
+      - 医疗管理/医生工作台
+  /medical/outpatientRecords/{recordId}/prescriptions:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 门诊病历ID
+        in: path
+        name: recordId
+        required: true
+        type: string
+      - description: 处方
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SavePrescriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrescriptionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建处方草稿
+      tags:
+      - 医疗管理/医生工作台
   /medical/patients:
     get:
       description: 分页查询患者主档案，列表中的姓名、证件号码和手机号始终脱敏
@@ -14384,6 +15725,367 @@ paths:
       summary: 更新患者状态
       tags:
       - 医疗管理/患者档案
+  /medical/prescriptionReviews:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小，最大100
+        in: query
+        name: pageSize
+        type: integer
+      - description: 处方编号
+        in: query
+        name: prescriptionNo
+        type: string
+      - description: 患者编号或姓名
+        in: query
+        name: patientKeyword
+        type: string
+      - description: 处方状态
+        in: query
+        name: status
+        type: integer
+      - description: 排序
+        in: query
+        name: sorts
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.PrescriptionResponse'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取处方审核列表
+      tags:
+      - 医疗管理/处方审核
+  /medical/prescriptionReviews/{prescriptionId}:
+    get:
+      parameters:
+      - description: 处方ID
+        in: path
+        name: prescriptionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrescriptionResponse'
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取处方审核详情
+      tags:
+      - 医疗管理/处方审核
+  /medical/prescriptionReviews/{prescriptionId}/review:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 处方ID
+        in: path
+        name: prescriptionId
+        required: true
+        type: string
+      - description: 审核结果
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ReviewPrescriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrescriptionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 审核处方
+      tags:
+      - 医疗管理/处方审核
+  /medical/prescriptions/{prescriptionId}:
+    get:
+      parameters:
+      - description: 处方ID
+        in: path
+        name: prescriptionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrescriptionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取处方详情
+      tags:
+      - 医疗管理/处方
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 处方ID
+        in: path
+        name: prescriptionId
+        required: true
+        type: string
+      - description: 处方
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SavePrescriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrescriptionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 修改处方
+      tags:
+      - 医疗管理/医生工作台
+  /medical/prescriptions/{prescriptionId}/submit:
+    post:
+      parameters:
+      - description: 处方ID
+        in: path
+        name: prescriptionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrescriptionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 提交处方审核
+      tags:
+      - 医疗管理/医生工作台
+  /medical/prescriptions/{prescriptionId}/void:
+    post:
+      parameters:
+      - description: 处方ID
+        in: path
+        name: prescriptionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrescriptionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 作废处方
+      tags:
+      - 医疗管理/医生工作台
+  /medical/prescriptions/{prescriptionId}/withdraw:
+    post:
+      parameters:
+      - description: 处方ID
+        in: path
+        name: prescriptionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PrescriptionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 撤回处方
+      tags:
+      - 医疗管理/医生工作台
   /medical/registrationFeeRules:
     get:
       description: 分页查询挂号费规则列表，支持按医生、科室、挂号类型、有效期状态等条件筛选
@@ -14799,51 +16501,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 挂号单签到
-      tags:
-      - 医疗管理/挂号管理
-  /medical/registrations/{registrationId}/complete:
-    post:
-      parameters:
-      - description: 挂号单ID
-        in: path
-        name: registrationId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/models.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.RegistrationResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.Response'
-        "409":
-          description: Conflict
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: 完成挂号单
       tags:
       - 医疗管理/挂号管理
   /medical/registrations/{registrationId}/confirmPayment:

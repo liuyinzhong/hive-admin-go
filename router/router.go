@@ -470,6 +470,16 @@ func SetupRouter() *gin.Engine {
 				patients.PUT("/:patientId/status", permissionGuard.Require("medical:patient:status"), medicalController.UpdatePatientStatus)
 			}
 
+			diagnoses := medical.Group("/diagnoses")
+			{
+				diagnoses.GET("", permissionGuard.Require("medical:diagnosis:list"), medicalController.GetDiagnosisList)
+				diagnoses.POST("", permissionGuard.Require("medical:diagnosis:create"), medicalController.CreateDiagnosis)
+				diagnoses.GET("/:diagnosisId", permissionGuard.Require("medical:diagnosis:detail"), medicalController.GetDiagnosisDetail)
+				diagnoses.PUT("/:diagnosisId", permissionGuard.Require("medical:diagnosis:update"), medicalController.UpdateDiagnosis)
+				diagnoses.PUT("/:diagnosisId/status", permissionGuard.Require("medical:diagnosis:status"), medicalController.UpdateDiagnosisStatus)
+				diagnoses.DELETE("/:diagnosisId", permissionGuard.Require("medical:diagnosis:delete"), medicalController.DeleteDiagnosis)
+			}
+
 			registrations := medical.Group("/registrations")
 			{
 				registrations.GET("", permissionGuard.Require("medical:registration:list"), medicalController.GetRegistrationList)
@@ -478,7 +488,6 @@ func SetupRouter() *gin.Engine {
 				registrations.POST("/:registrationId/confirmPayment", permissionGuard.Require("medical:registration:confirmPayment"), medicalController.ConfirmRegistrationPayment)
 				registrations.POST("/:registrationId/cancel", permissionGuard.Require("medical:registration:cancel"), medicalController.CancelRegistration)
 				registrations.POST("/:registrationId/checkIn", permissionGuard.Require("medical:registration:checkIn"), medicalController.CheckInRegistration)
-				registrations.POST("/:registrationId/complete", permissionGuard.Require("medical:registration:complete"), medicalController.CompleteRegistration)
 				registrations.POST("/:registrationId/noShow", permissionGuard.Require("medical:registration:noShow"), medicalController.MarkRegistrationNoShow)
 				registrations.POST("/:registrationId/refundStart", permissionGuard.Require("medical:registration:refundStart"), medicalController.StartRegistrationRefund)
 				registrations.POST("/:registrationId/refundProcess", permissionGuard.Require("medical:registration:refundProcess"), medicalController.ProcessRegistrationRefund)
@@ -518,6 +527,42 @@ func SetupRouter() *gin.Engine {
 			scheduleTasks := medical.Group("/scheduleTasks")
 			{
 				scheduleTasks.GET("", permissionGuard.Require("medical:scheduleTask:list"), medicalController.GetScheduleAutoTaskList)
+			}
+
+			doctorWorkbench := medical.Group("/doctorWorkbench", permissionGuard.Require("medical:doctorWorkbench:access"))
+			{
+				doctorWorkbench.GET("", medicalController.GetDoctorWorkbench)
+				doctorWorkbench.GET("/diagnosisOptions", medicalController.GetDiagnosisOptions)
+				doctorWorkbench.POST("/schedules/:scheduleId/callNext", medicalController.CallNextPatient)
+				doctorWorkbench.POST("/queues/:queueId/repeatCall", medicalController.RepeatCallPatient)
+				doctorWorkbench.POST("/queues/:queueId/pass", medicalController.PassPatient)
+				doctorWorkbench.POST("/queues/:queueId/recall", medicalController.RecallPatient)
+				doctorWorkbench.POST("/queues/:queueId/start", medicalController.StartConsultation)
+			}
+
+			outpatientRecords := medical.Group("/outpatientRecords", permissionGuard.Require("medical:doctorWorkbench:access"))
+			{
+				outpatientRecords.GET("/:recordId", medicalController.GetOutpatientRecord)
+				outpatientRecords.PUT("/:recordId", medicalController.SaveOutpatientRecord)
+				outpatientRecords.POST("/:recordId/complete", medicalController.CompleteOutpatientRecord)
+				outpatientRecords.GET("/:recordId/history", medicalController.GetPatientOutpatientHistory)
+				outpatientRecords.POST("/:recordId/prescriptions", medicalController.CreatePrescription)
+			}
+
+			prescriptions := medical.Group("/prescriptions", permissionGuard.Require("medical:doctorWorkbench:access"))
+			{
+				prescriptions.GET("/:prescriptionId", medicalController.GetPrescription)
+				prescriptions.PUT("/:prescriptionId", medicalController.UpdatePrescription)
+				prescriptions.POST("/:prescriptionId/submit", medicalController.SubmitPrescription)
+				prescriptions.POST("/:prescriptionId/withdraw", medicalController.WithdrawPrescription)
+				prescriptions.POST("/:prescriptionId/void", medicalController.VoidPrescription)
+			}
+
+			prescriptionReviews := medical.Group("/prescriptionReviews", permissionGuard.Require("medical:prescriptionReview:access"))
+			{
+				prescriptionReviews.GET("", medicalController.GetPrescriptionReviewList)
+				prescriptionReviews.GET("/:prescriptionId", medicalController.GetPrescriptionReviewDetail)
+				prescriptionReviews.POST("/:prescriptionId/review", medicalController.ReviewPrescription)
 			}
 		}
 
