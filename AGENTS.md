@@ -23,9 +23,11 @@
 
 ## 开发前
 
+进入任何已有业务模块时，必须先阅读该模块在 `business-docs` 中的领域词汇、业务规则和前端 UI 说明，用文档先建立对业务目标、状态、边界和运行逻辑的整体理解，再阅读代码核实现状和定位实现入口。不得一开始通过逐文件钻研代码来反推业务规则；代码用于验证文档、发现差异和完成实现，不代替文档提供业务上下文。
+
 按以下顺序获取上下文：
 
-1. 业务功能先阅读 `CONTEXT-MAP.md` 和 `business-docs` 中对应手册。
+1. 业务功能先阅读 `business-docs/README.md`、`CONTEXT-MAP.md` 和对应领域手册。
 2. 阅读当前模块的 Router、Controller、Service 和 Model。
 3. 查找相似接口、分页、事务、导入导出和数据库操作。
 4. 阅读 Swagger 注释和相关 SQL。
@@ -42,6 +44,7 @@
 
 - 后端 `business-docs/<领域>` 是术语、业务规则、状态流转、前置条件、副作用、权限和代码入口的正文。
 - 前端 `../hive/business-docs/<领域>` 只记录页面入口、按钮展示、表单联动、刷新和交互规则，不复制另一套后端业务规则。
+- `business-docs/README.md` 是 Controller、Service、Model 和路由到业务领域的总索引；新增业务入口时必须登记。
 - `CONTEXT.md` 只定义领域词汇，不写接口、表名、权限码或实现细节；具体规则放入模块文档。
 - `CONTEXT-MAP.md` 维护领域入口和跨领域关系。增加新领域或改变跨模块依赖时必须同步更新。
 - 本仓库 `docs` 是 Swagger 生成文件，不存放手写业务文档；Swagger 只描述 HTTP 契约，不能代替业务规则。
@@ -93,15 +96,15 @@
 
 处理 `product_*` 前，按 `CONTEXT-MAP.md` → `business-docs/product/CONTEXT.md` → `business-docs/product/README.md` → 当前子模块规则 → 当前代码与前端实现的顺序阅读。
 
-处理医生管理或医生排班前，按 `CONTEXT-MAP.md` → `business-docs/medical/CONTEXT.md` → `business-docs/medical/README.md` → `doctor.md` 或 `schedule.md` → 当前代码与前端实现的顺序阅读。
+处理任一医疗模块前，按 `CONTEXT-MAP.md` → `business-docs/medical/CONTEXT.md` → `business-docs/medical/README.md` → 当前模块规则 → 前端对应 UI 文档 → 当前代码的顺序阅读。
 
-产品档案、医生管理和医生排班的术语、状态、前置条件、价格或号源副作用、权限及前端入口变化时，必须在同一次修改中同步对应业务文档。患者、挂号、挂号费等尚未迁移模块仍需同时核对根目录 `CONTEXT.md`，不要把新的实现细节继续追加到领域词汇文件。
+产品档案，以及科室、医生、患者、诊断、挂号费、排班、挂号候诊、接诊和处方审核的术语、状态、前置条件、价格或号源副作用、权限及前端入口变化时，必须在同一次修改中同步对应业务文档。不要把新的实现细节追加到领域词汇文件。
 
-### 系统消息与下载中心业务文档
+### 系统管理业务文档
 
-处理 `menu_message`、`download_task`、`*_download_exporter`、系统消息或下载接口、下载 Worker、SSE 以及来源模块异步导出入口前，按 `CONTEXT-MAP.md` → `business-docs/system/CONTEXT.md` → `business-docs/system/README.md` → `message-push.md` 或 `download-center.md` → 当前代码与前端实现的顺序阅读。
+处理 auth、user、role、dept、menu、permission、dict、param、file、audit、external_page、pay_channel、menu_message、download_task、导出器或相关路由前，按 `CONTEXT-MAP.md` → `business-docs/system/CONTEXT.md` → `business-docs/system/README.md` → 当前模块规则 → 前端对应 UI 文档 → 当前代码的顺序阅读。
 
-菜单消息不是通用通知中心，SSE 事件也不是权威状态。修改消息持久化、未读汇总、事件类型、任务状态、导出上限、文件保留、清理规则、来源导出器或权限时，必须在同一次修改中同步系统业务文档；涉及库存或其它来源模块时还要同步其领域文档。
+系统管理各子模块不能互相套用规则。修改登录授权、动态菜单、字典参数、敏感配置、审计、消息持久化、事件类型、任务状态、导出上限、文件保留、清理规则、来源导出器或权限时，必须在同一次修改中同步系统业务文档；涉及其它来源领域时还要同步其文档。
 
 ## 技能自动调用
 
