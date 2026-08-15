@@ -12,7 +12,7 @@ const medicalPatientSensitivePermission = "medical:patient:viewSensitive"
 
 // GetPatientList 获取患者列表。
 // @Summary 获取患者列表
-// @Description 分页查询患者主档案，列表中的姓名、证件号码和手机号始终脱敏
+// @Description 按患者档案创建人及当前角色数据范围分页查询患者，列表姓名、证件号码和手机号始终脱敏
 // @Tags 医疗管理/患者档案
 // @Produce json
 // @Security ApiKeyAuth
@@ -35,7 +35,7 @@ func (ctrl *MedicalController) GetPatientList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.patientService.GetPatientList(req)
+	result, err := ctrl.patientService.GetPatientList(req, currentDataPermission(c))
 	if err != nil {
 		writeMedicalError(c, err)
 		return
@@ -45,7 +45,7 @@ func (ctrl *MedicalController) GetPatientList(c *gin.Context) {
 
 // CreatePatient 创建患者档案。
 // @Summary 创建患者档案
-// @Description 创建完整实名患者档案，姓名、证件号码和手机号属于敏感信息
+// @Description 创建完整实名患者档案并以当前用户作为归属人；姓名、证件号码和手机号属于敏感信息
 // @Tags 医疗管理/患者档案
 // @Accept json
 // @Produce json
@@ -75,7 +75,7 @@ func (ctrl *MedicalController) CreatePatient(c *gin.Context) {
 
 // GetPatientDetail 获取患者详情。
 // @Summary 获取患者详情
-// @Description 获取患者主档案详情；拥有敏感信息权限时返回姓名、证件号码和手机号完整值，否则返回脱敏值
+// @Description 按患者档案创建人及当前角色数据范围获取详情；敏感信息权限另行叠加
 // @Tags 医疗管理/患者档案
 // @Produce json
 // @Security ApiKeyAuth
@@ -89,6 +89,7 @@ func (ctrl *MedicalController) GetPatientDetail(c *gin.Context) {
 	result, err := ctrl.patientService.GetPatientDetail(
 		c.Param("patientId"),
 		ctrl.hasPatientSensitivePermissionValue(c),
+		currentDataPermission(c),
 	)
 	if err != nil {
 		writeMedicalError(c, err)
@@ -99,7 +100,7 @@ func (ctrl *MedicalController) GetPatientDetail(c *gin.Context) {
 
 // UpdatePatient 更新患者档案。
 // @Summary 更新患者档案
-// @Description 更新患者完整实名档案，需要同时拥有修改权限和敏感信息权限
+// @Description 按当前数据范围更新患者完整实名档案，需要同时拥有修改权限和敏感信息权限
 // @Tags 医疗管理/患者档案
 // @Accept json
 // @Produce json
@@ -121,7 +122,7 @@ func (ctrl *MedicalController) UpdatePatient(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	if err := ctrl.patientService.UpdatePatient(c.Param("patientId"), req, medicalOperatorID(c)); err != nil {
+	if err := ctrl.patientService.UpdatePatient(c.Param("patientId"), req, medicalOperatorID(c), currentDataPermission(c)); err != nil {
 		writeMedicalError(c, err)
 		return
 	}
@@ -130,7 +131,7 @@ func (ctrl *MedicalController) UpdatePatient(c *gin.Context) {
 
 // UpdatePatientStatus 更新患者状态。
 // @Summary 更新患者状态
-// @Description 启用或停用患者档案，停用不删除档案
+// @Description 按当前数据范围启用或停用患者档案，停用不删除档案
 // @Tags 医疗管理/患者档案
 // @Accept json
 // @Produce json
@@ -148,7 +149,7 @@ func (ctrl *MedicalController) UpdatePatientStatus(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	if err := ctrl.patientService.UpdatePatientStatus(c.Param("patientId"), req.Status, medicalOperatorID(c)); err != nil {
+	if err := ctrl.patientService.UpdatePatientStatus(c.Param("patientId"), req.Status, medicalOperatorID(c), currentDataPermission(c)); err != nil {
 		writeMedicalError(c, err)
 		return
 	}

@@ -8,7 +8,8 @@
 2. 设计、表单绑定和发布读 [流程定义规则](./definition.md)。
 3. 发起、待办、抄送和审批动作读 [流程运行规则](./runtime.md)。
 4. 表单结构继续读 [表单业务手册](../form/README.md)。
-5. 涉及页面时读前端 [工作流 UI 手册](../../../hive/business-docs/workflow/README.md)。
+5. 权限分层继续读 [系统数据权限规则](../system/data-permission.md)。
+6. 涉及页面时读前端 [工作流 UI 手册](../../../hive/business-docs/workflow/README.md)。
 
 ## 模块覆盖
 

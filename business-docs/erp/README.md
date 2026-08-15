@@ -7,8 +7,9 @@
 1. 先读 [ERP 领域词汇](./CONTEXT.md)。
 2. 再读当前任务对应的模块文档。
 3. 涉及接口时核对 Router、Controller、Model/DTO、Service 和 Swagger。
-4. 涉及页面时继续阅读前端 `hive/business-docs/erp` 下对应的 UI 文档。
-5. 文档与代码不一致时，以“待确认差异”方式列出，不静默决定哪一方正确。
+4. 涉及单据、库存、流水、追溯码或导出时阅读 [系统数据权限规则](../system/data-permission.md)。
+5. 涉及页面时继续阅读前端 `hive/business-docs/erp` 下对应的 UI 文档。
+6. 文档与代码不一致时，以“待确认差异”方式列出，不静默决定哪一方正确。
 
 ## 模块地图
 

@@ -9,12 +9,14 @@ import (
 	"gorm.io/gorm"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
 
-func GetStorys(page, pageSize int, params map[string]interface{}) (*utils.PaginationResponse, error) {
-	db := database.DB.Model(&models.DevStory{}).Where("del_flag = ?", 0)
+func GetStorys(page, pageSize int, params map[string]interface{}, permission datapermission.Permission) (*utils.PaginationResponse, error) {
+	db := database.DB.Model(&models.DevStory{}).Where("dev_story.del_flag = ?", 0)
+	db = permission.ApplyWithCSVUsers(db, []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"})
 
 	if storyNum, ok := params["storyNum"].(int); ok && storyNum > 0 {
 		db = db.Where("story_num = ?", storyNum)
@@ -46,12 +48,13 @@ func GetStorys(page, pageSize int, params map[string]interface{}) (*utils.Pagina
 	}
 
 	return utils.PaginateWithTransform[models.DevStory](db, page, pageSize, order, func(items []models.DevStory) interface{} {
-		return buildStoryResponses(items)
+		return buildStoryResponses(items, permission)
 	})
 }
 
-func GetAllStorys(params map[string]interface{}) ([]models.StoryResponse, error) {
-	db := database.DB.Model(&models.DevStory{}).Where("del_flag = ?", 0)
+func GetAllStorys(params map[string]interface{}, permission datapermission.Permission) ([]models.StoryResponse, error) {
+	db := database.DB.Model(&models.DevStory{}).Where("dev_story.del_flag = ?", 0)
+	db = permission.ApplyWithCSVUsers(db, []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"})
 
 	if storyNum, ok := params["storyNum"].(int); ok && storyNum > 0 {
 		db = db.Where("story_num = ?", storyNum)
@@ -78,10 +81,10 @@ func GetAllStorys(params map[string]interface{}) ([]models.StoryResponse, error)
 		return nil, err
 	}
 
-	return buildStoryResponses(storys), nil
+	return buildStoryResponses(storys, permission), nil
 }
 
-func buildStoryResponses(storys []models.DevStory) []models.StoryResponse {
+func buildStoryResponses(storys []models.DevStory, permission datapermission.Permission) []models.StoryResponse {
 	creatorIDs := make([]string, 0)
 	projectIDs := make([]string, 0)
 	versionIDs := make([]string, 0)
@@ -285,9 +288,10 @@ func buildStoryResponses(storys []models.DevStory) []models.StoryResponse {
 	return responses
 }
 
-func GetStoryByNum(storyNum int) (*models.StoryResponse, error) {
+func GetStoryByNum(storyNum int, permission datapermission.Permission) (*models.StoryResponse, error) {
 	var story models.DevStory
-	err := database.DB.Where("story_num = ? AND del_flag = ?", storyNum, 0).First(&story).Error
+	query := database.DB.Model(&models.DevStory{}).Where("story_num = ? AND del_flag = ?", storyNum, 0)
+	err := permission.ApplyWithCSVUsers(query, []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"}).First(&story).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("需求不存在")
@@ -295,10 +299,10 @@ func GetStoryByNum(storyNum int) (*models.StoryResponse, error) {
 		return nil, err
 	}
 
-	return buildSingleStoryResponse(&story), nil
+	return buildSingleStoryResponse(&story, permission), nil
 }
 
-func buildSingleStoryResponse(story *models.DevStory) *models.StoryResponse {
+func buildSingleStoryResponse(story *models.DevStory, permission datapermission.Permission) *models.StoryResponse {
 	var creatorName string
 	if story.CreatorID != nil {
 		var user models.SysUser
@@ -391,12 +395,12 @@ func buildSingleStoryResponse(story *models.DevStory) *models.StoryResponse {
 	taskList := make([]models.TaskResponse, 0)
 	bugList := make([]models.BugResponse, 0)
 
-	tasks, err := GetTasksByStoryId(story.StoryID)
+	tasks, err := GetTasksByStoryId(story.StoryID, permission)
 	if err == nil && tasks != nil {
 		taskList = tasks
 	}
 
-	bugs, err := GetBugsByStoryId(story.StoryID)
+	bugs, err := GetBugsByStoryId(story.StoryID, permission)
 	if err == nil && bugs != nil {
 		bugList = bugs
 	}
@@ -429,18 +433,36 @@ func buildSingleStoryResponse(story *models.DevStory) *models.StoryResponse {
 	}
 }
 
-func CreateStory(req *models.CreateStoryRequest, creatorID string) error {
+func CreateStory(req *models.CreateStoryRequest, creatorID string, permission datapermission.Permission) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		return createStoryTx(tx, req, creatorID, permission)
+	})
+}
+
+func createStoryTx(tx *gorm.DB, req *models.CreateStoryRequest, creatorID string, permission datapermission.Permission) error {
 	storyID := uuid.New().String()
 	now := time.Now()
 
+	userIDs, err := validateDataPermissionUsers(tx, req.UserIDs, permission)
+	if err != nil {
+		return err
+	}
+	fileIDs, err := validateDataPermissionFiles(tx, req.FileIDs, permission)
+	if err != nil {
+		return err
+	}
+	if err := validateDevVersionReference(tx, req.VersionID, permission); err != nil {
+		return err
+	}
+
 	userIDsStr := ""
-	if len(req.UserIDs) > 0 {
-		userIDsStr = strings.Join(req.UserIDs, ",")
+	if len(userIDs) > 0 {
+		userIDsStr = strings.Join(userIDs, ",")
 	}
 
 	fileIDsStr := ""
-	if len(req.FileIDs) > 0 {
-		fileIDsStr = strings.Join(req.FileIDs, ",")
+	if len(fileIDs) > 0 {
+		fileIDsStr = strings.Join(fileIDs, ",")
 	}
 
 	storyStatus, err := parseStringInt(req.StoryStatus, "storyStatus")
@@ -490,27 +512,29 @@ func CreateStory(req *models.CreateStoryRequest, creatorID string) error {
 		StoryNum:      0,
 	}
 
-	err = database.DB.Create(&story).Error
+	err = tx.Create(&story).Error
 	if err != nil {
 		return err
 	}
 
-	return createChangeHistory(creatorID, storyID, 0, 0, "")
+	return createChangeHistoryTx(tx, creatorID, storyID, 0, 0, "")
 }
 
-func CreateStorys(reqs []models.CreateStoryRequest, creatorID string) error {
-	for _, req := range reqs {
-		err := CreateStory(&req, creatorID)
-		if err != nil {
-			return err
+func CreateStorys(reqs []models.CreateStoryRequest, creatorID string, permission datapermission.Permission) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		for index := range reqs {
+			if err := createStoryTx(tx, &reqs[index], creatorID, permission); err != nil {
+				return fmt.Errorf("第%d条需求：%w", index+1, err)
+			}
 		}
-	}
-	return nil
+		return nil
+	})
 }
 
-func UpdateStory(storyID string, req *models.UpdateStoryRequest, creatorID string) error {
+func UpdateStory(storyID string, req *models.UpdateStoryRequest, creatorID string, permission datapermission.Permission) error {
 	var story models.DevStory
-	err := database.DB.Where("story_id = ? AND del_flag = ?", storyID, 0).First(&story).Error
+	query := database.DB.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = ?", storyID, 0)
+	err := permission.ApplyWithCSVUsers(query, []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"}).First(&story).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("需求不存在")
@@ -518,14 +542,26 @@ func UpdateStory(storyID string, req *models.UpdateStoryRequest, creatorID strin
 		return err
 	}
 
+	userIDs, err := validateDataPermissionUsers(database.DB, req.UserIDs, permission)
+	if err != nil {
+		return err
+	}
+	fileIDs, err := validateDataPermissionFiles(database.DB, req.FileIDs, permission)
+	if err != nil {
+		return err
+	}
+	if err := validateDevVersionReference(database.DB, req.VersionID, permission); err != nil {
+		return err
+	}
+
 	userIDsStr := ""
-	if len(req.UserIDs) > 0 {
-		userIDsStr = strings.Join(req.UserIDs, ",")
+	if len(userIDs) > 0 {
+		userIDsStr = strings.Join(userIDs, ",")
 	}
 
 	fileIDsStr := ""
-	if len(req.FileIDs) > 0 {
-		fileIDsStr = strings.Join(req.FileIDs, ",")
+	if len(fileIDs) > 0 {
+		fileIDsStr = strings.Join(fileIDs, ",")
 	}
 
 	storyStatus, err := parseStringInt(req.StoryStatus, "storyStatus")
@@ -546,40 +582,46 @@ func UpdateStory(storyID string, req *models.UpdateStoryRequest, creatorID strin
 	}
 
 	now := time.Now()
-	err = database.DB.Model(&story).Updates(map[string]interface{}{
-		"story_title":     req.StoryTitle,
-		"story_type":      storyType,
-		"story_status":    storyStatus,
-		"story_level":     storyLevel,
-		"source":          source,
-		"project_id":      req.ProjectID,
-		"version_id":      req.VersionID,
-		"module_id":       req.ModuleID,
-		"story_rich_text": req.StoryRichText,
-		"user_ids": func() interface{} {
-			if userIDsStr == "" {
-				return nil
-			}
-			return userIDsStr
-		}(),
-		"file_ids": func() interface{} {
-			if fileIDsStr == "" {
-				return nil
-			}
-			return fileIDsStr
-		}(),
-		"update_date": now,
-	}).Error
-	if err != nil {
-		return err
-	}
-
-	return createChangeHistory(creatorID, storyID, 0, 10, "")
+	return updateDevRecordWithHistory(creatorID, storyID, 0, 10, "", func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = ?", storyID, 0)
+		result := permission.ApplyWithCSVUsers(updateQuery, []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"}).Updates(map[string]interface{}{
+			"story_title":     req.StoryTitle,
+			"story_type":      storyType,
+			"story_status":    storyStatus,
+			"story_level":     storyLevel,
+			"source":          source,
+			"project_id":      req.ProjectID,
+			"version_id":      req.VersionID,
+			"module_id":       req.ModuleID,
+			"story_rich_text": req.StoryRichText,
+			"user_ids": func() interface{} {
+				if userIDsStr == "" {
+					return nil
+				}
+				return userIDsStr
+			}(),
+			"file_ids": func() interface{} {
+				if fileIDsStr == "" {
+					return nil
+				}
+				return fileIDsStr
+			}(),
+			"update_date": now,
+		})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return fmt.Errorf("需求不存在或无权操作")
+		}
+		return nil
+	})
 }
 
-func UpdateStoryField(storyID string, key string, value interface{}, creatorID string) error {
+func UpdateStoryField(storyID string, key string, value interface{}, creatorID string, permission datapermission.Permission) error {
 	var story models.DevStory
-	err := database.DB.Where("story_id = ? AND del_flag = ?", storyID, 0).First(&story).Error
+	query := database.DB.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = ?", storyID, 0)
+	err := permission.ApplyWithCSVUsers(query, []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"}).First(&story).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("需求不存在")
@@ -595,12 +637,18 @@ func UpdateStoryField(storyID string, key string, value interface{}, creatorID s
 	updateMap := make(map[string]interface{})
 	switch key {
 	case "userIds":
-		if ids, ok := value.([]interface{}); ok {
-			strIDs := make([]string, 0)
-			for _, id := range ids {
-				strIDs = append(strIDs, fmt.Sprintf("%v", id))
-			}
-			updateMap["user_ids"] = strings.Join(strIDs, ",")
+		ids, err := dataPermissionStringSlice(value, "参与人员")
+		if err != nil {
+			return err
+		}
+		ids, err = validateDataPermissionUsers(database.DB, ids, permission)
+		if err != nil {
+			return err
+		}
+		if len(ids) == 0 {
+			updateMap["user_ids"] = nil
+		} else {
+			updateMap["user_ids"] = strings.Join(ids, ",")
 		}
 	case "storyType":
 		updateMap["story_type"] = value
@@ -612,17 +660,23 @@ func UpdateStoryField(storyID string, key string, value interface{}, creatorID s
 
 	updateMap["update_date"] = time.Now()
 
-	err = database.DB.Model(&story).Updates(updateMap).Error
-	if err != nil {
-		return err
-	}
-
-	return createChangeHistory(creatorID, storyID, 0, 10, "")
+	return updateDevRecordWithHistory(creatorID, storyID, 0, 10, "", func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = ?", storyID, 0)
+		result := permission.ApplyWithCSVUsers(updateQuery, []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"}).Updates(updateMap)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return fmt.Errorf("需求不存在或无权操作")
+		}
+		return nil
+	})
 }
 
-func UpdateStoryNext(storyID string, storyStatus string, changeRichText string, creatorID string) error {
+func UpdateStoryNext(storyID string, storyStatus string, changeRichText string, creatorID string, permission datapermission.Permission) error {
 	var story models.DevStory
-	err := database.DB.Where("story_id = ? AND del_flag = ?", storyID, 0).First(&story).Error
+	query := database.DB.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = ?", storyID, 0)
+	err := permission.ApplyWithCSVUsers(query, []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"}).First(&story).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("需求不存在")
@@ -636,22 +690,31 @@ func UpdateStoryNext(storyID string, storyStatus string, changeRichText string, 
 	}
 
 	now := time.Now()
-	err = database.DB.Model(&story).Updates(map[string]interface{}{
-		"story_status": storyStatusInt,
-		"update_date":  now,
-	}).Error
+	return updateDevRecordWithHistory(creatorID, storyID, 0, 40, changeRichText, func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = ?", storyID, 0)
+		result := permission.ApplyWithCSVUsers(updateQuery, []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"}).Updates(map[string]interface{}{
+			"story_status": storyStatusInt,
+			"update_date":  now,
+		})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return fmt.Errorf("需求不存在或无权操作")
+		}
+		return nil
+	})
+}
+
+func DeleteStorys(storyIDs []string, creatorID string, permission datapermission.Permission) error {
+	var storys []models.DevStory
+	query := database.DB.Model(&models.DevStory{}).Where("story_id IN ? AND del_flag = ?", storyIDs, 0)
+	err := permission.ApplyWithCSVUsers(query, []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"}).Find(&storys).Error
 	if err != nil {
 		return err
 	}
-
-	return createChangeHistory(creatorID, storyID, 0, 40, changeRichText)
-}
-
-func DeleteStorys(storyIDs []string, creatorID string) error {
-	var storys []models.DevStory
-	err := database.DB.Where("story_id IN ? AND del_flag = ?", storyIDs, 0).Find(&storys).Error
-	if err != nil {
-		return err
+	if len(storys) != len(uniqueNonEmptyStrings(storyIDs)) {
+		return fmt.Errorf("需求不存在或无权操作")
 	}
 
 	for _, s := range storys {
@@ -660,16 +723,31 @@ func DeleteStorys(storyIDs []string, creatorID string) error {
 		}
 	}
 
-	err = database.DB.Model(&models.DevStory{}).Where("story_id IN ?", storyIDs).Updates(map[string]interface{}{
-		"del_flag":    1,
-		"update_date": time.Now(),
-	}).Error
+	accessibleIDs := make([]string, 0, len(storys))
+	for _, story := range storys {
+		accessibleIDs = append(accessibleIDs, story.StoryID)
+	}
+	err = database.DB.Transaction(func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevStory{}).Where("story_id IN ? AND del_flag = ? AND story_status = ?", accessibleIDs, 0, 0)
+		result := permission.ApplyWithCSVUsers(updateQuery, []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"}).Updates(map[string]interface{}{
+			"del_flag":    1,
+			"update_date": time.Now(),
+		})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != int64(len(accessibleIDs)) {
+			return fmt.Errorf("需求不存在或无权操作")
+		}
+		for _, story := range storys {
+			if err := createChangeHistoryTx(tx, creatorID, story.StoryID, 0, 20, ""); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		return err
-	}
-
-	for _, s := range storys {
-		createChangeHistory(creatorID, s.StoryID, 0, 20, "")
 	}
 	return nil
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/services"
 )
@@ -21,7 +22,7 @@ func NewErpPurchaseOrderController() *ErpPurchaseOrderController {
 
 // GetPurchaseOrderList 获取采购单列表
 // @Summary 获取采购单列表
-// @Description 分页查询采购单，支持单号、供应商、仓库、SKU编码、状态和采购日期范围筛选
+// @Description 按采购单创建人及当前角色数据范围分页查询采购单，支持单号、供应商、仓库、SKU编码、状态和采购日期范围筛选
 // @Tags 进销存/采购单
 // @Produce json
 // @Security ApiKeyAuth
@@ -47,7 +48,7 @@ func (ctrl *ErpPurchaseOrderController) GetPurchaseOrderList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.service.GetPurchaseOrderList(req)
+	result, err := ctrl.service.GetPurchaseOrderList(req, currentDataPermission(c))
 	if err != nil {
 		writeErpPurchaseOrderError(c, err)
 		return
@@ -57,6 +58,7 @@ func (ctrl *ErpPurchaseOrderController) GetPurchaseOrderList(c *gin.Context) {
 
 // GetPurchaseOrderDetail 获取采购单详情
 // @Summary 获取采购单详情
+// @Description 按采购单创建人及当前角色数据范围获取采购单头和明细
 // @Tags 进销存/采购单
 // @Produce json
 // @Security ApiKeyAuth
@@ -69,7 +71,7 @@ func (ctrl *ErpPurchaseOrderController) GetPurchaseOrderList(c *gin.Context) {
 // @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /erp/purchaseOrders/{purchaseOrderId} [get]
 func (ctrl *ErpPurchaseOrderController) GetPurchaseOrderDetail(c *gin.Context) {
-	result, err := ctrl.service.GetPurchaseOrderDetail(c.Param("purchaseOrderId"))
+	result, err := ctrl.service.GetPurchaseOrderDetail(c.Param("purchaseOrderId"), currentDataPermission(c))
 	if err != nil {
 		writeErpPurchaseOrderError(c, err)
 		return
@@ -79,7 +81,7 @@ func (ctrl *ErpPurchaseOrderController) GetPurchaseOrderDetail(c *gin.Context) {
 
 // CreatePurchaseOrder 创建采购单草稿
 // @Summary 创建采购单草稿
-// @Description 创建结构完整的采购单草稿并生成不可复用的采购单号
+// @Description 创建结构完整的采购单草稿并生成不可复用的采购单号，以当前用户作为归属人
 // @Tags 进销存/采购单
 // @Accept json
 // @Produce json
@@ -109,6 +111,7 @@ func (ctrl *ErpPurchaseOrderController) CreatePurchaseOrder(c *gin.Context) {
 
 // UpdatePurchaseOrder 修改采购单草稿
 // @Summary 修改采购单草稿
+// @Description 按采购单创建人及当前角色数据范围修改草稿
 // @Tags 进销存/采购单
 // @Accept json
 // @Produce json
@@ -129,7 +132,7 @@ func (ctrl *ErpPurchaseOrderController) UpdatePurchaseOrder(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.service.UpdatePurchaseOrder(c.Param("purchaseOrderId"), req, erpInventoryOperatorID(c))
+	result, err := ctrl.service.UpdatePurchaseOrder(c.Param("purchaseOrderId"), req, erpInventoryOperatorID(c), currentDataPermission(c))
 	if err != nil {
 		writeErpPurchaseOrderError(c, err)
 		return
@@ -139,7 +142,7 @@ func (ctrl *ErpPurchaseOrderController) UpdatePurchaseOrder(c *gin.Context) {
 
 // ConfirmPurchaseOrder 确认采购单
 // @Summary 确认采购单
-// @Description 将草稿确认并锁定，状态变更为待收货
+// @Description 按当前数据范围将草稿确认并锁定，状态变更为待收货
 // @Tags 进销存/采购单
 // @Produce json
 // @Security ApiKeyAuth
@@ -153,7 +156,7 @@ func (ctrl *ErpPurchaseOrderController) UpdatePurchaseOrder(c *gin.Context) {
 // @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /erp/purchaseOrders/{purchaseOrderId}/confirm [post]
 func (ctrl *ErpPurchaseOrderController) ConfirmPurchaseOrder(c *gin.Context) {
-	result, err := ctrl.service.ConfirmPurchaseOrder(c.Param("purchaseOrderId"), erpInventoryOperatorID(c))
+	result, err := ctrl.service.ConfirmPurchaseOrder(c.Param("purchaseOrderId"), erpInventoryOperatorID(c), currentDataPermission(c))
 	if err != nil {
 		writeErpPurchaseOrderError(c, err)
 		return
@@ -163,6 +166,7 @@ func (ctrl *ErpPurchaseOrderController) ConfirmPurchaseOrder(c *gin.Context) {
 
 // CancelPurchaseOrder 取消采购单
 // @Summary 取消采购单
+// @Description 按当前数据范围取消草稿或待收货采购单
 // @Tags 进销存/采购单
 // @Accept json
 // @Produce json
@@ -183,7 +187,7 @@ func (ctrl *ErpPurchaseOrderController) CancelPurchaseOrder(c *gin.Context) {
 
 // ClosePurchaseOrder 关闭部分入库采购单
 // @Summary 关闭采购单
-// @Description 关闭部分入库采购单，未入库的剩余数量永久失效
+// @Description 按当前数据范围关闭部分入库采购单，未入库的剩余数量永久失效
 // @Tags 进销存/采购单
 // @Accept json
 // @Produce json
@@ -202,7 +206,7 @@ func (ctrl *ErpPurchaseOrderController) ClosePurchaseOrder(c *gin.Context) {
 	ctrl.reasonAction(c, ctrl.service.ClosePurchaseOrder)
 }
 
-type erpPurchaseOrderReasonAction func(string, string, string) (*models.ErpPurchaseOrderResponse, error)
+type erpPurchaseOrderReasonAction func(string, string, string, datapermission.Permission) (*models.ErpPurchaseOrderResponse, error)
 
 func (ctrl *ErpPurchaseOrderController) reasonAction(c *gin.Context, action erpPurchaseOrderReasonAction) {
 	var req models.ErpPurchaseOrderReasonRequest
@@ -210,7 +214,7 @@ func (ctrl *ErpPurchaseOrderController) reasonAction(c *gin.Context, action erpP
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := action(c.Param("purchaseOrderId"), erpInventoryOperatorID(c), req.Reason)
+	result, err := action(c.Param("purchaseOrderId"), erpInventoryOperatorID(c), req.Reason, currentDataPermission(c))
 	if err != nil {
 		writeErpPurchaseOrderError(c, err)
 		return
@@ -220,7 +224,7 @@ func (ctrl *ErpPurchaseOrderController) reasonAction(c *gin.Context, action erpP
 
 // GetPurchaseOrderLogs 获取采购单业务日志
 // @Summary 获取采购单业务日志
-// @Description 返回不可修改的创建、修改、确认、入库、取消和关闭日志
+// @Description 校验采购单当前数据范围后，返回不可修改的创建、修改、确认、入库、取消和关闭日志
 // @Tags 进销存/采购单
 // @Produce json
 // @Security ApiKeyAuth
@@ -233,7 +237,7 @@ func (ctrl *ErpPurchaseOrderController) reasonAction(c *gin.Context, action erpP
 // @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /erp/purchaseOrders/{purchaseOrderId}/logs [get]
 func (ctrl *ErpPurchaseOrderController) GetPurchaseOrderLogs(c *gin.Context) {
-	result, err := ctrl.service.GetPurchaseOrderLogs(c.Param("purchaseOrderId"))
+	result, err := ctrl.service.GetPurchaseOrderLogs(c.Param("purchaseOrderId"), currentDataPermission(c))
 	if err != nil {
 		writeErpPurchaseOrderError(c, err)
 		return

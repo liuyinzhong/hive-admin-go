@@ -2,10 +2,15 @@ package services
 
 import (
 	"errors"
+	"time"
+
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
-	"time"
 )
 
 type UserService struct{}
@@ -14,8 +19,9 @@ func NewUserService() *UserService {
 	return &UserService{}
 }
 
-func (s *UserService) GetUserList(req models.UserListRequest) (*utils.PageResult, error) {
+func (s *UserService) GetUserList(req models.UserListRequest, permission datapermission.Permission) (*utils.PageResult, error) {
 	query := database.DB.Model(&models.SysUser{}).Where("del_flag = 0 AND is_sys = 0")
+	query = permission.Apply(query, "sys_user.user_id")
 
 	if req.Username != "" {
 		query = query.Where("username LIKE ?", "%"+req.Username+"%")
@@ -48,7 +54,7 @@ func (s *UserService) GetUserList(req models.UserListRequest) (*utils.PageResult
 	if err != nil {
 		return nil, err
 	}
-	leaderUserNames, err := s.getLeaderUserNames(users)
+	leaderUserNames, err := s.getLeaderUserNames(users, permission)
 	if err != nil {
 		return nil, err
 	}
@@ -56,11 +62,9 @@ func (s *UserService) GetUserList(req models.UserListRequest) (*utils.PageResult
 	resultItems := make([]*models.ProfileResponse, 0)
 	for _, user := range users {
 		roleTitles, roleIds := s.getUserRoles(user.UserID)
-		deptTitles, deptIds := s.getUserDepts(user.UserID)
+		deptTitles, deptIds := s.getUserDepts(user.UserID, permission)
 		response := models.SysUserToProfileResponse(user, roleTitles, roleIds, deptTitles, deptIds)
-		if user.LeaderUserID != nil {
-			response.LeaderUserName = leaderUserNames[*user.LeaderUserID]
-		}
+		applyVisibleLeader(response, user.LeaderUserID, leaderUserNames)
 		resultItems = append(resultItems, response)
 	}
 
@@ -68,7 +72,7 @@ func (s *UserService) GetUserList(req models.UserListRequest) (*utils.PageResult
 	return pageResult, nil
 }
 
-func (s *UserService) getLeaderUserNames(users []models.SysUser) (map[string]*string, error) {
+func (s *UserService) getLeaderUserNames(users []models.SysUser, permission datapermission.Permission) (map[string]*string, error) {
 	leaderUserIds := make([]string, 0)
 	for _, user := range users {
 		if user.LeaderUserID != nil && *user.LeaderUserID != "" {
@@ -82,8 +86,10 @@ func (s *UserService) getLeaderUserNames(users []models.SysUser) (map[string]*st
 	}
 
 	var leaders []models.SysUser
-	if err := database.DB.Select("user_id", "real_name").
-		Where("user_id IN ? AND del_flag = 0", leaderUserIds).
+	query := database.DB.Model(&models.SysUser{}).
+		Select("user_id", "real_name").
+		Where("user_id IN ? AND del_flag = 0 AND is_sys = 0", leaderUserIds)
+	if err := permission.Apply(query, "sys_user.user_id").
 		Find(&leaders).Error; err != nil {
 		return nil, err
 	}
@@ -91,6 +97,19 @@ func (s *UserService) getLeaderUserNames(users []models.SysUser) (map[string]*st
 		leaderUserNames[leader.UserID] = leader.RealName
 	}
 	return leaderUserNames, nil
+}
+
+func applyVisibleLeader(response *models.ProfileResponse, leaderUserID *string, leaderUserNames map[string]*string) {
+	if leaderUserID == nil || *leaderUserID == "" {
+		return
+	}
+	leaderUserName, visible := leaderUserNames[*leaderUserID]
+	if !visible {
+		response.LeaderUserId = nil
+		response.LeaderUserName = nil
+		return
+	}
+	response.LeaderUserName = leaderUserName
 }
 
 func (s *UserService) getDeptAndChildren(deptId string) []string {
@@ -103,8 +122,9 @@ func (s *UserService) getDeptAndChildren(deptId string) []string {
 	return ids
 }
 
-func (s *UserService) GetAllUsers(realName string) ([]*models.ProfileResponse, error) {
+func (s *UserService) GetAllUsers(realName string, permission datapermission.Permission) ([]*models.ProfileResponse, error) {
 	query := database.DB.Model(&models.SysUser{}).Where("del_flag = 0 AND is_sys = 0 AND status = 1")
+	query = permission.Apply(query, "sys_user.user_id")
 
 	if realName != "" {
 		query = query.Where("real_name LIKE ?", "%"+realName+"%")
@@ -116,113 +136,143 @@ func (s *UserService) GetAllUsers(realName string) ([]*models.ProfileResponse, e
 		return nil, err
 	}
 
+	leaderUserNames, err := s.getLeaderUserNames(users, permission)
+	if err != nil {
+		return nil, err
+	}
+
 	result := make([]*models.ProfileResponse, 0)
 	for _, user := range users {
 		roleTitles, roleIds := s.getUserRoles(user.UserID)
-		deptTitles, deptIds := s.getUserDepts(user.UserID)
-		result = append(result, models.SysUserToProfileResponse(user, roleTitles, roleIds, deptTitles, deptIds))
+		deptTitles, deptIds := s.getUserDepts(user.UserID, permission)
+		response := models.SysUserToProfileResponse(user, roleTitles, roleIds, deptTitles, deptIds)
+		applyVisibleLeader(response, user.LeaderUserID, leaderUserNames)
+		result = append(result, response)
 	}
 
 	return result, nil
 }
 
-func (s *UserService) CreateUser(req models.CreateUserRequest) error {
-	var count int64
-	database.DB.Model(&models.SysUser{}).Where("username = ? AND del_flag = 0", req.Username).Count(&count)
-	if count > 0 {
-		return errors.New("用户名已存在")
-	}
+func (s *UserService) CreateUser(req models.CreateUserRequest, permission datapermission.Permission) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		if err := validateManagedDepartments(tx, req.DeptIds, permission); err != nil {
+			return err
+		}
+		if err := validateManagedRoles(tx, req.RoleIds, req.DeptIds, permission); err != nil {
+			return err
+		}
 
-	userID := utils.GenerateUUID()
-	if err := s.validateLeaderUser(userID, req.LeaderUserId); err != nil {
-		return err
-	}
+		var count int64
+		if err := tx.Model(&models.SysUser{}).
+			Where("username = ? AND del_flag = 0", req.Username).
+			Count(&count).Error; err != nil {
+			return err
+		}
+		if count > 0 {
+			return errors.New("用户名已存在")
+		}
 
-	now := time.Now()
-	user := models.SysUser{
-		UserID:       userID,
-		Username:     &req.Username,
-		RealName:     &req.RealName,
-		Phone:        req.Phone,
-		Password:     &req.Password,
-		Desc:         req.Desc,
-		LeaderUserID: req.LeaderUserId,
-		Status:       1,
-		CreateDate:   &now,
-		UpdateDate:   &now,
-		DelFlag:      0,
-		IsSys:        0,
-	}
+		userID := utils.GenerateUUID()
+		if err := s.validateLeaderUser(tx, userID, req.LeaderUserId, permission); err != nil {
+			return err
+		}
 
-	if err := database.DB.Create(&user).Error; err != nil {
-		return err
-	}
-
-	if err := s.saveUserRoles(user.UserID, req.RoleIds); err != nil {
-		return err
-	}
-
-	if err := s.saveUserDepts(user.UserID, req.DeptIds); err != nil {
-		return err
-	}
-
-	return nil
+		now := time.Now()
+		user := models.SysUser{
+			UserID:       userID,
+			Username:     &req.Username,
+			RealName:     &req.RealName,
+			Phone:        req.Phone,
+			Password:     &req.Password,
+			Desc:         req.Desc,
+			LeaderUserID: req.LeaderUserId,
+			Status:       1,
+			CreateDate:   &now,
+			UpdateDate:   &now,
+			DelFlag:      0,
+			IsSys:        0,
+		}
+		if err := tx.Create(&user).Error; err != nil {
+			return err
+		}
+		if err := s.saveUserRoles(tx, user.UserID, req.RoleIds); err != nil {
+			return err
+		}
+		return s.saveUserDepts(tx, user.UserID, req.DeptIds)
+	})
 }
 
-func (s *UserService) GetUserDetail(userId string) (*models.ProfileResponse, error) {
+func (s *UserService) GetUserDetail(userId string, permission datapermission.Permission) (*models.ProfileResponse, error) {
 	var user models.SysUser
-	err := database.DB.Where("user_id = ? AND del_flag = 0", userId).First(&user).Error
+	query := database.DB.Model(&models.SysUser{}).Where("user_id = ? AND del_flag = 0 AND is_sys = 0", userId)
+	err := permission.Apply(query, "sys_user.user_id").First(&user).Error
 	if err != nil {
 		return nil, errors.New("用户不存在")
 	}
 
 	roleTitles, roleIds := s.getUserRoles(user.UserID)
-	deptTitles, deptIds := s.getUserDepts(user.UserID)
-
-	return models.SysUserToProfileResponse(user, roleTitles, roleIds, deptTitles, deptIds), nil
+	deptTitles, deptIds := s.getUserDepts(user.UserID, permission)
+	response := models.SysUserToProfileResponse(user, roleTitles, roleIds, deptTitles, deptIds)
+	leaderUserNames, err := s.getLeaderUserNames([]models.SysUser{user}, permission)
+	if err != nil {
+		return nil, err
+	}
+	applyVisibleLeader(response, user.LeaderUserID, leaderUserNames)
+	return response, nil
 }
 
-func (s *UserService) UpdateUser(userId string, req models.UpdateUserRequest) error {
-	var user models.SysUser
-	err := database.DB.Where("user_id = ? AND del_flag = 0", userId).First(&user).Error
-	if err != nil {
-		return errors.New("用户不存在")
-	}
+func (s *UserService) UpdateUser(userId string, req models.UpdateUserRequest, permission datapermission.Permission) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		if err := validateManagedDepartments(tx, req.DeptIds, permission); err != nil {
+			return err
+		}
+		if err := validateManagedRoles(tx, req.RoleIds, req.DeptIds, permission); err != nil {
+			return err
+		}
 
-	var count int64
-	database.DB.Model(&models.SysUser{}).Where("username = ? AND del_flag = 0 AND user_id != ?", req.Username, userId).Count(&count)
-	if count > 0 {
-		return errors.New("用户名已存在")
-	}
-	if err := s.validateLeaderUser(userId, req.LeaderUserId); err != nil {
-		return err
-	}
+		var user models.SysUser
+		query := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Model(&models.SysUser{}).
+			Where("user_id = ? AND del_flag = 0 AND is_sys = 0", userId)
+		if err := permission.Apply(query, "sys_user.user_id").First(&user).Error; err != nil {
+			return errors.New("用户不存在")
+		}
+		if err := ensureFullyManagedUserDepartments(tx, user.UserID, permission); err != nil {
+			return err
+		}
 
-	now := time.Now()
-	user.Username = &req.Username
-	user.RealName = &req.RealName
-	user.Phone = req.Phone
-	user.Desc = req.Desc
-	user.LeaderUserID = req.LeaderUserId
-	user.UpdateDate = &now
+		var count int64
+		if err := tx.Model(&models.SysUser{}).
+			Where("username = ? AND del_flag = 0 AND user_id != ?", req.Username, userId).
+			Count(&count).Error; err != nil {
+			return err
+		}
+		if count > 0 {
+			return errors.New("用户名已存在")
+		}
+		if err := s.validateLeaderUser(tx, userId, req.LeaderUserId, permission); err != nil {
+			return err
+		}
 
-	if err := database.DB.Save(&user).Error; err != nil {
-		return err
-	}
-
-	if err := s.saveUserRoles(user.UserID, req.RoleIds); err != nil {
-		return err
-	}
-
-	if err := s.saveUserDepts(user.UserID, req.DeptIds); err != nil {
-		return err
-	}
-
-	return nil
+		now := time.Now()
+		user.Username = &req.Username
+		user.RealName = &req.RealName
+		user.Phone = req.Phone
+		user.Desc = req.Desc
+		user.LeaderUserID = req.LeaderUserId
+		user.UpdateDate = &now
+		if err := tx.Save(&user).Error; err != nil {
+			return err
+		}
+		if err := s.saveUserRoles(tx, user.UserID, req.RoleIds); err != nil {
+			return err
+		}
+		return s.saveUserDepts(tx, user.UserID, req.DeptIds)
+	})
 }
 
 // validateLeaderUser 校验直属上级存在、启用且不能指向用户自身。
-func (s *UserService) validateLeaderUser(userID string, leaderUserID *string) error {
+func (s *UserService) validateLeaderUser(tx *gorm.DB, userID string, leaderUserID *string, permission datapermission.Permission) error {
 	if leaderUserID == nil || *leaderUserID == "" {
 		return nil
 	}
@@ -231,8 +281,9 @@ func (s *UserService) validateLeaderUser(userID string, leaderUserID *string) er
 	}
 
 	var count int64
-	if err := database.DB.Model(&models.SysUser{}).
-		Where("user_id = ? AND del_flag = 0 AND status = 1", *leaderUserID).
+	query := tx.Model(&models.SysUser{}).
+		Where("user_id = ? AND del_flag = 0 AND status = 1 AND is_sys = 0", *leaderUserID)
+	if err := permission.Apply(query, "sys_user.user_id").
 		Count(&count).Error; err != nil {
 		return err
 	}
@@ -242,55 +293,215 @@ func (s *UserService) validateLeaderUser(userID string, leaderUserID *string) er
 	return nil
 }
 
-func (s *UserService) UpdateUserStatus(userId string, status int) error {
-	var user models.SysUser
-	err := database.DB.Where("user_id = ? AND del_flag = 0", userId).First(&user).Error
-	if err != nil {
-		return errors.New("用户不存在")
-	}
+func (s *UserService) UpdateUserStatus(userId string, status int, permission datapermission.Permission) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		var user models.SysUser
+		query := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Model(&models.SysUser{}).
+			Where("user_id = ? AND del_flag = 0 AND is_sys = 0", userId)
+		if err := permission.Apply(query, "sys_user.user_id").First(&user).Error; err != nil {
+			return errors.New("用户不存在")
+		}
+		if err := ensureFullyManagedUserDepartments(tx, user.UserID, permission); err != nil {
+			return err
+		}
 
-	now := time.Now()
-	user.Status = status
-	user.UpdateDate = &now
-
-	return database.DB.Save(&user).Error
+		return tx.Model(&user).Updates(map[string]interface{}{
+			"status":      status,
+			"update_date": time.Now(),
+		}).Error
+	})
 }
 
-func (s *UserService) DeleteUsers(userIds []string, currentUserId string) error {
-	for _, userId := range userIds {
-		var user models.SysUser
-		err := database.DB.Where("user_id = ? AND del_flag = 0", userId).First(&user).Error
-		if err != nil {
-			continue
-		}
-
-		if userId == currentUserId {
-			return errors.New("不能删除当前登录用户")
-		}
-
-		if user.IsSys == 1 {
-			return errors.New("不能删除内置用户")
-		}
-
-		var roleCount int64
-		database.DB.Model(&models.SysUserRole{}).Where("user_id = ? AND del_flag = 0", userId).Count(&roleCount)
-		if roleCount > 0 {
-			database.DB.Model(&models.SysUserRole{}).Where("user_id = ?", userId).Updates(map[string]interface{}{"del_flag": 1, "update_date": time.Now()})
-		}
-
-		var deptCount int64
-		database.DB.Model(&models.SysUserDept{}).Where("user_id = ? AND del_flag = 0", userId).Count(&deptCount)
-		if deptCount > 0 {
-			database.DB.Model(&models.SysUserDept{}).Where("user_id = ?", userId).Updates(map[string]interface{}{"del_flag": 1, "update_date": time.Now()})
+func (s *UserService) DeleteUsers(userIds []string, currentUserId string, permission datapermission.Permission) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		ids := uniqueNonEmptyStrings(userIds)
+		users := make([]models.SysUser, 0, len(ids))
+		for _, userId := range ids {
+			if userId == currentUserId {
+				return errors.New("不能删除当前登录用户")
+			}
+			var user models.SysUser
+			query := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+				Model(&models.SysUser{}).
+				Where("user_id = ? AND del_flag = 0 AND is_sys = 0", userId)
+			if err := permission.Apply(query, "sys_user.user_id").First(&user).Error; err != nil {
+				return errors.New("用户不存在或无数据权限")
+			}
+			if err := ensureFullyManagedUserDepartments(tx, user.UserID, permission); err != nil {
+				return err
+			}
+			users = append(users, user)
 		}
 
 		now := time.Now()
-		user.DelFlag = 1
-		user.UpdateDate = &now
-		database.DB.Save(&user)
+		for _, user := range users {
+			if err := tx.Model(&models.SysUserRole{}).
+				Where("user_id = ? AND del_flag = 0", user.UserID).
+				Updates(map[string]interface{}{"del_flag": 1, "update_date": now}).Error; err != nil {
+				return err
+			}
+			if err := tx.Model(&models.SysUserDept{}).
+				Where("user_id = ? AND del_flag = 0", user.UserID).
+				Updates(map[string]interface{}{"del_flag": 1, "update_date": now}).Error; err != nil {
+				return err
+			}
+			if err := tx.Model(&models.SysUser{}).
+				Where("user_id = ?", user.UserID).
+				Updates(map[string]interface{}{"del_flag": 1, "update_date": now}).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func validateManagedDepartments(tx *gorm.DB, departmentIDs []string, permission datapermission.Permission) error {
+	departmentIDs = uniqueNonEmptyStrings(departmentIDs)
+	if !permission.All && len(departmentIDs) == 0 {
+		return errors.New("非全部数据权限用户必须为用户分配可管理部门")
+	}
+	if !permission.All && !permission.AllowsDepartments(departmentIDs) {
+		return errors.New("不能将用户分配到数据权限范围之外的部门")
+	}
+	if len(departmentIDs) == 0 {
+		return nil
+	}
+	var count int64
+	if err := tx.Model(&models.SysDept{}).
+		Where("dept_id IN ? AND status = 1 AND del_flag = 0", departmentIDs).
+		Count(&count).Error; err != nil {
+		return err
+	}
+	if count != int64(len(departmentIDs)) {
+		return errors.New("用户部门包含不存在或已停用的部门")
+	}
+	return nil
+}
+
+func validateManagedRoles(tx *gorm.DB, roleIDs, userDepartmentIDs []string, permission datapermission.Permission) error {
+	roleIDs = uniqueNonEmptyStrings(roleIDs)
+	if len(roleIDs) == 0 {
+		return nil
+	}
+	var roles []models.SysRole
+	if err := tx.Where("role_id IN ? AND status = 1 AND del_flag = 0", roleIDs).Find(&roles).Error; err != nil {
+		return err
+	}
+	if len(roles) != len(roleIDs) {
+		return errors.New("角色不存在或已停用")
+	}
+	if permission.All {
+		return nil
+	}
+	if permission.UserID == "" {
+		return errors.New("无法确认当前操作者的可分配角色")
+	}
+	var assignableRoleCount int64
+	if err := tx.Table("sys_user_role AS user_role").
+		Joins("JOIN sys_role AS role ON role.role_id = user_role.role_id AND role.status = 1 AND role.del_flag = 0").
+		Where("user_role.user_id = ? AND user_role.role_id IN ? AND user_role.del_flag = 0", permission.UserID, roleIDs).
+		Distinct("user_role.role_id").
+		Count(&assignableRoleCount).Error; err != nil {
+		return err
+	}
+	if assignableRoleCount != int64(len(roleIDs)) {
+		return errors.New("不能分配当前操作者未持有的角色")
 	}
 
+	allowedDepartments := make(map[string]struct{}, len(permission.DepartmentIDs))
+	for _, departmentID := range permission.DepartmentIDs {
+		allowedDepartments[departmentID] = struct{}{}
+	}
+	for _, role := range roles {
+		switch datapermission.Scope(role.DataScope) {
+		case datapermission.ScopeAll:
+			return errors.New("不能分配数据范围大于当前操作者的角色")
+		case datapermission.ScopeCustomDepartment:
+			var departmentIDs []string
+			if err := tx.Model(&models.SysRoleDept{}).
+				Where("role_id = ?", role.RoleID).
+				Pluck("dept_id", &departmentIDs).Error; err != nil {
+				return err
+			}
+			if !departmentSubset(departmentIDs, allowedDepartments) {
+				return errors.New("不能分配数据范围大于当前操作者的角色")
+			}
+		case datapermission.ScopeDepartment:
+			if !departmentSubset(userDepartmentIDs, allowedDepartments) {
+				return errors.New("不能分配数据范围大于当前操作者的角色")
+			}
+		case datapermission.ScopeDepartmentAndChildren:
+			expanded, err := expandDepartmentTrees(tx, userDepartmentIDs)
+			if err != nil {
+				return err
+			}
+			if !departmentSubset(expanded, allowedDepartments) {
+				return errors.New("不能分配数据范围大于当前操作者的角色")
+			}
+		case datapermission.ScopeSelf, datapermission.ScopeNone:
+			// These scopes cannot expand the operator's department visibility.
+		default:
+			return errors.New("角色数据范围无效")
+		}
+	}
 	return nil
+}
+
+func ensureFullyManagedUserDepartments(tx *gorm.DB, userID string, permission datapermission.Permission) error {
+	if permission.All {
+		return nil
+	}
+	var departmentIDs []string
+	if err := tx.Table("sys_user_dept AS user_dept").
+		Select("user_dept.dept_id").
+		Joins("JOIN sys_dept AS dept ON dept.dept_id = user_dept.dept_id AND dept.status = 1 AND dept.del_flag = 0").
+		Where("user_dept.user_id = ? AND user_dept.del_flag = 0", userID).
+		Pluck("user_dept.dept_id", &departmentIDs).Error; err != nil {
+		return err
+	}
+	if len(departmentIDs) == 0 || !permission.AllowsDepartments(departmentIDs) {
+		return errors.New("用户同时属于数据权限范围之外的部门，不能修改")
+	}
+	return nil
+}
+
+func departmentSubset(departmentIDs []string, allowed map[string]struct{}) bool {
+	for _, departmentID := range uniqueNonEmptyStrings(departmentIDs) {
+		if _, ok := allowed[departmentID]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
+func expandDepartmentTrees(tx *gorm.DB, rootIDs []string) ([]string, error) {
+	var departments []models.SysDept
+	if err := tx.Where("status = 1 AND del_flag = 0").Find(&departments).Error; err != nil {
+		return nil, err
+	}
+	childrenByParent := make(map[string][]string)
+	for _, department := range departments {
+		if department.Pid != nil && *department.Pid != "" {
+			childrenByParent[*department.Pid] = append(childrenByParent[*department.Pid], department.DeptID)
+		}
+	}
+	seen := make(map[string]struct{})
+	queue := append([]string(nil), uniqueNonEmptyStrings(rootIDs)...)
+	for len(queue) > 0 {
+		departmentID := queue[0]
+		queue = queue[1:]
+		if _, ok := seen[departmentID]; ok {
+			continue
+		}
+		seen[departmentID] = struct{}{}
+		queue = append(queue, childrenByParent[departmentID]...)
+	}
+	result := make([]string, 0, len(seen))
+	for departmentID := range seen {
+		result = append(result, departmentID)
+	}
+	return result, nil
 }
 
 func (s *UserService) getUserRoles(userId string) ([]string, []string) {
@@ -313,8 +524,10 @@ func (s *UserService) getUserRoles(userId string) ([]string, []string) {
 	return roleTitles, roleIds
 }
 
-func (s *UserService) saveUserRoles(userId string, roleIds []string) error {
-	database.DB.Where("user_id = ? AND del_flag = 0", userId).Delete(&models.SysUserRole{})
+func (s *UserService) saveUserRoles(tx *gorm.DB, userId string, roleIds []string) error {
+	if err := tx.Where("user_id = ? AND del_flag = 0", userId).Delete(&models.SysUserRole{}).Error; err != nil {
+		return err
+	}
 
 	now := time.Now()
 	for _, roleId := range roleIds {
@@ -326,7 +539,7 @@ func (s *UserService) saveUserRoles(userId string, roleIds []string) error {
 			UpdateDate: &now,
 			DelFlag:    0,
 		}
-		if err := database.DB.Create(&userRole).Error; err != nil {
+		if err := tx.Create(&userRole).Error; err != nil {
 			return err
 		}
 	}
@@ -334,9 +547,16 @@ func (s *UserService) saveUserRoles(userId string, roleIds []string) error {
 	return nil
 }
 
-func (s *UserService) getUserDepts(userId string) ([]string, []string) {
+func (s *UserService) getUserDepts(userId string, permission datapermission.Permission) ([]string, []string) {
 	var userDepts []models.SysUserDept
-	database.DB.Where("user_id = ? AND del_flag = 0", userId).Find(&userDepts)
+	query := database.DB.Where("user_id = ? AND del_flag = 0", userId)
+	if !permission.All && !(permission.IncludeSelf && permission.UserID == userId) {
+		if len(permission.DepartmentIDs) == 0 {
+			return []string{}, []string{}
+		}
+		query = query.Where("dept_id IN ?", permission.DepartmentIDs)
+	}
+	query.Find(&userDepts)
 
 	var deptTitles []string
 	var deptIds []string
@@ -354,8 +574,10 @@ func (s *UserService) getUserDepts(userId string) ([]string, []string) {
 	return deptTitles, deptIds
 }
 
-func (s *UserService) saveUserDepts(userId string, deptIds []string) error {
-	database.DB.Where("user_id = ? AND del_flag = 0", userId).Delete(&models.SysUserDept{})
+func (s *UserService) saveUserDepts(tx *gorm.DB, userId string, deptIds []string) error {
+	if err := tx.Where("user_id = ? AND del_flag = 0", userId).Delete(&models.SysUserDept{}).Error; err != nil {
+		return err
+	}
 
 	now := time.Now()
 	for _, deptId := range deptIds {
@@ -367,7 +589,7 @@ func (s *UserService) saveUserDepts(userId string, deptIds []string) error {
 			UpdateDate: &now,
 			DelFlag:    0,
 		}
-		if err := database.DB.Create(&userDept).Error; err != nil {
+		if err := tx.Create(&userDept).Error; err != nil {
 			return err
 		}
 	}

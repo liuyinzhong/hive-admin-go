@@ -11,7 +11,7 @@ import (
 
 // GetChangeHistory 获取变更记录
 // @Summary 获取变更记录
-// @Description 根据业务ID获取变更记录
+// @Description 根据业务ID获取变更记录；访问范围继承对应需求、任务、缺陷或版本
 // @Tags 开发管理/变更记录
 // @Accept json
 // @Produce json
@@ -29,7 +29,7 @@ func (dc *DevController) GetChangeHistory(c *gin.Context) {
 		return
 	}
 
-	histories, err := services.GetChangeHistory(businessID)
+	histories, err := services.GetChangeHistory(businessID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -39,7 +39,7 @@ func (dc *DevController) GetChangeHistory(c *gin.Context) {
 
 // CreateChangeHistory 创建变更记录（评论）
 // @Summary 创建变更记录
-// @Description 创建新的变更记录或评论
+// @Description 创建新的变更记录或评论；写入前校验对应需求、任务、缺陷或版本的当前访问范围
 // @Tags 开发管理/变更记录
 // @Accept json
 // @Produce json
@@ -58,7 +58,7 @@ func (dc *DevController) CreateChangeHistory(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.CreateChangeHistory(&req, creatorID)
+	err := services.CreateChangeHistory(&req, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return

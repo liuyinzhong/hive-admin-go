@@ -14,7 +14,7 @@ import (
 
 // CreateTaskExport 创建任务管理导出任务。
 // @Summary 创建任务管理导出任务
-// @Description 按当前筛选和排序创建异步XLSX导出任务
+// @Description 按当前筛选和排序创建异步XLSX导出任务；Worker 在计数和生成时重新解析创建用户当前数据范围
 // @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
@@ -43,7 +43,7 @@ func (dc *DevController) CreateTaskExport(c *gin.Context) {
 		models.DownloadTaskTypeDevTask,
 		"任务管理导出",
 		"任务管理",
-		req,
+		services.NewDevTaskExportPayload(req),
 	)
 	if err != nil {
 		if errors.Is(err, services.ErrDownloadTaskLimitReached) {
@@ -58,7 +58,7 @@ func (dc *DevController) CreateTaskExport(c *gin.Context) {
 
 // GetTasks 获取任务列表
 // @Summary 获取任务列表
-// @Description 分页获取任务列表
+// @Description 按创建人或执行人及当前角色数据范围分页获取任务
 // @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
@@ -108,7 +108,7 @@ func (dc *DevController) GetTasks(c *gin.Context) {
 		"sorts":        c.Query("sorts"),
 	}
 
-	result, err := services.GetTasks(page, pageSize, params)
+	result, err := services.GetTasks(page, pageSize, params, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -118,7 +118,7 @@ func (dc *DevController) GetTasks(c *gin.Context) {
 
 // GetAllTasks 获取所有任务
 // @Summary 获取所有任务
-// @Description 获取所有任务（不分页）
+// @Description 按创建人或执行人及当前角色数据范围获取所有任务（不分页）
 // @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
@@ -151,7 +151,7 @@ func (dc *DevController) GetAllTasks(c *gin.Context) {
 		"storyId":    c.Query("storyId"),
 	}
 
-	tasks, err := services.GetAllTasks(params)
+	tasks, err := services.GetAllTasks(params, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -161,7 +161,7 @@ func (dc *DevController) GetAllTasks(c *gin.Context) {
 
 // GetTask 获取任务详情
 // @Summary 获取任务详情
-// @Description 根据任务编号获取任务详情
+// @Description 按创建人或执行人及当前角色数据范围获取任务详情
 // @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
@@ -179,7 +179,7 @@ func (dc *DevController) GetTask(c *gin.Context) {
 		return
 	}
 
-	task, err := services.GetTaskByNum(taskNum)
+	task, err := services.GetTaskByNum(taskNum, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -189,7 +189,7 @@ func (dc *DevController) GetTask(c *gin.Context) {
 
 // CreateTask 创建任务
 // @Summary 创建任务
-// @Description 创建新任务
+// @Description 创建新任务；执行人、关联版本和关联需求必须处于当前数据范围
 // @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
@@ -208,7 +208,7 @@ func (dc *DevController) CreateTask(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.CreateTask(&req, creatorID)
+	err := services.CreateTask(&req, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -218,7 +218,7 @@ func (dc *DevController) CreateTask(c *gin.Context) {
 
 // CreateTasks 批量创建任务
 // @Summary 批量创建任务
-// @Description 批量创建任务
+// @Description 批量创建任务；每条记录的执行人、关联版本和关联需求均须处于当前数据范围
 // @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
@@ -237,7 +237,7 @@ func (dc *DevController) CreateTasks(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.CreateTasks(reqs, creatorID)
+	err := services.CreateTasks(reqs, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -247,7 +247,7 @@ func (dc *DevController) CreateTasks(c *gin.Context) {
 
 // UpdateTask 更新任务
 // @Summary 更新任务
-// @Description 更新任务信息
+// @Description 按当前数据范围更新任务；执行人、关联版本和关联需求不得越界
 // @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
@@ -269,7 +269,7 @@ func (dc *DevController) UpdateTask(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.UpdateTask(taskID, &req, creatorID)
+	err := services.UpdateTask(taskID, &req, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -279,7 +279,7 @@ func (dc *DevController) UpdateTask(c *gin.Context) {
 
 // UpdateTaskField 更新任务字段
 // @Summary 更新任务字段
-// @Description 更新任务的单个字段，仅可修改：userId、taskType、startDate、endDate
+// @Description 按当前数据范围更新任务的单个字段，仅可修改：userId、taskType、startDate、endDate；修改执行人时校验目标用户范围
 // @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
@@ -301,7 +301,7 @@ func (dc *DevController) UpdateTaskField(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.UpdateTaskField(taskID, req.Key, req.Value, creatorID)
+	err := services.UpdateTaskField(taskID, req.Key, req.Value, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -311,7 +311,7 @@ func (dc *DevController) UpdateTaskField(c *gin.Context) {
 
 // UpdateTaskNext 任务流转状态
 // @Summary 任务流转状态
-// @Description 更新任务状态
+// @Description 按当前数据范围更新任务状态
 // @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
@@ -333,7 +333,7 @@ func (dc *DevController) UpdateTaskNext(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.UpdateTaskNext(taskID, req.TaskStatus, req.ChangeRichText, creatorID)
+	err := services.UpdateTaskNext(taskID, req.TaskStatus, req.ChangeRichText, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -343,7 +343,7 @@ func (dc *DevController) UpdateTaskNext(c *gin.Context) {
 
 // DeleteTasks 删除任务
 // @Summary 删除任务
-// @Description 批量删除任务
+// @Description 按当前数据范围批量删除任务；任一记录不存在或越界时整批失败
 // @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json
@@ -362,7 +362,7 @@ func (dc *DevController) DeleteTasks(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.DeleteTasks(ids, creatorID)
+	err := services.DeleteTasks(ids, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return

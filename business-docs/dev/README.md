@@ -9,7 +9,8 @@
 3. 需求、任务、缺陷和变更时间线读 [研发工作项规则](./work-items.md)。
 4. 仪表盘和工作台统计读 [开发统计规则](./statistics.md)。
 5. 任务异步导出还要读 [下载中心规则](../system/download-center.md)。
-6. 涉及页面时继续阅读前端 hive/business-docs/dev。
+6. 列表、详情、写入、统计或导出还要读 [数据权限规则](../system/data-permission.md)。
+7. 涉及页面时继续阅读前端 hive/business-docs/dev。
 
 ## 模块覆盖
 

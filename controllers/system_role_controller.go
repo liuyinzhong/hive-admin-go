@@ -10,7 +10,7 @@ import (
 
 // GetRoleList 获取角色列表
 // @Summary 获取角色列表
-// @Description 分页获取角色列表
+// @Description 分页获取全局角色配置，响应包含 dataScope；记录范围不用于过滤角色配置
 // @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
@@ -41,7 +41,7 @@ func (ctrl *SystemController) GetRoleList(c *gin.Context) {
 
 // GetAllRoles 获取所有角色
 // @Summary 获取所有角色
-// @Description 获取所有角色（不分页）
+// @Description 获取所有启用角色（不分页），响应包含 dataScope；供用户授权等选择场景使用
 // @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
@@ -61,7 +61,7 @@ func (ctrl *SystemController) GetAllRoles(c *gin.Context) {
 
 // CreateRole 创建角色
 // @Summary 创建角色
-// @Description 创建新角色
+// @Description 创建新角色并配置 dataScope；customDepartment 必须提交 dataScopeDeptIds；仅全部数据权限操作者可执行
 // @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
@@ -73,6 +73,9 @@ func (ctrl *SystemController) GetAllRoles(c *gin.Context) {
 // @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/roles [post]
 func (ctrl *SystemController) CreateRole(c *gin.Context) {
+	if !requireAllDataPermission(c) {
+		return
+	}
 	var req models.CreateRoleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
@@ -89,7 +92,7 @@ func (ctrl *SystemController) CreateRole(c *gin.Context) {
 
 // GetRoleDetail 获取角色详情
 // @Summary 获取角色详情
-// @Description 根据角色ID获取角色详情
+// @Description 根据角色ID获取角色详情，包含 dataScope、dataScopeDeptIds 和菜单权限
 // @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
@@ -118,7 +121,7 @@ func (ctrl *SystemController) GetRoleDetail(c *gin.Context) {
 
 // UpdateRole 更新角色
 // @Summary 更新角色
-// @Description 更新角色信息
+// @Description 更新角色、菜单权限和数据范围；仅全部数据权限操作者可执行
 // @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
@@ -131,6 +134,9 @@ func (ctrl *SystemController) GetRoleDetail(c *gin.Context) {
 // @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/roles/{roleId} [put]
 func (ctrl *SystemController) UpdateRole(c *gin.Context) {
+	if !requireAllDataPermission(c) {
+		return
+	}
 	roleId := c.Param("roleId")
 	if roleId == "" {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "角色ID不能为空"))
@@ -153,7 +159,7 @@ func (ctrl *SystemController) UpdateRole(c *gin.Context) {
 
 // UpdateRoleStatus 更新角色状态
 // @Summary 更新角色状态
-// @Description 更新角色启用/禁用状态
+// @Description 更新角色启用/禁用状态；角色停用会在后续请求中立即停止贡献数据范围；仅全部数据权限操作者可执行
 // @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
@@ -166,6 +172,9 @@ func (ctrl *SystemController) UpdateRole(c *gin.Context) {
 // @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/roles/{roleId}/status [put]
 func (ctrl *SystemController) UpdateRoleStatus(c *gin.Context) {
+	if !requireAllDataPermission(c) {
+		return
+	}
 	roleId := c.Param("roleId")
 	if roleId == "" {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "角色ID不能为空"))
@@ -188,7 +197,7 @@ func (ctrl *SystemController) UpdateRoleStatus(c *gin.Context) {
 
 // DeleteRoles 删除角色
 // @Summary 删除角色
-// @Description 批量删除角色
+// @Description 批量软删除角色并清理菜单、自定义部门关联；仅全部数据权限操作者可执行
 // @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
@@ -200,6 +209,9 @@ func (ctrl *SystemController) UpdateRoleStatus(c *gin.Context) {
 // @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /system/roles [delete]
 func (ctrl *SystemController) DeleteRoles(c *gin.Context) {
+	if !requireAllDataPermission(c) {
+		return
+	}
 	var ids []string
 	if err := c.ShouldBindJSON(&ids); err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))

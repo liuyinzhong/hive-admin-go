@@ -12,7 +12,7 @@ import (
 
 // GetOperationLogs 获取操作日志列表
 // @Summary 获取操作日志列表
-// @Description 分页查询操作日志。未传时间范围时默认查询最近 7 天数据；日志表保留 180 天，超期会被物理删除。
+// @Description 按日志用户和当前角色数据范围分页查询操作日志。未传时间范围时默认查询最近 7 天数据；日志表保留 180 天，超期会被物理删除。
 // @Tags 系统管理/日志管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -37,7 +37,7 @@ func (ctrl *SystemController) GetOperationLogs(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
 		return
 	}
-	result, err := ctrl.auditLogService.GetOperationLogs(req)
+	result, err := ctrl.auditLogService.GetOperationLogs(req, currentDataPermission(c))
 	if err != nil {
 		writeAuditLogError(c, err)
 		return
@@ -47,7 +47,7 @@ func (ctrl *SystemController) GetOperationLogs(c *gin.Context) {
 
 // GetOperationLog 获取操作日志详情
 // @Summary 获取操作日志详情
-// @Description 根据日志 ID 获取操作日志详情，包含请求参数、请求体、响应体等完整信息
+// @Description 按日志用户和当前角色数据范围获取操作日志详情，包含请求参数、请求体、响应体等完整信息
 // @Tags 系统管理/日志管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -59,7 +59,7 @@ func (ctrl *SystemController) GetOperationLogs(c *gin.Context) {
 // @Failure 500 {object} models.Response "日志查询失败"
 // @Router /system/operationLogs/{logId} [get]
 func (ctrl *SystemController) GetOperationLog(c *gin.Context) {
-	result, err := ctrl.auditLogService.GetOperationLog(c.Param("logId"))
+	result, err := ctrl.auditLogService.GetOperationLog(c.Param("logId"), currentDataPermission(c))
 	if err != nil {
 		writeAuditLogError(c, err)
 		return
@@ -69,7 +69,7 @@ func (ctrl *SystemController) GetOperationLog(c *gin.Context) {
 
 // GetLoginLogs 获取登录日志列表
 // @Summary 获取登录日志列表
-// @Description 分页查询登录与退出日志。未传时间范围时默认查询最近 7 天数据；日志表保留 180 天，超期会被物理删除。
+// @Description 按日志用户和当前角色数据范围分页查询登录与退出日志。未传时间范围时默认查询最近 7 天数据；空用户日志仅全部数据范围可见；日志表保留 180 天，超期会被物理删除。
 // @Tags 系统管理/日志管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -94,7 +94,7 @@ func (ctrl *SystemController) GetLoginLogs(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
 		return
 	}
-	result, err := ctrl.auditLogService.GetLoginLogs(req)
+	result, err := ctrl.auditLogService.GetLoginLogs(req, currentDataPermission(c))
 	if err != nil {
 		writeAuditLogError(c, err)
 		return
@@ -104,7 +104,7 @@ func (ctrl *SystemController) GetLoginLogs(c *gin.Context) {
 
 // GetLoginLog 获取登录日志详情
 // @Summary 获取登录日志详情
-// @Description 根据日志 ID 获取登录日志详情，包含响应体、内容类型等完整信息
+// @Description 按日志用户和当前角色数据范围获取登录日志详情，包含响应体、内容类型等完整信息
 // @Tags 系统管理/日志管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -116,7 +116,7 @@ func (ctrl *SystemController) GetLoginLogs(c *gin.Context) {
 // @Failure 500 {object} models.Response "日志查询失败"
 // @Router /system/loginLogs/{logId} [get]
 func (ctrl *SystemController) GetLoginLog(c *gin.Context) {
-	result, err := ctrl.auditLogService.GetLoginLog(c.Param("logId"))
+	result, err := ctrl.auditLogService.GetLoginLog(c.Param("logId"), currentDataPermission(c))
 	if err != nil {
 		writeAuditLogError(c, err)
 		return

@@ -138,6 +138,7 @@
 - 处方审核页面及审核动作共用 `medical:prescriptionReview:access`。
 - 疾病诊断档案使用 `medical:diagnosis:list`、`create`、`detail`、`update`、`status`、`delete`。
 - 权限码之外，医生工作台接口始终校验当前系统用户绑定启用医生档案且为当前排班医生；处方审核始终校验不能审核本人处方。
+- 通用角色部门数据范围不扩大医生工作台、门诊病历、处方或审核对象；`all` 也不能替代当前排班医生、原开方医生、流程状态和不得自审等领域归属校验。
 
 ### 疾病诊断档案录入
 
@@ -145,7 +146,6 @@
 
 ## 实现入口
 
-- 数据库迁移：`migrations/20260812_create_med_outpatient_workbench.sql`。
 - Model：`models/medical_outpatient.go`、`models/medical_registration.go`。
 - Service：`services/medical_diagnosis_service.go`、`medical_outpatient_service.go`、`medical_prescription_service.go`。
 - Controller：`controllers/medical_diagnosis_controller.go`、`medical_outpatient_controller.go`。
@@ -155,7 +155,6 @@
 
 ## 迁移、兼容性与回滚
 
-- 发布后端前先手动执行 `migrations/20260812_create_med_outpatient_workbench.sql`，本次实现不会自动执行迁移。
 - 迁移新增八张业务表、处方编号公共流水，并为医生绑定用户增加仅未删除记录生效的唯一约束。
 - 添加医生用户唯一约束前应先检查存量未删除医生是否重复绑定同一系统用户；存在重复时迁移会失败，需人工处理后重试。
 - 回滚应用时先停止医生工作台写入并恢复旧版前后端。只有确认新增门诊病历和处方数据可以丢弃后，才可人工删除新增表和唯一约束；删除操作不可恢复。

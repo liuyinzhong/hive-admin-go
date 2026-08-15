@@ -7,8 +7,9 @@
 1. 先读 [表单领域词汇](./CONTEXT.md)。
 2. 再读 [表单 Schema 规则](./form-schema.md)。
 3. 涉及流程时继续读 [工作流业务手册](../workflow/README.md)。
-4. 涉及页面时读前端 [表单 UI 手册](../../../hive/business-docs/form/README.md)。
-5. 最后核对 form_schema Controller、Service、Model 和前端 API。
+4. 权限分层继续读 [系统数据权限规则](../system/data-permission.md)。
+5. 涉及页面时读前端 [表单 UI 手册](../../../hive/business-docs/form/README.md)。
+6. 最后核对 form_schema Controller、Service、Model 和前端 API。
 
 ## 模块覆盖
 

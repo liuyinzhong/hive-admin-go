@@ -125,7 +125,7 @@ type UpdateUserRequest struct {
 }
 
 type UpdateUserStatusRequest struct {
-	Status int `json:"status" example:"1"` // 状态 0=禁用 1=启用
+	Status int `json:"status" binding:"oneof=0 1" example:"1"` // 状态 0=禁用 1=启用
 }
 
 type MenuListRequest struct {
@@ -170,36 +170,43 @@ type RoleListRequest struct {
 }
 
 type CreateRoleRequest struct {
-	RoleTitle   string   `json:"roleTitle" binding:"required" example:"编辑员"` // 角色名称
-	Status      int      `json:"status" example:"1"`                         // 状态 0=禁用 1=启用
-	Remark      *string  `json:"remark" example:"编辑角色"`                      // 备注
-	Permissions []string `json:"permissions" example:"[\"UUID\"]"`           // 菜单id数组
+	RoleTitle        string   `json:"roleTitle" binding:"required" example:"编辑员"`                                                                                          // 角色名称
+	Status           int      `json:"status" binding:"oneof=0 1" example:"1"`                                                                                              // 状态 0=禁用 1=启用
+	Remark           *string  `json:"remark" example:"编辑角色"`                                                                                                               // 备注
+	Permissions      []string `json:"permissions" example:"[\"UUID\"]"`                                                                                                    // 菜单id数组
+	DataScope        string   `json:"dataScope" binding:"omitempty,oneof=all customDepartment department departmentAndChildren self none" example:"departmentAndChildren"` // 数据范围
+	DataScopeDeptIds []string `json:"dataScopeDeptIds" example:"[\"UUID\"]"`                                                                                               // 自定义数据范围部门ID
 }
 
 type UpdateRoleRequest struct {
-	RoleTitle   string   `json:"roleTitle" binding:"required" example:"编辑员"` // 角色名称
-	Status      int      `json:"status" example:"1"`                         // 状态 0=禁用 1=启用
-	Remark      *string  `json:"remark" example:"编辑角色"`                      // 备注
-	Permissions []string `json:"permissions" example:"[\"UUID\"]"`           // 菜单id数组
+	RoleTitle        string   `json:"roleTitle" binding:"required" example:"编辑员"`                                                                                          // 角色名称
+	Status           int      `json:"status" binding:"oneof=0 1" example:"1"`                                                                                              // 状态 0=禁用 1=启用
+	Remark           *string  `json:"remark" example:"编辑角色"`                                                                                                               // 备注
+	Permissions      []string `json:"permissions" example:"[\"UUID\"]"`                                                                                                    // 菜单id数组
+	DataScope        string   `json:"dataScope" binding:"omitempty,oneof=all customDepartment department departmentAndChildren self none" example:"departmentAndChildren"` // 数据范围
+	DataScopeDeptIds []string `json:"dataScopeDeptIds" example:"[\"UUID\"]"`                                                                                               // 自定义数据范围部门ID
 }
 
 type RoleDetailResponse struct {
-	RoleId      string   `json:"roleId" example:"UUID"`                    // 角色ID
-	RoleTitle   string   `json:"roleTitle" example:"SuperAdmin"`           // 角色名称
-	Status      int      `json:"status" example:"1"`                       // 状态 0=禁用 1=启用
-	CreateDate  *string  `json:"createDate" example:"2024-01-01 12:00:00"` // 创建时间
-	Remark      *string  `json:"remark" example:"超级管理员"`                   // 备注
-	Permissions []string `json:"permissions" example:"[\"UUID\"]"`         // 菜单id数组
+	RoleId           string   `json:"roleId" example:"UUID"`                     // 角色ID
+	RoleTitle        string   `json:"roleTitle" example:"SuperAdmin"`            // 角色名称
+	Status           int      `json:"status" example:"1"`                        // 状态 0=禁用 1=启用
+	CreateDate       *string  `json:"createDate" example:"2024-01-01 12:00:00"`  // 创建时间
+	Remark           *string  `json:"remark" example:"超级管理员"`                    // 备注
+	Permissions      []string `json:"permissions" example:"[\"UUID\"]"`          // 菜单id数组
+	DataScope        string   `json:"dataScope" example:"departmentAndChildren"` // 数据范围
+	DataScopeDeptIds []string `json:"dataScopeDeptIds" example:"[\"UUID\"]"`     // 自定义数据范围部门ID
 }
 
 type RoleSimpleResponse struct {
 	RoleId    string `json:"roleId" example:"UUID"`          // 角色ID
 	RoleTitle string `json:"roleTitle" example:"SuperAdmin"` // 角色名称
+	DataScope string `json:"dataScope" example:"all"`        // 数据范围
 	Status    int    `json:"status" example:"1"`             // 状态 0=禁用 1=启用
 }
 
 type UpdateStatusRequest struct {
-	Status int `json:"status" example:"1"` // 状态 0=禁用 1=启用
+	Status int `json:"status" binding:"oneof=0 1" example:"1"` // 状态 0=禁用 1=启用
 }
 
 type DeptListRequest struct {
@@ -568,7 +575,7 @@ type UpdateStoryRequest struct {
 
 type UpdateStoryFieldRequest struct {
 	Key   string      `json:"key" binding:"required" example:"storyStatus"` // 要更新的字段名
-	Value interface{} `json:"value" example:"0"`                            // 要更新的字段值
+	Value interface{} `json:"value" swaggertype:"object"`                   // 要更新的字段值，类型随 key 变化
 }
 
 type UpdateStoryNextRequest struct {
@@ -608,7 +615,7 @@ type UpdateTaskRequest struct {
 
 type UpdateTaskFieldRequest struct {
 	Key   string      `json:"key" binding:"required" example:"taskStatus"` // 要更新的字段名
-	Value interface{} `json:"value" example:"0"`                           // 要更新的字段值
+	Value interface{} `json:"value" swaggertype:"object"`                  // 要更新的字段值，类型随 key 变化
 }
 
 type UpdateTaskNextRequest struct {
@@ -650,7 +657,7 @@ type UpdateBugRequest struct {
 
 type UpdateBugFieldRequest struct {
 	Key   string      `json:"key" binding:"required" example:"bugStatus"` // 要更新的字段名
-	Value interface{} `json:"value" example:"0"`                          // 要更新的字段值
+	Value interface{} `json:"value" swaggertype:"object"`                 // 要更新的字段值，类型随 key 变化
 }
 
 type UpdateBugNextRequest struct {

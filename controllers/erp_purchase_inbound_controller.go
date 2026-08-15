@@ -23,7 +23,7 @@ func NewErpPurchaseInboundController() *ErpPurchaseInboundController {
 
 // GetPurchaseInboundList 获取采购入库单列表
 // @Summary 获取采购入库单列表
-// @Description 分页查询采购入库单，支持按入库单号、采购单号、供应商、仓库、SKU编码、批号和入库日期范围筛选
+// @Description 按入库单创建人及当前角色数据范围分页查询采购入库单，支持按入库单号、采购单号、供应商、仓库、SKU编码、批号和入库日期范围筛选
 // @Tags 进销存/采购入库
 // @Produce json
 // @Security ApiKeyAuth
@@ -50,7 +50,7 @@ func (ctrl *ErpPurchaseInboundController) GetPurchaseInboundList(c *gin.Context)
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.purchaseInboundService.GetPurchaseInboundList(req)
+	result, err := ctrl.purchaseInboundService.GetPurchaseInboundList(req, currentDataPermission(c))
 	if err != nil {
 		writeErpPurchaseInboundError(c, err)
 		return
@@ -60,7 +60,7 @@ func (ctrl *ErpPurchaseInboundController) GetPurchaseInboundList(c *gin.Context)
 
 // GetPurchaseInboundDetail 获取采购入库单详情
 // @Summary 获取采购入库单详情
-// @Description 获取采购入库单头、明细和当前SKU展示信息；采购入库单提交后只读
+// @Description 按入库单创建人及当前角色数据范围获取单头、明细和当前SKU展示信息；提交后只读
 // @Tags 进销存/采购入库
 // @Produce json
 // @Security ApiKeyAuth
@@ -73,7 +73,7 @@ func (ctrl *ErpPurchaseInboundController) GetPurchaseInboundList(c *gin.Context)
 // @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /erp/purchaseInbounds/{inboundId} [get]
 func (ctrl *ErpPurchaseInboundController) GetPurchaseInboundDetail(c *gin.Context) {
-	result, err := ctrl.purchaseInboundService.GetPurchaseInboundDetail(c.Param("inboundId"))
+	result, err := ctrl.purchaseInboundService.GetPurchaseInboundDetail(c.Param("inboundId"), currentDataPermission(c))
 	if err != nil {
 		writeErpPurchaseInboundError(c, err)
 		return
@@ -83,7 +83,7 @@ func (ctrl *ErpPurchaseInboundController) GetPurchaseInboundDetail(c *gin.Contex
 
 // CreatePurchaseInbound 新增采购入库单
 // @Summary 新增采购入库单
-// @Description 只能从待收货或部分入库采购单发起；供应商、仓库、SKU和成本价继承采购单，批量保存单据和明细并原子更新采购单收货进度、库存与采购单日志；启用追溯的SKU必须提交纯数字小包装追溯码且数量与追溯码个数一致
+// @Description 只能从当前数据范围内的待收货或部分入库采购单发起；新入库单归属当前用户，并原子更新采购单收货进度、库存与日志
 // @Tags 进销存/采购入库
 // @Accept json
 // @Produce json
@@ -103,7 +103,7 @@ func (ctrl *ErpPurchaseInboundController) CreatePurchaseInbound(c *gin.Context) 
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.purchaseInboundService.CreatePurchaseInbound(req, erpInventoryOperatorID(c))
+	result, err := ctrl.purchaseInboundService.CreatePurchaseInbound(req, erpInventoryOperatorID(c), currentDataPermission(c))
 	if err != nil {
 		writeErpPurchaseInboundError(c, err)
 		return

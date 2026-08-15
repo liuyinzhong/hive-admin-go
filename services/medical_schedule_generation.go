@@ -58,6 +58,9 @@ func (s *MedicalScheduleService) GenerateSchedules(req models.GenerateSchedulesR
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("idempotency_key = ?", idempotencyKey).First(&batch).Error; err != nil {
 			return err
 		}
+		if !scheduleGenerationOwnedBy(batch.CreatorID, operatorID) {
+			return fmt.Errorf("%w: 幂等键已被其他请求占用", ErrMedicalConflict)
+		}
 		if batch.RequestHash != requestHash {
 			return fmt.Errorf("%w: 相同幂等键不能用于不同的生成参数", ErrMedicalConflict)
 		}
@@ -260,6 +263,10 @@ func buildGeneratedSchedules(templates []models.MedScheduleTemplate, relations m
 	skippedCount := 0
 	now := time.Now()
 	for _, template := range templates {
+		scheduleOwnerID := strings.TrimSpace(operatorID)
+		if scheduleOwnerID == "" && template.CreatorID != nil {
+			scheduleOwnerID = strings.TrimSpace(*template.CreatorID)
+		}
 		dimensionKey := scheduleDimensionKey(template.DoctorID, template.DepartmentID, template.RegistrationType)
 		relation := relations[dimensionKey]
 		for scheduleDate := startDate; !medicalDateAfter(scheduleDate, endDate); scheduleDate = scheduleDate.AddDate(0, 0, 1) {
@@ -298,7 +305,7 @@ func buildGeneratedSchedules(templates []models.MedScheduleTemplate, relations m
 			templateID := template.TemplateID
 			batchIDValue := batchID
 			scheduleID := utils.GenerateUUID()
-			slots, totalQuota, _, err := buildScheduleSlotDrafts(scheduleID, template.StartTime, template.EndTime, template.DefaultSlotQuota, config, operatorID)
+			slots, totalQuota, _, err := buildScheduleSlotDrafts(scheduleID, template.StartTime, template.EndTime, template.DefaultSlotQuota, config, scheduleOwnerID)
 			if err != nil {
 				return nil, nil, 0, err
 			}
@@ -316,8 +323,8 @@ func buildGeneratedSchedules(templates []models.MedScheduleTemplate, relations m
 				TotalQuota:        totalQuota,
 				Status:            models.MedScheduleStatusDraft,
 				Remark:            template.Remark,
-				CreatorID:         optionalOperatorID(operatorID),
-				UpdaterID:         optionalOperatorID(operatorID),
+				CreatorID:         optionalOperatorID(scheduleOwnerID),
+				UpdaterID:         optionalOperatorID(scheduleOwnerID),
 				CreateDate:        &now,
 				UpdateDate:        &now,
 			}
@@ -327,6 +334,14 @@ func buildGeneratedSchedules(templates []models.MedScheduleTemplate, relations m
 		}
 	}
 	return created, createdSlots, skippedCount, nil
+}
+
+func scheduleGenerationOwnedBy(creatorID *string, operatorID string) bool {
+	operatorID = strings.TrimSpace(operatorID)
+	if creatorID == nil {
+		return operatorID == ""
+	}
+	return strings.TrimSpace(*creatorID) == operatorID
 }
 
 func scheduleMatchesGeneratedTemplate(schedule models.MedSchedule, template models.MedScheduleTemplate) bool {

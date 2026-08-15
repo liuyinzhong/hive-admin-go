@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm/clause"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
@@ -294,12 +295,13 @@ func (s *MedicalScheduleService) DeleteScheduleTemplate(templateID string, opera
 	})
 }
 
-func (s *MedicalScheduleService) GetScheduleList(req models.ScheduleListRequest) (*utils.PageResult, error) {
+func (s *MedicalScheduleService) GetScheduleList(req models.ScheduleListRequest, permission datapermission.Permission) (*utils.PageResult, error) {
 	query := database.DB.Table("med_schedule AS schedule").
 		Select("schedule.*, doctor.doctor_no, doctor.name AS doctor_name, department.department_code, department.department_name").
 		Joins("JOIN med_doctor AS doctor ON doctor.doctor_id = schedule.doctor_id AND doctor.del_flag = 0").
 		Joins("JOIN med_department AS department ON department.department_id = schedule.department_id AND department.del_flag = 0").
 		Where("schedule.del_flag = 0")
+	query = permission.Apply(query, "schedule.creator_id")
 	if req.DoctorID != "" {
 		if err := validateMedicalUUID(req.DoctorID, "医生ID"); err != nil {
 			return nil, err
@@ -402,18 +404,18 @@ func (s *MedicalScheduleService) GetScheduleList(req models.ScheduleListRequest)
 }
 
 // GetScheduleDetail 获取实际排班详情及其号源档位。
-func (s *MedicalScheduleService) GetScheduleDetail(scheduleID string) (*models.ScheduleResponse, error) {
+func (s *MedicalScheduleService) GetScheduleDetail(scheduleID string, permission datapermission.Permission) (*models.ScheduleResponse, error) {
 	if err := validateMedicalUUID(scheduleID, "排班ID"); err != nil {
 		return nil, err
 	}
 
 	var row scheduleListRow
-	if err := database.DB.Table("med_schedule AS schedule").
+	query := database.DB.Table("med_schedule AS schedule").
 		Select("schedule.*, doctor.doctor_no, doctor.name AS doctor_name, department.department_code, department.department_name").
 		Joins("JOIN med_doctor AS doctor ON doctor.doctor_id = schedule.doctor_id AND doctor.del_flag = 0").
 		Joins("JOIN med_department AS department ON department.department_id = schedule.department_id AND department.del_flag = 0").
-		Where("schedule.schedule_id = ? AND schedule.del_flag = 0", scheduleID).
-		First(&row).Error; err != nil {
+		Where("schedule.schedule_id = ? AND schedule.del_flag = 0", scheduleID)
+	if err := permission.Apply(query, "schedule.creator_id").First(&row).Error; err != nil {
 		return nil, scheduleRecordError(err, "排班不存在")
 	}
 
@@ -478,7 +480,7 @@ func (s *MedicalScheduleService) CreateSchedule(req models.SaveScheduleRequest, 
 	})
 }
 
-func (s *MedicalScheduleService) UpdateSchedule(scheduleID string, req models.SaveScheduleRequest, operatorID string) error {
+func (s *MedicalScheduleService) UpdateSchedule(scheduleID string, req models.SaveScheduleRequest, operatorID string, permission datapermission.Permission) error {
 	if err := validateMedicalUUID(scheduleID, "排班ID"); err != nil {
 		return err
 	}
@@ -488,14 +490,16 @@ func (s *MedicalScheduleService) UpdateSchedule(scheduleID string, req models.Sa
 	}
 	return database.DB.Transaction(func(tx *gorm.DB) error {
 		var initial models.MedSchedule
-		if err := tx.Where("schedule_id = ? AND del_flag = 0", scheduleID).First(&initial).Error; err != nil {
+		initialQuery := tx.Model(&models.MedSchedule{}).Where("schedule_id = ? AND del_flag = 0", scheduleID)
+		if err := permission.Apply(initialQuery, "med_schedule.creator_id").First(&initial).Error; err != nil {
 			return scheduleRecordError(err, "排班不存在")
 		}
 		if err := lockScheduleDoctors(tx, []string{initial.DoctorID, prepared.doctorID}); err != nil {
 			return err
 		}
 		var current models.MedSchedule
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("schedule_id = ? AND del_flag = 0", scheduleID).First(&current).Error; err != nil {
+		currentQuery := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Model(&models.MedSchedule{}).Where("schedule_id = ? AND del_flag = 0", scheduleID)
+		if err := permission.Apply(currentQuery, "med_schedule.creator_id").First(&current).Error; err != nil {
 			return scheduleRecordError(err, "排班不存在")
 		}
 		if current.DoctorID != initial.DoctorID {
@@ -544,19 +548,20 @@ func (s *MedicalScheduleService) UpdateSchedule(scheduleID string, req models.Sa
 	})
 }
 
-func (s *MedicalScheduleService) PublishSchedules(req models.PublishSchedulesRequest, operatorID string) error {
+func (s *MedicalScheduleService) PublishSchedules(req models.PublishSchedulesRequest, operatorID string, permission datapermission.Permission) error {
 	scheduleIDs, err := normalizeScheduleUUIDs(req.ScheduleIDs, "排班ID", 100)
 	if err != nil {
 		return err
 	}
 	return database.DB.Transaction(func(tx *gorm.DB) error {
-		return publishScheduleIDsTx(tx, scheduleIDs, operatorID)
+		return publishScheduleIDsTx(tx, scheduleIDs, operatorID, permission)
 	})
 }
 
-func publishScheduleIDsTx(tx *gorm.DB, scheduleIDs []string, operatorID string) error {
+func publishScheduleIDsTx(tx *gorm.DB, scheduleIDs []string, operatorID string, permission datapermission.Permission) error {
 	var initial []models.MedSchedule
-	if err := tx.Where("schedule_id IN ? AND del_flag = 0", scheduleIDs).Find(&initial).Error; err != nil {
+	initialQuery := tx.Model(&models.MedSchedule{}).Where("schedule_id IN ? AND del_flag = 0", scheduleIDs)
+	if err := permission.Apply(initialQuery, "med_schedule.creator_id").Find(&initial).Error; err != nil {
 		return err
 	}
 	if len(initial) != len(scheduleIDs) {
@@ -570,8 +575,9 @@ func publishScheduleIDsTx(tx *gorm.DB, scheduleIDs []string, operatorID string) 
 		return err
 	}
 	var schedules []models.MedSchedule
-	if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
-		Where("schedule_id IN ? AND del_flag = 0", scheduleIDs).
+	lockedQuery := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Model(&models.MedSchedule{}).
+		Where("schedule_id IN ? AND del_flag = 0", scheduleIDs)
+	if err := permission.Apply(lockedQuery, "med_schedule.creator_id").
 		Order("doctor_id asc, department_id asc, registration_type asc, schedule_date asc, start_time asc, schedule_id asc").
 		Find(&schedules).Error; err != nil {
 		return err
@@ -646,7 +652,7 @@ func publishScheduleIDsTx(tx *gorm.DB, scheduleIDs []string, operatorID string) 
 	return nil
 }
 
-func (s *MedicalScheduleService) StopSchedule(scheduleID string, req models.StopScheduleRequest, operatorID string) error {
+func (s *MedicalScheduleService) StopSchedule(scheduleID string, req models.StopScheduleRequest, operatorID string, permission datapermission.Permission) error {
 	if err := validateMedicalUUID(scheduleID, "排班ID"); err != nil {
 		return err
 	}
@@ -656,7 +662,8 @@ func (s *MedicalScheduleService) StopSchedule(scheduleID string, req models.Stop
 	}
 	return database.DB.Transaction(func(tx *gorm.DB) error {
 		var schedule models.MedSchedule
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("schedule_id = ? AND del_flag = 0", scheduleID).First(&schedule).Error; err != nil {
+		query := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Model(&models.MedSchedule{}).Where("schedule_id = ? AND del_flag = 0", scheduleID)
+		if err := permission.Apply(query, "med_schedule.creator_id").First(&schedule).Error; err != nil {
 			return scheduleRecordError(err, "排班不存在")
 		}
 		if schedule.Status != models.MedScheduleStatusPublished {
@@ -675,15 +682,16 @@ func (s *MedicalScheduleService) StopSchedule(scheduleID string, req models.Stop
 	})
 }
 
-func (s *MedicalScheduleService) DeleteDraftSchedules(scheduleIDs []string, operatorID string) error {
+func (s *MedicalScheduleService) DeleteDraftSchedules(scheduleIDs []string, operatorID string, permission datapermission.Permission) error {
 	normalizedIDs, err := normalizeScheduleUUIDs(scheduleIDs, "排班ID", 100)
 	if err != nil {
 		return err
 	}
 	return database.DB.Transaction(func(tx *gorm.DB) error {
 		var schedules []models.MedSchedule
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
-			Where("schedule_id IN ? AND del_flag = 0", normalizedIDs).
+		query := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Model(&models.MedSchedule{}).
+			Where("schedule_id IN ? AND del_flag = 0", normalizedIDs)
+		if err := permission.Apply(query, "med_schedule.creator_id").
 			Order("schedule_id asc").Find(&schedules).Error; err != nil {
 			return err
 		}
@@ -705,13 +713,14 @@ func (s *MedicalScheduleService) DeleteDraftSchedules(scheduleIDs []string, oper
 	})
 }
 
-func (s *MedicalScheduleService) FinishSchedule(scheduleID string, operatorID string) error {
+func (s *MedicalScheduleService) FinishSchedule(scheduleID string, operatorID string, permission datapermission.Permission) error {
 	if err := validateMedicalUUID(scheduleID, "排班ID"); err != nil {
 		return err
 	}
 	return database.DB.Transaction(func(tx *gorm.DB) error {
 		var schedule models.MedSchedule
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("schedule_id = ? AND del_flag = 0", scheduleID).First(&schedule).Error; err != nil {
+		query := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Model(&models.MedSchedule{}).Where("schedule_id = ? AND del_flag = 0", scheduleID)
+		if err := permission.Apply(query, "med_schedule.creator_id").First(&schedule).Error; err != nil {
 			return scheduleRecordError(err, "排班不存在")
 		}
 		if schedule.Status != models.MedScheduleStatusPublished {

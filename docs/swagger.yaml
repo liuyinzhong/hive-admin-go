@@ -792,6 +792,24 @@ definitions:
     type: object
   models.CreateRoleRequest:
     properties:
+      dataScope:
+        description: 数据范围
+        enum:
+        - all
+        - customDepartment
+        - department
+        - departmentAndChildren
+        - self
+        - none
+        example: departmentAndChildren
+        type: string
+      dataScopeDeptIds:
+        description: 自定义数据范围部门ID
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
       permissions:
         description: 菜单id数组
         example:
@@ -809,6 +827,9 @@ definitions:
         type: string
       status:
         description: 状态 0=禁用 1=启用
+        enum:
+        - 0
+        - 1
         example: 1
         type: integer
     required:
@@ -5347,6 +5368,17 @@ definitions:
         description: 创建时间
         example: "2024-01-01 12:00:00"
         type: string
+      dataScope:
+        description: 数据范围
+        example: departmentAndChildren
+        type: string
+      dataScopeDeptIds:
+        description: 自定义数据范围部门ID
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
       permissions:
         description: 菜单id数组
         example:
@@ -5373,6 +5405,10 @@ definitions:
     type: object
   models.RoleSimpleResponse:
     properties:
+      dataScope:
+        description: 数据范围
+        example: all
+        type: string
       roleId:
         description: 角色ID
         example: UUID
@@ -7128,6 +7164,16 @@ definitions:
         type: string
     type: object
   models.UpdateBugFieldRequest:
+    properties:
+      key:
+        description: 要更新的字段名
+        example: bugStatus
+        type: string
+      value:
+        description: 要更新的字段值，类型随 key 变化
+        type: object
+    required:
+    - key
     type: object
   models.UpdateBugNextRequest:
     properties:
@@ -7624,6 +7670,24 @@ definitions:
     type: object
   models.UpdateRoleRequest:
     properties:
+      dataScope:
+        description: 数据范围
+        enum:
+        - all
+        - customDepartment
+        - department
+        - departmentAndChildren
+        - self
+        - none
+        example: departmentAndChildren
+        type: string
+      dataScopeDeptIds:
+        description: 自定义数据范围部门ID
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
       permissions:
         description: 菜单id数组
         example:
@@ -7641,6 +7705,9 @@ definitions:
         type: string
       status:
         description: 状态 0=禁用 1=启用
+        enum:
+        - 0
+        - 1
         example: 1
         type: integer
     required:
@@ -7650,10 +7717,23 @@ definitions:
     properties:
       status:
         description: 状态 0=禁用 1=启用
+        enum:
+        - 0
+        - 1
         example: 1
         type: integer
     type: object
   models.UpdateStoryFieldRequest:
+    properties:
+      key:
+        description: 要更新的字段名
+        example: storyStatus
+        type: string
+      value:
+        description: 要更新的字段值，类型随 key 变化
+        type: object
+    required:
+    - key
     type: object
   models.UpdateStoryNextRequest:
     properties:
@@ -7724,6 +7804,16 @@ definitions:
     - versionId
     type: object
   models.UpdateTaskFieldRequest:
+    properties:
+      key:
+        description: 要更新的字段名
+        example: taskStatus
+        type: string
+      value:
+        description: 要更新的字段值，类型随 key 变化
+        type: object
+    required:
+    - key
     type: object
   models.UpdateTaskNextRequest:
     properties:
@@ -8600,7 +8690,7 @@ definitions:
 host: localhost:9191
 info:
   contact: {}
-  description: Hive Admin Go 后端 API 接口文档
+  description: Hive Admin Go 后端 API 接口文档。受认证业务接口依次执行原子接口权限与数据权限；具体记录范围以角色 dataScope、当前用户部门和领域归属为准。
   title: Hive Admin API
   version: "1.0"
 paths:
@@ -9506,7 +9596,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 批量删除缺陷
+      description: 按当前数据范围批量删除缺陷；任一记录不存在或越界时整批失败
       parameters:
       - description: 缺陷ID列表
         in: body
@@ -9545,7 +9635,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 分页获取缺陷列表
+      description: 按创建人或处理人及当前角色数据范围分页获取缺陷
       parameters:
       - description: 页码
         in: query
@@ -9623,7 +9713,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建新缺陷
+      description: 创建新缺陷；处理人、关联版本和关联需求必须处于当前数据范围
       parameters:
       - description: 缺陷信息
         in: body
@@ -9661,7 +9751,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新缺陷信息
+      description: 按当前数据范围更新缺陷；处理人、关联版本和关联需求不得越界
       parameters:
       - description: 缺陷ID
         in: path
@@ -9704,7 +9794,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 确认缺陷并更新缺陷状态
+      description: 按当前数据范围确认缺陷并更新缺陷状态
       parameters:
       - description: 缺陷ID
         in: path
@@ -9747,7 +9837,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新缺陷的单个字段
+      description: 按当前数据范围更新缺陷的单个字段；修改处理人时校验目标用户范围
       parameters:
       - description: 缺陷ID
         in: path
@@ -9790,7 +9880,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新缺陷状态
+      description: 按当前数据范围更新缺陷状态
       parameters:
       - description: 缺陷ID
         in: path
@@ -9833,7 +9923,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 根据缺陷编号获取缺陷详情
+      description: 按创建人或处理人及当前角色数据范围获取缺陷详情
       parameters:
       - description: 缺陷编号
         in: path
@@ -9875,7 +9965,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取所有缺陷（不分页）
+      description: 按创建人或处理人及当前角色数据范围获取所有缺陷（不分页）
       parameters:
       - description: 缺陷编号
         in: query
@@ -9933,7 +10023,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 批量创建缺陷
+      description: 批量创建缺陷；每条记录的处理人、关联版本和关联需求均须处于当前数据范围
       parameters:
       - description: 缺陷信息列表
         in: body
@@ -9973,7 +10063,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 根据业务ID获取变更记录
+      description: 根据业务ID获取变更记录；访问范围继承对应需求、任务、缺陷或版本
       parameters:
       - description: 业务ID
         in: query
@@ -10016,7 +10106,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建新的变更记录或评论
+      description: 创建新的变更记录或评论；写入前校验对应需求、任务、缺陷或版本的当前访问范围
       parameters:
       - description: 变更记录信息
         in: body
@@ -10406,7 +10496,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 批量删除需求
+      description: 按当前数据范围批量删除需求；任一记录不存在或越界时整批失败
       parameters:
       - description: 需求ID列表
         in: body
@@ -10445,7 +10535,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 分页获取需求列表
+      description: 按创建人或参与人及当前角色数据范围分页获取需求
       parameters:
       - description: 页码
         in: query
@@ -10519,7 +10609,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建新需求
+      description: 创建新需求；参与人、附件和关联版本必须处于当前数据范围
       parameters:
       - description: 需求信息
         in: body
@@ -10557,7 +10647,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新需求信息
+      description: 按当前数据范围更新需求；参与人、附件和关联版本不得越界
       parameters:
       - description: 需求ID
         in: path
@@ -10600,7 +10690,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新需求的单个字段
+      description: 按当前数据范围更新需求单个字段；修改参与人时校验目标用户范围
       parameters:
       - description: 需求ID
         in: path
@@ -10643,7 +10733,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新需求状态
+      description: 按当前数据范围更新需求状态
       parameters:
       - description: 需求ID
         in: path
@@ -10686,7 +10776,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 根据需求编号获取需求详情
+      description: 按创建人或参与人及当前角色数据范围获取需求详情，关联任务和缺陷继续按各自范围过滤
       parameters:
       - description: 需求编号
         in: path
@@ -10728,7 +10818,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取所有需求（不分页）
+      description: 按创建人或参与人及当前角色数据范围获取所有需求（不分页）
       parameters:
       - description: 需求编号
         in: query
@@ -10782,7 +10872,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 批量创建需求
+      description: 批量创建需求；每条记录的参与人、附件和关联版本均须处于当前数据范围
       parameters:
       - description: 需求信息列表
         in: body
@@ -10822,7 +10912,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 批量删除任务
+      description: 按当前数据范围批量删除任务；任一记录不存在或越界时整批失败
       parameters:
       - description: 任务ID列表
         in: body
@@ -10861,7 +10951,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 分页获取任务列表
+      description: 按创建人或执行人及当前角色数据范围分页获取任务
       parameters:
       - description: 页码
         in: query
@@ -10935,7 +11025,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建新任务
+      description: 创建新任务；执行人、关联版本和关联需求必须处于当前数据范围
       parameters:
       - description: 任务信息
         in: body
@@ -10973,7 +11063,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新任务信息
+      description: 按当前数据范围更新任务；执行人、关联版本和关联需求不得越界
       parameters:
       - description: 任务ID
         in: path
@@ -11016,7 +11106,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新任务的单个字段，仅可修改：userId、taskType、startDate、endDate
+      description: 按当前数据范围更新任务的单个字段，仅可修改：userId、taskType、startDate、endDate；修改执行人时校验目标用户范围
       parameters:
       - description: 任务ID
         in: path
@@ -11059,7 +11149,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新任务状态
+      description: 按当前数据范围更新任务状态
       parameters:
       - description: 任务ID
         in: path
@@ -11102,7 +11192,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 根据任务编号获取任务详情
+      description: 按创建人或执行人及当前角色数据范围获取任务详情
       parameters:
       - description: 任务编号
         in: path
@@ -11144,7 +11234,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取所有任务（不分页）
+      description: 按创建人或执行人及当前角色数据范围获取所有任务（不分页）
       parameters:
       - description: 任务编号
         in: query
@@ -11198,7 +11288,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 批量创建任务
+      description: 批量创建任务；每条记录的执行人、关联版本和关联需求均须处于当前数据范围
       parameters:
       - description: 任务信息列表
         in: body
@@ -11238,7 +11328,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 按当前筛选和排序创建异步XLSX导出任务
+      description: 按当前筛选和排序创建异步XLSX导出任务；Worker 在计数和生成时重新解析创建用户当前数据范围
       parameters:
       - description: 导出条件
         in: body
@@ -11287,7 +11377,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 批量删除版本
+      description: 按当前数据范围批量删除版本；任一记录不存在或越界时整批失败
       parameters:
       - description: 版本ID列表
         in: body
@@ -11326,7 +11416,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 分页获取版本列表
+      description: 按版本创建人及当前角色数据范围分页获取版本
       parameters:
       - description: 页码
         in: query
@@ -11388,7 +11478,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建新版本
+      description: 创建新版本并以当前用户作为创建人
       parameters:
       - description: 版本信息
         in: body
@@ -11426,7 +11516,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 根据版本ID获取版本详情
+      description: 按版本创建人及当前角色数据范围获取版本详情
       parameters:
       - description: 版本ID
         in: path
@@ -11467,7 +11557,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新版本信息
+      description: 按版本创建人及当前角色数据范围更新版本信息
       parameters:
       - description: 版本ID
         in: path
@@ -11510,7 +11600,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新版本状态并记录变更历史
+      description: 按当前数据范围更新版本状态并记录继承版本范围的变更历史
       parameters:
       - description: 版本ID
         in: path
@@ -11553,7 +11643,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取所有版本（不分页）
+      description: 按版本创建人及当前角色数据范围获取所有版本（不分页）
       parameters:
       - description: 版本号
         in: query
@@ -11595,7 +11685,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取指定项目下按版本号排序后的最大版本号
+      description: 在当前角色数据范围内获取指定项目下按版本号排序后的最大版本号
       parameters:
       - description: 项目ID
         in: query
@@ -11630,7 +11720,7 @@ paths:
       - 开发管理/版本管理
   /erp/inventory/balances:
     get:
-      description: 分页查询库存余额，第一版按仓库和库存批次展示；搜索条件支持仓库ID、库存余额ID、SKU编码和批号，默认包含零库存余额
+      description: 按库存余额创建人及当前角色数据范围分页查询库存余额；支持仓库ID、库存余额ID、SKU编码和批号，默认包含零库存余额
       parameters:
       - description: 页码
         in: query
@@ -11714,7 +11804,7 @@ paths:
       - 进销存/库存管理
   /erp/inventory/balances/{balanceId}/movements:
     get:
-      description: 根据库存余额ID分页查询库存流水；流水一旦写入不可更改，第一版仅包含初始库存入库流水
+      description: 先校验库存余额范围，再按流水操作人及当前角色数据范围分页查询库存流水；流水一旦写入不可更改
       parameters:
       - description: 库存余额ID，UUID格式
         example: 550e8400-e29b-41d4-a716-446655440000
@@ -11786,7 +11876,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 按当前筛选和排序创建异步XLSX导出任务
+      description: 按当前筛选和排序创建异步XLSX导出任务；Worker 在计数和生成时重新解析创建用户当前数据范围
       parameters:
       - description: 导出条件
         in: body
@@ -11835,7 +11925,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 批量写入初始库存；启用追溯的SKU必须提交纯数字小包装追溯码且数量与追溯码个数一致；同一批次再次写入是追加库存而不是覆盖库存；整批提交原子成功或失败
+      description: 批量写入初始库存并以当前用户作为新余额、流水和追溯码归属人；累加已有余额时必须处于当前数据范围；启用追溯的SKU必须提交等量纯数字追溯码；整批原子成功或失败
       parameters:
       - description: 初始库存
         in: body
@@ -11886,7 +11976,7 @@ paths:
       - 进销存/库存管理
   /erp/inventory/movements:
     get:
-      description: 根据来源单据类型和来源单据ID分页查询库存流水，适用于查看整张采购入库单产生的全部流水
+      description: 按流水操作人及当前角色数据范围，根据来源单据类型和来源单据ID分页查询库存流水
       parameters:
       - description: 来源单据类型，例如PURCHASE_INBOUND
         in: query
@@ -11952,7 +12042,7 @@ paths:
       - 进销存/库存管理
   /erp/inventory/traceCodes:
     get:
-      description: 分页查询小包装追溯码，可按追溯码、SKU编码、批号、当前仓库和当前状态筛选
+      description: 按追溯码创建人及当前角色数据范围分页查询小包装追溯码，可按追溯码、SKU编码、批号、当前仓库和当前状态筛选
       parameters:
       - description: 页码
         in: query
@@ -12031,7 +12121,7 @@ paths:
       - 进销存/库存管理
   /erp/inventory/traceCodes/{traceId}/movements:
     get:
-      description: 根据追溯码ID分页查询其关联的全部库存流水，仅展示来源单据编号，不提供页面跳转
+      description: 先校验追溯码范围，再按流水操作人及当前角色数据范围分页查询其关联库存流水
       parameters:
       - description: 追溯码ID，UUID格式
         in: path
@@ -12096,7 +12186,7 @@ paths:
       - 进销存/库存管理
   /erp/otherOutbounds:
     get:
-      description: 分页查询其它出库单，支持按单号、仓库、SKU编码、批号和出库日期范围筛选
+      description: 按出库单创建人及当前角色数据范围分页查询其它出库单，支持按单号、仓库、SKU编码、批号和出库日期范围筛选
       parameters:
       - description: 页码
         in: query
@@ -12177,7 +12267,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 提交即完成其它出库，批量保存单据和明细并原子扣减库存余额、写入库存流水；启用追溯的SKU必须提交属于所选库存余额且当前在库的小包装追溯码，数量与追溯码个数一致
+      description: 提交即完成其它出库；每个库存余额必须处于当前数据范围，新出库单和库存流水归属当前用户，整批原子扣减库存
       parameters:
       - description: 其它出库单
         in: body
@@ -12228,7 +12318,7 @@ paths:
       - 进销存/其它出库
   /erp/otherOutbounds/{outboundId}:
     get:
-      description: 获取其它出库单头、明细和当前库存关联展示信息；其它出库单提交后只读
+      description: 按出库单创建人及当前角色数据范围获取单头、明细和当前库存关联展示信息；提交后只读
       parameters:
       - description: 其它出库单ID，UUID格式
         in: path
@@ -12274,7 +12364,7 @@ paths:
       - 进销存/其它出库
   /erp/purchaseInbounds:
     get:
-      description: 分页查询采购入库单，支持按入库单号、采购单号、供应商、仓库、SKU编码、批号和入库日期范围筛选
+      description: 按入库单创建人及当前角色数据范围分页查询采购入库单，支持按入库单号、采购单号、供应商、仓库、SKU编码、批号和入库日期范围筛选
       parameters:
       - description: 页码
         in: query
@@ -12363,7 +12453,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 只能从待收货或部分入库采购单发起；供应商、仓库、SKU和成本价继承采购单，批量保存单据和明细并原子更新采购单收货进度、库存与采购单日志；启用追溯的SKU必须提交纯数字小包装追溯码且数量与追溯码个数一致
+      description: 只能从当前数据范围内的待收货或部分入库采购单发起；新入库单归属当前用户，并原子更新采购单收货进度、库存与日志
       parameters:
       - description: 采购入库单
         in: body
@@ -12414,7 +12504,7 @@ paths:
       - 进销存/采购入库
   /erp/purchaseInbounds/{inboundId}:
     get:
-      description: 获取采购入库单头、明细和当前SKU展示信息；采购入库单提交后只读
+      description: 按入库单创建人及当前角色数据范围获取单头、明细和当前SKU展示信息；提交后只读
       parameters:
       - description: 采购入库单ID，UUID格式
         in: path
@@ -12460,7 +12550,7 @@ paths:
       - 进销存/采购入库
   /erp/purchaseOrders:
     get:
-      description: 分页查询采购单，支持单号、供应商、仓库、SKU编码、状态和采购日期范围筛选
+      description: 按采购单创建人及当前角色数据范围分页查询采购单，支持单号、供应商、仓库、SKU编码、状态和采购日期范围筛选
       parameters:
       - description: 页码
         in: query
@@ -12552,7 +12642,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建结构完整的采购单草稿并生成不可复用的采购单号
+      description: 创建结构完整的采购单草稿并生成不可复用的采购单号，以当前用户作为归属人
       parameters:
       - description: 采购单
         in: body
@@ -12603,6 +12693,7 @@ paths:
       - 进销存/采购单
   /erp/purchaseOrders/{purchaseOrderId}:
     get:
+      description: 按采购单创建人及当前角色数据范围获取采购单头和明细
       parameters:
       - description: 采购单ID，UUID格式
         in: path
@@ -12649,6 +12740,7 @@ paths:
     put:
       consumes:
       - application/json
+      description: 按采购单创建人及当前角色数据范围修改草稿
       parameters:
       - description: 采购单ID，UUID格式
         in: path
@@ -12706,6 +12798,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 按当前数据范围取消草稿或待收货采购单
       parameters:
       - description: 采购单ID，UUID格式
         in: path
@@ -12763,7 +12856,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 关闭部分入库采购单，未入库的剩余数量永久失效
+      description: 按当前数据范围关闭部分入库采购单，未入库的剩余数量永久失效
       parameters:
       - description: 采购单ID，UUID格式
         in: path
@@ -12819,7 +12912,7 @@ paths:
       - 进销存/采购单
   /erp/purchaseOrders/{purchaseOrderId}/confirm:
     post:
-      description: 将草稿确认并锁定，状态变更为待收货
+      description: 按当前数据范围将草稿确认并锁定，状态变更为待收货
       parameters:
       - description: 采购单ID，UUID格式
         in: path
@@ -12869,7 +12962,7 @@ paths:
       - 进销存/采购单
   /erp/purchaseOrders/{purchaseOrderId}/logs:
     get:
-      description: 返回不可修改的创建、修改、确认、入库、取消和关闭日志
+      description: 校验采购单当前数据范围后，返回不可修改的创建、修改、确认、入库、取消和关闭日志
       parameters:
       - description: 采购单ID，UUID格式
         in: path
@@ -15493,7 +15586,7 @@ paths:
       - 医疗管理/医生工作台
   /medical/patients:
     get:
-      description: 分页查询患者主档案，列表中的姓名、证件号码和手机号始终脱敏
+      description: 按患者档案创建人及当前角色数据范围分页查询患者，列表姓名、证件号码和手机号始终脱敏
       parameters:
       - description: 页码
         in: query
@@ -15566,7 +15659,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建完整实名患者档案，姓名、证件号码和手机号属于敏感信息
+      description: 创建完整实名患者档案并以当前用户作为归属人；姓名、证件号码和手机号属于敏感信息
       parameters:
       - description: 患者档案
         in: body
@@ -15604,7 +15697,7 @@ paths:
       - 医疗管理/患者档案
   /medical/patients/{patientId}:
     get:
-      description: 获取患者主档案详情；拥有敏感信息权限时返回姓名、证件号码和手机号完整值，否则返回脱敏值
+      description: 按患者档案创建人及当前角色数据范围获取详情；敏感信息权限另行叠加
       parameters:
       - description: 患者ID
         in: path
@@ -15643,7 +15736,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新患者完整实名档案，需要同时拥有修改权限和敏感信息权限
+      description: 按当前数据范围更新患者完整实名档案，需要同时拥有修改权限和敏感信息权限
       parameters:
       - description: 患者ID
         in: path
@@ -15688,7 +15781,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 启用或停用患者档案，停用不删除档案
+      description: 按当前数据范围启用或停用患者档案，停用不删除档案
       parameters:
       - description: 患者ID
         in: path
@@ -16236,6 +16329,7 @@ paths:
       - 医疗管理/挂号费
   /medical/registrations:
     get:
+      description: 按挂号单创建人及当前角色数据范围分页查询；患者敏感字段权限另行叠加
       parameters:
       - description: 页码
         in: query
@@ -16324,6 +16418,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 患者和实际排班必须处于当前数据范围；新挂号单以当前用户作为归属人
       parameters:
       - description: 挂号信息
         in: body
@@ -16366,6 +16461,7 @@ paths:
       - 医疗管理/挂号管理
   /medical/registrations/{registrationId}:
     get:
+      description: 按挂号单创建人及当前角色数据范围获取详情和生命周期；患者敏感字段权限另行叠加
       parameters:
       - description: 挂号单ID
         in: path
@@ -16409,6 +16505,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 按挂号单创建人及当前角色数据范围取消待支付挂号单
       parameters:
       - description: 挂号单ID
         in: path
@@ -16460,6 +16557,7 @@ paths:
       - 医疗管理/挂号管理
   /medical/registrations/{registrationId}/checkIn:
     post:
+      description: 按挂号单创建人及当前角色数据范围签到
       parameters:
       - description: 挂号单ID
         in: path
@@ -16505,6 +16603,7 @@ paths:
       - 医疗管理/挂号管理
   /medical/registrations/{registrationId}/confirmPayment:
     post:
+      description: 按挂号单创建人及当前角色数据范围确认支付
       parameters:
       - description: 挂号单ID
         in: path
@@ -16550,6 +16649,7 @@ paths:
       - 医疗管理/挂号管理
   /medical/registrations/{registrationId}/noShow:
     post:
+      description: 按挂号单创建人及当前角色数据范围标记爽约
       parameters:
       - description: 挂号单ID
         in: path
@@ -16595,6 +16695,7 @@ paths:
       - 医疗管理/挂号管理
   /medical/registrations/{registrationId}/refundComplete:
     post:
+      description: 按挂号单创建人及当前角色数据范围完成退款并释放号源
       parameters:
       - description: 挂号单ID
         in: path
@@ -16640,6 +16741,7 @@ paths:
       - 医疗管理/挂号管理
   /medical/registrations/{registrationId}/refundProcess:
     post:
+      description: 按挂号单创建人及当前角色数据范围标记退款处理中
       parameters:
       - description: 挂号单ID
         in: path
@@ -16687,6 +16789,7 @@ paths:
     post:
       consumes:
       - application/json
+      description: 按挂号单创建人及当前角色数据范围发起全额退款
       parameters:
       - description: 挂号单ID
         in: path
@@ -17025,7 +17128,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 批量删除草稿状态的排班记录
+      description: 按当前数据范围批量删除草稿排班；任一记录不存在或越界时整批失败
       parameters:
       - description: 排班ID列表
         in: body
@@ -17060,7 +17163,7 @@ paths:
       tags:
       - 医疗管理/排班
     get:
-      description: 分页查询实际排班列表，支持按医生、科室、挂号类型、日期范围、状态等条件筛选
+      description: 按实际排班创建人及当前角色数据范围分页查询，支持按医生、科室、挂号类型、日期范围、状态等条件筛选
       parameters:
       - description: 页码
         in: query
@@ -17137,7 +17240,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 手工创建实际排班记录
+      description: 手工创建实际排班并以当前用户作为归属人
       parameters:
       - description: 实际排班
         in: body
@@ -17171,7 +17274,7 @@ paths:
       - 医疗管理/排班
   /medical/schedules/{scheduleId}:
     get:
-      description: 获取指定实际排班及其半小时号源档位的完整信息
+      description: 按实际排班创建人及当前角色数据范围获取排班及半小时号源档位
       parameters:
       - description: 排班ID
         in: path
@@ -17210,7 +17313,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 编辑草稿状态的排班记录
+      description: 按实际排班创建人及当前角色数据范围编辑草稿排班
       parameters:
       - description: 排班ID
         in: path
@@ -17249,7 +17352,7 @@ paths:
       - 医疗管理/排班
   /medical/schedules/{scheduleId}/finish:
     put:
-      description: 将已完成出诊的排班标记为结束状态
+      description: 按当前数据范围将已完成出诊的排班标记为结束
       parameters:
       - description: 排班ID
         in: path
@@ -17284,7 +17387,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 将已发布的排班标记为停诊状态，需提供停诊原因
+      description: 按当前数据范围将已发布排班标记为停诊，需提供停诊原因
       parameters:
       - description: 排班ID
         in: path
@@ -17323,7 +17426,7 @@ paths:
       - 医疗管理/排班
   /medical/schedules/{scheduleId}/visitQueues:
     get:
-      description: 按签到序号升序返回指定实际排班的全部候诊记录；患者姓名和手机号始终脱敏
+      description: 先校验实际排班当前数据范围，再按签到序号返回候诊记录；患者姓名和手机号始终脱敏
       parameters:
       - description: 排班ID
         in: path
@@ -17369,7 +17472,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 根据启用的周期排班模板，批量生成指定日期范围内的实际排班
+      description: 根据启用周期模板批量生成实际排班；手工生成归属当前用户，自动生成继承模板创建人
       parameters:
       - description: 生成范围和幂等键
         in: body
@@ -17410,7 +17513,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 批量发布草稿排班，将其状态变更为已发布
+      description: 按当前数据范围批量发布草稿排班；任一记录不存在或越界时整批失败
       parameters:
       - description: 排班ID列表
         in: body
@@ -17444,7 +17547,7 @@ paths:
       - 医疗管理/排班
   /printDocuments/purchaseInbound/{inboundId}:
     get:
-      description: 返回统一打印数据协议和当前已发布模板；动态字段使用当前业务关联数据，不保存打印快照
+      description: 校验采购入库单当前数据范围后，返回统一打印数据协议和已发布模板；动态字段不保存打印快照
       parameters:
       - description: 采购入库单ID，UUID格式
         in: path
@@ -17494,7 +17597,7 @@ paths:
       - 打印管理/打印数据
   /printDocuments/purchaseInbound/{inboundId}/data:
     get:
-      description: 仅返回真实业务单据的统一打印数据，不要求已有已发布模板，供模板设计器实时预览使用
+      description: 校验采购入库单当前数据范围后返回真实业务单据的统一打印数据，供模板设计器实时预览
       parameters:
       - description: 采购入库单ID，UUID格式
         in: path
@@ -19325,7 +19428,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 按小时统计两个日期的任务创建数量，用于任务趋势对比折线图
+      description: 先按任务创建人或执行人及当前角色数据范围过滤，再按小时统计两个日期的任务创建数量
       parameters:
       - default: 2026/02/25
         description: 日期1（昨天），格式 YYYY/MM/DD 或 YYYY-MM-DD
@@ -19369,7 +19472,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 按月统计指定年份的任务实际工时合计，用于工时总量柱状图
+      description: 先按任务创建人或执行人及当前角色数据范围过滤，再按月统计指定年份的实际工时合计
       parameters:
       - default: 2026
         description: 年份
@@ -19407,7 +19510,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取需求、任务、缺陷的总数与待处理数量，用于工作台概览
+      description: 分别按需求、任务、缺陷的当前数据范围聚合总数与待处理数量，用于工作台概览
       produces:
       - application/json
       responses:
@@ -20283,7 +20386,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 分页获取文件列表
+      description: 按文件创建人和当前角色数据范围分页获取文件元数据；不改变 /uploads/** 的公开静态访问边界
       parameters:
       - description: 页码
         in: query
@@ -20349,7 +20452,8 @@ paths:
       - 系统管理/文件管理
   /system/loginLogs:
     get:
-      description: 分页查询登录与退出日志。未传时间范围时默认查询最近 7 天数据；日志表保留 180 天，超期会被物理删除。
+      description: 按日志用户和当前角色数据范围分页查询登录与退出日志。未传时间范围时默认查询最近 7 天数据；空用户日志仅全部数据范围可见；日志表保留
+        180 天，超期会被物理删除。
       parameters:
       - default: 1
         description: 页码，默认 1
@@ -20439,7 +20543,7 @@ paths:
       - 系统管理/日志管理
   /system/loginLogs/{logId}:
     get:
-      description: 根据日志 ID 获取登录日志详情，包含响应体、内容类型等完整信息
+      description: 按日志用户和当前角色数据范围获取登录日志详情，包含响应体、内容类型等完整信息
       parameters:
       - description: 日志 ID（UUID，带横线）
         in: path
@@ -20812,7 +20916,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 为指定用户在指定叶子菜单下新增指定数量的测试未读消息
+      description: 为当前数据范围内的指定用户在指定叶子菜单下新增指定数量的测试未读消息
       parameters:
       - description: 消息参数
         in: body
@@ -20939,7 +21043,7 @@ paths:
       - 系统管理/消息推送
   /system/operationLogs:
     get:
-      description: 分页查询操作日志。未传时间范围时默认查询最近 7 天数据；日志表保留 180 天，超期会被物理删除。
+      description: 按日志用户和当前角色数据范围分页查询操作日志。未传时间范围时默认查询最近 7 天数据；日志表保留 180 天，超期会被物理删除。
       parameters:
       - default: 1
         description: 页码，默认 1
@@ -21026,7 +21130,7 @@ paths:
       - 系统管理/日志管理
   /system/operationLogs/{logId}:
     get:
-      description: 根据日志 ID 获取操作日志详情，包含请求参数、请求体、响应体等完整信息
+      description: 按日志用户和当前角色数据范围获取操作日志详情，包含请求参数、请求体、响应体等完整信息
       parameters:
       - description: 日志 ID（UUID，带横线）
         in: path
@@ -21704,7 +21808,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 批量删除角色
+      description: 批量软删除角色并清理菜单、自定义部门关联；仅全部数据权限操作者可执行
       parameters:
       - description: 角色ID列表
         in: body
@@ -21743,7 +21847,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 分页获取角色列表
+      description: 分页获取全局角色配置，响应包含 dataScope；记录范围不用于过滤角色配置
       parameters:
       - description: 页码
         in: query
@@ -21797,7 +21901,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建新角色
+      description: 创建新角色并配置 dataScope；customDepartment 必须提交 dataScopeDeptIds；仅全部数据权限操作者可执行
       parameters:
       - description: 角色信息
         in: body
@@ -21835,7 +21939,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 根据角色ID获取角色详情
+      description: 根据角色ID获取角色详情，包含 dataScope、dataScopeDeptIds 和菜单权限
       parameters:
       - description: 角色ID
         in: path
@@ -21876,7 +21980,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新角色信息
+      description: 更新角色、菜单权限和数据范围；仅全部数据权限操作者可执行
       parameters:
       - description: 角色ID
         in: path
@@ -21919,7 +22023,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新角色启用/禁用状态
+      description: 更新角色启用/禁用状态；角色停用会在后续请求中立即停止贡献数据范围；仅全部数据权限操作者可执行
       parameters:
       - description: 角色ID
         in: path
@@ -21964,7 +22068,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取所有角色（不分页）
+      description: 获取所有启用角色（不分页），响应包含 dataScope；供用户授权等选择场景使用
       produces:
       - application/json
       responses:
@@ -21993,7 +22097,7 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: 上传文件到系统文件表
+      description: 上传文件并以当前用户作为元数据创建人；现有 /uploads/** 静态 URL 为公开访问，不适合敏感文件
       parameters:
       - description: 文件
         in: formData
@@ -22031,7 +22135,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 批量删除用户
+      description: 按当前角色数据范围批量软删除用户；任一用户不存在、越界或包含越界部门时整批失败
       parameters:
       - description: 用户ID列表
         in: body
@@ -22070,7 +22174,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 分页获取用户列表
+      description: 按当前角色数据范围分页获取普通用户；任一启用部门可见即进入列表，越界部门和直属领导关联不返回
       parameters:
       - description: 页码
         in: query
@@ -22136,7 +22240,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建新用户
+      description: 创建新用户；部门必须在当前可管理范围，受限操作者只能分配自己持有且范围不越界的角色
       parameters:
       - description: 用户信息
         in: body
@@ -22174,7 +22278,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 根据用户ID获取用户详情
+      description: 按当前角色数据范围获取用户详情；越界部门和直属领导关联不返回
       parameters:
       - description: 用户ID
         in: path
@@ -22215,7 +22319,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新用户信息
+      description: 按当前角色数据范围更新用户；目标用户全部启用部门均须可管理，新的部门、角色和直属领导不得越界
       parameters:
       - description: 用户ID
         in: path
@@ -22258,7 +22362,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新用户启用/禁用状态
+      description: 按当前角色数据范围更新用户启用/禁用状态；目标用户全部启用部门均须可管理
       parameters:
       - description: 用户ID
         in: path
@@ -22303,7 +22407,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取所有用户（不分页）
+      description: 按当前角色数据范围获取所有启用普通用户（不分页），供人员选择使用
       parameters:
       - description: 用户姓名
         in: query

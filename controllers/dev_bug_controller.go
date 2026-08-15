@@ -13,7 +13,7 @@ import (
 
 // GetBugs 获取缺陷列表
 // @Summary 获取缺陷列表
-// @Description 分页获取缺陷列表
+// @Description 按创建人或处理人及当前角色数据范围分页获取缺陷
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -65,7 +65,7 @@ func (dc *DevController) GetBugs(c *gin.Context) {
 		"sorts":       c.Query("sorts"),
 	}
 
-	result, err := services.GetBugs(page, pageSize, params)
+	result, err := services.GetBugs(page, pageSize, params, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -75,7 +75,7 @@ func (dc *DevController) GetBugs(c *gin.Context) {
 
 // GetAllBugs 获取所有缺陷
 // @Summary 获取所有缺陷
-// @Description 获取所有缺陷（不分页）
+// @Description 按创建人或处理人及当前角色数据范围获取所有缺陷（不分页）
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -110,7 +110,7 @@ func (dc *DevController) GetAllBugs(c *gin.Context) {
 		"storyId":   c.Query("storyId"),
 	}
 
-	bugs, err := services.GetAllBugs(params)
+	bugs, err := services.GetAllBugs(params, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -120,7 +120,7 @@ func (dc *DevController) GetAllBugs(c *gin.Context) {
 
 // GetBug 获取缺陷详情
 // @Summary 获取缺陷详情
-// @Description 根据缺陷编号获取缺陷详情
+// @Description 按创建人或处理人及当前角色数据范围获取缺陷详情
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -138,7 +138,7 @@ func (dc *DevController) GetBug(c *gin.Context) {
 		return
 	}
 
-	bug, err := services.GetBugByNum(bugNum)
+	bug, err := services.GetBugByNum(bugNum, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -148,7 +148,7 @@ func (dc *DevController) GetBug(c *gin.Context) {
 
 // CreateBug 创建缺陷
 // @Summary 创建缺陷
-// @Description 创建新缺陷
+// @Description 创建新缺陷；处理人、关联版本和关联需求必须处于当前数据范围
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -167,7 +167,7 @@ func (dc *DevController) CreateBug(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.CreateBug(&req, creatorID)
+	err := services.CreateBug(&req, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -177,7 +177,7 @@ func (dc *DevController) CreateBug(c *gin.Context) {
 
 // ConfirmBug 确认缺陷
 // @Summary 确认缺陷
-// @Description 确认缺陷并更新缺陷状态
+// @Description 按当前数据范围确认缺陷并更新缺陷状态
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -199,7 +199,7 @@ func (dc *DevController) ConfirmBug(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.ConfirmBug(bugID, &req, creatorID)
+	err := services.ConfirmBug(bugID, &req, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -209,7 +209,7 @@ func (dc *DevController) ConfirmBug(c *gin.Context) {
 
 // CreateBugs 批量创建缺陷
 // @Summary 批量创建缺陷
-// @Description 批量创建缺陷
+// @Description 批量创建缺陷；每条记录的处理人、关联版本和关联需求均须处于当前数据范围
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -228,7 +228,7 @@ func (dc *DevController) CreateBugs(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.CreateBugs(reqs, creatorID)
+	err := services.CreateBugs(reqs, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -238,7 +238,7 @@ func (dc *DevController) CreateBugs(c *gin.Context) {
 
 // UpdateBug 更新缺陷
 // @Summary 更新缺陷
-// @Description 更新缺陷信息
+// @Description 按当前数据范围更新缺陷；处理人、关联版本和关联需求不得越界
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -260,7 +260,7 @@ func (dc *DevController) UpdateBug(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.UpdateBug(bugID, &req, creatorID)
+	err := services.UpdateBug(bugID, &req, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -270,7 +270,7 @@ func (dc *DevController) UpdateBug(c *gin.Context) {
 
 // UpdateBugField 更新缺陷字段
 // @Summary 更新缺陷字段
-// @Description 更新缺陷的单个字段
+// @Description 按当前数据范围更新缺陷的单个字段；修改处理人时校验目标用户范围
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -292,7 +292,7 @@ func (dc *DevController) UpdateBugField(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.UpdateBugField(bugID, req.Key, req.Value, creatorID)
+	err := services.UpdateBugField(bugID, req.Key, req.Value, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -302,7 +302,7 @@ func (dc *DevController) UpdateBugField(c *gin.Context) {
 
 // UpdateBugNext 缺陷流转状态
 // @Summary 缺陷流转状态
-// @Description 更新缺陷状态
+// @Description 按当前数据范围更新缺陷状态
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -324,7 +324,7 @@ func (dc *DevController) UpdateBugNext(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.UpdateBugNext(bugID, req.BugStatus, req.ChangeRichText, creatorID)
+	err := services.UpdateBugNext(bugID, req.BugStatus, req.ChangeRichText, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -334,7 +334,7 @@ func (dc *DevController) UpdateBugNext(c *gin.Context) {
 
 // DeleteBugs 删除缺陷
 // @Summary 删除缺陷
-// @Description 批量删除缺陷
+// @Description 按当前数据范围批量删除缺陷；任一记录不存在或越界时整批失败
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -353,7 +353,7 @@ func (dc *DevController) DeleteBugs(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.DeleteBugs(ids, creatorID)
+	err := services.DeleteBugs(ids, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return

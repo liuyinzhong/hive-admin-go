@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 
 	"hive-admin-go/database"
 	"hive-admin-go/models"
@@ -71,7 +72,7 @@ func intToString(value int) string {
 	return strconv.Itoa(value)
 }
 
-func createChangeHistory(creatorID, businessID string, businessType, changeBehavior int, changeRichText string) error {
+func createChangeHistoryTx(tx *gorm.DB, creatorID, businessID string, businessType, changeBehavior int, changeRichText string) error {
 	now := time.Now()
 	history := models.DevChangeHistory{
 		ChangeID:       uuid.New().String(),
@@ -83,5 +84,19 @@ func createChangeHistory(creatorID, businessID string, businessType, changeBehav
 		CreateDate:     &now,
 		UpdateDate:     &now,
 	}
-	return database.DB.Create(&history).Error
+	return tx.Create(&history).Error
+}
+
+func updateDevRecordWithHistory(
+	creatorID, businessID string,
+	businessType, changeBehavior int,
+	changeRichText string,
+	update func(*gorm.DB) error,
+) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		if err := update(tx); err != nil {
+			return err
+		}
+		return createChangeHistoryTx(tx, creatorID, businessID, businessType, changeBehavior, changeRichText)
+	})
 }

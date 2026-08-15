@@ -23,7 +23,7 @@ func NewErpOtherOutboundController() *ErpOtherOutboundController {
 
 // GetOtherOutboundList 获取其它出库单列表
 // @Summary 获取其它出库单列表
-// @Description 分页查询其它出库单，支持按单号、仓库、SKU编码、批号和出库日期范围筛选
+// @Description 按出库单创建人及当前角色数据范围分页查询其它出库单，支持按单号、仓库、SKU编码、批号和出库日期范围筛选
 // @Tags 进销存/其它出库
 // @Produce json
 // @Security ApiKeyAuth
@@ -48,7 +48,7 @@ func (ctrl *ErpOtherOutboundController) GetOtherOutboundList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.otherOutboundService.GetOtherOutboundList(req)
+	result, err := ctrl.otherOutboundService.GetOtherOutboundList(req, currentDataPermission(c))
 	if err != nil {
 		writeErpOtherOutboundError(c, err)
 		return
@@ -58,7 +58,7 @@ func (ctrl *ErpOtherOutboundController) GetOtherOutboundList(c *gin.Context) {
 
 // GetOtherOutboundDetail 获取其它出库单详情
 // @Summary 获取其它出库单详情
-// @Description 获取其它出库单头、明细和当前库存关联展示信息；其它出库单提交后只读
+// @Description 按出库单创建人及当前角色数据范围获取单头、明细和当前库存关联展示信息；提交后只读
 // @Tags 进销存/其它出库
 // @Produce json
 // @Security ApiKeyAuth
@@ -71,7 +71,7 @@ func (ctrl *ErpOtherOutboundController) GetOtherOutboundList(c *gin.Context) {
 // @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /erp/otherOutbounds/{outboundId} [get]
 func (ctrl *ErpOtherOutboundController) GetOtherOutboundDetail(c *gin.Context) {
-	result, err := ctrl.otherOutboundService.GetOtherOutboundDetail(c.Param("outboundId"))
+	result, err := ctrl.otherOutboundService.GetOtherOutboundDetail(c.Param("outboundId"), currentDataPermission(c))
 	if err != nil {
 		writeErpOtherOutboundError(c, err)
 		return
@@ -81,7 +81,7 @@ func (ctrl *ErpOtherOutboundController) GetOtherOutboundDetail(c *gin.Context) {
 
 // CreateOtherOutbound 新增其它出库单
 // @Summary 新增其它出库单
-// @Description 提交即完成其它出库，批量保存单据和明细并原子扣减库存余额、写入库存流水；启用追溯的SKU必须提交属于所选库存余额且当前在库的小包装追溯码，数量与追溯码个数一致
+// @Description 提交即完成其它出库；每个库存余额必须处于当前数据范围，新出库单和库存流水归属当前用户，整批原子扣减库存
 // @Tags 进销存/其它出库
 // @Accept json
 // @Produce json
@@ -101,7 +101,7 @@ func (ctrl *ErpOtherOutboundController) CreateOtherOutbound(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.otherOutboundService.CreateOtherOutbound(req, erpInventoryOperatorID(c))
+	result, err := ctrl.otherOutboundService.CreateOtherOutbound(req, erpInventoryOperatorID(c), currentDataPermission(c))
 	if err != nil {
 		writeErpOtherOutboundError(c, err)
 		return

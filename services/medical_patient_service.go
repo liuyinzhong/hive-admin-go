@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
@@ -44,8 +45,9 @@ func NewMedicalPatientService() *MedicalPatientService {
 	return &MedicalPatientService{}
 }
 
-func (s *MedicalPatientService) GetPatientList(req models.PatientListRequest) (*utils.PageResult, error) {
+func (s *MedicalPatientService) GetPatientList(req models.PatientListRequest, permission datapermission.Permission) (*utils.PageResult, error) {
 	query := database.DB.Model(&models.MedPatient{}).Where("med_patient.del_flag = 0")
+	query = permission.Apply(query, "med_patient.creator_id")
 	keyword := strings.TrimSpace(req.Keyword)
 	if keyword != "" {
 		like := "%" + keyword + "%"
@@ -107,12 +109,13 @@ func (s *MedicalPatientService) GetPatientList(req models.PatientListRequest) (*
 	return pageResult, nil
 }
 
-func (s *MedicalPatientService) GetPatientDetail(patientID string, showSensitive bool) (*models.PatientResponse, error) {
+func (s *MedicalPatientService) GetPatientDetail(patientID string, showSensitive bool, permission datapermission.Permission) (*models.PatientResponse, error) {
 	if err := validateMedicalUUID(patientID, "患者ID"); err != nil {
 		return nil, err
 	}
 	var patient models.MedPatient
-	if err := database.DB.Where("patient_id = ? AND del_flag = 0", patientID).First(&patient).Error; err != nil {
+	query := database.DB.Model(&models.MedPatient{}).Where("patient_id = ? AND del_flag = 0", patientID)
+	if err := permission.Apply(query, "med_patient.creator_id").First(&patient).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("%w: 患者不存在", ErrMedicalNotFound)
 		}
@@ -157,13 +160,14 @@ func (s *MedicalPatientService) CreatePatient(req models.SavePatientRequest, ope
 	})
 }
 
-func (s *MedicalPatientService) UpdatePatient(patientID string, req models.SavePatientRequest, operatorID string) error {
+func (s *MedicalPatientService) UpdatePatient(patientID string, req models.SavePatientRequest, operatorID string, permission datapermission.Permission) error {
 	if err := validateMedicalUUID(patientID, "患者ID"); err != nil {
 		return err
 	}
 	return database.DB.Transaction(func(tx *gorm.DB) error {
 		var patient models.MedPatient
-		if err := tx.Where("patient_id = ? AND del_flag = 0", patientID).First(&patient).Error; err != nil {
+		query := tx.Model(&models.MedPatient{}).Where("patient_id = ? AND del_flag = 0", patientID)
+		if err := permission.Apply(query, "med_patient.creator_id").First(&patient).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return fmt.Errorf("%w: 患者不存在", ErrMedicalNotFound)
 			}
@@ -191,15 +195,15 @@ func (s *MedicalPatientService) UpdatePatient(patientID string, req models.SaveP
 	})
 }
 
-func (s *MedicalPatientService) UpdatePatientStatus(patientID string, status int, operatorID string) error {
+func (s *MedicalPatientService) UpdatePatientStatus(patientID string, status int, operatorID string, permission datapermission.Permission) error {
 	if err := validateMedicalUUID(patientID, "患者ID"); err != nil {
 		return err
 	}
 	if err := validateMedicalStatus(status); err != nil {
 		return err
 	}
-	result := database.DB.Model(&models.MedPatient{}).
-		Where("patient_id = ? AND del_flag = 0", patientID).
+	query := database.DB.Model(&models.MedPatient{}).Where("patient_id = ? AND del_flag = 0", patientID)
+	result := permission.Apply(query, "med_patient.creator_id").
 		Updates(map[string]interface{}{
 			"status":      status,
 			"updater_id":  optionalOperatorID(operatorID),

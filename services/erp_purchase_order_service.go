@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm/clause"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
@@ -104,9 +105,10 @@ type erpPurchaseOrderLogRow struct {
 	OperatedAt         time.Time
 }
 
-func (s *ErpPurchaseOrderService) GetPurchaseOrderList(req models.ErpPurchaseOrderListRequest) (*utils.PaginationResponse, error) {
+func (s *ErpPurchaseOrderService) GetPurchaseOrderList(req models.ErpPurchaseOrderListRequest, permission datapermission.Permission) (*utils.PaginationResponse, error) {
 	page, pageSize := normalizeErpInventoryPage(req.Page, req.PageSize, 20, 100)
-	query, err := s.applyPurchaseOrderFilters(s.basePurchaseOrderQuery(database.DB), req)
+	query := permission.Apply(s.basePurchaseOrderQuery(database.DB), "erp_purchase_order.creator_id")
+	query, err := s.applyPurchaseOrderFilters(query, req)
 	if err != nil {
 		return nil, err
 	}
@@ -136,19 +138,20 @@ func (s *ErpPurchaseOrderService) GetPurchaseOrderList(req models.ErpPurchaseOrd
 	return &utils.PaginationResponse{Items: erpPurchaseOrderRowsToResponses(rows), Total: total}, nil
 }
 
-func (s *ErpPurchaseOrderService) GetPurchaseOrderDetail(purchaseOrderID string) (*models.ErpPurchaseOrderResponse, error) {
+func (s *ErpPurchaseOrderService) GetPurchaseOrderDetail(purchaseOrderID string, permission datapermission.Permission) (*models.ErpPurchaseOrderResponse, error) {
 	if err := validateErpPurchaseOrderUUID(purchaseOrderID, "采购单ID"); err != nil {
 		return nil, err
 	}
-	return s.getPurchaseOrderDetail(database.DB, strings.TrimSpace(purchaseOrderID))
+	return s.getPurchaseOrderDetail(database.DB, strings.TrimSpace(purchaseOrderID), permission)
 }
 
-func (s *ErpPurchaseOrderService) GetPurchaseOrderLogs(purchaseOrderID string) ([]models.ErpPurchaseOrderLogResponse, error) {
+func (s *ErpPurchaseOrderService) GetPurchaseOrderLogs(purchaseOrderID string, permission datapermission.Permission) ([]models.ErpPurchaseOrderLogResponse, error) {
 	if err := validateErpPurchaseOrderUUID(purchaseOrderID, "采购单ID"); err != nil {
 		return nil, err
 	}
 	var count int64
-	if err := database.DB.Model(&models.ErpPurchaseOrder{}).Where("purchase_order_id = ?", strings.TrimSpace(purchaseOrderID)).Count(&count).Error; err != nil {
+	parentQuery := database.DB.Model(&models.ErpPurchaseOrder{}).Where("purchase_order_id = ?", strings.TrimSpace(purchaseOrderID))
+	if err := permission.Apply(parentQuery, "erp_purchase_order.creator_id").Count(&count).Error; err != nil {
 		return nil, err
 	}
 	if count == 0 {
@@ -212,10 +215,11 @@ func (s *ErpPurchaseOrderService) CreatePurchaseOrder(req models.SaveErpPurchase
 	}); err != nil {
 		return nil, err
 	}
-	return s.GetPurchaseOrderDetail(purchaseOrderID)
+	// 返回本次已成功创建的记录，不改变后续独立查询的数据范围。
+	return s.getPurchaseOrderDetail(database.DB, purchaseOrderID, datapermission.Permission{All: true})
 }
 
-func (s *ErpPurchaseOrderService) UpdatePurchaseOrder(purchaseOrderID string, req models.SaveErpPurchaseOrderRequest, operatorID string) (*models.ErpPurchaseOrderResponse, error) {
+func (s *ErpPurchaseOrderService) UpdatePurchaseOrder(purchaseOrderID string, req models.SaveErpPurchaseOrderRequest, operatorID string, permission datapermission.Permission) (*models.ErpPurchaseOrderResponse, error) {
 	if err := validateErpPurchaseOrderUUID(purchaseOrderID, "采购单ID"); err != nil {
 		return nil, err
 	}
@@ -226,7 +230,8 @@ func (s *ErpPurchaseOrderService) UpdatePurchaseOrder(purchaseOrderID string, re
 	purchaseOrderID = strings.TrimSpace(purchaseOrderID)
 	if err := database.DB.Transaction(func(tx *gorm.DB) error {
 		var order models.ErpPurchaseOrder
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("purchase_order_id = ?", purchaseOrderID).First(&order).Error; err != nil {
+		query := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Model(&models.ErpPurchaseOrder{}).Where("purchase_order_id = ?", purchaseOrderID)
+		if err := permission.Apply(query, "erp_purchase_order.creator_id").First(&order).Error; err != nil {
 			return erpPurchaseOrderRecordError(err)
 		}
 		if order.Status != models.ErpPurchaseOrderStatusDraft {
@@ -260,22 +265,22 @@ func (s *ErpPurchaseOrderService) UpdatePurchaseOrder(purchaseOrderID string, re
 	}); err != nil {
 		return nil, err
 	}
-	return s.GetPurchaseOrderDetail(purchaseOrderID)
+	return s.GetPurchaseOrderDetail(purchaseOrderID, permission)
 }
 
-func (s *ErpPurchaseOrderService) ConfirmPurchaseOrder(purchaseOrderID, operatorID string) (*models.ErpPurchaseOrderResponse, error) {
-	return s.changePurchaseOrderStatus(purchaseOrderID, operatorID, "", models.ErpPurchaseOrderLogActionConfirm)
+func (s *ErpPurchaseOrderService) ConfirmPurchaseOrder(purchaseOrderID, operatorID string, permission datapermission.Permission) (*models.ErpPurchaseOrderResponse, error) {
+	return s.changePurchaseOrderStatus(purchaseOrderID, operatorID, "", models.ErpPurchaseOrderLogActionConfirm, permission)
 }
 
-func (s *ErpPurchaseOrderService) CancelPurchaseOrder(purchaseOrderID, operatorID, reason string) (*models.ErpPurchaseOrderResponse, error) {
-	return s.changePurchaseOrderStatus(purchaseOrderID, operatorID, reason, models.ErpPurchaseOrderLogActionCancel)
+func (s *ErpPurchaseOrderService) CancelPurchaseOrder(purchaseOrderID, operatorID, reason string, permission datapermission.Permission) (*models.ErpPurchaseOrderResponse, error) {
+	return s.changePurchaseOrderStatus(purchaseOrderID, operatorID, reason, models.ErpPurchaseOrderLogActionCancel, permission)
 }
 
-func (s *ErpPurchaseOrderService) ClosePurchaseOrder(purchaseOrderID, operatorID, reason string) (*models.ErpPurchaseOrderResponse, error) {
-	return s.changePurchaseOrderStatus(purchaseOrderID, operatorID, reason, models.ErpPurchaseOrderLogActionClose)
+func (s *ErpPurchaseOrderService) ClosePurchaseOrder(purchaseOrderID, operatorID, reason string, permission datapermission.Permission) (*models.ErpPurchaseOrderResponse, error) {
+	return s.changePurchaseOrderStatus(purchaseOrderID, operatorID, reason, models.ErpPurchaseOrderLogActionClose, permission)
 }
 
-func (s *ErpPurchaseOrderService) changePurchaseOrderStatus(purchaseOrderID, operatorID, reason, action string) (*models.ErpPurchaseOrderResponse, error) {
+func (s *ErpPurchaseOrderService) changePurchaseOrderStatus(purchaseOrderID, operatorID, reason, action string, permission datapermission.Permission) (*models.ErpPurchaseOrderResponse, error) {
 	if err := validateErpPurchaseOrderUUID(purchaseOrderID, "采购单ID"); err != nil {
 		return nil, err
 	}
@@ -291,7 +296,8 @@ func (s *ErpPurchaseOrderService) changePurchaseOrderStatus(purchaseOrderID, ope
 	}
 	if err := database.DB.Transaction(func(tx *gorm.DB) error {
 		var order models.ErpPurchaseOrder
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("purchase_order_id = ?", purchaseOrderID).First(&order).Error; err != nil {
+		query := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Model(&models.ErpPurchaseOrder{}).Where("purchase_order_id = ?", purchaseOrderID)
+		if err := permission.Apply(query, "erp_purchase_order.creator_id").First(&order).Error; err != nil {
 			return erpPurchaseOrderRecordError(err)
 		}
 		fromStatus := order.Status
@@ -332,7 +338,7 @@ func (s *ErpPurchaseOrderService) changePurchaseOrderStatus(purchaseOrderID, ope
 	}); err != nil {
 		return nil, err
 	}
-	return s.GetPurchaseOrderDetail(purchaseOrderID)
+	return s.GetPurchaseOrderDetail(purchaseOrderID, permission)
 }
 
 func (s *ErpPurchaseOrderService) basePurchaseOrderQuery(db *gorm.DB) *gorm.DB {
@@ -379,9 +385,10 @@ func (s *ErpPurchaseOrderService) applyPurchaseOrderFilters(query *gorm.DB, req 
 	return query, nil
 }
 
-func (s *ErpPurchaseOrderService) getPurchaseOrderDetail(db *gorm.DB, purchaseOrderID string) (*models.ErpPurchaseOrderResponse, error) {
+func (s *ErpPurchaseOrderService) getPurchaseOrderDetail(db *gorm.DB, purchaseOrderID string, permission datapermission.Permission) (*models.ErpPurchaseOrderResponse, error) {
 	var row erpPurchaseOrderListRow
-	if err := s.basePurchaseOrderQuery(db).Select(erpPurchaseOrderSelectFields()).Where("erp_purchase_order.purchase_order_id = ?", purchaseOrderID).First(&row).Error; err != nil {
+	query := s.basePurchaseOrderQuery(db).Where("erp_purchase_order.purchase_order_id = ?", purchaseOrderID)
+	if err := permission.Apply(query, "erp_purchase_order.creator_id").Select(erpPurchaseOrderSelectFields()).First(&row).Error; err != nil {
 		return nil, erpPurchaseOrderRecordError(err)
 	}
 	var itemRows []erpPurchaseOrderItemRow

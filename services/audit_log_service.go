@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
@@ -74,11 +75,12 @@ func (s *AuditLogService) RecordLogin(entry models.LoginLogEntry) error {
 	return database.DB.Create(&row).Error
 }
 
-func (s *AuditLogService) GetOperationLogs(req models.AuditLogListRequest) (*utils.PageResult, error) {
+func (s *AuditLogService) GetOperationLogs(req models.AuditLogListRequest, permission datapermission.Permission) (*utils.PageResult, error) {
 	query, err := applyCommonAuditFilters(database.DB.Model(&models.SysOperationLog{}), req)
 	if err != nil {
 		return nil, err
 	}
+	query = permission.Apply(query, "sys_operation_log.user_id")
 	if req.RequestURL != "" {
 		query = query.Where("request_url LIKE ?", "%"+req.RequestURL+"%")
 	}
@@ -106,9 +108,10 @@ func (s *AuditLogService) GetOperationLogs(req models.AuditLogListRequest) (*uti
 	return result, nil
 }
 
-func (s *AuditLogService) GetOperationLog(logID string) (*models.OperationLogDetailResponse, error) {
+func (s *AuditLogService) GetOperationLog(logID string, permission datapermission.Permission) (*models.OperationLogDetailResponse, error) {
 	var row models.SysOperationLog
-	if err := database.DB.Where("log_id = ?", logID).First(&row).Error; err != nil {
+	query := database.DB.Model(&models.SysOperationLog{}).Where("log_id = ?", logID)
+	if err := permission.Apply(query, "sys_operation_log.user_id").First(&row).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrAuditLogNotFound
 		}
@@ -123,11 +126,12 @@ func (s *AuditLogService) GetOperationLog(logID string) (*models.OperationLogDet
 	}, nil
 }
 
-func (s *AuditLogService) GetLoginLogs(req models.AuditLogListRequest) (*utils.PageResult, error) {
+func (s *AuditLogService) GetLoginLogs(req models.AuditLogListRequest, permission datapermission.Permission) (*utils.PageResult, error) {
 	query, err := applyCommonAuditFilters(database.DB.Model(&models.SysLoginLog{}), req)
 	if err != nil {
 		return nil, err
 	}
+	query = permission.Apply(query, "sys_login_log.user_id")
 	if req.EventType != "" {
 		if req.EventType != models.LoginLogTypeLogin && req.EventType != models.LoginLogTypeLogout {
 			return nil, fmt.Errorf("%w: 登录类型不正确", ErrAuditLogInvalidInput)
@@ -158,9 +162,10 @@ func (s *AuditLogService) GetLoginLogs(req models.AuditLogListRequest) (*utils.P
 	return result, nil
 }
 
-func (s *AuditLogService) GetLoginLog(logID string) (*models.LoginLogDetailResponse, error) {
+func (s *AuditLogService) GetLoginLog(logID string, permission datapermission.Permission) (*models.LoginLogDetailResponse, error) {
 	var row models.SysLoginLog
-	if err := database.DB.Where("log_id = ?", logID).First(&row).Error; err != nil {
+	query := database.DB.Model(&models.SysLoginLog{}).Where("log_id = ?", logID)
+	if err := permission.Apply(query, "sys_login_log.user_id").First(&row).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrAuditLogNotFound
 		}

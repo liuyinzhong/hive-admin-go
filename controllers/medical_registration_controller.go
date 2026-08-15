@@ -7,12 +7,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/services"
 )
 
 // GetRegistrationList 分页查询挂号单。
 // @Summary 获取挂号单列表
+// @Description 按挂号单创建人及当前角色数据范围分页查询；患者敏感字段权限另行叠加
 // @Tags 医疗管理/挂号管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -39,7 +41,7 @@ func (ctrl *MedicalController) GetRegistrationList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.registrationService.GetRegistrationList(req, ctrl.hasPatientSensitivePermissionValue(c))
+	result, err := ctrl.registrationService.GetRegistrationList(req, ctrl.hasPatientSensitivePermissionValue(c), currentDataPermission(c))
 	if err != nil {
 		writeRegistrationError(c, err)
 		return
@@ -49,6 +51,7 @@ func (ctrl *MedicalController) GetRegistrationList(c *gin.Context) {
 
 // CreateRegistration 创建挂号单。
 // @Summary 创建挂号单
+// @Description 患者和实际排班必须处于当前数据范围；新挂号单以当前用户作为归属人
 // @Tags 医疗管理/挂号管理
 // @Accept json
 // @Produce json
@@ -66,7 +69,7 @@ func (ctrl *MedicalController) CreateRegistration(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.registrationService.CreateRegistration(req, medicalOperatorID(c), ctrl.hasPatientSensitivePermissionValue(c))
+	result, err := ctrl.registrationService.CreateRegistration(req, medicalOperatorID(c), ctrl.hasPatientSensitivePermissionValue(c), currentDataPermission(c))
 	if err != nil {
 		writeRegistrationError(c, err)
 		return
@@ -76,6 +79,7 @@ func (ctrl *MedicalController) CreateRegistration(c *gin.Context) {
 
 // GetRegistrationDetail 获取挂号单详情及生命周期。
 // @Summary 获取挂号单详情
+// @Description 按挂号单创建人及当前角色数据范围获取详情和生命周期；患者敏感字段权限另行叠加
 // @Tags 医疗管理/挂号管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -87,7 +91,7 @@ func (ctrl *MedicalController) CreateRegistration(c *gin.Context) {
 // @Failure 500 {object} models.Response
 // @Router /medical/registrations/{registrationId} [get]
 func (ctrl *MedicalController) GetRegistrationDetail(c *gin.Context) {
-	result, err := ctrl.registrationService.GetRegistrationDetail(c.Param("registrationId"), ctrl.hasPatientSensitivePermissionValue(c))
+	result, err := ctrl.registrationService.GetRegistrationDetail(c.Param("registrationId"), ctrl.hasPatientSensitivePermissionValue(c), currentDataPermission(c))
 	if err != nil {
 		writeRegistrationError(c, err)
 		return
@@ -97,6 +101,7 @@ func (ctrl *MedicalController) GetRegistrationDetail(c *gin.Context) {
 
 // ConfirmRegistrationPayment 确认支付。
 // @Summary 确认挂号单支付
+// @Description 按挂号单创建人及当前角色数据范围确认支付
 // @Tags 医疗管理/挂号管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -114,6 +119,7 @@ func (ctrl *MedicalController) ConfirmRegistrationPayment(c *gin.Context) {
 
 // CancelRegistration 取消待支付挂号单。
 // @Summary 取消挂号单
+// @Description 按挂号单创建人及当前角色数据范围取消待支付挂号单
 // @Tags 医疗管理/挂号管理
 // @Accept json
 // @Produce json
@@ -133,6 +139,7 @@ func (ctrl *MedicalController) CancelRegistration(c *gin.Context) {
 
 // CheckInRegistration 签到。
 // @Summary 挂号单签到
+// @Description 按挂号单创建人及当前角色数据范围签到
 // @Tags 医疗管理/挂号管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -150,6 +157,7 @@ func (ctrl *MedicalController) CheckInRegistration(c *gin.Context) {
 
 // MarkRegistrationNoShow 标记爽约。
 // @Summary 标记挂号单爽约
+// @Description 按挂号单创建人及当前角色数据范围标记爽约
 // @Tags 医疗管理/挂号管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -167,6 +175,7 @@ func (ctrl *MedicalController) MarkRegistrationNoShow(c *gin.Context) {
 
 // StartRegistrationRefund 发起全额退款。
 // @Summary 发起挂号单退款
+// @Description 按挂号单创建人及当前角色数据范围发起全额退款
 // @Tags 医疗管理/挂号管理
 // @Accept json
 // @Produce json
@@ -186,6 +195,7 @@ func (ctrl *MedicalController) StartRegistrationRefund(c *gin.Context) {
 
 // ProcessRegistrationRefund 标记退款中。
 // @Summary 推进挂号单退款中
+// @Description 按挂号单创建人及当前角色数据范围标记退款处理中
 // @Tags 医疗管理/挂号管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -203,6 +213,7 @@ func (ctrl *MedicalController) ProcessRegistrationRefund(c *gin.Context) {
 
 // CompleteRegistrationRefund 完成退款并释放号源。
 // @Summary 完成挂号单退款
+// @Description 按挂号单创建人及当前角色数据范围完成退款并释放号源
 // @Tags 医疗管理/挂号管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -218,11 +229,11 @@ func (ctrl *MedicalController) CompleteRegistrationRefund(c *gin.Context) {
 	ctrl.registrationAction(c, ctrl.registrationService.CompleteRefund)
 }
 
-type registrationActionFunc func(string, string, bool) (*models.RegistrationResponse, error)
-type registrationReasonActionFunc func(string, string, string, bool) (*models.RegistrationResponse, error)
+type registrationActionFunc func(string, string, bool, datapermission.Permission) (*models.RegistrationResponse, error)
+type registrationReasonActionFunc func(string, string, string, bool, datapermission.Permission) (*models.RegistrationResponse, error)
 
 func (ctrl *MedicalController) registrationAction(c *gin.Context, action registrationActionFunc) {
-	result, err := action(c.Param("registrationId"), medicalOperatorID(c), ctrl.hasPatientSensitivePermissionValue(c))
+	result, err := action(c.Param("registrationId"), medicalOperatorID(c), ctrl.hasPatientSensitivePermissionValue(c), currentDataPermission(c))
 	if err != nil {
 		writeRegistrationError(c, err)
 		return
@@ -236,7 +247,7 @@ func (ctrl *MedicalController) registrationReasonAction(c *gin.Context, action r
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := action(c.Param("registrationId"), medicalOperatorID(c), req.Reason, ctrl.hasPatientSensitivePermissionValue(c))
+	result, err := action(c.Param("registrationId"), medicalOperatorID(c), req.Reason, ctrl.hasPatientSensitivePermissionValue(c), currentDataPermission(c))
 	if err != nil {
 		writeRegistrationError(c, err)
 		return

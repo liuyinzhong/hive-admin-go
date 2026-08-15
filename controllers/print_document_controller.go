@@ -25,7 +25,7 @@ func NewPrintDocumentController() *PrintDocumentController {
 
 // GetPurchaseInboundPrintDocument 获取采购入库单打印数据和当前已发布模板
 // @Summary 获取采购入库单打印数据
-// @Description 返回统一打印数据协议和当前已发布模板；动态字段使用当前业务关联数据，不保存打印快照
+// @Description 校验采购入库单当前数据范围后，返回统一打印数据协议和已发布模板；动态字段不保存打印快照
 // @Tags 打印管理/打印数据
 // @Produce json
 // @Security ApiKeyAuth
@@ -44,7 +44,7 @@ func (ctrl *PrintDocumentController) GetPurchaseInboundPrintDocument(c *gin.Cont
 		writePrintDocumentError(c, err)
 		return
 	}
-	data, err := ctrl.printDocumentService.GetPrintDocument(models.PrintDocumentTypePurchaseInbound, c.Param("inboundId"))
+	data, err := ctrl.printDocumentService.GetPrintDocument(models.PrintDocumentTypePurchaseInbound, c.Param("inboundId"), currentDataPermission(c))
 	if err != nil {
 		writePrintDocumentError(c, err)
 		return
@@ -57,7 +57,7 @@ func (ctrl *PrintDocumentController) GetPurchaseInboundPrintDocument(c *gin.Cont
 
 // GetPurchaseInboundPrintData 获取采购入库单打印预览数据
 // @Summary 获取采购入库单打印预览数据
-// @Description 仅返回真实业务单据的统一打印数据，不要求已有已发布模板，供模板设计器实时预览使用
+// @Description 校验采购入库单当前数据范围后返回真实业务单据的统一打印数据，供模板设计器实时预览
 // @Tags 打印管理/打印数据
 // @Produce json
 // @Security ApiKeyAuth
@@ -70,7 +70,7 @@ func (ctrl *PrintDocumentController) GetPurchaseInboundPrintDocument(c *gin.Cont
 // @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /printDocuments/purchaseInbound/{inboundId}/data [get]
 func (ctrl *PrintDocumentController) GetPurchaseInboundPrintData(c *gin.Context) {
-	data, err := ctrl.printDocumentService.GetPrintDocument(models.PrintDocumentTypePurchaseInbound, c.Param("inboundId"))
+	data, err := ctrl.printDocumentService.GetPrintDocument(models.PrintDocumentTypePurchaseInbound, c.Param("inboundId"), currentDataPermission(c))
 	if err != nil {
 		writePrintDocumentError(c, err)
 		return

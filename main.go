@@ -26,7 +26,7 @@ import (
 
 // @title Hive Admin API
 // @version 1.0
-// @description Hive Admin Go 后端 API 接口文档
+// @description Hive Admin Go 后端 API 接口文档。受认证业务接口依次执行原子接口权限与数据权限；具体记录范围以角色 dataScope、当前用户部门和领域归属为准。
 // @host localhost:9191
 // @BasePath /api
 // @schemes http https

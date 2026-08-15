@@ -34,7 +34,7 @@
 
 ### SYS-MSG-007 Demo 消息受目标限制
 
-Demo 接口每次可为一个或多个目标用户各创建 1 至 1000 条固定标题和内容的测试消息。目标菜单必须启用、未删除、属于页面类型且没有非按钮子菜单；目标用户必须启用、未删除且不能是系统用户。重复用户 ID 会去重，整批创建在一个事务中完成。
+Demo 接口每次可为一个或多个目标用户各创建 1 至 1000 条固定标题和内容的测试消息。目标菜单必须启用、未删除、属于页面类型且没有非按钮子菜单；目标用户必须启用、未删除、不能是系统用户，并且全部处于操作者当前角色数据范围内。重复用户 ID 会去重，任一目标越界时整批失败，整批创建在一个事务中完成。
 
 ### SYS-MSG-008 下载终态生成持久化菜单消息
 
@@ -51,7 +51,7 @@ Demo 接口每次可为一个或多个目标用户各创建 1 至 1000 条固定
 | `GET /api/system/messages/unreadSummary` | 当前用户未读汇总 | 登录即可，只返回本人 |
 | `GET /api/system/messages/stream` | 当前用户 SSE | 登录即可，只订阅本人 |
 | `POST /api/system/messages/read` | 当前用户某菜单全部已读 | 登录即可，只更新本人 |
-| `POST /api/system/messages/demo` | 批量创建测试消息 | `system:messageDemo:create` |
+| `POST /api/system/messages/demo` | 批量创建测试消息 | `system:messageDemo:create`，目标用户受数据范围约束 |
 
 `CreateMenuMessageForMenuName` 是后端内部能力，不是外部 HTTP 接口。
 
@@ -63,4 +63,3 @@ Demo 接口每次可为一个或多个目标用户各创建 1 至 1000 条固定
 - Router：`router/router.go` 中 `/api/system/messages`。
 - 前端 Store：`hive/apps/web-antdv-next/src/store/menu-message.ts`。
 - 前端 Demo：`hive/apps/web-antdv-next/src/views/system/message/demo.vue`。
-

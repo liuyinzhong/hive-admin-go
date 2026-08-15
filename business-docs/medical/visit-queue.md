@@ -53,6 +53,8 @@
 
 队列项中的患者编号、挂号单号和号源时段来自挂号单快照。患者姓名和手机号必须由服务端无条件脱敏，即使调用方拥有 `medical:patient:viewSensitive` 或系统管理员权限也不返回完整值。候诊队列接口只读，不提供详情跳转或任何状态操作。
 
+候诊队列不按候诊记录创建人单独授权，而是先验证父实际排班处于当前角色数据范围，再返回该排班全部队列项。医生工作台内的队列操作继续按当前排班医生领域归属校验，不因角色范围为 `all` 而跳过。
+
 ## 本期不包含
 
 - 候诊序号调整、插队和优先级；
@@ -62,14 +64,12 @@
 ## 迁移、兼容性与回滚
 
 - 本次只新增 `med_visit_queue`，不修改已有挂号、排班和挂号日志表。
-- 发布时必须先执行 `migrations/20260810_create_med_visit_queue.sql`，确认建表成功后再发布后端代码；否则挂号详情和签到动作查询候诊表时会失败。
 - 不提供历史候诊记录补录或修复脚本，系统按新建候诊表后的规则运行。
 - 回滚时先停止新签到流量并恢复不读取候诊表的旧版后端。只有确认新增候诊数据可以丢弃后，才由实施人员手动执行 `DROP TABLE med_visit_queue`；删除表会永久丢失迁移后的签到序号和叫号次数。
 - 完成接诊只允许通过正式门诊病历完成接口执行，要求候诊记录处于 `20（接诊中）`。
 
 ## 实现入口
 
-- 数据库脚本：`migrations/20260810_create_med_visit_queue.sql`。
 - Model：`models/medical_registration.go`。
 - Service：`services/medical_registration_service.go`。
 - 前端 API：`hive/apps/web-antdv-next/src/api/medical/registration.ts`、`schedule.ts`。

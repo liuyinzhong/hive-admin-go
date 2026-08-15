@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm/clause"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
@@ -32,9 +33,10 @@ func NewErpPurchaseInboundService() *ErpPurchaseInboundService {
 	}
 }
 
-func (s *ErpPurchaseInboundService) GetPurchaseInboundList(req models.ErpPurchaseInboundListRequest) (*utils.PaginationResponse, error) {
+func (s *ErpPurchaseInboundService) GetPurchaseInboundList(req models.ErpPurchaseInboundListRequest, permission datapermission.Permission) (*utils.PaginationResponse, error) {
 	page, pageSize := normalizeErpInventoryPage(req.Page, req.PageSize, 20, 100)
-	query, err := s.applyPurchaseInboundFilters(s.basePurchaseInboundQuery(database.DB), req)
+	query := permission.Apply(s.basePurchaseInboundQuery(database.DB), "erp_purchase_inbound.creator_id")
+	query, err := s.applyPurchaseInboundFilters(query, req)
 	if err != nil {
 		return nil, err
 	}
@@ -72,14 +74,14 @@ func (s *ErpPurchaseInboundService) GetPurchaseInboundList(req models.ErpPurchas
 	}, nil
 }
 
-func (s *ErpPurchaseInboundService) GetPurchaseInboundDetail(inboundID string) (*models.ErpPurchaseInboundResponse, error) {
+func (s *ErpPurchaseInboundService) GetPurchaseInboundDetail(inboundID string, permission datapermission.Permission) (*models.ErpPurchaseInboundResponse, error) {
 	if err := validateErpPurchaseInboundUUID(inboundID, "采购入库单ID"); err != nil {
 		return nil, err
 	}
-	return s.getPurchaseInboundDetail(database.DB, strings.TrimSpace(inboundID))
+	return s.getPurchaseInboundDetail(database.DB, strings.TrimSpace(inboundID), permission)
 }
 
-func (s *ErpPurchaseInboundService) CreatePurchaseInbound(req models.CreateErpPurchaseInboundRequest, operatorID string) (*models.ErpPurchaseInboundResponse, error) {
+func (s *ErpPurchaseInboundService) CreatePurchaseInbound(req models.CreateErpPurchaseInboundRequest, operatorID string, permission datapermission.Permission) (*models.ErpPurchaseInboundResponse, error) {
 	purchaseOrderID := strings.TrimSpace(req.PurchaseOrderID)
 	if err := validateErpPurchaseInboundUUID(purchaseOrderID, "采购单ID"); err != nil {
 		return nil, err
@@ -101,7 +103,8 @@ func (s *ErpPurchaseInboundService) CreatePurchaseInbound(req models.CreateErpPu
 	inboundID := utils.GenerateUUID()
 	if err := database.DB.Transaction(func(tx *gorm.DB) error {
 		var purchaseOrder models.ErpPurchaseOrder
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("purchase_order_id = ?", purchaseOrderID).First(&purchaseOrder).Error; err != nil {
+		query := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Model(&models.ErpPurchaseOrder{}).Where("purchase_order_id = ?", purchaseOrderID)
+		if err := permission.Apply(query, "erp_purchase_order.creator_id").First(&purchaseOrder).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return fmt.Errorf("%w: 采购单不存在", ErrErpPurchaseInboundNotFound)
 			}
@@ -199,7 +202,7 @@ func (s *ErpPurchaseInboundService) CreatePurchaseInbound(req models.CreateErpPu
 				SourceBillID:   &sourceBillID,
 				SourceBillNo:   inboundNo,
 				MovementType:   models.InventoryMovementTypePurchaseIn,
-			}, operatorID); err != nil {
+			}, operatorID, permission); err != nil {
 				return err
 			}
 		}
@@ -241,7 +244,8 @@ func (s *ErpPurchaseInboundService) CreatePurchaseInbound(req models.CreateErpPu
 		return nil, err
 	}
 
-	return s.GetPurchaseInboundDetail(inboundID)
+	// 返回本次已成功创建的记录，不改变后续独立查询的数据范围。
+	return s.getPurchaseInboundDetail(database.DB, inboundID, datapermission.Permission{All: true})
 }
 
 type normalizedErpPurchaseInboundItem struct {
@@ -348,9 +352,10 @@ func (s *ErpPurchaseInboundService) applyPurchaseInboundFilters(query *gorm.DB, 
 	return query, nil
 }
 
-func (s *ErpPurchaseInboundService) getPurchaseInboundDetail(db *gorm.DB, inboundID string) (*models.ErpPurchaseInboundResponse, error) {
+func (s *ErpPurchaseInboundService) getPurchaseInboundDetail(db *gorm.DB, inboundID string, permission datapermission.Permission) (*models.ErpPurchaseInboundResponse, error) {
 	var inbound erpPurchaseInboundDetailQueryRow
-	if err := s.basePurchaseInboundQuery(db).
+	query := permission.Apply(s.basePurchaseInboundQuery(db), "erp_purchase_inbound.creator_id")
+	if err := query.
 		Select(erpPurchaseInboundDetailSelectFields()).
 		Where("erp_purchase_inbound.inbound_id = ?", inboundID).
 		First(&inbound).Error; err != nil {

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
@@ -138,8 +139,9 @@ func (s *FileService) UploadFile(fileHeader *multipart.FileHeader, creatorID str
 	return buildFileResponse(file, creatorName), nil
 }
 
-func (s *FileService) GetFileList(req models.FileListRequest) (*utils.PageResult, error) {
+func (s *FileService) GetFileList(req models.FileListRequest, permission datapermission.Permission) (*utils.PageResult, error) {
 	db := database.DB.Model(&models.SysFile{})
+	db = permission.Apply(db, "sys_file.creator_id")
 
 	if req.OriginalName != "" {
 		db = db.Where("original_name LIKE ?", "%"+req.OriginalName+"%")

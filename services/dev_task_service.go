@@ -8,12 +8,13 @@ import (
 	"gorm.io/gorm"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
 
-func GetTasks(page, pageSize int, params map[string]interface{}) (*utils.PaginationResponse, error) {
-	db := buildDevTaskQuery(params)
+func GetTasks(page, pageSize int, params map[string]interface{}, permission datapermission.Permission) (*utils.PaginationResponse, error) {
+	db := buildDevTaskQuery(params, permission)
 	order := buildDevTaskOrder(params)
 
 	return utils.PaginateWithTransform[models.DevTask](db, page, pageSize, order, func(items []models.DevTask) interface{} {
@@ -21,8 +22,9 @@ func GetTasks(page, pageSize int, params map[string]interface{}) (*utils.Paginat
 	})
 }
 
-func buildDevTaskQuery(params map[string]interface{}) *gorm.DB {
+func buildDevTaskQuery(params map[string]interface{}, permission datapermission.Permission) *gorm.DB {
 	db := database.DB.Model(&models.DevTask{}).Where("dev_task.del_flag = ?", 0)
+	db = permission.Apply(db, "dev_task.creator_id", "dev_task.user_id")
 
 	if taskNum, ok := params["taskNum"].(int); ok && taskNum > 0 {
 		db = db.Where("dev_task.task_num = ?", taskNum)
@@ -60,8 +62,9 @@ func buildDevTaskOrder(params map[string]interface{}) string {
 	return order
 }
 
-func GetAllTasks(params map[string]interface{}) ([]models.TaskResponse, error) {
-	db := database.DB.Model(&models.DevTask{}).Where("del_flag = ?", 0)
+func GetAllTasks(params map[string]interface{}, permission datapermission.Permission) ([]models.TaskResponse, error) {
+	db := database.DB.Model(&models.DevTask{}).Where("dev_task.del_flag = ?", 0)
+	db = permission.Apply(db, "dev_task.creator_id", "dev_task.user_id")
 
 	if taskNum, ok := params["taskNum"].(int); ok && taskNum > 0 {
 		db = db.Where("task_num = ?", taskNum)
@@ -238,9 +241,10 @@ func buildTaskResponses(tasks []models.DevTask) []models.TaskResponse {
 	return responses
 }
 
-func GetTaskByNum(taskNum int) (*models.TaskResponse, error) {
+func GetTaskByNum(taskNum int, permission datapermission.Permission) (*models.TaskResponse, error) {
 	var task models.DevTask
-	err := database.DB.Where("task_num = ? AND del_flag = ?", taskNum, 0).First(&task).Error
+	query := database.DB.Model(&models.DevTask{}).Where("task_num = ? AND del_flag = ?", taskNum, 0)
+	err := permission.Apply(query, "dev_task.creator_id", "dev_task.user_id").First(&task).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("任务不存在")
@@ -251,9 +255,10 @@ func GetTaskByNum(taskNum int) (*models.TaskResponse, error) {
 	return buildSingleTaskResponse(&task), nil
 }
 
-func GetTasksByStoryId(storyId string) ([]models.TaskResponse, error) {
+func GetTasksByStoryId(storyId string, permission datapermission.Permission) ([]models.TaskResponse, error) {
 	var tasks []models.DevTask
-	err := database.DB.Where("story_id = ? AND del_flag = ?", storyId, 0).Find(&tasks).Error
+	query := database.DB.Model(&models.DevTask{}).Where("story_id = ? AND del_flag = ?", storyId, 0)
+	err := permission.Apply(query, "dev_task.creator_id", "dev_task.user_id").Find(&tasks).Error
 	if err != nil {
 		return nil, err
 	}
@@ -353,7 +358,24 @@ func buildSingleTaskResponse(task *models.DevTask) *models.TaskResponse {
 	}
 }
 
-func CreateTask(req *models.CreateTaskRequest, creatorID string) error {
+func CreateTask(req *models.CreateTaskRequest, creatorID string, permission datapermission.Permission) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		return createTaskTx(tx, req, creatorID, permission)
+	})
+}
+
+func createTaskTx(tx *gorm.DB, req *models.CreateTaskRequest, creatorID string, permission datapermission.Permission) error {
+	assigneeID, err := validateRequiredDataPermissionUser(tx, req.UserID, "负责人", permission)
+	if err != nil {
+		return err
+	}
+	if err := validateDevVersionReference(tx, req.VersionID, permission); err != nil {
+		return err
+	}
+	if err := validateDevStoryReference(tx, req.StoryID, permission); err != nil {
+		return err
+	}
+
 	startDate, err := time.ParseInLocation("2006-01-02 15:04:05", *req.StartDate, time.Local)
 	if err != nil {
 		return fmt.Errorf("开始时间格式错误")
@@ -389,7 +411,7 @@ func CreateTask(req *models.CreateTaskRequest, creatorID string) error {
 		VersionID:    req.VersionID,
 		ModuleID:     req.ModuleID,
 		StoryID:      req.StoryID,
-		UserID:       req.UserID,
+		UserID:       &assigneeID,
 		EndDate:      &endDate,
 		StartDate:    &startDate,
 		CreatorID:    &creatorID,
@@ -398,31 +420,43 @@ func CreateTask(req *models.CreateTaskRequest, creatorID string) error {
 		DelFlag:      0,
 	}
 
-	err = database.DB.Create(&task).Error
+	err = tx.Create(&task).Error
 	if err != nil {
 		return err
 	}
 
-	return createChangeHistory(creatorID, taskID, 10, 0, "")
+	return createChangeHistoryTx(tx, creatorID, taskID, 10, 0, "")
 }
 
-func CreateTasks(reqs []models.CreateTaskRequest, creatorID string) error {
-	for _, req := range reqs {
-		err := CreateTask(&req, creatorID)
-		if err != nil {
-			return err
+func CreateTasks(reqs []models.CreateTaskRequest, creatorID string, permission datapermission.Permission) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		for index := range reqs {
+			if err := createTaskTx(tx, &reqs[index], creatorID, permission); err != nil {
+				return fmt.Errorf("第%d条任务：%w", index+1, err)
+			}
 		}
-	}
-	return nil
+		return nil
+	})
 }
 
-func UpdateTask(taskID string, req *models.UpdateTaskRequest, creatorID string) error {
+func UpdateTask(taskID string, req *models.UpdateTaskRequest, creatorID string, permission datapermission.Permission) error {
 	var task models.DevTask
-	err := database.DB.Where("task_id = ? AND del_flag = ?", taskID, 0).First(&task).Error
+	query := database.DB.Model(&models.DevTask{}).Where("task_id = ? AND del_flag = ?", taskID, 0)
+	err := permission.Apply(query, "dev_task.creator_id", "dev_task.user_id").First(&task).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("任务不存在")
 		}
+		return err
+	}
+	assigneeID, err := validateRequiredDataPermissionUser(database.DB, req.UserID, "负责人", permission)
+	if err != nil {
+		return err
+	}
+	if err := validateDevVersionReference(database.DB, req.VersionID, permission); err != nil {
+		return err
+	}
+	if err := validateDevStoryReference(database.DB, req.StoryID, permission); err != nil {
 		return err
 	}
 
@@ -448,31 +482,37 @@ func UpdateTask(taskID string, req *models.UpdateTaskRequest, creatorID string) 
 	}
 
 	now := time.Now()
-	err = database.DB.Model(&task).Updates(map[string]interface{}{
-		"task_title":     req.TaskTitle,
-		"task_status":    taskStatus,
-		"task_type":      taskType,
-		"plan_hours":     req.PlanHours,
-		"project_id":     req.ProjectID,
-		"task_rich_text": req.TaskRichText,
-		"version_id":     req.VersionID,
-		"module_id":      req.ModuleID,
-		"story_id":       req.StoryID,
-		"user_id":        req.UserID,
-		"end_date":       endDate,
-		"start_date":     startDate,
-		"update_date":    now,
-	}).Error
-	if err != nil {
-		return err
-	}
-
-	return createChangeHistory(creatorID, taskID, 10, 10, "")
+	return updateDevRecordWithHistory(creatorID, taskID, 10, 10, "", func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevTask{}).Where("task_id = ? AND del_flag = ?", taskID, 0)
+		result := permission.Apply(updateQuery, "dev_task.creator_id", "dev_task.user_id").Updates(map[string]interface{}{
+			"task_title":     req.TaskTitle,
+			"task_status":    taskStatus,
+			"task_type":      taskType,
+			"plan_hours":     req.PlanHours,
+			"project_id":     req.ProjectID,
+			"task_rich_text": req.TaskRichText,
+			"version_id":     req.VersionID,
+			"module_id":      req.ModuleID,
+			"story_id":       req.StoryID,
+			"user_id":        assigneeID,
+			"end_date":       endDate,
+			"start_date":     startDate,
+			"update_date":    now,
+		})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return fmt.Errorf("任务不存在或无权操作")
+		}
+		return nil
+	})
 }
 
-func UpdateTaskField(taskID string, key string, value interface{}, creatorID string) error {
+func UpdateTaskField(taskID string, key string, value interface{}, creatorID string, permission datapermission.Permission) error {
 	var task models.DevTask
-	err := database.DB.Where("task_id = ? AND del_flag = ?", taskID, 0).First(&task).Error
+	query := database.DB.Model(&models.DevTask{}).Where("task_id = ? AND del_flag = ?", taskID, 0)
+	err := permission.Apply(query, "dev_task.creator_id", "dev_task.user_id").First(&task).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("任务不存在")
@@ -491,7 +531,15 @@ func UpdateTaskField(taskID string, key string, value interface{}, creatorID str
 	updateMap := make(map[string]interface{})
 	switch key {
 	case "userId":
-		updateMap["user_id"] = value
+		userID, err := dataPermissionStringValue(value, "负责人ID")
+		if err != nil {
+			return err
+		}
+		validatedID, err := validateRequiredDataPermissionUser(database.DB, &userID, "负责人", permission)
+		if err != nil {
+			return err
+		}
+		updateMap["user_id"] = validatedID
 	case "taskType":
 		updateMap["task_type"] = value
 	case "startDate":
@@ -520,17 +568,23 @@ func UpdateTaskField(taskID string, key string, value interface{}, creatorID str
 
 	updateMap["update_date"] = time.Now()
 
-	err = database.DB.Model(&task).Updates(updateMap).Error
-	if err != nil {
-		return err
-	}
-
-	return createChangeHistory(creatorID, taskID, 10, 10, "")
+	return updateDevRecordWithHistory(creatorID, taskID, 10, 10, "", func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevTask{}).Where("task_id = ? AND del_flag = ?", taskID, 0)
+		result := permission.Apply(updateQuery, "dev_task.creator_id", "dev_task.user_id").Updates(updateMap)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return fmt.Errorf("任务不存在或无权操作")
+		}
+		return nil
+	})
 }
 
-func UpdateTaskNext(taskID string, taskStatus string, changeRichText string, creatorID string) error {
+func UpdateTaskNext(taskID string, taskStatus string, changeRichText string, creatorID string, permission datapermission.Permission) error {
 	var task models.DevTask
-	err := database.DB.Where("task_id = ? AND del_flag = ?", taskID, 0).First(&task).Error
+	query := database.DB.Model(&models.DevTask{}).Where("task_id = ? AND del_flag = ?", taskID, 0)
+	err := permission.Apply(query, "dev_task.creator_id", "dev_task.user_id").First(&task).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("任务不存在")
@@ -544,22 +598,31 @@ func UpdateTaskNext(taskID string, taskStatus string, changeRichText string, cre
 	}
 
 	now := time.Now()
-	err = database.DB.Model(&task).Updates(map[string]interface{}{
-		"task_status": taskStatusInt,
-		"update_date": now,
-	}).Error
+	return updateDevRecordWithHistory(creatorID, taskID, 10, 40, changeRichText, func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevTask{}).Where("task_id = ? AND del_flag = ?", taskID, 0)
+		result := permission.Apply(updateQuery, "dev_task.creator_id", "dev_task.user_id").Updates(map[string]interface{}{
+			"task_status": taskStatusInt,
+			"update_date": now,
+		})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return fmt.Errorf("任务不存在或无权操作")
+		}
+		return nil
+	})
+}
+
+func DeleteTasks(taskIDs []string, creatorID string, permission datapermission.Permission) error {
+	var tasks []models.DevTask
+	query := database.DB.Model(&models.DevTask{}).Where("task_id IN ? AND del_flag = ?", taskIDs, 0)
+	err := permission.Apply(query, "dev_task.creator_id", "dev_task.user_id").Find(&tasks).Error
 	if err != nil {
 		return err
 	}
-
-	return createChangeHistory(creatorID, taskID, 10, 40, changeRichText)
-}
-
-func DeleteTasks(taskIDs []string, creatorID string) error {
-	var tasks []models.DevTask
-	err := database.DB.Where("task_id IN ? AND del_flag = ?", taskIDs, 0).Find(&tasks).Error
-	if err != nil {
-		return err
+	if len(tasks) != len(uniqueNonEmptyStrings(taskIDs)) {
+		return fmt.Errorf("任务不存在或无权操作")
 	}
 
 	for _, t := range tasks {
@@ -568,16 +631,31 @@ func DeleteTasks(taskIDs []string, creatorID string) error {
 		}
 	}
 
-	err = database.DB.Model(&models.DevTask{}).Where("task_id IN ?", taskIDs).Updates(map[string]interface{}{
-		"del_flag":    1,
-		"update_date": time.Now(),
-	}).Error
+	accessibleIDs := make([]string, 0, len(tasks))
+	for _, task := range tasks {
+		accessibleIDs = append(accessibleIDs, task.TaskID)
+	}
+	err = database.DB.Transaction(func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevTask{}).Where("task_id IN ? AND del_flag = ? AND task_status = ?", accessibleIDs, 0, 0)
+		result := permission.Apply(updateQuery, "dev_task.creator_id", "dev_task.user_id").Updates(map[string]interface{}{
+			"del_flag":    1,
+			"update_date": time.Now(),
+		})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != int64(len(accessibleIDs)) {
+			return fmt.Errorf("任务不存在或无权操作")
+		}
+		for _, task := range tasks {
+			if err := createChangeHistoryTx(tx, creatorID, task.TaskID, 10, 20, ""); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		return err
-	}
-
-	for _, t := range tasks {
-		createChangeHistory(creatorID, t.TaskID, 10, 20, "")
 	}
 	return nil
 }

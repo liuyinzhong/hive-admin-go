@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
@@ -30,9 +31,10 @@ func NewErpOtherOutboundService() *ErpOtherOutboundService {
 	}
 }
 
-func (s *ErpOtherOutboundService) GetOtherOutboundList(req models.ErpOtherOutboundListRequest) (*utils.PaginationResponse, error) {
+func (s *ErpOtherOutboundService) GetOtherOutboundList(req models.ErpOtherOutboundListRequest, permission datapermission.Permission) (*utils.PaginationResponse, error) {
 	page, pageSize := normalizeErpInventoryPage(req.Page, req.PageSize, 20, 100)
-	query, err := s.applyOtherOutboundFilters(s.baseOtherOutboundQuery(database.DB), req)
+	query := permission.Apply(s.baseOtherOutboundQuery(database.DB), "erp_other_outbound.creator_id")
+	query, err := s.applyOtherOutboundFilters(query, req)
 	if err != nil {
 		return nil, err
 	}
@@ -68,14 +70,14 @@ func (s *ErpOtherOutboundService) GetOtherOutboundList(req models.ErpOtherOutbou
 	}, nil
 }
 
-func (s *ErpOtherOutboundService) GetOtherOutboundDetail(outboundID string) (*models.ErpOtherOutboundResponse, error) {
+func (s *ErpOtherOutboundService) GetOtherOutboundDetail(outboundID string, permission datapermission.Permission) (*models.ErpOtherOutboundResponse, error) {
 	if err := validateErpOtherOutboundUUID(outboundID, "其它出库单ID"); err != nil {
 		return nil, err
 	}
-	return s.getOtherOutboundDetail(database.DB, strings.TrimSpace(outboundID))
+	return s.getOtherOutboundDetail(database.DB, strings.TrimSpace(outboundID), permission)
 }
 
-func (s *ErpOtherOutboundService) CreateOtherOutbound(req models.CreateErpOtherOutboundRequest, operatorID string) (*models.ErpOtherOutboundResponse, error) {
+func (s *ErpOtherOutboundService) CreateOtherOutbound(req models.CreateErpOtherOutboundRequest, operatorID string, permission datapermission.Permission) (*models.ErpOtherOutboundResponse, error) {
 	warehouseID := strings.TrimSpace(req.WarehouseID)
 	if err := validateErpOtherOutboundUUID(warehouseID, "仓库ID"); err != nil {
 		return nil, err
@@ -125,6 +127,9 @@ func (s *ErpOtherOutboundService) CreateOtherOutbound(req models.CreateErpOtherO
 		})
 		sourceBillID := outboundID
 		for _, item := range processingItems {
+			if err := s.inventoryService.ensureInventoryBalanceAccess(tx, item.BalanceID, permission); err != nil {
+				return fmt.Errorf("第%d行：%w", item.LineNo, err)
+			}
 			itemRow := models.ErpOtherOutboundItem{
 				OutboundItemID: utils.GenerateUUID(),
 				OutboundID:     outboundID,
@@ -152,7 +157,8 @@ func (s *ErpOtherOutboundService) CreateOtherOutbound(req models.CreateErpOtherO
 		return nil, err
 	}
 
-	return s.GetOtherOutboundDetail(outboundID)
+	// 返回本次已成功创建的记录，不改变后续独立查询的数据范围。
+	return s.getOtherOutboundDetail(database.DB, outboundID, datapermission.Permission{All: true})
 }
 
 type normalizedErpOtherOutboundItem struct {
@@ -240,9 +246,10 @@ func (s *ErpOtherOutboundService) applyOtherOutboundFilters(query *gorm.DB, req 
 	return query, nil
 }
 
-func (s *ErpOtherOutboundService) getOtherOutboundDetail(db *gorm.DB, outboundID string) (*models.ErpOtherOutboundResponse, error) {
+func (s *ErpOtherOutboundService) getOtherOutboundDetail(db *gorm.DB, outboundID string, permission datapermission.Permission) (*models.ErpOtherOutboundResponse, error) {
 	var outbound erpOtherOutboundDetailQueryRow
-	if err := s.baseOtherOutboundQuery(db).
+	query := permission.Apply(s.baseOtherOutboundQuery(db), "erp_other_outbound.creator_id")
+	if err := query.
 		Select(erpOtherOutboundDetailSelectFields()).
 		Where("erp_other_outbound.outbound_id = ?", outboundID).
 		First(&outbound).Error; err != nil {

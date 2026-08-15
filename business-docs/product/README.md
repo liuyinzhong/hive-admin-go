@@ -8,7 +8,8 @@
 2. 再读 [产品档案规则](./product-archive.md) 和 [SKU 价格规则](./sku-price.md)。
 3. 涉及页面时继续阅读前端 `hive/business-docs/product`。
 4. 涉及 ERP 时同时阅读 `business-docs/erp`，因为 ERP 直接引用 SKU、包装换算和追溯模式。
-5. 文档与代码不一致时列出差异和影响，不静默选择。
+5. 产品档案和价格按 [系统数据权限分类](../system/data-permission.md) 作为全局主数据，不按创建人切分。
+6. 文档与代码不一致时列出差异和影响，不静默选择。
 
 ## 结构
 
@@ -50,4 +51,3 @@ flowchart LR
 - Controller：`controllers/product_*_controller.go`。
 - 前端页面：`hive/apps/web-antdv-next/src/views/product/spu`。
 - 前端 API：`hive/apps/web-antdv-next/src/api/product`。
-

@@ -13,7 +13,7 @@ import (
 
 // GetStorys 获取需求列表
 // @Summary 获取需求列表
-// @Description 分页获取需求列表
+// @Description 按创建人或参与人及当前角色数据范围分页获取需求
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -64,7 +64,7 @@ func (dc *DevController) GetStorys(c *gin.Context) {
 		"sorts":         c.Query("sorts"),
 	}
 
-	result, err := services.GetStorys(page, pageSize, params)
+	result, err := services.GetStorys(page, pageSize, params, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -74,7 +74,7 @@ func (dc *DevController) GetStorys(c *gin.Context) {
 
 // GetAllStorys 获取所有需求
 // @Summary 获取所有需求
-// @Description 获取所有需求（不分页）
+// @Description 按创建人或参与人及当前角色数据范围获取所有需求（不分页）
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -107,7 +107,7 @@ func (dc *DevController) GetAllStorys(c *gin.Context) {
 		"storyStatus": storyStatus,
 	}
 
-	storys, err := services.GetAllStorys(params)
+	storys, err := services.GetAllStorys(params, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -117,7 +117,7 @@ func (dc *DevController) GetAllStorys(c *gin.Context) {
 
 // GetStory 获取需求详情
 // @Summary 获取需求详情
-// @Description 根据需求编号获取需求详情
+// @Description 按创建人或参与人及当前角色数据范围获取需求详情，关联任务和缺陷继续按各自范围过滤
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -135,7 +135,7 @@ func (dc *DevController) GetStory(c *gin.Context) {
 		return
 	}
 
-	story, err := services.GetStoryByNum(storyNum)
+	story, err := services.GetStoryByNum(storyNum, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -145,7 +145,7 @@ func (dc *DevController) GetStory(c *gin.Context) {
 
 // CreateStory 创建需求
 // @Summary 创建需求
-// @Description 创建新需求
+// @Description 创建新需求；参与人、附件和关联版本必须处于当前数据范围
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -164,7 +164,7 @@ func (dc *DevController) CreateStory(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.CreateStory(&req, creatorID)
+	err := services.CreateStory(&req, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -174,7 +174,7 @@ func (dc *DevController) CreateStory(c *gin.Context) {
 
 // CreateStorys 批量创建需求
 // @Summary 批量创建需求
-// @Description 批量创建需求
+// @Description 批量创建需求；每条记录的参与人、附件和关联版本均须处于当前数据范围
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -193,7 +193,7 @@ func (dc *DevController) CreateStorys(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.CreateStorys(reqs, creatorID)
+	err := services.CreateStorys(reqs, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -203,7 +203,7 @@ func (dc *DevController) CreateStorys(c *gin.Context) {
 
 // UpdateStory 更新需求
 // @Summary 更新需求
-// @Description 更新需求信息
+// @Description 按当前数据范围更新需求；参与人、附件和关联版本不得越界
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -225,7 +225,7 @@ func (dc *DevController) UpdateStory(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.UpdateStory(storyID, &req, creatorID)
+	err := services.UpdateStory(storyID, &req, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -235,7 +235,7 @@ func (dc *DevController) UpdateStory(c *gin.Context) {
 
 // UpdateStoryField 更新需求字段
 // @Summary 更新需求字段
-// @Description 更新需求的单个字段
+// @Description 按当前数据范围更新需求单个字段；修改参与人时校验目标用户范围
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -257,7 +257,7 @@ func (dc *DevController) UpdateStoryField(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.UpdateStoryField(storyID, req.Key, req.Value, creatorID)
+	err := services.UpdateStoryField(storyID, req.Key, req.Value, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -267,7 +267,7 @@ func (dc *DevController) UpdateStoryField(c *gin.Context) {
 
 // UpdateStoryNext 需求流转状态
 // @Summary 需求流转状态
-// @Description 更新需求状态
+// @Description 按当前数据范围更新需求状态
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -289,7 +289,7 @@ func (dc *DevController) UpdateStoryNext(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.UpdateStoryNext(storyID, req.StoryStatus, req.ChangeRichText, creatorID)
+	err := services.UpdateStoryNext(storyID, req.StoryStatus, req.ChangeRichText, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -299,7 +299,7 @@ func (dc *DevController) UpdateStoryNext(c *gin.Context) {
 
 // DeleteStorys 删除需求
 // @Summary 删除需求
-// @Description 批量删除需求
+// @Description 按当前数据范围批量删除需求；任一记录不存在或越界时整批失败
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -318,7 +318,7 @@ func (dc *DevController) DeleteStorys(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.DeleteStorys(ids, creatorID)
+	err := services.DeleteStorys(ids, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return

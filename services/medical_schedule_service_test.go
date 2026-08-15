@@ -121,6 +121,7 @@ func TestScheduleTemplateConflictRequiresWeekdayDateAndTimeOverlap(t *testing.T)
 
 func TestBuildGeneratedSchedulesUsesEverySelectedWeekday(t *testing.T) {
 	startDate := time.Date(2026, 7, 20, 0, 0, 0, 0, medicalBusinessLocation)
+	templateOwnerID := "00000000-0000-0000-0000-000000000003"
 	template := models.MedScheduleTemplate{
 		TemplateID:       scheduleTestUUID,
 		DoctorID:         scheduleTestUUID,
@@ -132,6 +133,7 @@ func TestBuildGeneratedSchedulesUsesEverySelectedWeekday(t *testing.T) {
 		DefaultSlotQuota: 1,
 		EffectiveDate:    startDate,
 		Status:           1,
+		CreatorID:        &templateOwnerID,
 	}
 	relations := map[string]models.MedDoctorDepartment{
 		scheduleDimensionKey(template.DoctorID, template.DepartmentID, template.RegistrationType): {},
@@ -160,6 +162,33 @@ func TestBuildGeneratedSchedulesUsesEverySelectedWeekday(t *testing.T) {
 		if got := schedules[index].ScheduleDate.Format("2006-01-02"); got != want {
 			t.Fatalf("schedule %d date = %s, want %s", index, got, want)
 		}
+		if schedules[index].CreatorID == nil || *schedules[index].CreatorID != templateOwnerID {
+			t.Fatalf("schedule %d creator = %v, want template owner %s", index, schedules[index].CreatorID, templateOwnerID)
+		}
+	}
+}
+
+func TestScheduleGenerationOwnedBy(t *testing.T) {
+	ownerID := "00000000-0000-0000-0000-000000000003"
+	tests := []struct {
+		name       string
+		creatorID  *string
+		operatorID string
+		want       bool
+	}{
+		{name: "same user", creatorID: &ownerID, operatorID: ownerID, want: true},
+		{name: "different user", creatorID: &ownerID, operatorID: scheduleTestUUID, want: false},
+		{name: "automatic request", creatorID: nil, operatorID: "", want: true},
+		{name: "manual cannot reuse automatic key", creatorID: nil, operatorID: ownerID, want: false},
+		{name: "automatic cannot reuse manual key", creatorID: &ownerID, operatorID: "", want: false},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := scheduleGenerationOwnedBy(test.creatorID, test.operatorID); got != test.want {
+				t.Fatalf("scheduleGenerationOwnedBy() = %v, want %v", got, test.want)
+			}
+		})
 	}
 }
 

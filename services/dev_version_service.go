@@ -8,12 +8,14 @@ import (
 	"gorm.io/gorm"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
 
-func GetVersions(page, pageSize int, params map[string]interface{}) (*utils.PaginationResponse, error) {
-	db := database.DB.Model(&models.DevVersion{}).Where("del_flag = ?", 0)
+func GetVersions(page, pageSize int, params map[string]interface{}, permission datapermission.Permission) (*utils.PaginationResponse, error) {
+	db := database.DB.Model(&models.DevVersion{}).Where("dev_version.del_flag = ?", 0)
+	db = permission.Apply(db, "dev_version.creator_id")
 
 	if version, ok := params["version"].(string); ok && version != "" {
 		db = db.Where("version LIKE ?", "%"+version+"%")
@@ -40,8 +42,9 @@ func GetVersions(page, pageSize int, params map[string]interface{}) (*utils.Pagi
 	})
 }
 
-func GetAllVersions(params map[string]interface{}) ([]models.VersionResponse, error) {
-	db := database.DB.Model(&models.DevVersion{}).Where("del_flag = ?", 0)
+func GetAllVersions(params map[string]interface{}, permission datapermission.Permission) ([]models.VersionResponse, error) {
+	db := database.DB.Model(&models.DevVersion{}).Where("dev_version.del_flag = ?", 0)
+	db = permission.Apply(db, "dev_version.creator_id")
 
 	if version, ok := params["version"].(string); ok && version != "" {
 		db = db.Where("version LIKE ?", "%"+version+"%")
@@ -119,9 +122,10 @@ func buildVersionResponses(versions []models.DevVersion) []models.VersionRespons
 	return responses
 }
 
-func GetVersionByID(versionID string) (*models.VersionResponse, error) {
+func GetVersionByID(versionID string, permission datapermission.Permission) (*models.VersionResponse, error) {
 	var version models.DevVersion
-	err := database.DB.Where("version_id = ? AND del_flag = ?", versionID, 0).First(&version).Error
+	query := database.DB.Model(&models.DevVersion{}).Where("version_id = ? AND del_flag = ?", versionID, 0)
+	err := permission.Apply(query, "dev_version.creator_id").First(&version).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("版本不存在")
@@ -164,9 +168,10 @@ func GetVersionByID(versionID string) (*models.VersionResponse, error) {
 	}, nil
 }
 
-func GetLatestVersion(projectID string) (*models.VersionResponse, error) {
+func GetLatestVersion(projectID string, permission datapermission.Permission) (*models.VersionResponse, error) {
 	var versions []models.DevVersion
-	err := database.DB.Where("project_id = ? AND del_flag = ?", projectID, 0).Order("create_date DESC").Find(&versions).Error
+	query := database.DB.Model(&models.DevVersion{}).Where("project_id = ? AND del_flag = ?", projectID, 0)
+	err := permission.Apply(query, "dev_version.creator_id").Order("create_date DESC").Find(&versions).Error
 	if err != nil {
 		return nil, err
 	}
@@ -229,7 +234,11 @@ func GetLatestVersion(projectID string) (*models.VersionResponse, error) {
 
 func CreateVersion(req *models.CreateVersionRequest, creatorID string) error {
 	var count int64
-	database.DB.Model(&models.DevVersion{}).Where("version = ? AND project_id = ? AND del_flag = ?", req.Version, req.ProjectID, 0).Count(&count)
+	if err := database.DB.Model(&models.DevVersion{}).
+		Where("version = ? AND project_id = ? AND del_flag = ?", req.Version, req.ProjectID, 0).
+		Count(&count).Error; err != nil {
+		return err
+	}
 	if count > 0 {
 		return fmt.Errorf("同一项目下版本号已存在")
 	}
@@ -272,17 +281,18 @@ func CreateVersion(req *models.CreateVersionRequest, creatorID string) error {
 		DelFlag:       0,
 	}
 
-	err = database.DB.Create(&version).Error
-	if err != nil {
-		return err
-	}
-
-	return createChangeHistory(creatorID, versionID, 30, 0, "")
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&version).Error; err != nil {
+			return err
+		}
+		return createChangeHistoryTx(tx, creatorID, versionID, 30, 0, "")
+	})
 }
 
-func UpdateVersion(versionID string, req *models.UpdateVersionRequest, creatorID string) error {
+func UpdateVersion(versionID string, req *models.UpdateVersionRequest, creatorID string, permission datapermission.Permission) error {
 	var version models.DevVersion
-	err := database.DB.Where("version_id = ? AND del_flag = ?", versionID, 0).First(&version).Error
+	query := database.DB.Model(&models.DevVersion{}).Where("version_id = ? AND del_flag = ?", versionID, 0)
+	err := permission.Apply(query, "dev_version.creator_id").First(&version).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("版本不存在")
@@ -291,7 +301,11 @@ func UpdateVersion(versionID string, req *models.UpdateVersionRequest, creatorID
 	}
 
 	var count int64
-	database.DB.Model(&models.DevVersion{}).Where("version = ? AND project_id = ? AND version_id != ? AND del_flag = ?", req.Version, req.ProjectID, versionID, 0).Count(&count)
+	if err := database.DB.Model(&models.DevVersion{}).
+		Where("version = ? AND project_id = ? AND version_id != ? AND del_flag = ?", req.Version, req.ProjectID, versionID, 0).
+		Count(&count).Error; err != nil {
+		return err
+	}
 	if count > 0 {
 		return fmt.Errorf("同一项目下版本号已存在")
 	}
@@ -317,26 +331,32 @@ func UpdateVersion(versionID string, req *models.UpdateVersionRequest, creatorID
 	}
 
 	now := time.Now()
-	err = database.DB.Model(&version).Updates(map[string]interface{}{
-		"version":        req.Version,
-		"version_type":   versionType,
-		"release_status": releaseStatus,
-		"project_id":     req.ProjectID,
-		"remark":         req.Remark,
-		"end_date":       endDate,
-		"start_date":     startDate,
-		"update_date":    now,
-	}).Error
-	if err != nil {
-		return err
-	}
-
-	return createChangeHistory(creatorID, versionID, 30, 10, "")
+	return updateDevRecordWithHistory(creatorID, versionID, 30, 10, "", func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevVersion{}).Where("version_id = ? AND del_flag = ?", versionID, 0)
+		result := permission.Apply(updateQuery, "dev_version.creator_id").Updates(map[string]interface{}{
+			"version":        req.Version,
+			"version_type":   versionType,
+			"release_status": releaseStatus,
+			"project_id":     req.ProjectID,
+			"remark":         req.Remark,
+			"end_date":       endDate,
+			"start_date":     startDate,
+			"update_date":    now,
+		})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return fmt.Errorf("版本不存在或无权操作")
+		}
+		return nil
+	})
 }
 
-func UpdateVersionNext(versionID string, releaseStatus string, changeRichText string, creatorID string) error {
+func UpdateVersionNext(versionID string, releaseStatus string, changeRichText string, creatorID string, permission datapermission.Permission) error {
 	var version models.DevVersion
-	err := database.DB.Where("version_id = ? AND del_flag = ?", versionID, 0).First(&version).Error
+	query := database.DB.Model(&models.DevVersion{}).Where("version_id = ? AND del_flag = ?", versionID, 0)
+	err := permission.Apply(query, "dev_version.creator_id").First(&version).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("版本不存在")
@@ -349,19 +369,28 @@ func UpdateVersionNext(versionID string, releaseStatus string, changeRichText st
 		return err
 	}
 
-	err = database.DB.Model(&version).Update("release_status", releaseStatusInt).Error
+	return updateDevRecordWithHistory(creatorID, versionID, 30, 40, changeRichText, func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevVersion{}).Where("version_id = ? AND del_flag = ?", versionID, 0)
+		result := permission.Apply(updateQuery, "dev_version.creator_id").Update("release_status", releaseStatusInt)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return fmt.Errorf("版本不存在或无权操作")
+		}
+		return nil
+	})
+}
+
+func DeleteVersions(versionIDs []string, creatorID string, permission datapermission.Permission) error {
+	var versions []models.DevVersion
+	query := database.DB.Model(&models.DevVersion{}).Where("version_id IN ? AND del_flag = ?", versionIDs, 0)
+	err := permission.Apply(query, "dev_version.creator_id").Find(&versions).Error
 	if err != nil {
 		return err
 	}
-
-	return createChangeHistory(creatorID, versionID, 30, 40, changeRichText)
-}
-
-func DeleteVersions(versionIDs []string, creatorID string) error {
-	var versions []models.DevVersion
-	err := database.DB.Where("version_id IN ? AND del_flag = ?", versionIDs, 0).Find(&versions).Error
-	if err != nil {
-		return err
+	if len(versions) != len(uniqueNonEmptyStrings(versionIDs)) {
+		return fmt.Errorf("版本不存在或无权操作")
 	}
 
 	for _, v := range versions {
@@ -370,16 +399,31 @@ func DeleteVersions(versionIDs []string, creatorID string) error {
 		}
 	}
 
-	err = database.DB.Model(&models.DevVersion{}).Where("version_id IN ?", versionIDs).Updates(map[string]interface{}{
-		"del_flag":    1,
-		"update_date": time.Now(),
-	}).Error
+	accessibleIDs := make([]string, 0, len(versions))
+	for _, version := range versions {
+		accessibleIDs = append(accessibleIDs, version.VersionID)
+	}
+	err = database.DB.Transaction(func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevVersion{}).Where("version_id IN ? AND del_flag = ? AND release_status = ?", accessibleIDs, 0, 0)
+		result := permission.Apply(updateQuery, "dev_version.creator_id").Updates(map[string]interface{}{
+			"del_flag":    1,
+			"update_date": time.Now(),
+		})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != int64(len(accessibleIDs)) {
+			return fmt.Errorf("版本不存在或无权操作")
+		}
+		for _, version := range versions {
+			if err := createChangeHistoryTx(tx, creatorID, version.VersionID, 30, 20, ""); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		return err
-	}
-
-	for _, v := range versions {
-		createChangeHistory(creatorID, v.VersionID, 30, 20, "")
 	}
 	return nil
 }

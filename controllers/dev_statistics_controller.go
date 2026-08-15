@@ -12,7 +12,7 @@ import (
 
 // GetTaskFindDay 统计任务趋势
 // @Summary 统计任务趋势
-// @Description 按小时统计两个日期的任务创建数量，用于任务趋势对比折线图
+// @Description 先按任务创建人或执行人及当前角色数据范围过滤，再按小时统计两个日期的任务创建数量
 // @Tags 统计/开发管理
 // @Accept json
 // @Produce json
@@ -27,7 +27,7 @@ func (dc *DevController) GetTaskFindDay(c *gin.Context) {
 	date1 := c.Query("date1")
 	date2 := c.Query("date2")
 
-	result, err := services.GetTaskFindDay(date1, date2)
+	result, err := services.GetTaskFindDay(date1, date2, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -37,7 +37,7 @@ func (dc *DevController) GetTaskFindDay(c *gin.Context) {
 
 // GetTaskFindYear 统计任务年度工时
 // @Summary 统计任务年度工时
-// @Description 按月统计指定年份的任务实际工时合计，用于工时总量柱状图
+// @Description 先按任务创建人或执行人及当前角色数据范围过滤，再按月统计指定年份的实际工时合计
 // @Tags 统计/开发管理
 // @Accept json
 // @Produce json
@@ -54,7 +54,7 @@ func (dc *DevController) GetTaskFindYear(c *gin.Context) {
 		return
 	}
 
-	result, err := services.GetTaskFindYear(year)
+	result, err := services.GetTaskFindYear(year, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -64,7 +64,7 @@ func (dc *DevController) GetTaskFindYear(c *gin.Context) {
 
 // GetWorkspaceEnum 获取工作空间概览统计
 // @Summary 获取工作空间概览统计
-// @Description 获取需求、任务、缺陷的总数与待处理数量，用于工作台概览
+// @Description 分别按需求、任务、缺陷的当前数据范围聚合总数与待处理数量，用于工作台概览
 // @Tags 统计/开发管理
 // @Accept json
 // @Produce json
@@ -74,7 +74,7 @@ func (dc *DevController) GetTaskFindYear(c *gin.Context) {
 // @Failure 500 {object} models.Response "内部错误"
 // @Router /statistics/dev/getWorkspaceEnum [get]
 func (dc *DevController) GetWorkspaceEnum(c *gin.Context) {
-	result, err := services.GetWorkspaceEnum()
+	result, err := services.GetWorkspaceEnum(currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return

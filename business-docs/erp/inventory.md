@@ -66,12 +66,19 @@
 | 采购入库 | `PURCHASE_INBOUND` | `PURCHASE_IN` | `IN` |
 | 其它出库 | `OTHER_OUTBOUND` | `OTHER_OUT` | `OUT` |
 
+### ERP-INV-011 库存查询和写入遵循记录归属
+
+库存余额按 `creator_id`、库存流水按 `operator_id`、追溯码按 `creator_id` 应用当前角色数据范围。余额入口查看流水时同时校验余额范围；单码流水同时受追溯码和流水范围约束。期初库存创建的新余额、流水和追溯码归属当前操作者；若期初库存命中已有余额，必须先确认该余额也在操作者范围内。
+
+采购入库和其它出库引用或累加库存余额前必须确认每个余额都在操作者范围内。采购入库新增的流水归属入库操作者；既有余额继续保留其原创建人，不因一次数量变化转移归属。
+
 ## 查询与权限
 
 - 库存余额默认保留并展示零余额，可用 `onlyPositive=true` 只查正库存。
 - 余额列表支持仓库、余额 ID 集合、产品编码、批号和排序。
 - 可从余额查看该余额的流水，也可按来源单据查看整单流水。
 - 追溯码列表支持追溯码、产品编码、批号、仓库和状态筛选，并可查看单码流水。
+- 列表、流水、追溯码和库存余额异步导出都使用相同数据范围；导出在 Worker 执行时重新解析任务创建者当前授权。
 - 权限：`erp:inventoryBalance:list`、`erp:inventoryBalance:export`、`erp:inventoryMovement:list`、`erp:inventorySourceMovement:list`、`erp:inventoryInitial:create`、`erp:inventoryTraceCode:list`、`erp:inventoryTraceCode:movements`。
 
 ## 代码入口

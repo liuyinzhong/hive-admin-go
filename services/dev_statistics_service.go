@@ -5,12 +5,15 @@ import (
 	"strings"
 	"time"
 
+	"gorm.io/gorm"
+
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 )
 
 // GetTaskFindDay 统计两个日期各小时任务创建数量，用于任务趋势对比折线图
-func GetTaskFindDay(date1Str, date2Str string) (*models.TaskFindDayResponse, error) {
+func GetTaskFindDay(date1Str, date2Str string, permission datapermission.Permission) (*models.TaskFindDayResponse, error) {
 	date1, err := parseStatisticsDate(date1Str)
 	if err != nil {
 		return nil, err
@@ -20,11 +23,11 @@ func GetTaskFindDay(date1Str, date2Str string) (*models.TaskFindDayResponse, err
 		return nil, err
 	}
 
-	date1Data, err := countTaskByHour(date1)
+	date1Data, err := countTaskByHour(date1, permission)
 	if err != nil {
 		return nil, err
 	}
-	date2Data, err := countTaskByHour(date2)
+	date2Data, err := countTaskByHour(date2, permission)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +39,7 @@ func GetTaskFindDay(date1Str, date2Str string) (*models.TaskFindDayResponse, err
 }
 
 // GetTaskFindYear 统计指定年份各月份任务实际工时合计，用于工时总量柱状图
-func GetTaskFindYear(year int) (*models.TaskFindYearResponse, error) {
+func GetTaskFindYear(year int, permission datapermission.Permission) (*models.TaskFindYearResponse, error) {
 	if year <= 0 {
 		return nil, fmt.Errorf("年份参数错误")
 	}
@@ -49,9 +52,10 @@ func GetTaskFindYear(year int) (*models.TaskFindYearResponse, error) {
 		Total float64 `gorm:"column:total"`
 	}
 	var results []monthSum
-	err := database.DB.Model(&models.DevTask{}).
+	query := database.DB.Model(&models.DevTask{}).
 		Select("MONTH(create_date) as month, COALESCE(SUM(actual_hours), 0) as total").
-		Where("del_flag = ? AND create_date >= ? AND create_date < ?", 0, yearStart, yearEnd).
+		Where("dev_task.del_flag = ? AND create_date >= ? AND create_date < ?", 0, yearStart, yearEnd)
+	err := permission.Apply(query, "dev_task.creator_id", "dev_task.user_id").
 		Group("MONTH(create_date)").
 		Scan(&results).Error
 	if err != nil {
@@ -68,27 +72,31 @@ func GetTaskFindYear(year int) (*models.TaskFindYearResponse, error) {
 }
 
 // GetWorkspaceEnum 统计需求、任务、缺陷的总数与待处理数量，用于工作台概览
-func GetWorkspaceEnum() (*models.WorkspaceEnumResponse, error) {
+func GetWorkspaceEnum(permission datapermission.Permission) (*models.WorkspaceEnumResponse, error) {
 	var storyTotal, storyActive int64
 	var taskTotal, taskActive int64
 	var bugTotal, bugActive int64
 
-	if err := database.DB.Model(&models.DevStory{}).Where("del_flag = ?", 0).Count(&storyTotal).Error; err != nil {
+	storyQuery := permission.ApplyWithCSVUsers(database.DB.Model(&models.DevStory{}), []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"})
+	taskQuery := permission.Apply(database.DB.Model(&models.DevTask{}), "dev_task.creator_id", "dev_task.user_id")
+	bugQuery := permission.Apply(database.DB.Model(&models.DevBug{}), "dev_bug.creator_id", "dev_bug.user_id")
+
+	if err := storyQuery.Where("dev_story.del_flag = ?", 0).Count(&storyTotal).Error; err != nil {
 		return nil, err
 	}
-	if err := database.DB.Model(&models.DevStory{}).Where("del_flag = ? AND story_status = ?", 0, 0).Count(&storyActive).Error; err != nil {
+	if err := storyQuery.Session(&gorm.Session{}).Where("dev_story.del_flag = ? AND story_status = ?", 0, 0).Count(&storyActive).Error; err != nil {
 		return nil, err
 	}
-	if err := database.DB.Model(&models.DevTask{}).Where("del_flag = ?", 0).Count(&taskTotal).Error; err != nil {
+	if err := taskQuery.Where("dev_task.del_flag = ?", 0).Count(&taskTotal).Error; err != nil {
 		return nil, err
 	}
-	if err := database.DB.Model(&models.DevTask{}).Where("del_flag = ? AND task_status = ?", 0, 0).Count(&taskActive).Error; err != nil {
+	if err := taskQuery.Session(&gorm.Session{}).Where("dev_task.del_flag = ? AND task_status = ?", 0, 0).Count(&taskActive).Error; err != nil {
 		return nil, err
 	}
-	if err := database.DB.Model(&models.DevBug{}).Where("del_flag = ?", 0).Count(&bugTotal).Error; err != nil {
+	if err := bugQuery.Where("dev_bug.del_flag = ?", 0).Count(&bugTotal).Error; err != nil {
 		return nil, err
 	}
-	if err := database.DB.Model(&models.DevBug{}).Where("del_flag = ? AND bug_status = ?", 0, 0).Count(&bugActive).Error; err != nil {
+	if err := bugQuery.Session(&gorm.Session{}).Where("dev_bug.del_flag = ? AND bug_status = ?", 0, 0).Count(&bugActive).Error; err != nil {
 		return nil, err
 	}
 
@@ -116,7 +124,7 @@ func parseStatisticsDate(dateStr string) (time.Time, error) {
 }
 
 // countTaskByHour 统计指定日期各小时（0-23）的任务创建数量
-func countTaskByHour(date time.Time) ([]int64, error) {
+func countTaskByHour(date time.Time, permission datapermission.Permission) ([]int64, error) {
 	start := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local)
 	end := start.AddDate(0, 0, 1)
 
@@ -125,9 +133,10 @@ func countTaskByHour(date time.Time) ([]int64, error) {
 		Count int64 `gorm:"column:count"`
 	}
 	var results []hourCount
-	err := database.DB.Model(&models.DevTask{}).
+	query := database.DB.Model(&models.DevTask{}).
 		Select("HOUR(create_date) as hour, COUNT(*) as count").
-		Where("del_flag = ? AND create_date >= ? AND create_date < ?", 0, start, end).
+		Where("dev_task.del_flag = ? AND create_date >= ? AND create_date < ?", 0, start, end)
+	err := permission.Apply(query, "dev_task.creator_id", "dev_task.user_id").
 		Group("HOUR(create_date)").
 		Scan(&results).Error
 	if err != nil {

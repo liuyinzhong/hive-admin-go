@@ -12,7 +12,7 @@ import (
 
 // GetVersions 获取版本列表
 // @Summary 获取版本列表
-// @Description 分页获取版本列表
+// @Description 按版本创建人及当前角色数据范围分页获取版本
 // @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
@@ -43,7 +43,7 @@ func (dc *DevController) GetVersions(c *gin.Context) {
 		"sorts":         c.Query("sorts"),
 	}
 
-	result, err := services.GetVersions(page, pageSize, params)
+	result, err := services.GetVersions(page, pageSize, params, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -53,7 +53,7 @@ func (dc *DevController) GetVersions(c *gin.Context) {
 
 // GetAllVersions 获取所有版本
 // @Summary 获取所有版本
-// @Description 获取所有版本（不分页）
+// @Description 按版本创建人及当前角色数据范围获取所有版本（不分页）
 // @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
@@ -76,7 +76,7 @@ func (dc *DevController) GetAllVersions(c *gin.Context) {
 		"releaseStatus": releaseStatus,
 	}
 
-	versions, err := services.GetAllVersions(params)
+	versions, err := services.GetAllVersions(params, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -86,7 +86,7 @@ func (dc *DevController) GetAllVersions(c *gin.Context) {
 
 // GetVersion 获取版本详情
 // @Summary 获取版本详情
-// @Description 根据版本ID获取版本详情
+// @Description 按版本创建人及当前角色数据范围获取版本详情
 // @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
@@ -99,7 +99,7 @@ func (dc *DevController) GetAllVersions(c *gin.Context) {
 // @Router /dev/versions/{versionId} [get]
 func (dc *DevController) GetVersion(c *gin.Context) {
 	versionID := c.Param("versionId")
-	version, err := services.GetVersionByID(versionID)
+	version, err := services.GetVersionByID(versionID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -109,7 +109,7 @@ func (dc *DevController) GetVersion(c *gin.Context) {
 
 // GetLatestVersion 获取最新版本号
 // @Summary 获取最新版本号
-// @Description 获取指定项目下按版本号排序后的最大版本号
+// @Description 在当前角色数据范围内获取指定项目下按版本号排序后的最大版本号
 // @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
@@ -126,7 +126,7 @@ func (dc *DevController) GetLatestVersion(c *gin.Context) {
 		return
 	}
 
-	version, err := services.GetLatestVersion(projectID)
+	version, err := services.GetLatestVersion(projectID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -136,7 +136,7 @@ func (dc *DevController) GetLatestVersion(c *gin.Context) {
 
 // CreateVersion 创建版本
 // @Summary 创建版本
-// @Description 创建新版本
+// @Description 创建新版本并以当前用户作为创建人
 // @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
@@ -174,7 +174,7 @@ func (dc *DevController) CreateVersion(c *gin.Context) {
 
 // UpdateVersion 更新版本
 // @Summary 更新版本
-// @Description 更新版本信息
+// @Description 按版本创建人及当前角色数据范围更新版本信息
 // @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
@@ -205,7 +205,7 @@ func (dc *DevController) UpdateVersion(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.UpdateVersion(versionID, &req, creatorID)
+	err := services.UpdateVersion(versionID, &req, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -215,7 +215,7 @@ func (dc *DevController) UpdateVersion(c *gin.Context) {
 
 // UpdateVersionNext 版本流转状态
 // @Summary 版本流转状态
-// @Description 更新版本状态并记录变更历史
+// @Description 按当前数据范围更新版本状态并记录继承版本范围的变更历史
 // @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
@@ -237,7 +237,7 @@ func (dc *DevController) UpdateVersionNext(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.UpdateVersionNext(versionID, req.ReleaseStatus, req.ChangeRichText, creatorID)
+	err := services.UpdateVersionNext(versionID, req.ReleaseStatus, req.ChangeRichText, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return
@@ -247,7 +247,7 @@ func (dc *DevController) UpdateVersionNext(c *gin.Context) {
 
 // DeleteVersions 删除版本
 // @Summary 删除版本
-// @Description 批量删除版本
+// @Description 按当前数据范围批量删除版本；任一记录不存在或越界时整批失败
 // @Tags 开发管理/版本管理
 // @Accept json
 // @Produce json
@@ -266,7 +266,7 @@ func (dc *DevController) DeleteVersions(c *gin.Context) {
 	}
 
 	creatorID := c.GetString("userId")
-	err := services.DeleteVersions(ids, creatorID)
+	err := services.DeleteVersions(ids, creatorID, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
 		return

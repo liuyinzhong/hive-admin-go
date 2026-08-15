@@ -2,6 +2,8 @@ package router
 
 import (
 	"hive-admin-go/controllers"
+	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/middleware"
 	"hive-admin-go/services"
 
@@ -36,6 +38,9 @@ func SetupRouter() *gin.Engine {
 	productSkuController := controllers.NewProductSkuController()
 	productSkuPriceController := controllers.NewProductSkuPriceController()
 	permissionGuard := middleware.NewPermissionGuard(services.NewPermissionService())
+	dataPermissionMiddleware := middleware.DataPermissionMiddleware(
+		datapermission.NewResolver(datapermission.NewGormAssignmentStore(database.DB)),
+	)
 	auditLogService := services.NewAuditLogService()
 
 	api := router.Group("/api")
@@ -55,7 +60,7 @@ func SetupRouter() *gin.Engine {
 			auth.POST("/logout", middleware.AuthMiddleware(), authController.Logout)
 		}
 
-		system := api.Group("/system", middleware.AuthMiddleware())
+		system := api.Group("/system", middleware.AuthMiddleware(), dataPermissionMiddleware)
 		{
 			downloads := system.Group("/downloads")
 			{
@@ -173,7 +178,7 @@ func SetupRouter() *gin.Engine {
 			}
 		}
 
-		dev := api.Group("/dev", middleware.AuthMiddleware())
+		dev := api.Group("/dev", middleware.AuthMiddleware(), dataPermissionMiddleware)
 		{
 			projects := dev.Group("/projects")
 			{
@@ -249,7 +254,7 @@ func SetupRouter() *gin.Engine {
 			dev.POST("/changeHistory", permissionGuard.Require("dev:changeHistory:create"), devController.CreateChangeHistory)
 		}
 
-		statistics := api.Group("/statistics", middleware.AuthMiddleware())
+		statistics := api.Group("/statistics", middleware.AuthMiddleware(), dataPermissionMiddleware)
 		{
 			devStatistics := statistics.Group("/dev")
 			{
@@ -259,7 +264,7 @@ func SetupRouter() *gin.Engine {
 			}
 		}
 
-		form := api.Group("/form", middleware.AuthMiddleware())
+		form := api.Group("/form", middleware.AuthMiddleware(), dataPermissionMiddleware)
 		{
 			schemas := form.Group("/schemas")
 			{
@@ -272,7 +277,7 @@ func SetupRouter() *gin.Engine {
 			}
 		}
 
-		base := api.Group("/base", middleware.AuthMiddleware())
+		base := api.Group("/base", middleware.AuthMiddleware(), dataPermissionMiddleware)
 		{
 			institution := base.Group("/institution")
 			{
@@ -311,7 +316,7 @@ func SetupRouter() *gin.Engine {
 			}
 		}
 
-		erp := api.Group("/erp", middleware.AuthMiddleware())
+		erp := api.Group("/erp", middleware.AuthMiddleware(), dataPermissionMiddleware)
 		{
 			warehouses := erp.Group("/warehouses")
 			{
@@ -374,7 +379,7 @@ func SetupRouter() *gin.Engine {
 			}
 		}
 
-		printTemplates := api.Group("/printTemplates", middleware.AuthMiddleware())
+		printTemplates := api.Group("/printTemplates", middleware.AuthMiddleware(), dataPermissionMiddleware)
 		{
 			printTemplates.GET("", permissionGuard.Require("print:template:list"), printTemplateController.GetPrintTemplateList)
 			printTemplates.GET("/metadata", permissionGuard.Require("print:template:metadata"), printTemplateController.GetPrintTemplateMetadata)
@@ -385,13 +390,13 @@ func SetupRouter() *gin.Engine {
 			printTemplates.DELETE("/:templateId", permissionGuard.Require("print:template:delete"), printTemplateController.DeletePrintTemplate)
 		}
 
-		printDocuments := api.Group("/printDocuments", middleware.AuthMiddleware())
+		printDocuments := api.Group("/printDocuments", middleware.AuthMiddleware(), dataPermissionMiddleware)
 		{
 			printDocuments.GET("/purchaseInbound/:inboundId/data", permissionGuard.Require("print:template:preview"), printDocumentController.GetPurchaseInboundPrintData)
 			printDocuments.GET("/purchaseInbound/:inboundId", permissionGuard.Require("print:purchaseInbound:print"), printDocumentController.GetPurchaseInboundPrintDocument)
 		}
 
-		product := api.Group("/product", middleware.AuthMiddleware())
+		product := api.Group("/product", middleware.AuthMiddleware(), dataPermissionMiddleware)
 		{
 			spus := product.Group("/spus")
 			{
@@ -437,7 +442,7 @@ func SetupRouter() *gin.Engine {
 			}
 		}
 
-		medical := api.Group("/medical", middleware.AuthMiddleware())
+		medical := api.Group("/medical", middleware.AuthMiddleware(), dataPermissionMiddleware)
 		{
 			departments := medical.Group("/departments")
 			{
@@ -566,7 +571,7 @@ func SetupRouter() *gin.Engine {
 			}
 		}
 
-		workflow := api.Group("/workflow", middleware.AuthMiddleware())
+		workflow := api.Group("/workflow", middleware.AuthMiddleware(), dataPermissionMiddleware)
 		{
 			definitions := workflow.Group("/definitions")
 			{

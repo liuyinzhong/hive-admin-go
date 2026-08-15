@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 
@@ -57,7 +58,7 @@ func (s *MenuMessageService) GetUnreadSummary(userID string) ([]models.MenuMessa
 }
 
 // CreateDemoMessages 为每个目标用户新增指定数量的未读消息。
-func (s *MenuMessageService) CreateDemoMessages(req models.CreateMenuMessageRequest) error {
+func (s *MenuMessageService) CreateDemoMessages(req models.CreateMenuMessageRequest, permission datapermission.Permission) error {
 	userIDs := uniqueNonEmptyStrings(req.UserIDs)
 	if len(userIDs) == 0 {
 		return ErrMenuMessageInvalidUsers
@@ -85,10 +86,11 @@ func (s *MenuMessageService) CreateDemoMessages(req models.CreateMenuMessageRequ
 		}
 
 		var users []models.SysUser
-		if err := tx.Where(
+		userQuery := tx.Model(&models.SysUser{}).Where(
 			"user_id IN ? AND status = 1 AND del_flag = 0 AND is_sys = 0",
 			userIDs,
-		).Find(&users).Error; err != nil {
+		)
+		if err := permission.Apply(userQuery, "sys_user.user_id").Find(&users).Error; err != nil {
 			return err
 		}
 		if len(users) != len(userIDs) {

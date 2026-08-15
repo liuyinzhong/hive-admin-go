@@ -10,7 +10,7 @@ import (
 
 // UploadFile 上传文件
 // @Summary 上传文件
-// @Description 上传文件到系统文件表
+// @Description 上传文件并以当前用户作为元数据创建人；现有 /uploads/** 静态 URL 为公开访问，不适合敏感文件
 // @Tags 系统管理/文件管理
 // @Accept mpfd
 // @Produce json
@@ -38,7 +38,7 @@ func (ctrl *SystemController) UploadFile(c *gin.Context) {
 
 // GetFileList 获取文件列表
 // @Summary 获取文件列表
-// @Description 分页获取文件列表
+// @Description 按文件创建人和当前角色数据范围分页获取文件元数据；不改变 /uploads/** 的公开静态访问边界
 // @Tags 系统管理/文件管理
 // @Accept json
 // @Produce json
@@ -61,7 +61,7 @@ func (ctrl *SystemController) GetFileList(c *gin.Context) {
 		return
 	}
 
-	result, err := ctrl.fileService.GetFileList(req)
+	result, err := ctrl.fileService.GetFileList(req, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
 		return

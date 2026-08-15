@@ -23,7 +23,7 @@ func NewErpInventoryController() *ErpInventoryController {
 
 // GetInventoryBalanceList 获取库存余额列表
 // @Summary 获取库存余额列表
-// @Description 分页查询库存余额，第一版按仓库和库存批次展示；搜索条件支持仓库ID、库存余额ID、SKU编码和批号，默认包含零库存余额
+// @Description 按库存余额创建人及当前角色数据范围分页查询库存余额；支持仓库ID、库存余额ID、SKU编码和批号，默认包含零库存余额
 // @Tags 进销存/库存管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -49,7 +49,7 @@ func (ctrl *ErpInventoryController) GetInventoryBalanceList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.inventoryService.GetInventoryBalanceList(req)
+	result, err := ctrl.inventoryService.GetInventoryBalanceList(req, currentDataPermission(c))
 	if err != nil {
 		writeErpInventoryError(c, err)
 		return
@@ -59,7 +59,7 @@ func (ctrl *ErpInventoryController) GetInventoryBalanceList(c *gin.Context) {
 
 // CreateInventoryBalanceExport 创建库存余额导出任务。
 // @Summary 创建库存余额导出任务
-// @Description 按当前筛选和排序创建异步XLSX导出任务
+// @Description 按当前筛选和排序创建异步XLSX导出任务；Worker 在计数和生成时重新解析创建用户当前数据范围
 // @Tags 进销存/库存管理
 // @Accept json
 // @Produce json
@@ -88,7 +88,7 @@ func (ctrl *ErpInventoryController) CreateInventoryBalanceExport(c *gin.Context)
 		models.DownloadTaskTypeInventoryBalance,
 		"库存余额导出",
 		"库存管理",
-		req,
+		services.NewInventoryBalanceExportPayload(req),
 	)
 	if err != nil {
 		if errors.Is(err, services.ErrDownloadTaskLimitReached) {
@@ -103,7 +103,7 @@ func (ctrl *ErpInventoryController) CreateInventoryBalanceExport(c *gin.Context)
 
 // GetInventoryMovements 获取库存流水列表
 // @Summary 获取库存流水列表
-// @Description 根据库存余额ID分页查询库存流水；流水一旦写入不可更改，第一版仅包含初始库存入库流水
+// @Description 先校验库存余额范围，再按流水操作人及当前角色数据范围分页查询库存流水；流水一旦写入不可更改
 // @Tags 进销存/库存管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -125,7 +125,7 @@ func (ctrl *ErpInventoryController) GetInventoryMovements(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.inventoryService.GetInventoryMovements(c.Param("balanceId"), req)
+	result, err := ctrl.inventoryService.GetInventoryMovements(c.Param("balanceId"), req, currentDataPermission(c))
 	if err != nil {
 		writeErpInventoryError(c, err)
 		return
@@ -135,7 +135,7 @@ func (ctrl *ErpInventoryController) GetInventoryMovements(c *gin.Context) {
 
 // GetInventoryMovementsBySource 获取来源单据库存流水列表
 // @Summary 获取来源单据库存流水列表
-// @Description 根据来源单据类型和来源单据ID分页查询库存流水，适用于查看整张采购入库单产生的全部流水
+// @Description 按流水操作人及当前角色数据范围，根据来源单据类型和来源单据ID分页查询库存流水
 // @Tags 进销存/库存管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -156,7 +156,7 @@ func (ctrl *ErpInventoryController) GetInventoryMovementsBySource(c *gin.Context
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.inventoryService.GetInventoryMovementsBySource(req)
+	result, err := ctrl.inventoryService.GetInventoryMovementsBySource(req, currentDataPermission(c))
 	if err != nil {
 		writeErpInventoryError(c, err)
 		return
@@ -166,7 +166,7 @@ func (ctrl *ErpInventoryController) GetInventoryMovementsBySource(c *gin.Context
 
 // GetInventoryTraceCodeList 获取库存追溯码列表
 // @Summary 获取库存追溯码列表
-// @Description 分页查询小包装追溯码，可按追溯码、SKU编码、批号、当前仓库和当前状态筛选
+// @Description 按追溯码创建人及当前角色数据范围分页查询小包装追溯码，可按追溯码、SKU编码、批号、当前仓库和当前状态筛选
 // @Tags 进销存/库存管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -190,7 +190,7 @@ func (ctrl *ErpInventoryController) GetInventoryTraceCodeList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.inventoryService.GetInventoryTraceCodeList(req)
+	result, err := ctrl.inventoryService.GetInventoryTraceCodeList(req, currentDataPermission(c))
 	if err != nil {
 		writeErpInventoryError(c, err)
 		return
@@ -200,7 +200,7 @@ func (ctrl *ErpInventoryController) GetInventoryTraceCodeList(c *gin.Context) {
 
 // GetInventoryTraceCodeMovements 获取追溯码库存流水
 // @Summary 获取追溯码库存流水
-// @Description 根据追溯码ID分页查询其关联的全部库存流水，仅展示来源单据编号，不提供页面跳转
+// @Description 先校验追溯码范围，再按流水操作人及当前角色数据范围分页查询其关联库存流水
 // @Tags 进销存/库存管理
 // @Produce json
 // @Security ApiKeyAuth
@@ -221,7 +221,7 @@ func (ctrl *ErpInventoryController) GetInventoryTraceCodeMovements(c *gin.Contex
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.inventoryService.GetInventoryTraceCodeMovements(c.Param("traceId"), req)
+	result, err := ctrl.inventoryService.GetInventoryTraceCodeMovements(c.Param("traceId"), req, currentDataPermission(c))
 	if err != nil {
 		writeErpInventoryError(c, err)
 		return
@@ -231,7 +231,7 @@ func (ctrl *ErpInventoryController) GetInventoryTraceCodeMovements(c *gin.Contex
 
 // CreateInitialStocks 新增初始库存
 // @Summary 新增初始库存
-// @Description 批量写入初始库存；启用追溯的SKU必须提交纯数字小包装追溯码且数量与追溯码个数一致；同一批次再次写入是追加库存而不是覆盖库存；整批提交原子成功或失败
+// @Description 批量写入初始库存并以当前用户作为新余额、流水和追溯码归属人；累加已有余额时必须处于当前数据范围；启用追溯的SKU必须提交等量纯数字追溯码；整批原子成功或失败
 // @Tags 进销存/库存管理
 // @Accept json
 // @Produce json
@@ -251,7 +251,7 @@ func (ctrl *ErpInventoryController) CreateInitialStocks(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.inventoryService.CreateInitialStocks(req, erpInventoryOperatorID(c))
+	result, err := ctrl.inventoryService.CreateInitialStocks(req, erpInventoryOperatorID(c), currentDataPermission(c))
 	if err != nil {
 		writeErpInventoryError(c, err)
 		return

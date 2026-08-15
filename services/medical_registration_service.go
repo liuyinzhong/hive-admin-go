@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm/clause"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
@@ -61,8 +62,9 @@ func RegistrationTransitionReleasesQuota(fromStatus, toStatus int) bool {
 		fromStatus == models.MedRegistrationStatusRefunding && toStatus == models.MedRegistrationStatusRefunded
 }
 
-func (s *MedicalRegistrationService) GetRegistrationList(req models.RegistrationListRequest, showSensitive bool) (*utils.PageResult, error) {
+func (s *MedicalRegistrationService) GetRegistrationList(req models.RegistrationListRequest, showSensitive bool, permission datapermission.Permission) (*utils.PageResult, error) {
 	query := database.DB.Model(&models.MedRegistration{})
+	query = permission.Apply(query, "med_registration.creator_id")
 	if value := strings.TrimSpace(req.RegistrationNo); value != "" {
 		query = query.Where("registration_no LIKE ?", "%"+value+"%")
 	}
@@ -135,18 +137,19 @@ func (s *MedicalRegistrationService) GetRegistrationList(req models.Registration
 	return result, nil
 }
 
-func (s *MedicalRegistrationService) GetRegistrationDetail(registrationID string, showSensitive bool) (*models.RegistrationResponse, error) {
-	return s.getRegistrationDetail(database.DB, registrationID, showSensitive, true)
+func (s *MedicalRegistrationService) GetRegistrationDetail(registrationID string, showSensitive bool, permission datapermission.Permission) (*models.RegistrationResponse, error) {
+	return s.getRegistrationDetail(database.DB, registrationID, showSensitive, true, permission)
 }
 
 // GetVisitQueueList 按签到序号返回实际排班下的完整候诊队列。
 // 队列场景固定返回脱敏后的患者姓名和手机号，不开放敏感信息权限例外。
-func (s *MedicalRegistrationService) GetVisitQueueList(scheduleID string) ([]models.VisitQueueListItemResponse, error) {
+func (s *MedicalRegistrationService) GetVisitQueueList(scheduleID string, permission datapermission.Permission) ([]models.VisitQueueListItemResponse, error) {
 	if err := validateMedicalUUID(scheduleID, "排班ID"); err != nil {
 		return nil, err
 	}
 	var schedule models.MedSchedule
-	if err := database.DB.Select("schedule_id").Where("schedule_id = ? AND del_flag = 0", scheduleID).First(&schedule).Error; err != nil {
+	scheduleQuery := database.DB.Model(&models.MedSchedule{}).Select("schedule_id").Where("schedule_id = ? AND del_flag = 0", scheduleID)
+	if err := permission.Apply(scheduleQuery, "med_schedule.creator_id").First(&schedule).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("%w: 排班不存在", ErrMedicalNotFound)
 		}
@@ -174,12 +177,13 @@ func (s *MedicalRegistrationService) GetVisitQueueList(scheduleID string) ([]mod
 	return items, nil
 }
 
-func (s *MedicalRegistrationService) getRegistrationDetail(db *gorm.DB, registrationID string, showSensitive, includeQueue bool) (*models.RegistrationResponse, error) {
+func (s *MedicalRegistrationService) getRegistrationDetail(db *gorm.DB, registrationID string, showSensitive, includeQueue bool, permission datapermission.Permission) (*models.RegistrationResponse, error) {
 	if err := validateMedicalUUID(registrationID, "挂号单ID"); err != nil {
 		return nil, err
 	}
 	var registration models.MedRegistration
-	if err := db.Where("registration_id = ?", registrationID).First(&registration).Error; err != nil {
+	query := db.Model(&models.MedRegistration{}).Where("registration_id = ?", registrationID)
+	if err := permission.Apply(query, "med_registration.creator_id").First(&registration).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("%w: 挂号单不存在", ErrMedicalNotFound)
 		}
@@ -201,7 +205,7 @@ func (s *MedicalRegistrationService) getRegistrationDetail(db *gorm.DB, registra
 	return response, nil
 }
 
-func (s *MedicalRegistrationService) CreateRegistration(req models.CreateRegistrationRequest, operatorID string, showSensitive bool) (*models.RegistrationResponse, error) {
+func (s *MedicalRegistrationService) CreateRegistration(req models.CreateRegistrationRequest, operatorID string, showSensitive bool, permission datapermission.Permission) (*models.RegistrationResponse, error) {
 	patientID := strings.TrimSpace(req.PatientID)
 	slotID := strings.TrimSpace(req.SlotID)
 	if err := validateMedicalUUID(patientID, "患者ID"); err != nil {
@@ -221,7 +225,8 @@ func (s *MedicalRegistrationService) CreateRegistration(req models.CreateRegistr
 	var response *models.RegistrationResponse
 	err = database.DB.Transaction(func(tx *gorm.DB) error {
 		var patient models.MedPatient
-		if err := tx.Where("patient_id = ? AND status = 1 AND del_flag = 0", patientID).First(&patient).Error; err != nil {
+		patientQuery := tx.Model(&models.MedPatient{}).Where("patient_id = ? AND status = 1 AND del_flag = 0", patientID)
+		if err := permission.Apply(patientQuery, "med_patient.creator_id").First(&patient).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return fmt.Errorf("%w: 患者不存在或已停用", ErrMedicalInvalidInput)
 			}
@@ -235,7 +240,8 @@ func (s *MedicalRegistrationService) CreateRegistration(req models.CreateRegistr
 			return err
 		}
 		var schedule models.MedSchedule
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("schedule_id = ? AND del_flag = 0", slot.ScheduleID).First(&schedule).Error; err != nil {
+		scheduleQuery := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Model(&models.MedSchedule{}).Where("schedule_id = ? AND del_flag = 0", slot.ScheduleID)
+		if err := permission.Apply(scheduleQuery, "med_schedule.creator_id").First(&schedule).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return fmt.Errorf("%w: 排班不存在", ErrMedicalNotFound)
 			}
@@ -303,7 +309,8 @@ func (s *MedicalRegistrationService) CreateRegistration(req models.CreateRegistr
 		if err := createRegistrationLog(tx, registrationID, nil, models.MedRegistrationStatusPendingPayment, operatorID, now, nil, nil); err != nil {
 			return err
 		}
-		response, err = s.getRegistrationDetail(tx, registrationID, showSensitive, false)
+		// 返回本事务刚创建的挂号单；后续独立查询仍使用调用者数据范围。
+		response, err = s.getRegistrationDetail(tx, registrationID, showSensitive, false, datapermission.Permission{All: true})
 		return err
 	})
 	if err != nil {
@@ -312,29 +319,29 @@ func (s *MedicalRegistrationService) CreateRegistration(req models.CreateRegistr
 	return response, nil
 }
 
-func (s *MedicalRegistrationService) ConfirmPayment(id, operatorID string, showSensitive bool) (*models.RegistrationResponse, error) {
-	return s.transition(id, models.MedRegistrationStatusPaid, operatorID, nil, false, showSensitive)
+func (s *MedicalRegistrationService) ConfirmPayment(id, operatorID string, showSensitive bool, permission datapermission.Permission) (*models.RegistrationResponse, error) {
+	return s.transition(id, models.MedRegistrationStatusPaid, operatorID, nil, false, showSensitive, permission)
 }
-func (s *MedicalRegistrationService) Cancel(id, operatorID, reason string, showSensitive bool) (*models.RegistrationResponse, error) {
-	return s.transition(id, models.MedRegistrationStatusCanceled, operatorID, &reason, false, showSensitive)
+func (s *MedicalRegistrationService) Cancel(id, operatorID, reason string, showSensitive bool, permission datapermission.Permission) (*models.RegistrationResponse, error) {
+	return s.transition(id, models.MedRegistrationStatusCanceled, operatorID, &reason, false, showSensitive, permission)
 }
-func (s *MedicalRegistrationService) CheckIn(id, operatorID string, showSensitive bool) (*models.RegistrationResponse, error) {
-	return s.transition(id, models.MedRegistrationStatusCheckedIn, operatorID, nil, false, showSensitive)
+func (s *MedicalRegistrationService) CheckIn(id, operatorID string, showSensitive bool, permission datapermission.Permission) (*models.RegistrationResponse, error) {
+	return s.transition(id, models.MedRegistrationStatusCheckedIn, operatorID, nil, false, showSensitive, permission)
 }
-func (s *MedicalRegistrationService) NoShow(id, operatorID string, showSensitive bool) (*models.RegistrationResponse, error) {
-	return s.transition(id, models.MedRegistrationStatusNoShow, operatorID, nil, true, showSensitive)
+func (s *MedicalRegistrationService) NoShow(id, operatorID string, showSensitive bool, permission datapermission.Permission) (*models.RegistrationResponse, error) {
+	return s.transition(id, models.MedRegistrationStatusNoShow, operatorID, nil, true, showSensitive, permission)
 }
-func (s *MedicalRegistrationService) StartRefund(id, operatorID, reason string, showSensitive bool) (*models.RegistrationResponse, error) {
-	return s.transition(id, models.MedRegistrationStatusRefundStarted, operatorID, &reason, false, showSensitive)
+func (s *MedicalRegistrationService) StartRefund(id, operatorID, reason string, showSensitive bool, permission datapermission.Permission) (*models.RegistrationResponse, error) {
+	return s.transition(id, models.MedRegistrationStatusRefundStarted, operatorID, &reason, false, showSensitive, permission)
 }
-func (s *MedicalRegistrationService) ProcessRefund(id, operatorID string, showSensitive bool) (*models.RegistrationResponse, error) {
-	return s.transition(id, models.MedRegistrationStatusRefunding, operatorID, nil, false, showSensitive)
+func (s *MedicalRegistrationService) ProcessRefund(id, operatorID string, showSensitive bool, permission datapermission.Permission) (*models.RegistrationResponse, error) {
+	return s.transition(id, models.MedRegistrationStatusRefunding, operatorID, nil, false, showSensitive, permission)
 }
-func (s *MedicalRegistrationService) CompleteRefund(id, operatorID string, showSensitive bool) (*models.RegistrationResponse, error) {
-	return s.transition(id, models.MedRegistrationStatusRefunded, operatorID, nil, false, showSensitive)
+func (s *MedicalRegistrationService) CompleteRefund(id, operatorID string, showSensitive bool, permission datapermission.Permission) (*models.RegistrationResponse, error) {
+	return s.transition(id, models.MedRegistrationStatusRefunded, operatorID, nil, false, showSensitive, permission)
 }
 
-func (s *MedicalRegistrationService) transition(id string, toStatus int, operatorID string, reason *string, requireSlotEnded, showSensitive bool) (*models.RegistrationResponse, error) {
+func (s *MedicalRegistrationService) transition(id string, toStatus int, operatorID string, reason *string, requireSlotEnded, showSensitive bool, permission datapermission.Permission) (*models.RegistrationResponse, error) {
 	if err := validateMedicalUUID(id, "挂号单ID"); err != nil {
 		return nil, err
 	}
@@ -348,7 +355,8 @@ func (s *MedicalRegistrationService) transition(id string, toStatus int, operato
 	var response *models.RegistrationResponse
 	err = database.DB.Transaction(func(tx *gorm.DB) error {
 		var registration models.MedRegistration
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("registration_id = ?", id).First(&registration).Error; err != nil {
+		query := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Model(&models.MedRegistration{}).Where("registration_id = ?", id)
+		if err := permission.Apply(query, "med_registration.creator_id").First(&registration).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return fmt.Errorf("%w: 挂号单不存在", ErrMedicalNotFound)
 			}
@@ -388,7 +396,7 @@ func (s *MedicalRegistrationService) transition(id string, toStatus int, operato
 		if err := createRegistrationLog(tx, id, &fromStatus, toStatus, operatorID, now, normalizedReason, refundAmount); err != nil {
 			return err
 		}
-		response, err = s.getRegistrationDetail(tx, id, showSensitive, toStatus == models.MedRegistrationStatusCheckedIn)
+		response, err = s.getRegistrationDetail(tx, id, showSensitive, toStatus == models.MedRegistrationStatusCheckedIn, permission)
 		return err
 	})
 	if err != nil {

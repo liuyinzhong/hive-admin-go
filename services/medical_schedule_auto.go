@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm/clause"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
@@ -94,7 +95,8 @@ func (s *MedicalScheduleService) runAutomaticPublish(startDate, endDate, execute
 	successCount := 0
 	for _, doctorID := range doctorIDs {
 		err := database.DB.Transaction(func(tx *gorm.DB) error {
-			return publishScheduleIDsTx(tx, idsByDoctor[doctorID], "")
+			// 系统自动任务没有登录用户，处理范围来自任务本次选出的草稿 ID 集合。
+			return publishScheduleIDsTx(tx, idsByDoctor[doctorID], "", datapermission.Permission{All: true})
 		})
 		if err != nil {
 			failures = append(failures, models.ScheduleAutoTaskFailure{DoctorID: doctorID, DoctorName: doctorNames[doctorID], Reason: err.Error()})

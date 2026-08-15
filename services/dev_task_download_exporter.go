@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 
@@ -13,6 +14,14 @@ import (
 )
 
 type devTaskDownloadExporter struct{}
+
+type DevTaskExportPayload struct {
+	Request models.DevTaskExportRequest `json:"request"`
+}
+
+func NewDevTaskExportPayload(request models.DevTaskExportRequest) DevTaskExportPayload {
+	return DevTaskExportPayload{Request: request}
+}
 
 type devTaskDownloadRow struct {
 	TaskNum      int
@@ -32,24 +41,24 @@ type devTaskDownloadRow struct {
 	CreateDate   *time.Time
 }
 
-func (e *devTaskDownloadExporter) Count(payload string) (int64, error) {
-	params, err := parseDevTaskExportParams(payload)
+func (e *devTaskDownloadExporter) Count(payload, creatorID string) (int64, error) {
+	params, permission, err := parseDevTaskExportParams(payload, creatorID)
 	if err != nil {
 		return 0, err
 	}
 	var total int64
-	if err := buildDevTaskQuery(params).Count(&total).Error; err != nil {
+	if err := buildDevTaskQuery(params, permission).Count(&total).Error; err != nil {
 		return 0, err
 	}
 	return total, nil
 }
 
-func (e *devTaskDownloadExporter) Export(payload, filePath string, totalRows int64, onProgress func(int64)) (int64, error) {
-	params, err := parseDevTaskExportParams(payload)
+func (e *devTaskDownloadExporter) Export(payload, creatorID, filePath string, totalRows int64, onProgress func(int64)) (int64, error) {
+	params, permission, err := parseDevTaskExportParams(payload, creatorID)
 	if err != nil {
 		return 0, err
 	}
-	query := buildDevTaskQuery(params)
+	query := buildDevTaskQuery(params, permission)
 	order := buildDevTaskOrder(params)
 	dictLabels, err := loadDevTaskDownloadDictLabels()
 	if err != nil {
@@ -159,10 +168,17 @@ func formatDevTaskDownloadDictValue(labels map[string]string, dictType string, v
 	return rawValue
 }
 
-func parseDevTaskExportParams(payload string) (map[string]interface{}, error) {
-	var request models.DevTaskExportRequest
-	if err := json.Unmarshal([]byte(payload), &request); err != nil {
-		return nil, err
+func parseDevTaskExportParams(payload, creatorID string) (map[string]interface{}, datapermission.Permission, error) {
+	request, err := decodeDevTaskExportRequest(payload)
+	if err != nil {
+		return nil, datapermission.Permission{}, err
+	}
+	if creatorID == "" {
+		return nil, datapermission.Permission{}, fmt.Errorf("导出任务缺少创建用户")
+	}
+	permission, err := resolveDataPermission(creatorID)
+	if err != nil {
+		return nil, datapermission.Permission{}, err
 	}
 	return map[string]interface{}{
 		"taskTitle":    request.TaskTitle,
@@ -170,7 +186,25 @@ func parseDevTaskExportParams(payload string) (map[string]interface{}, error) {
 		"versionId":    request.VersionID,
 		"taskStatuses": request.TaskStatuses,
 		"sorts":        request.Sorts,
-	}, nil
+	}, permission, nil
+}
+
+func decodeDevTaskExportRequest(payload string) (models.DevTaskExportRequest, error) {
+	var envelope struct {
+		Request json.RawMessage `json:"request"`
+	}
+	if err := json.Unmarshal([]byte(payload), &envelope); err != nil {
+		return models.DevTaskExportRequest{}, err
+	}
+	requestPayload := []byte(payload)
+	if len(envelope.Request) > 0 && string(envelope.Request) != "null" {
+		requestPayload = envelope.Request
+	}
+	var request models.DevTaskExportRequest
+	if err := json.Unmarshal(requestPayload, &request); err != nil {
+		return models.DevTaskExportRequest{}, err
+	}
+	return request, nil
 }
 
 func formatDownloadDate(value *time.Time) string {

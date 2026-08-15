@@ -142,7 +142,7 @@ func (ctrl *MedicalController) DeleteScheduleTemplate(c *gin.Context) {
 
 // GetScheduleList 获取实际排班列表。
 // @Summary 获取实际排班列表
-// @Description 分页查询实际排班列表，支持按医生、科室、挂号类型、日期范围、状态等条件筛选
+// @Description 按实际排班创建人及当前角色数据范围分页查询，支持按医生、科室、挂号类型、日期范围、状态等条件筛选
 // @Tags 医疗管理/排班
 // @Produce json
 // @Security ApiKeyAuth
@@ -166,7 +166,7 @@ func (ctrl *MedicalController) GetScheduleList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	result, err := ctrl.scheduleService.GetScheduleList(req)
+	result, err := ctrl.scheduleService.GetScheduleList(req, currentDataPermission(c))
 	if err != nil {
 		writeMedicalError(c, err)
 		return
@@ -176,7 +176,7 @@ func (ctrl *MedicalController) GetScheduleList(c *gin.Context) {
 
 // GetScheduleDetail 获取实际排班详情。
 // @Summary 获取实际排班详情
-// @Description 获取指定实际排班及其半小时号源档位的完整信息
+// @Description 按实际排班创建人及当前角色数据范围获取排班及半小时号源档位
 // @Tags 医疗管理/排班
 // @Produce json
 // @Security ApiKeyAuth
@@ -187,7 +187,7 @@ func (ctrl *MedicalController) GetScheduleList(c *gin.Context) {
 // @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/schedules/{scheduleId} [get]
 func (ctrl *MedicalController) GetScheduleDetail(c *gin.Context) {
-	result, err := ctrl.scheduleService.GetScheduleDetail(c.Param("scheduleId"))
+	result, err := ctrl.scheduleService.GetScheduleDetail(c.Param("scheduleId"), currentDataPermission(c))
 	if err != nil {
 		writeMedicalError(c, err)
 		return
@@ -197,7 +197,7 @@ func (ctrl *MedicalController) GetScheduleDetail(c *gin.Context) {
 
 // GetVisitQueueList 获取实际排班的候诊队列。
 // @Summary 获取候诊队列
-// @Description 按签到序号升序返回指定实际排班的全部候诊记录；患者姓名和手机号始终脱敏
+// @Description 先校验实际排班当前数据范围，再按签到序号返回候诊记录；患者姓名和手机号始终脱敏
 // @Tags 医疗管理/排班
 // @Produce json
 // @Security ApiKeyAuth
@@ -209,7 +209,7 @@ func (ctrl *MedicalController) GetScheduleDetail(c *gin.Context) {
 // @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/schedules/{scheduleId}/visitQueues [get]
 func (ctrl *MedicalController) GetVisitQueueList(c *gin.Context) {
-	result, err := ctrl.registrationService.GetVisitQueueList(c.Param("scheduleId"))
+	result, err := ctrl.registrationService.GetVisitQueueList(c.Param("scheduleId"), currentDataPermission(c))
 	if err != nil {
 		writeMedicalError(c, err)
 		return
@@ -219,7 +219,7 @@ func (ctrl *MedicalController) GetVisitQueueList(c *gin.Context) {
 
 // CreateSchedule 手工创建实际排班。
 // @Summary 手工创建实际排班
-// @Description 手工创建实际排班记录
+// @Description 手工创建实际排班并以当前用户作为归属人
 // @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
@@ -245,7 +245,7 @@ func (ctrl *MedicalController) CreateSchedule(c *gin.Context) {
 
 // UpdateSchedule 编辑草稿排班。
 // @Summary 编辑草稿排班
-// @Description 编辑草稿状态的排班记录
+// @Description 按实际排班创建人及当前角色数据范围编辑草稿排班
 // @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
@@ -263,7 +263,7 @@ func (ctrl *MedicalController) UpdateSchedule(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	if err := ctrl.scheduleService.UpdateSchedule(c.Param("scheduleId"), req, medicalOperatorID(c)); err != nil {
+	if err := ctrl.scheduleService.UpdateSchedule(c.Param("scheduleId"), req, medicalOperatorID(c), currentDataPermission(c)); err != nil {
 		writeMedicalError(c, err)
 		return
 	}
@@ -272,7 +272,7 @@ func (ctrl *MedicalController) UpdateSchedule(c *gin.Context) {
 
 // DeleteDraftSchedules 删除草稿排班。
 // @Summary 批量删除草稿排班
-// @Description 批量删除草稿状态的排班记录
+// @Description 按当前数据范围批量删除草稿排班；任一记录不存在或越界时整批失败
 // @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
@@ -289,7 +289,7 @@ func (ctrl *MedicalController) DeleteDraftSchedules(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	if err := ctrl.scheduleService.DeleteDraftSchedules(scheduleIDs, medicalOperatorID(c)); err != nil {
+	if err := ctrl.scheduleService.DeleteDraftSchedules(scheduleIDs, medicalOperatorID(c), currentDataPermission(c)); err != nil {
 		writeMedicalError(c, err)
 		return
 	}
@@ -298,7 +298,7 @@ func (ctrl *MedicalController) DeleteDraftSchedules(c *gin.Context) {
 
 // GenerateSchedules 根据周期模板批量生成未来排班。
 // @Summary 批量生成未来排班
-// @Description 根据启用的周期排班模板，批量生成指定日期范围内的实际排班
+// @Description 根据启用周期模板批量生成实际排班；手工生成归属当前用户，自动生成继承模板创建人
 // @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
@@ -325,7 +325,7 @@ func (ctrl *MedicalController) GenerateSchedules(c *gin.Context) {
 
 // PublishSchedules 批量发布草稿排班。
 // @Summary 批量发布草稿排班
-// @Description 批量发布草稿排班，将其状态变更为已发布
+// @Description 按当前数据范围批量发布草稿排班；任一记录不存在或越界时整批失败
 // @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
@@ -342,7 +342,7 @@ func (ctrl *MedicalController) PublishSchedules(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	if err := ctrl.scheduleService.PublishSchedules(req, medicalOperatorID(c)); err != nil {
+	if err := ctrl.scheduleService.PublishSchedules(req, medicalOperatorID(c), currentDataPermission(c)); err != nil {
 		writeMedicalError(c, err)
 		return
 	}
@@ -351,7 +351,7 @@ func (ctrl *MedicalController) PublishSchedules(c *gin.Context) {
 
 // StopSchedule 停诊。
 // @Summary 停诊
-// @Description 将已发布的排班标记为停诊状态，需提供停诊原因
+// @Description 按当前数据范围将已发布排班标记为停诊，需提供停诊原因
 // @Tags 医疗管理/排班
 // @Accept json
 // @Produce json
@@ -369,7 +369,7 @@ func (ctrl *MedicalController) StopSchedule(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	if err := ctrl.scheduleService.StopSchedule(c.Param("scheduleId"), req, medicalOperatorID(c)); err != nil {
+	if err := ctrl.scheduleService.StopSchedule(c.Param("scheduleId"), req, medicalOperatorID(c), currentDataPermission(c)); err != nil {
 		writeMedicalError(c, err)
 		return
 	}
@@ -378,7 +378,7 @@ func (ctrl *MedicalController) StopSchedule(c *gin.Context) {
 
 // FinishSchedule 结束已完成出诊的排班。
 // @Summary 结束已完成出诊的排班
-// @Description 将已完成出诊的排班标记为结束状态
+// @Description 按当前数据范围将已完成出诊的排班标记为结束
 // @Tags 医疗管理/排班
 // @Produce json
 // @Security ApiKeyAuth
@@ -389,7 +389,7 @@ func (ctrl *MedicalController) StopSchedule(c *gin.Context) {
 // @Failure 500 {object} models.Response "服务器内部错误"
 // @Router /medical/schedules/{scheduleId}/finish [put]
 func (ctrl *MedicalController) FinishSchedule(c *gin.Context) {
-	if err := ctrl.scheduleService.FinishSchedule(c.Param("scheduleId"), medicalOperatorID(c)); err != nil {
+	if err := ctrl.scheduleService.FinishSchedule(c.Param("scheduleId"), medicalOperatorID(c), currentDataPermission(c)); err != nil {
 		writeMedicalError(c, err)
 		return
 	}

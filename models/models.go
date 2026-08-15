@@ -45,6 +45,7 @@ type SysRole struct {
 	RoleID     string     `gorm:"column:role_id;type:char(36);primaryKey" json:"roleId"`
 	RoleTitle  *string    `gorm:"column:role_title;type:varchar(36)" json:"roleTitle"`
 	Remark     *string    `gorm:"column:remark;type:varchar(128)" json:"remark"`
+	DataScope  string     `gorm:"column:data_scope;type:varchar(32);default:self" json:"dataScope"`
 	Status     int        `gorm:"column:status;type:tinyint;default:1" json:"status"`
 	CreateDate *time.Time `gorm:"column:create_date" json:"createDate"`
 	UpdateDate *time.Time `gorm:"column:update_date" json:"updateDate"`
@@ -136,6 +137,17 @@ type SysRoleMenu struct {
 
 func (SysRoleMenu) TableName() string {
 	return "sys_role_menu"
+}
+
+type SysRoleDept struct {
+	ID         string     `gorm:"column:id;type:char(36);primaryKey" json:"id"`
+	RoleID     string     `gorm:"column:role_id;type:char(36)" json:"roleId"`
+	DeptID     string     `gorm:"column:dept_id;type:char(36)" json:"deptId"`
+	CreateDate *time.Time `gorm:"column:create_date" json:"createDate"`
+}
+
+func (SysRoleDept) TableName() string {
+	return "sys_role_dept"
 }
 
 type SysDict struct {

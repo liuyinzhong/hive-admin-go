@@ -37,8 +37,8 @@ var (
 )
 
 type downloadTaskExporter interface {
-	Count(payload string) (int64, error)
-	Export(payload, filePath string, totalRows int64, onProgress func(int64)) (int64, error)
+	Count(payload, creatorID string) (int64, error)
+	Export(payload, creatorID, filePath string, totalRows int64, onProgress func(int64)) (int64, error)
 }
 
 type downloadTaskManager struct {
@@ -269,7 +269,7 @@ func (m *downloadTaskManager) processNext() bool {
 		m.fail(task, "不支持的导出任务类型", nil)
 		return true
 	}
-	totalRows, err := exporter.Count(task.RequestPayload)
+	totalRows, err := exporter.Count(task.RequestPayload, task.CreatorID)
 	if err != nil {
 		m.fail(task, "统计导出数据失败", err)
 		return true
@@ -310,7 +310,7 @@ func (m *downloadTaskManager) processNext() bool {
 		task.Progress = progress
 		m.publish(task)
 	}
-	processedRows, err := exporter.Export(task.RequestPayload, filePath, totalRows, onProgress)
+	processedRows, err := exporter.Export(task.RequestPayload, task.CreatorID, filePath, totalRows, onProgress)
 	if err != nil {
 		if errors.Is(err, ErrDownloadDataChanged) {
 			m.fail(task, err.Error(), err)

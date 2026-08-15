@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 )
 
@@ -18,17 +19,17 @@ func NewPrintDocumentService() *PrintDocumentService {
 	}
 }
 
-func (s *PrintDocumentService) GetPrintDocument(documentType, documentID string) (*models.PrintDocumentResponse, error) {
+func (s *PrintDocumentService) GetPrintDocument(documentType, documentID string, permission datapermission.Permission) (*models.PrintDocumentResponse, error) {
 	switch documentType {
 	case models.PrintDocumentTypePurchaseInbound:
-		return s.getPurchaseInboundPrintDocument(documentID)
+		return s.getPurchaseInboundPrintDocument(documentID, permission)
 	default:
 		return nil, fmt.Errorf("%w: 不支持的打印单据类型", ErrPrintTemplateInvalidInput)
 	}
 }
 
-func (s *PrintDocumentService) getPurchaseInboundPrintDocument(inboundID string) (*models.PrintDocumentResponse, error) {
-	detail, err := s.purchaseInboundService.GetPurchaseInboundDetail(inboundID)
+func (s *PrintDocumentService) getPurchaseInboundPrintDocument(inboundID string, permission datapermission.Permission) (*models.PrintDocumentResponse, error) {
+	detail, err := s.purchaseInboundService.GetPurchaseInboundDetail(inboundID, permission)
 	if err != nil {
 		return nil, err
 	}

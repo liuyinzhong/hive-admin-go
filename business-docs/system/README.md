@@ -15,6 +15,7 @@
 | 模块 | 规则正文 | 主要后端入口 |
 |---|---|---|
 | 登录、用户、角色、部门、菜单和接口权限 | [access-control.md](./access-control.md) | auth、user、role、dept、menu、permission |
+| 角色数据范围与全接口分类 | [data-permission.md](./data-permission.md) | datapermission、data permission middleware、各领域 Service |
 | 字典和系统参数 | [dictionary-parameter.md](./dictionary-parameter.md) | dict、param |
 | 上传与文件列表 | [file-management.md](./file-management.md) | file_controller.go、file_service.go |
 | 操作日志和登录日志 | [audit-log.md](./audit-log.md) | operation_log、login_log、audit middleware |
@@ -26,6 +27,7 @@
 ## 规则编号
 
 - SYS-ACL-*：登录、用户、角色、部门、菜单和权限。
+- SYS-DATA-*：角色数据范围、归属、全局主数据和接口分类。
 - SYS-CFG-*：字典和参数。
 - SYS-FILE-*：上传文件。
 - SYS-AUD-*：审计日志。
@@ -39,8 +41,8 @@
 ## 跨模块关系
 
 - 系统用户可以与医生档案关联，但用户授权与医生业务身份是两层校验。
+- 原子接口权限决定能否调用动作，角色数据范围决定能操作哪些记录，领域归属可继续收紧；三者不能互相替代。
 - 字典只提供可配置选项，不能代替业务文档中定义的状态流转。
 - 来源模块创建下载任务；下载中心只负责异步生成、交付和清理。
 - 外部页面公开解析和后台配置是不同访问边界。
 - 支付渠道只维护接入配置，当前不管理支付订单或退款业务。
-

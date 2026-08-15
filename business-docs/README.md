@@ -25,7 +25,7 @@
 | 开发管理 | 项目、模块、版本、需求、任务、缺陷、变更记录与统计 | [dev](./dev/README.md) |
 | 表单 | 可复用表单 Schema、设计约束和服务端提交校验 | [form](./form/README.md) |
 | 工作流 | 流程定义、画布、表单绑定、实例、待办、抄送和审批操作 | [workflow](./workflow/README.md) |
-| 系统管理 | 登录授权、用户角色部门菜单、字典参数、文件、日志、外部页面、支付渠道、消息与下载 | [system](./system/README.md) |
+| 系统管理 | 登录授权、角色数据范围、用户角色部门菜单、字典参数、文件、日志、外部页面、支付渠道、消息与下载 | [system](./system/README.md) |
 
 ## 后端源码覆盖表
 
@@ -39,7 +39,7 @@
 | controllers/dev_*；services/dev_*；models/models.go 中 Dev*；statistics/dev | [开发管理](./dev/README.md) |
 | form_schema_controller.go、form_schema_service.go、models/form_schema.go | [表单](./form/README.md) |
 | workflow_*_controller.go、workflow_*_service.go、models/workflow* | [工作流](./workflow/README.md) |
-| auth、system、user、role、dept、menu、permission、dict、param、file、audit、external_page、pay_channel、menu_message、download_task | [系统管理](./system/README.md) |
+| auth、system、user、role、dept、menu、permission、datapermission、dict、param、file、audit、external_page、pay_channel、menu_message、download_task | [系统管理](./system/README.md) |
 | router/router.go | 按路由所属资源阅读上表对应领域；跨域关系再读 CONTEXT-MAP.md |
 
 ## 不属于业务规则正文的目录

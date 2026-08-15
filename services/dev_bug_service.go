@@ -8,12 +8,14 @@ import (
 	"gorm.io/gorm"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
 
-func GetBugs(page, pageSize int, params map[string]interface{}) (*utils.PaginationResponse, error) {
-	db := database.DB.Model(&models.DevBug{}).Where("del_flag = ?", 0)
+func GetBugs(page, pageSize int, params map[string]interface{}, permission datapermission.Permission) (*utils.PaginationResponse, error) {
+	db := database.DB.Model(&models.DevBug{}).Where("dev_bug.del_flag = ?", 0)
+	db = permission.Apply(db, "dev_bug.creator_id", "dev_bug.user_id")
 
 	if bugNum, ok := params["bugNum"].(int); ok && bugNum > 0 {
 		db = db.Where("bug_num = ?", bugNum)
@@ -53,8 +55,9 @@ func GetBugs(page, pageSize int, params map[string]interface{}) (*utils.Paginati
 	})
 }
 
-func GetAllBugs(params map[string]interface{}) ([]models.BugResponse, error) {
-	db := database.DB.Model(&models.DevBug{}).Where("del_flag = ?", 0)
+func GetAllBugs(params map[string]interface{}, permission datapermission.Permission) ([]models.BugResponse, error) {
+	db := database.DB.Model(&models.DevBug{}).Where("dev_bug.del_flag = ?", 0)
+	db = permission.Apply(db, "dev_bug.creator_id", "dev_bug.user_id")
 
 	if bugNum, ok := params["bugNum"].(int); ok && bugNum > 0 {
 		db = db.Where("bug_num = ?", bugNum)
@@ -230,9 +233,10 @@ func buildBugResponses(bugs []models.DevBug) []models.BugResponse {
 	return responses
 }
 
-func GetBugByNum(bugNum int) (*models.BugResponse, error) {
+func GetBugByNum(bugNum int, permission datapermission.Permission) (*models.BugResponse, error) {
 	var bug models.DevBug
-	err := database.DB.Where("bug_num = ? AND del_flag = ?", bugNum, 0).First(&bug).Error
+	query := database.DB.Model(&models.DevBug{}).Where("bug_num = ? AND del_flag = ?", bugNum, 0)
+	err := permission.Apply(query, "dev_bug.creator_id", "dev_bug.user_id").First(&bug).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("缺陷不存在")
@@ -243,9 +247,10 @@ func GetBugByNum(bugNum int) (*models.BugResponse, error) {
 	return buildSingleBugResponse(&bug), nil
 }
 
-func GetBugsByStoryId(storyId string) ([]models.BugResponse, error) {
+func GetBugsByStoryId(storyId string, permission datapermission.Permission) ([]models.BugResponse, error) {
 	var bugs []models.DevBug
-	err := database.DB.Where("story_id = ? AND del_flag = ?", storyId, 0).Find(&bugs).Error
+	query := database.DB.Model(&models.DevBug{}).Where("story_id = ? AND del_flag = ?", storyId, 0)
+	err := permission.Apply(query, "dev_bug.creator_id", "dev_bug.user_id").Find(&bugs).Error
 	if err != nil {
 		return nil, err
 	}
@@ -341,7 +346,24 @@ func buildSingleBugResponse(bug *models.DevBug) *models.BugResponse {
 	}
 }
 
-func CreateBug(req *models.CreateBugRequest, creatorID string) error {
+func CreateBug(req *models.CreateBugRequest, creatorID string, permission datapermission.Permission) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		return createBugTx(tx, req, creatorID, permission)
+	})
+}
+
+func createBugTx(tx *gorm.DB, req *models.CreateBugRequest, creatorID string, permission datapermission.Permission) error {
+	assigneeID, err := validateRequiredDataPermissionUser(tx, req.UserID, "指派人", permission)
+	if err != nil {
+		return err
+	}
+	if err := validateDevVersionReference(tx, req.VersionID, permission); err != nil {
+		return err
+	}
+	if err := validateDevStoryReference(tx, req.StoryID, permission); err != nil {
+		return err
+	}
+
 	bugID := uuid.New().String()
 	now := time.Now()
 	bugStatus, err := parseStringInt(req.BugStatus, "bugStatus")
@@ -380,38 +402,50 @@ func CreateBug(req *models.CreateBugRequest, creatorID string) error {
 		VersionID:        req.VersionID,
 		ModuleID:         req.ModuleID,
 		StoryID:          req.StoryID,
-		UserID:           req.UserID,
+		UserID:           &assigneeID,
 		CreatorID:        &creatorID,
 		CreateDate:       &now,
 		UpdateDate:       &now,
 		DelFlag:          0,
 	}
 
-	err = database.DB.Create(&bug).Error
+	err = tx.Create(&bug).Error
 	if err != nil {
 		return err
 	}
 
-	return createChangeHistory(creatorID, bugID, 20, 0, "")
+	return createChangeHistoryTx(tx, creatorID, bugID, 20, 0, "")
 }
 
-func CreateBugs(reqs []models.CreateBugRequest, creatorID string) error {
-	for _, req := range reqs {
-		err := CreateBug(&req, creatorID)
-		if err != nil {
-			return err
+func CreateBugs(reqs []models.CreateBugRequest, creatorID string, permission datapermission.Permission) error {
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		for index := range reqs {
+			if err := createBugTx(tx, &reqs[index], creatorID, permission); err != nil {
+				return fmt.Errorf("第%d条缺陷：%w", index+1, err)
+			}
 		}
-	}
-	return nil
+		return nil
+	})
 }
 
-func UpdateBug(bugID string, req *models.UpdateBugRequest, creatorID string) error {
+func UpdateBug(bugID string, req *models.UpdateBugRequest, creatorID string, permission datapermission.Permission) error {
 	var bug models.DevBug
-	err := database.DB.Where("bug_id = ? AND del_flag = ?", bugID, 0).First(&bug).Error
+	query := database.DB.Model(&models.DevBug{}).Where("bug_id = ? AND del_flag = ?", bugID, 0)
+	err := permission.Apply(query, "dev_bug.creator_id", "dev_bug.user_id").First(&bug).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("缺陷不存在")
 		}
+		return err
+	}
+	assigneeID, err := validateRequiredDataPermissionUser(database.DB, req.UserID, "指派人", permission)
+	if err != nil {
+		return err
+	}
+	if err := validateDevVersionReference(database.DB, req.VersionID, permission); err != nil {
+		return err
+	}
+	if err := validateDevStoryReference(database.DB, req.StoryID, permission); err != nil {
 		return err
 	}
 	bugStatus, err := parseStringInt(req.BugStatus, "bugStatus")
@@ -436,32 +470,38 @@ func UpdateBug(bugID string, req *models.UpdateBugRequest, creatorID string) err
 	}
 
 	now := time.Now()
-	err = database.DB.Model(&bug).Updates(map[string]interface{}{
-		"bug_title":     req.BugTitle,
-		"bug_status":    bugStatus,
-		"bug_level":     bugLevel,
-		"bug_source":    bugSource,
-		"bug_type":      bugType,
-		"bug_env":       bugEnv,
-		"bug_ua":        req.BugUa,
-		"project_id":    req.ProjectID,
-		"bug_rich_text": req.BugRichText,
-		"version_id":    req.VersionID,
-		"module_id":     req.ModuleID,
-		"story_id":      req.StoryID,
-		"user_id":       req.UserID,
-		"update_date":   now,
-	}).Error
-	if err != nil {
-		return err
-	}
-
-	return createChangeHistory(creatorID, bugID, 20, 10, "")
+	return updateDevRecordWithHistory(creatorID, bugID, 20, 10, "", func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevBug{}).Where("bug_id = ? AND del_flag = ?", bugID, 0)
+		result := permission.Apply(updateQuery, "dev_bug.creator_id", "dev_bug.user_id").Updates(map[string]interface{}{
+			"bug_title":     req.BugTitle,
+			"bug_status":    bugStatus,
+			"bug_level":     bugLevel,
+			"bug_source":    bugSource,
+			"bug_type":      bugType,
+			"bug_env":       bugEnv,
+			"bug_ua":        req.BugUa,
+			"project_id":    req.ProjectID,
+			"bug_rich_text": req.BugRichText,
+			"version_id":    req.VersionID,
+			"module_id":     req.ModuleID,
+			"story_id":      req.StoryID,
+			"user_id":       assigneeID,
+			"update_date":   now,
+		})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return fmt.Errorf("缺陷不存在或无权操作")
+		}
+		return nil
+	})
 }
 
-func UpdateBugField(bugID string, key string, value interface{}, creatorID string) error {
+func UpdateBugField(bugID string, key string, value interface{}, creatorID string, permission datapermission.Permission) error {
 	var bug models.DevBug
-	err := database.DB.Where("bug_id = ? AND del_flag = ?", bugID, 0).First(&bug).Error
+	query := database.DB.Model(&models.DevBug{}).Where("bug_id = ? AND del_flag = ?", bugID, 0)
+	err := permission.Apply(query, "dev_bug.creator_id", "dev_bug.user_id").First(&bug).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("缺陷不存在")
@@ -477,7 +517,15 @@ func UpdateBugField(bugID string, key string, value interface{}, creatorID strin
 	updateMap := make(map[string]interface{})
 	switch key {
 	case "userId":
-		updateMap["user_id"] = value
+		userID, err := dataPermissionStringValue(value, "指派人ID")
+		if err != nil {
+			return err
+		}
+		validatedID, err := validateRequiredDataPermissionUser(database.DB, &userID, "指派人", permission)
+		if err != nil {
+			return err
+		}
+		updateMap["user_id"] = validatedID
 	case "bugLevel":
 		updateMap["bug_level"] = value
 	case "bugEnv":
@@ -490,17 +538,23 @@ func UpdateBugField(bugID string, key string, value interface{}, creatorID strin
 
 	updateMap["update_date"] = time.Now()
 
-	err = database.DB.Model(&bug).Updates(updateMap).Error
-	if err != nil {
-		return err
-	}
-
-	return createChangeHistory(creatorID, bugID, 20, 10, "")
+	return updateDevRecordWithHistory(creatorID, bugID, 20, 10, "", func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevBug{}).Where("bug_id = ? AND del_flag = ?", bugID, 0)
+		result := permission.Apply(updateQuery, "dev_bug.creator_id", "dev_bug.user_id").Updates(updateMap)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return fmt.Errorf("缺陷不存在或无权操作")
+		}
+		return nil
+	})
 }
 
-func UpdateBugNext(bugID string, bugStatus string, changeRichText string, creatorID string) error {
+func UpdateBugNext(bugID string, bugStatus string, changeRichText string, creatorID string, permission datapermission.Permission) error {
 	var bug models.DevBug
-	err := database.DB.Where("bug_id = ? AND del_flag = ?", bugID, 0).First(&bug).Error
+	query := database.DB.Model(&models.DevBug{}).Where("bug_id = ? AND del_flag = ?", bugID, 0)
+	err := permission.Apply(query, "dev_bug.creator_id", "dev_bug.user_id").First(&bug).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("缺陷不存在")
@@ -523,17 +577,23 @@ func UpdateBugNext(bugID string, bugStatus string, changeRichText string, creato
 		updateMap["bug_confirm_status"] = 0
 	}
 
-	err = database.DB.Model(&bug).Updates(updateMap).Error
-	if err != nil {
-		return err
-	}
-
-	return createChangeHistory(creatorID, bugID, 20, 40, changeRichText)
+	return updateDevRecordWithHistory(creatorID, bugID, 20, 40, changeRichText, func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevBug{}).Where("bug_id = ? AND del_flag = ?", bugID, 0)
+		result := permission.Apply(updateQuery, "dev_bug.creator_id", "dev_bug.user_id").Updates(updateMap)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return fmt.Errorf("缺陷不存在或无权操作")
+		}
+		return nil
+	})
 }
 
-func ConfirmBug(bugID string, req *models.ConfirmBugRequest, creatorID string) error {
+func ConfirmBug(bugID string, req *models.ConfirmBugRequest, creatorID string, permission datapermission.Permission) error {
 	var bug models.DevBug
-	err := database.DB.Where("bug_id = ? AND del_flag = ?", bugID, 0).First(&bug).Error
+	query := database.DB.Model(&models.DevBug{}).Where("bug_id = ? AND del_flag = ?", bugID, 0)
+	err := permission.Apply(query, "dev_bug.creator_id", "dev_bug.user_id").First(&bug).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return fmt.Errorf("缺陷不存在")
@@ -558,19 +618,28 @@ func ConfirmBug(bugID string, req *models.ConfirmBugRequest, creatorID string) e
 		updateMap["bug_status"] = 1
 	}
 
-	err = database.DB.Model(&bug).Updates(updateMap).Error
+	return updateDevRecordWithHistory(creatorID, bugID, 20, 50, req.ChangeRichText, func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevBug{}).Where("bug_id = ? AND del_flag = ?", bugID, 0)
+		result := permission.Apply(updateQuery, "dev_bug.creator_id", "dev_bug.user_id").Updates(updateMap)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return fmt.Errorf("缺陷不存在或无权操作")
+		}
+		return nil
+	})
+}
+
+func DeleteBugs(bugIDs []string, creatorID string, permission datapermission.Permission) error {
+	var bugs []models.DevBug
+	query := database.DB.Model(&models.DevBug{}).Where("bug_id IN ? AND del_flag = ?", bugIDs, 0)
+	err := permission.Apply(query, "dev_bug.creator_id", "dev_bug.user_id").Find(&bugs).Error
 	if err != nil {
 		return err
 	}
-
-	return createChangeHistory(creatorID, bugID, 20, 50, req.ChangeRichText)
-}
-
-func DeleteBugs(bugIDs []string, creatorID string) error {
-	var bugs []models.DevBug
-	err := database.DB.Where("bug_id IN ? AND del_flag = ?", bugIDs, 0).Find(&bugs).Error
-	if err != nil {
-		return err
+	if len(bugs) != len(uniqueNonEmptyStrings(bugIDs)) {
+		return fmt.Errorf("缺陷不存在或无权操作")
 	}
 
 	for _, b := range bugs {
@@ -579,16 +648,31 @@ func DeleteBugs(bugIDs []string, creatorID string) error {
 		}
 	}
 
-	err = database.DB.Model(&models.DevBug{}).Where("bug_id IN ?", bugIDs).Updates(map[string]interface{}{
-		"del_flag":    1,
-		"update_date": time.Now(),
-	}).Error
+	accessibleIDs := make([]string, 0, len(bugs))
+	for _, bug := range bugs {
+		accessibleIDs = append(accessibleIDs, bug.BugID)
+	}
+	err = database.DB.Transaction(func(tx *gorm.DB) error {
+		updateQuery := tx.Model(&models.DevBug{}).Where("bug_id IN ? AND del_flag = ? AND bug_status = ?", accessibleIDs, 0, 0)
+		result := permission.Apply(updateQuery, "dev_bug.creator_id", "dev_bug.user_id").Updates(map[string]interface{}{
+			"del_flag":    1,
+			"update_date": time.Now(),
+		})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != int64(len(accessibleIDs)) {
+			return fmt.Errorf("缺陷不存在或无权操作")
+		}
+		for _, bug := range bugs {
+			if err := createChangeHistoryTx(tx, creatorID, bug.BugID, 20, 20, ""); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		return err
-	}
-
-	for _, b := range bugs {
-		createChangeHistory(creatorID, b.BugID, 20, 20, "")
 	}
 	return nil
 }

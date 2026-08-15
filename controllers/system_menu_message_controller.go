@@ -45,7 +45,7 @@ func (ctrl *MenuMessageController) GetUnreadSummary(c *gin.Context) {
 
 // CreateDemoMessages 创建 Demo 菜单消息。
 // @Summary 创建 Demo 菜单消息
-// @Description 为指定用户在指定叶子菜单下新增指定数量的测试未读消息
+// @Description 为当前数据范围内的指定用户在指定叶子菜单下新增指定数量的测试未读消息
 // @Tags 系统管理/消息推送
 // @Accept json
 // @Produce json
@@ -64,7 +64,7 @@ func (ctrl *MenuMessageController) CreateDemoMessages(c *gin.Context) {
 		return
 	}
 
-	if err := ctrl.service.CreateDemoMessages(req); err != nil {
+	if err := ctrl.service.CreateDemoMessages(req, currentDataPermission(c)); err != nil {
 		if errors.Is(err, services.ErrMenuMessageInvalidMenu) || errors.Is(err, services.ErrMenuMessageInvalidUsers) {
 			c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
 			return

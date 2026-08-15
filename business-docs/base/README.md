@@ -9,6 +9,7 @@
 3. 生产企业、供应商、客户等主体读 [企业主体规则](./enterprise.md)。
 4. 通用层级分类读 [分类体系规则](./classification.md)。
 5. 涉及页面时继续阅读前端 hive/business-docs/base。
+6. 本机构、企业主体和分类体系均按 [系统数据权限分类](../system/data-permission.md) 作为全局主数据，不按创建人切分。
 
 ## 模块
 

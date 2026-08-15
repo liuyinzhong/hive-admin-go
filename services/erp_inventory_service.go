@@ -14,6 +14,7 @@ import (
 	"gorm.io/gorm/clause"
 
 	"hive-admin-go/database"
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 )
@@ -48,9 +49,9 @@ func NewErpInventoryService() *ErpInventoryService {
 	return &ErpInventoryService{}
 }
 
-func (s *ErpInventoryService) GetInventoryBalanceList(req models.ErpInventoryBalanceListRequest) (*utils.PaginationResponse, error) {
+func (s *ErpInventoryService) GetInventoryBalanceList(req models.ErpInventoryBalanceListRequest, permission datapermission.Permission) (*utils.PaginationResponse, error) {
 	page, pageSize := normalizeErpInventoryPage(req.Page, req.PageSize, 20, 100)
-	query := s.baseInventoryBalanceQuery()
+	query := permission.Apply(s.baseInventoryBalanceQuery(), "erp_inventory_balance.creator_id")
 	var err error
 	query, err = s.applyInventoryBalanceFilters(query, req)
 	if err != nil {
@@ -99,16 +100,17 @@ func buildInventoryBalanceOrder(sorts string) string {
 	})
 }
 
-func (s *ErpInventoryService) GetInventoryMovements(balanceID string, req models.ErpInventoryMovementListRequest) (*utils.PaginationResponse, error) {
+func (s *ErpInventoryService) GetInventoryMovements(balanceID string, req models.ErpInventoryMovementListRequest, permission datapermission.Permission) (*utils.PaginationResponse, error) {
 	if err := validateErpInventoryUUID(balanceID, "库存余额ID"); err != nil {
 		return nil, err
 	}
-	if _, err := s.getExistingInventoryBalance(database.DB, balanceID); err != nil {
+	if err := s.ensureInventoryBalanceAccess(database.DB, balanceID, permission); err != nil {
 		return nil, err
 	}
 
 	page, pageSize := normalizeErpInventoryPage(req.Page, req.PageSize, 20, 100)
 	query := s.baseInventoryMovementQuery().Where("erp_inventory_movement.balance_id = ?", balanceID)
+	query = permission.Apply(query, "erp_inventory_movement.operator_id")
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
@@ -138,7 +140,7 @@ func (s *ErpInventoryService) GetInventoryMovements(balanceID string, req models
 	return &utils.PaginationResponse{Items: erpInventoryMovementRowsToResponses(rows), Total: total}, nil
 }
 
-func (s *ErpInventoryService) GetInventoryMovementsBySource(req models.ErpInventorySourceMovementListRequest) (*utils.PaginationResponse, error) {
+func (s *ErpInventoryService) GetInventoryMovementsBySource(req models.ErpInventorySourceMovementListRequest, permission datapermission.Permission) (*utils.PaginationResponse, error) {
 	if strings.TrimSpace(req.SourceBillType) == "" {
 		return nil, fmt.Errorf("%w: 来源单据类型不能为空", ErrErpInventoryInvalidInput)
 	}
@@ -152,6 +154,7 @@ func (s *ErpInventoryService) GetInventoryMovementsBySource(req models.ErpInvent
 		strings.TrimSpace(req.SourceBillType),
 		strings.TrimSpace(req.SourceBillID),
 	)
+	query = permission.Apply(query, "erp_inventory_movement.operator_id")
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
@@ -181,9 +184,9 @@ func (s *ErpInventoryService) GetInventoryMovementsBySource(req models.ErpInvent
 	return &utils.PaginationResponse{Items: erpInventoryMovementRowsToResponses(rows), Total: total}, nil
 }
 
-func (s *ErpInventoryService) GetInventoryTraceCodeList(req models.ErpInventoryTraceCodeListRequest) (*utils.PaginationResponse, error) {
+func (s *ErpInventoryService) GetInventoryTraceCodeList(req models.ErpInventoryTraceCodeListRequest, permission datapermission.Permission) (*utils.PaginationResponse, error) {
 	page, pageSize := normalizeErpInventoryPage(req.Page, req.PageSize, 20, 100)
-	query := s.baseInventoryTraceCodeQuery()
+	query := permission.Apply(s.baseInventoryTraceCodeQuery(), "erp_inventory_trace_code.creator_id")
 	if traceCode := strings.TrimSpace(req.TraceCode); traceCode != "" {
 		query = query.Where("erp_inventory_trace_code.trace_code = ?", traceCode)
 	}
@@ -231,12 +234,13 @@ func (s *ErpInventoryService) GetInventoryTraceCodeList(req models.ErpInventoryT
 	return &utils.PaginationResponse{Items: erpInventoryTraceCodeRowsToResponses(rows), Total: total}, nil
 }
 
-func (s *ErpInventoryService) GetInventoryTraceCodeMovements(traceID string, req models.ErpInventoryMovementListRequest) (*utils.PaginationResponse, error) {
+func (s *ErpInventoryService) GetInventoryTraceCodeMovements(traceID string, req models.ErpInventoryMovementListRequest, permission datapermission.Permission) (*utils.PaginationResponse, error) {
 	if err := validateErpInventoryUUID(traceID, "追溯码ID"); err != nil {
 		return nil, err
 	}
 	var count int64
-	if err := database.DB.Model(&models.ErpInventoryTraceCode{}).Where("trace_id = ?", traceID).Count(&count).Error; err != nil {
+	traceQuery := database.DB.Model(&models.ErpInventoryTraceCode{}).Where("trace_id = ?", traceID)
+	if err := permission.Apply(traceQuery, "erp_inventory_trace_code.creator_id").Count(&count).Error; err != nil {
 		return nil, err
 	}
 	if count == 0 {
@@ -246,6 +250,7 @@ func (s *ErpInventoryService) GetInventoryTraceCodeMovements(traceID string, req
 	query := s.baseInventoryMovementQuery().
 		Joins("INNER JOIN erp_inventory_movement_trace_code ON erp_inventory_movement_trace_code.movement_id = erp_inventory_movement.movement_id").
 		Where("erp_inventory_movement_trace_code.trace_id = ?", traceID)
+	query = permission.Apply(query, "erp_inventory_movement.operator_id")
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
 		return nil, err
@@ -267,7 +272,7 @@ func (s *ErpInventoryService) GetInventoryTraceCodeMovements(traceID string, req
 	return &utils.PaginationResponse{Items: erpInventoryMovementRowsToResponses(rows), Total: total}, nil
 }
 
-func (s *ErpInventoryService) CreateInitialStocks(req models.CreateErpInventoryInitialStockRequest, operatorID string) (*models.CreateErpInventoryInitialStockResponse, error) {
+func (s *ErpInventoryService) CreateInitialStocks(req models.CreateErpInventoryInitialStockRequest, operatorID string, permission datapermission.Permission) (*models.CreateErpInventoryInitialStockResponse, error) {
 	if err := validateErpInventoryUUID(req.WarehouseID, "仓库ID"); err != nil {
 		return nil, err
 	}
@@ -298,7 +303,7 @@ func (s *ErpInventoryService) CreateInitialStocks(req models.CreateErpInventoryI
 				SourceBillType: models.InventorySourceBillTypeInitialStock,
 				SourceBillNo:   sourceBillNo,
 				MovementType:   models.InventoryMovementTypeInitialIn,
-			}, operatorID); err != nil {
+			}, operatorID, permission); err != nil {
 				return err
 			}
 			movementCount++
@@ -603,6 +608,18 @@ func erpInventoryMovementCountSubquery() *gorm.DB {
 		Group("balance_id")
 }
 
+func (s *ErpInventoryService) ensureInventoryBalanceAccess(tx *gorm.DB, balanceID string, permission datapermission.Permission) error {
+	query := tx.Model(&models.ErpInventoryBalance{}).Where("balance_id = ?", balanceID)
+	var count int64
+	if err := permission.Apply(query, "erp_inventory_balance.creator_id").Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		return fmt.Errorf("%w: 库存余额不存在或无权访问", ErrErpInventoryNotFound)
+	}
+	return nil
+}
+
 func (s *ErpInventoryService) getExistingInventoryBalance(tx *gorm.DB, balanceID string) (*models.ErpInventoryBalance, error) {
 	var balance models.ErpInventoryBalance
 	if err := tx.Where("balance_id = ?", balanceID).First(&balance).Error; err != nil {
@@ -695,7 +712,7 @@ type erpInventoryInMovementContext struct {
 	MovementType   string
 }
 
-func (s *ErpInventoryService) createInventoryInMovement(tx *gorm.DB, warehouse models.ErpWarehouse, sku models.ProductSku, item normalizedErpInventoryInboundItem, context erpInventoryInMovementContext, operatorID string) error {
+func (s *ErpInventoryService) createInventoryInMovement(tx *gorm.DB, warehouse models.ErpWarehouse, sku models.ProductSku, item normalizedErpInventoryInboundItem, context erpInventoryInMovementContext, operatorID string, permission datapermission.Permission) error {
 	now := time.Now().In(erpInventoryLocation)
 	if err := validateErpInventoryTraceMode(sku.TraceMode, item.Quantity, item.TraceCodes); err != nil {
 		return err
@@ -722,6 +739,9 @@ func (s *ErpInventoryService) createInventoryInMovement(tx *gorm.DB, warehouse m
 	afterMinCount := changeMinCount
 	balanceID := utils.GenerateUUID()
 	if balance != nil {
+		if err := s.ensureInventoryBalanceAccess(tx, balance.BalanceID, permission); err != nil {
+			return err
+		}
 		if sku.TraceMode == models.ProductSkuTraceModeRequired {
 			if err := s.ensureTraceBalanceConsistency(tx, balance.BalanceID, balance.PackageUnitCount); err != nil {
 				return err

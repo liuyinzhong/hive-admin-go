@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 
@@ -12,13 +13,22 @@ import (
 
 type inventoryBalanceDownloadExporter struct{}
 
-func (e *inventoryBalanceDownloadExporter) Count(payload string) (int64, error) {
-	req, err := parseInventoryBalanceExportRequest(payload)
+type InventoryBalanceExportPayload struct {
+	Request models.InventoryBalanceExportRequest `json:"request"`
+}
+
+func NewInventoryBalanceExportPayload(request models.InventoryBalanceExportRequest) InventoryBalanceExportPayload {
+	return InventoryBalanceExportPayload{Request: request}
+}
+
+func (e *inventoryBalanceDownloadExporter) Count(payload, creatorID string) (int64, error) {
+	req, permission, err := parseInventoryBalanceExportRequest(payload, creatorID)
 	if err != nil {
 		return 0, err
 	}
 	service := NewErpInventoryService()
-	query, err := service.applyInventoryBalanceFilters(service.baseInventoryBalanceExportQuery(), req)
+	query := permission.Apply(service.baseInventoryBalanceExportQuery(), "erp_inventory_balance.creator_id")
+	query, err = service.applyInventoryBalanceFilters(query, req)
 	if err != nil {
 		return 0, err
 	}
@@ -29,13 +39,14 @@ func (e *inventoryBalanceDownloadExporter) Count(payload string) (int64, error) 
 	return total, nil
 }
 
-func (e *inventoryBalanceDownloadExporter) Export(payload, filePath string, totalRows int64, onProgress func(int64)) (int64, error) {
-	req, err := parseInventoryBalanceExportRequest(payload)
+func (e *inventoryBalanceDownloadExporter) Export(payload, creatorID, filePath string, totalRows int64, onProgress func(int64)) (int64, error) {
+	req, permission, err := parseInventoryBalanceExportRequest(payload, creatorID)
 	if err != nil {
 		return 0, err
 	}
 	service := NewErpInventoryService()
-	query, err := service.applyInventoryBalanceFilters(service.baseInventoryBalanceExportQuery(), req)
+	query := permission.Apply(service.baseInventoryBalanceExportQuery(), "erp_inventory_balance.creator_id")
+	query, err = service.applyInventoryBalanceFilters(query, req)
 	if err != nil {
 		return 0, err
 	}
@@ -96,10 +107,17 @@ func (e *inventoryBalanceDownloadExporter) Export(payload, filePath string, tota
 	return processed, err
 }
 
-func parseInventoryBalanceExportRequest(payload string) (models.ErpInventoryBalanceListRequest, error) {
-	var request models.InventoryBalanceExportRequest
-	if err := json.Unmarshal([]byte(payload), &request); err != nil {
-		return models.ErpInventoryBalanceListRequest{}, err
+func parseInventoryBalanceExportRequest(payload, creatorID string) (models.ErpInventoryBalanceListRequest, datapermission.Permission, error) {
+	request, err := decodeInventoryBalanceExportRequest(payload)
+	if err != nil {
+		return models.ErpInventoryBalanceListRequest{}, datapermission.Permission{}, err
+	}
+	if creatorID == "" {
+		return models.ErpInventoryBalanceListRequest{}, datapermission.Permission{}, fmt.Errorf("导出任务缺少创建用户")
+	}
+	permission, err := resolveDataPermission(creatorID)
+	if err != nil {
+		return models.ErpInventoryBalanceListRequest{}, datapermission.Permission{}, err
 	}
 	return models.ErpInventoryBalanceListRequest{
 		WarehouseID:  request.WarehouseID,
@@ -107,5 +125,23 @@ func parseInventoryBalanceExportRequest(payload string) (models.ErpInventoryBala
 		BatchNo:      request.BatchNo,
 		OnlyPositive: request.OnlyPositive,
 		Sorts:        request.Sorts,
-	}, nil
+	}, permission, nil
+}
+
+func decodeInventoryBalanceExportRequest(payload string) (models.InventoryBalanceExportRequest, error) {
+	var envelope struct {
+		Request json.RawMessage `json:"request"`
+	}
+	if err := json.Unmarshal([]byte(payload), &envelope); err != nil {
+		return models.InventoryBalanceExportRequest{}, err
+	}
+	requestPayload := []byte(payload)
+	if len(envelope.Request) > 0 && string(envelope.Request) != "null" {
+		requestPayload = envelope.Request
+	}
+	var request models.InventoryBalanceExportRequest
+	if err := json.Unmarshal(requestPayload, &request); err != nil {
+		return models.InventoryBalanceExportRequest{}, err
+	}
+	return request, nil
 }
