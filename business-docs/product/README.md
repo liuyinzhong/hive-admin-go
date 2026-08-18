@@ -45,7 +45,7 @@ flowchart LR
 
 ## 代码入口
 
-- Router：`router/router.go` 中 `/api/product`。
+- Router：`router/product.go` 中 `/api/product`。
 - Model/DTO：`models/product_*.go`。
 - Service：`services/product_*_service.go`。
 - Controller：`controllers/product_*_controller.go`。

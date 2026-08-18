@@ -46,6 +46,6 @@ SKU 价格独立归属于一个 SKU，并按价格类型、适用范围和生效
 - Model/DTO：`models/product_sku_price.go`。
 - Service：`services/product_sku_price_service.go`。
 - Controller：`controllers/product_sku_price_controller.go`。
-- Router：`router/router.go` 中 `/api/product/skus/:skuId/prices`。
+- Router：`router/product.go` 中 `/api/product/skus/:skuId/prices`。
 - 前端：`hive/apps/web-antdv-next/src/views/product/spu/components/sku-price`。
 

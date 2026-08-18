@@ -76,5 +76,5 @@ flowchart LR
 - Service：`services/erp_purchase_inbound_service.go`。
 - 库存写入：`services/erp_inventory_service.go`。
 - Controller：`controllers/erp_purchase_inbound_controller.go`。
-- Router：`router/router.go` 中 `/api/erp/purchaseInbounds`。
+- Router：`router/erp.go` 中 `/api/erp/purchaseInbounds`。
 - 前端：`hive/apps/web-antdv-next/src/views/erp/purchaseInbound`。

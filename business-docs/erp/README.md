@@ -72,7 +72,7 @@ flowchart LR
 
 ## 代码入口
 
-- 路由：`router/router.go` 的 `/api/erp` 分组。
+- 路由：`router/erp.go` 的 `/api/erp` 分组。
 - Controller：`controllers/erp_*_controller.go`。
 - Model/DTO：`models/erp_*.go`。
 - Service：`services/erp_*_service.go`。

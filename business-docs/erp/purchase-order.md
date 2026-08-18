@@ -82,5 +82,5 @@ stateDiagram-v2
 - Model/DTO：`models/erp_purchase_order.go`。
 - Service：`services/erp_purchase_order_service.go`。
 - Controller：`controllers/erp_purchase_order_controller.go`。
-- Router：`router/router.go` 中 `/api/erp/purchaseOrders`。
+- Router：`router/erp.go` 中 `/api/erp/purchaseOrders`。
 - 前端：`hive/apps/web-antdv-next/src/views/erp/purchaseOrder`。

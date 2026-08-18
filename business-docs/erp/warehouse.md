@@ -67,5 +67,5 @@
 - Model/DTO：`models/erp_warehouse.go`、`models/erp_warehouse_space.go`。
 - Service：`services/erp_warehouse_service.go`、`services/erp_warehouse_space_service.go`。
 - Controller：`controllers/erp_warehouse_controller.go`、`controllers/erp_warehouse_space_controller.go`。
-- Router：`router/router.go` 中 `/api/erp/warehouses`。
+- Router：`router/erp.go` 中 `/api/erp/warehouses`。
 - 前端：`hive/apps/web-antdv-next/src/views/erp/warehouse`。

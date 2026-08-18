@@ -60,6 +60,6 @@ Demo 接口每次可为一个或多个目标用户各创建 1 至 1000 条固定
 - Model/DTO：`models/menu_message.go`。
 - Service：`services/menu_message_service.go`。
 - Controller：`controllers/system_menu_message_controller.go`。
-- Router：`router/router.go` 中 `/api/system/messages`。
+- Router：`router/system.go` 中 `/api/system/messages`。
 - 前端 Store：`hive/apps/web-antdv-next/src/store/menu-message.ts`。
 - 前端 Demo：`hive/apps/web-antdv-next/src/views/system/message/demo.vue`。

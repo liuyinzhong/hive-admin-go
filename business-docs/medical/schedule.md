@@ -108,5 +108,5 @@ stateDiagram-v2
 - Model/DTO：`models/medical_schedule.go`、`models/medical_schedule_extension.go`。
 - Service：`services/medical_schedule_service.go`、`medical_schedule_validation.go`、`medical_schedule_generation.go`、`medical_schedule_auto.go`。
 - Controller：`controllers/medical_schedule_controller.go`。
-- Router：`router/router.go` 中 `/api/medical/scheduleTemplates`、`schedules`、`scheduleTasks`。
+- Router：`router/medical.go` 中 `/api/medical/scheduleTemplates`、`schedules`、`scheduleTasks`。
 - 前端：`hive/apps/web-antdv-next/src/views/medical/schedule`。

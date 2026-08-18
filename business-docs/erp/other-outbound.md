@@ -78,5 +78,5 @@ flowchart LR
 - Service：`services/erp_other_outbound_service.go`。
 - 库存扣减：`services/erp_inventory_service.go`。
 - Controller：`controllers/erp_other_outbound_controller.go`。
-- Router：`router/router.go` 中 `/api/erp/otherOutbounds`。
+- Router：`router/erp.go` 中 `/api/erp/otherOutbounds`。
 - 前端：`hive/apps/web-antdv-next/src/views/erp/otherOutbound`。

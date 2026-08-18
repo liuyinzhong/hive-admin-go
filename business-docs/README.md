@@ -40,7 +40,7 @@
 | form_schema_controller.go、form_schema_service.go、models/form_schema.go | [表单](./form/README.md) |
 | workflow_*_controller.go、workflow_*_service.go、models/workflow* | [工作流](./workflow/README.md) |
 | auth、system、user、role、dept、menu、permission、datapermission、dict、param、file、audit、external_page、pay_channel、menu_message、download_task | [系统管理](./system/README.md) |
-| router/router.go | 按路由所属资源阅读上表对应领域；跨域关系再读 CONTEXT-MAP.md |
+| router/（按领域拆分为 router.go、system.go、dev.go、base.go、erp.go、product.go、medical.go、print.go、form.go、workflow.go） | 按路由所属资源阅读上表对应领域；跨域关系再读 CONTEXT-MAP.md |
 
 ## 不属于业务规则正文的目录
 

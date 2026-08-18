@@ -63,5 +63,5 @@ SKU 档案列表以真实 SKU 为分页边界，一行对应一条 SKU，并在�
 
 - Model/DTO：`models/product_spu.go`、`product_rp.go`、`product_mp.go`、`product_sku.go`。
 - Service：`services/product_spu_service.go`、`product_rp_service.go`、`product_mp_service.go`、`product_sku_service.go`。
-- Router：`router/router.go` 中 `/api/product/spus`、`rps`、`mps`、`skus`。
+- Router：`router/product.go` 中 `/api/product/spus`、`rps`、`mps`、`skus`。
 - 前端：`hive/apps/web-antdv-next/src/views/product/spu`、`hive/apps/web-antdv-next/src/views/product/sku`。

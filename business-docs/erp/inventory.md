@@ -88,6 +88,6 @@
 - 导出：`services/erp_inventory_download_exporter.go`。
 - 异步导出通用规则：[系统下载中心](../system/download-center.md)。
 - Controller：`controllers/erp_inventory_controller.go`。
-- Router：`router/router.go` 中 `/api/erp/inventory`。
+- Router：`router/erp.go` 中 `/api/erp/inventory`。
 - 前端余额：`hive/apps/web-antdv-next/src/views/erp/inventory`。
 - 前端追溯码：`hive/apps/web-antdv-next/src/views/erp/traceCode`。

@@ -149,7 +149,7 @@
 - Model：`models/medical_outpatient.go`、`models/medical_registration.go`。
 - Service：`services/medical_diagnosis_service.go`、`medical_outpatient_service.go`、`medical_prescription_service.go`。
 - Controller：`controllers/medical_diagnosis_controller.go`、`medical_outpatient_controller.go`。
-- Router：`router/router.go` 中 `/api/medical`。
+- Router：`router/medical.go` 中 `/api/medical`。
 - 前端 API：`hive/apps/web-antdv-next/src/api/medical/diagnosis.ts`、`outpatient.ts`。
 - 前端页面：`hive/apps/web-antdv-next/src/views/medical/diagnosis`、`doctor-workbench`、`prescription-review`。
 

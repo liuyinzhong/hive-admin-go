@@ -57,6 +57,6 @@
 - Model/DTO：`models/medical.go` 的 `MedDoctor`、`MedDoctorDepartment` 和医生请求响应结构。
 - Service：`services/medical_doctor_service.go`。
 - Controller：`controllers/medical_controller.go`。
-- Router：`router/router.go` 中 `/api/medical/doctors`。
+- Router：`router/medical.go` 中 `/api/medical/doctors`。
 - 前端：`hive/apps/web-antdv-next/src/views/medical/doctor`。
 
