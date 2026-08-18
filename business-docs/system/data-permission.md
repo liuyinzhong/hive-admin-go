@@ -59,9 +59,10 @@ Bearer Token 认证
 |---|---|---|
 | `/uploads/**` | 公开静态资源 | Gin 静态目录，不经过认证、接口权限或数据权限；不得用于需要私有下载授权的文件 |
 | `/api/public/externalPages/:name` | 公开接口 | 按已启用外部页面名称公开解析 |
+| `/api/public/downloads/preview/:token` | 公开接口 | 通过 JWT 签名校验确保 token 由本服务签发且未过期，再复用创建者和文件可用性校验；kkFileView 等外部预览服务无登录态时通过此接口取文件 |
 | `POST /api/auth/login` | 公开接口 | 建立登录身份 |
 | `/api/auth/profile`、`menus`、`codes`、`logout` | 当前用户上下文 | 只处理当前 Token 对应用户，不使用角色行范围 |
-| `/api/system/downloads/**` | 当前用户归属 | 任务列表和文件下载只允许创建者 |
+| `/api/system/downloads/**` | 当前用户归属 | 任务列表、文件下载和预览链接生成只允许创建者 |
 | `/api/system/messages/unreadSummary`、`stream`、`read` | 当前用户归属 | 只查询、订阅或更新当前接收者 |
 | `POST /api/system/messages/demo` | 角色数据范围 | 除接口权限外，每个目标用户还必须在当前用户数据范围内；整批越界则失败 |
 | `POST /api/system/upload` | 创建归属 | 元数据创建人为当前用户；实际 `/uploads/**` 访问仍是公开边界 |

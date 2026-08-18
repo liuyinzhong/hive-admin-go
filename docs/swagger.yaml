@@ -1497,6 +1497,12 @@ definitions:
       startTime:
         type: string
     type: object
+  models.DownloadPreviewURLResponse:
+    properties:
+      previewUrl:
+        example: /api/public/downloads/preview/eyJhbGciOiJIUzI1NiJ9.xxx
+        type: string
+    type: object
   models.DownloadTaskCreatedResponse:
     properties:
       id:
@@ -19393,6 +19399,42 @@ paths:
       summary: 获取启用通用产品选项
       tags:
       - 产品档案/通用产品
+  /public/downloads/preview/{token}:
+    get:
+      description: 数据权限：公开接口。通过 JWT 签名校验确保 token 由本服务签发且未过期，再复用下载校验确保任务仍属于签发用户且文件可用。kkFileView
+        等外部预览服务无登录态时通过此接口取文件。
+      parameters:
+      - description: 预览 token
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 文件流
+          schema:
+            type: file
+        "401":
+          description: 预览链接无效或已过期
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 任务不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 文件不可用
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 预览失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: 通过预览 token 获取文件
+      tags:
+      - 系统管理/下载中心
   /public/externalPages/{name}:
     get:
       parameters:
@@ -20121,6 +20163,49 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 下载导出文件
+      tags:
+      - 系统管理/下载中心
+  /system/downloads/{id}/preview-url:
+    get:
+      description: 数据权限：当前用户归属。校验任务属于当前登录用户、状态为成功且文件未过期后，生成 5 分钟有效的预览 token，返回相对路径。前端拼接后传给
+        kkFileView 等外部预览服务调用。
+      parameters:
+      - description: 下载任务ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 生成成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DownloadPreviewURLResponse'
+              type: object
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: 任务不存在
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 文件不可用
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 生成失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 生成下载文件预览链接
       tags:
       - 系统管理/下载中心
   /system/externalPages:

@@ -51,6 +51,11 @@ type DownloadTaskCreatedResponse struct {
 	ID string `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
 }
 
+// DownloadPreviewURLResponse 预览链接生成响应，返回前端可拼接的相对路径。
+type DownloadPreviewURLResponse struct {
+	PreviewURL string `json:"previewUrl" example:"/api/public/downloads/preview/eyJhbGciOiJIUzI1NiJ9.xxx"`
+}
+
 type DownloadTaskChangedEvent struct {
 	ID            string `json:"id"`
 	Status        string `json:"status"`

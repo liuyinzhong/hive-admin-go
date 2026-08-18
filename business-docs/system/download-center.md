@@ -84,12 +84,25 @@ Worker 以下载任务记录不可由请求负载覆盖的 `creator_id` 作为�
 
 导出器同时兼容历史任务直接保存筛选条件的裸 JSON，以及当前 `{ "request": ... }` 封装格式；旧封装中即使存在 `userId` 也会被忽略，权限主体只取任务表的创建者。因此升级后遗留 `pending` 任务可以继续安全执行。
 
+### SYS-DL-013 预览链接使用短时签名 token
+
+下载中心只生成 XLSX 文件，浏览器无法原生预览，前端通过 kkFileView 等外部预览服务渲染。外部预览服务没有登录态，无法直接调用 `GET /api/system/downloads/:id/file`，因此由 `GET /api/system/downloads/:id/preview-url` 生成短时签名 URL 供外部服务无鉴权取文件。
+
+- 生成链接接口要求登录，复用 `SYS-DL-007` 和 `SYS-DL-008` 的全部校验：任务属于当前登录用户、状态为 `succeeded`、文件名和文件路径存在且未过期、服务器文件实际存在。
+- 链接生成时签发 5 分钟有效的 HS256 JWT token，payload 中携带 `taskId` 和 `userId`，密钥复用项目 `config.AppConfig.JWT.Secret`，token 不写入数据库。
+- 公开取文件接口 `GET /api/public/downloads/preview/:token` 不经过认证中间件；先通过 JWT 签名校验确认 token 由本服务签发且未过期，再复用 `SYS-DL-007` 和 `SYS-DL-008` 校验确保 token 有效期内任务仍属于签发用户且文件仍可下载。任一校验失败返回对应错误，不返回文件流。
+- 预览链接返回相对路径，由前端用 `window.location.origin` 拼接为完整 URL（dev 走 vite proxy 到后端，生产走 nginx 反代），URL 上附加 `?fullfilename=<encodeURIComponent(fileName)>` 让 kkFileView 识别文件类型（公开接口路径不含扩展名，必须显式传文件名），Base64 编码后透传给 kkFileView `/onlinePreview?url=<base64(absoluteUrl)>` 在新窗口打开。前端不向外部预览服务透露用户 Token。
+- kkFileView 服务端必须配置 `trust.host` 白名单加入前端访问域名（dev 为 `localhost,127.0.0.1`，生产为前端域名），否则被 SSRF 防护拦截，返回 403。
+- token 在有效期内可重放使用，不强制一次性；预览完成后由前端关闭窗口即可，无需后端清理。需要更严格的失效控制时再引入数据库存储的一次性 token，当前以短时有效期作为主要防护。
+
 ## 接口与权限
 
 | 接口 | 用途 | 权限边界 |
 |---|---|---|
 | `GET /api/system/downloads` | 当前用户任务列表 | 登录即可，只返回本人 |
 | `GET /api/system/downloads/:id/file` | 下载成功文件 | 登录即可，只允许创建者 |
+| `GET /api/system/downloads/:id/preview-url` | 生成 5 分钟有效的预览链接 | 登录即可，只允许创建者 |
+| `GET /api/public/downloads/preview/:token` | 公开取预览文件流 | 公开接口，通过 JWT 签名校验确保 token 由本服务签发且未过期，再复用创建者和文件可用性校验 |
 | `POST /api/erp/inventory/balances/exports` | 创建库存余额导出 | `erp:inventoryBalance:export` |
 | `POST /api/dev/tasks/exports` | 创建开发任务导出 | `dev:task:export` |
 

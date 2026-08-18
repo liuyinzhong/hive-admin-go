@@ -20,6 +20,7 @@ func registerSystemRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 	public := api.Group("/public")
 	{
 		public.GET("/externalPages/:name", externalPageController.GetPublicExternalPage)
+		public.GET("/downloads/preview/:token", downloadTaskController.PreviewFile)
 	}
 
 	auth := api.Group("/auth")
@@ -37,6 +38,7 @@ func registerSystemRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 		{
 			downloads.GET("", downloadTaskController.GetList)
 			downloads.GET("/:id/file", downloadTaskController.DownloadFile)
+			downloads.GET("/:id/preview-url", downloadTaskController.GetPreviewURL)
 		}
 
 		messages := system.Group("/messages")

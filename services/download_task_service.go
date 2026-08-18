@@ -15,6 +15,7 @@ import (
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
 
+	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm"
 )
 
@@ -25,6 +26,9 @@ const (
 	downloadRecordRetentionDays = 30
 	downloadCenterMenuName      = "downloadCenter"
 	downloadTaskDirectory       = "data/downloads"
+	downloadPreviewTokenExpiry  = 5 * time.Minute
+	downloadPreviewTokenIssuer  = "hive-download-preview"
+	downloadPreviewURLPrefix    = "/api/public/downloads/preview/"
 )
 
 var (
@@ -34,7 +38,16 @@ var (
 	ErrDownloadInvalidDate      = errors.New("日期格式错误")
 	ErrDownloadInvalidStatus    = errors.New("任务状态错误")
 	ErrDownloadDataChanged      = errors.New("导出数据在生成期间发生变化，请重新发起导出")
+	ErrDownloadPreviewInvalid   = errors.New("预览链接无效或已过期")
 )
+
+// DownloadPreviewClaims 下载中心预览 token 的 JWT Claims，复用项目 JWT 密钥签名。
+// 自包含短时 token，无需数据库存储；token 中携带 taskId 和 userId 用于后续校验。
+type DownloadPreviewClaims struct {
+	TaskID string `json:"taskId"`
+	UserID string `json:"userId"`
+	jwt.RegisteredClaims
+}
 
 type downloadTaskExporter interface {
 	Count(payload, creatorID string) (int64, error)
@@ -220,6 +233,46 @@ func (s *DownloadTaskService) GetDownloadFile(userID, taskID string) (*models.Sy
 		return nil, err
 	}
 	return &task, nil
+}
+
+// GeneratePreviewURL 校验当前用户对任务拥有下载权限后，生成短时签名 token，返回前端可拼接的相对路径。
+// 复用 GetDownloadFile 完成创建者、状态和文件可用性校验；token 通过 utils.SignShortLivedToken 签发，5 分钟内有效。
+func (s *DownloadTaskService) GeneratePreviewURL(userID, taskID string) (string, error) {
+	if _, err := s.GetDownloadFile(userID, taskID); err != nil {
+		return "", err
+	}
+	now := time.Now()
+	claims := DownloadPreviewClaims{
+		TaskID: taskID,
+		UserID: userID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(now.Add(downloadPreviewTokenExpiry)),
+			IssuedAt:  jwt.NewNumericDate(now),
+			Issuer:    downloadPreviewTokenIssuer,
+		},
+	}
+	signed, err := utils.SignShortLivedToken(claims)
+	if err != nil {
+		return "", err
+	}
+	return downloadPreviewURLPrefix + signed, nil
+}
+
+// GetPreviewFile 校验预览 token 并返回对应任务，供 Controller 流式返回文件。
+// 通过 utils.ParseShortLivedToken 确认 token 由本服务签发且未过期；再复用 GetDownloadFile 确保 token 有效期内文件仍可下载。
+func (s *DownloadTaskService) GetPreviewFile(tokenString string) (*models.SysDownloadTask, error) {
+	claims := &DownloadPreviewClaims{}
+	if err := utils.ParseShortLivedToken(tokenString, claims); err != nil {
+		return nil, ErrDownloadPreviewInvalid
+	}
+	if claims.TaskID == "" || claims.UserID == "" {
+		return nil, ErrDownloadPreviewInvalid
+	}
+	task, err := s.GetDownloadFile(claims.UserID, claims.TaskID)
+	if err != nil {
+		return nil, err
+	}
+	return task, nil
 }
 
 func (m *downloadTaskManager) wake() {
