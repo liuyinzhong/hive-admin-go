@@ -83,11 +83,17 @@ type DownloadTaskResponse struct {
 }
 
 type InventoryBalanceExportRequest struct {
-	WarehouseID  string `json:"warehouseId" example:"550e8400-e29b-41d4-a716-446655440000"`
-	SkuCode      string `json:"skuCode" example:"SKU000001"`
-	BatchNo      string `json:"batchNo" example:"B20260731001"`
-	OnlyPositive bool   `json:"onlyPositive" example:"true"`
-	Sorts        string `json:"sorts" example:"updateDate,desc"`
+	WarehouseID  string                 `json:"warehouseId" example:"550e8400-e29b-41d4-a716-446655440000"`
+	SkuCode      string                 `json:"skuCode" example:"SKU000001"`
+	BatchNo      string                 `json:"batchNo" example:"B20260731001"`
+	OnlyPositive bool                   `json:"onlyPositive" example:"true"`
+	Sorts        string                 `json:"sorts" example:"updateDate,desc"`
+	Filename     string                 `json:"filename" example:"库存余额导出.xlsx"`
+	SheetName    string                 `json:"sheetName" example:"库存余额"`
+	Columns      []DownloadExportColumn `json:"columns"`
+	IsHeader     *bool                  `json:"isHeader" example:"true"`
+	IsTitle      *bool                  `json:"isTitle" example:"true"`
+	Original     *bool                  `json:"original" example:"false"`
 }
 
 type DevTaskExportRequest struct {

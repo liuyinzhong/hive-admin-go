@@ -40,6 +40,9 @@ func TestDecodeInventoryBalanceExportRequestSupportsLegacyAndEnvelopePayloads(t 
 }
 
 func TestResolveDevTaskExportColumnsUsesWhitelistAndRequestOrder(t *testing.T) {
+	if _, err := resolveDevTaskExportColumns(models.DevTaskExportRequest{}); err == nil {
+		t.Fatal("expected missing columns to fail")
+	}
 	columns, err := resolveDevTaskExportColumns(models.DevTaskExportRequest{
 		Columns: []models.DownloadExportColumn{
 			{Field: "taskStatus", Title: "状态值"},
@@ -57,13 +60,28 @@ func TestResolveDevTaskExportColumnsUsesWhitelistAndRequestOrder(t *testing.T) {
 }
 
 func TestNormalizeDevTaskExportOptions(t *testing.T) {
-	if got := normalizeDevTaskFileName(`任务:/列表`); got != "任务__列表.xlsx" {
+	if got := normalizeDownloadFileName(`任务:/列表`); got != "任务__列表.xlsx" {
 		t.Fatalf("unexpected file name: %s", got)
 	}
-	if got := normalizeDevTaskSheetName("任务/管理" + strings.Repeat("名", 40)); len([]rune(got)) != 31 {
+	if got := normalizeDownloadSheetName("任务/管理" + strings.Repeat("名", 40)); len([]rune(got)) != 31 {
 		t.Fatalf("unexpected sheet name length: %d", len([]rune(got)))
 	}
 	if !exportBoolValue(nil, true) || exportBoolValue(func() *bool { value := false; return &value }(), true) {
 		t.Fatal("unexpected boolean fallback")
+	}
+}
+
+func TestResolveInventoryBalanceExportColumnsRequiresRequestColumns(t *testing.T) {
+	if _, err := resolveInventoryBalanceExportColumns(inventoryBalanceExportRequest{}); err == nil {
+		t.Fatal("expected missing columns to fail")
+	}
+	columns, err := resolveInventoryBalanceExportColumns(inventoryBalanceExportRequest{
+		Columns: []models.DownloadExportColumn{
+			{Field: "warehouseName", Title: "仓库"},
+			{Field: "operation", Title: "操作"},
+		},
+	})
+	if err != nil || len(columns) != 1 || columns[0].Field != "warehouseName" || columns[0].Title != "仓库" {
+		t.Fatalf("unexpected inventory columns: %+v, error: %v", columns, err)
 	}
 }

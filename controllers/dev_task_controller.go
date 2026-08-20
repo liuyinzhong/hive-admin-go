@@ -38,6 +38,10 @@ func (dc *DevController) CreateTaskExport(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
 		return
 	}
+	if len(req.Columns) == 0 {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "导出列不能为空"))
+		return
+	}
 	result, err := services.NewDownloadTaskService().CreateTask(
 		userID,
 		models.DownloadTaskTypeDevTask,

@@ -59,7 +59,7 @@ func (ctrl *ErpInventoryController) GetInventoryBalanceList(c *gin.Context) {
 
 // CreateInventoryBalanceExport 创建库存余额导出任务。
 // @Summary 创建库存余额导出任务
-// @Description 按当前筛选和排序创建异步XLSX导出任务；Worker 在计数和生成时重新解析创建用户当前数据范围
+// @Description 按当前筛选、排序和 VXE 导出配置创建异步 XLSX 导出任务；导出列仅允许库存余额白名单；数据权限：当前用户角色数据范围，Worker 在计数和生成时重新解析创建用户当前数据范围
 // @Tags 进销存/库存管理
 // @Accept json
 // @Produce json
@@ -81,6 +81,10 @@ func (ctrl *ErpInventoryController) CreateInventoryBalanceExport(c *gin.Context)
 	var req models.InventoryBalanceExportRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
+		return
+	}
+	if len(req.Columns) == 0 {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "导出列不能为空"))
 		return
 	}
 	result, err := services.NewDownloadTaskService().CreateTask(

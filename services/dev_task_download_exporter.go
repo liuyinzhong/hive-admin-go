@@ -48,7 +48,7 @@ type devTaskExportColumn struct {
 	Width int
 }
 
-var defaultDevTaskExportColumns = []models.DownloadExportColumn{
+var devTaskExportColumns = []models.DownloadExportColumn{
 	{Field: "taskNum", Title: "任务编号"},
 	{Field: "projectTitle", Title: "项目"},
 	{Field: "version", Title: "版本"},
@@ -68,8 +68,8 @@ var defaultDevTaskExportColumns = []models.DownloadExportColumn{
 }
 
 var devTaskExportColumnTitles = func() map[string]string {
-	result := make(map[string]string, len(defaultDevTaskExportColumns))
-	for _, column := range defaultDevTaskExportColumns {
+	result := make(map[string]string, len(devTaskExportColumns))
+	for _, column := range devTaskExportColumns {
 		result[column.Field] = column.Title
 	}
 	result["realName"] = "负责人"
@@ -138,7 +138,7 @@ func (e *devTaskDownloadExporter) Export(payload, creatorID, filePath string, to
 			headers = append(headers, column.Field)
 		}
 	}
-	sheetName := normalizeDevTaskSheetName(request.SheetName)
+	sheetName := normalizeDownloadSheetName(request.SheetName)
 	var processed int64
 	widths := make([]int, 0, len(columns))
 	for _, column := range columns {
@@ -262,9 +262,6 @@ func devTaskExportColumnValue(field string, row devTaskDownloadRow, dictLabels m
 
 func resolveDevTaskExportColumns(request models.DevTaskExportRequest) ([]devTaskExportColumn, error) {
 	selected := request.Columns
-	if selected == nil {
-		selected = defaultDevTaskExportColumns
-	}
 	if len(selected) == 0 {
 		return nil, fmt.Errorf("导出列不能为空")
 	}
@@ -352,7 +349,7 @@ func exportBoolValue(value *bool, fallback bool) bool {
 	return *value
 }
 
-func normalizeDevTaskSheetName(value string) string {
+func normalizeDownloadSheetName(value string) string {
 	value = strings.TrimSpace(value)
 	if value == "" {
 		return "任务管理"
@@ -368,7 +365,7 @@ func normalizeDevTaskSheetName(value string) string {
 	return value
 }
 
-func normalizeDevTaskFileName(value string) string {
+func normalizeDownloadFileName(value string) string {
 	value = strings.TrimSpace(value)
 	if value == "" {
 		return ""
@@ -399,5 +396,5 @@ func (e *devTaskDownloadExporter) ResolveFileName(payload string, _ time.Time) (
 	if err != nil {
 		return "", err
 	}
-	return normalizeDevTaskFileName(request.Filename), nil
+	return normalizeDownloadFileName(request.Filename), nil
 }
