@@ -85,3 +85,18 @@ func TestResolveInventoryBalanceExportColumnsRequiresRequestColumns(t *testing.T
 		t.Fatalf("unexpected inventory columns: %+v, error: %v", columns, err)
 	}
 }
+
+func TestResolveLoginLogExportColumnsRequiresRequestColumns(t *testing.T) {
+	if _, err := resolveLoginLogExportColumns(loginLogExportRequest{}); err == nil {
+		t.Fatal("expected missing columns to fail")
+	}
+	columns, err := resolveLoginLogExportColumns(loginLogExportRequest{
+		Columns: []models.DownloadExportColumn{
+			{Field: "status", Title: "状态"},
+			{Field: "operation", Title: "操作"},
+		},
+	})
+	if err != nil || len(columns) != 1 || columns[0].Field != "status" || columns[0].Title != "状态" {
+		t.Fatalf("unexpected login log columns: %+v, error: %v", columns, err)
+	}
+}

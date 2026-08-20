@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"hive-admin-go/datapermission"
@@ -12,6 +13,44 @@ import (
 )
 
 type loginLogDownloadExporter struct{}
+
+type loginLogExportRequest struct {
+	models.AuditLogListRequest
+	Filename  string
+	SheetName string
+	Columns   []models.DownloadExportColumn
+	IsHeader  *bool
+	IsTitle   *bool
+	Original  *bool
+}
+
+type loginLogExportColumn struct {
+	Field string
+	Title string
+	Width int
+}
+
+type loginLogDownloadRow struct {
+	Username   string
+	EventType  string
+	HTTPStatus int
+	Status     int
+	DurationMs int64
+	IP         string
+	UserAgent  string
+	CreateDate time.Time
+}
+
+var loginLogExportColumnTitles = map[string]string{
+	"username":   "用户名",
+	"eventType":  "事件类型",
+	"httpStatus": "HTTP状态",
+	"status":     "执行状态",
+	"durationMs": "耗时（毫秒）",
+	"ip":         "客户端IP",
+	"userAgent":  "浏览器 / User-Agent",
+	"createDate": "发生时间",
+}
 
 type LoginLogExportPayload struct {
 	Request models.LoginLogExportRequest `json:"request"`
@@ -26,7 +65,10 @@ func (e *loginLogDownloadExporter) Count(payload, creatorID string) (int64, erro
 	if err != nil {
 		return 0, err
 	}
-	query, err := buildLoginLogQuery(req, permission)
+	if _, err := resolveLoginLogExportColumns(req); err != nil {
+		return 0, err
+	}
+	query, err := buildLoginLogQuery(req.AuditLogListRequest, permission)
 	if err != nil {
 		return 0, err
 	}
@@ -42,16 +84,31 @@ func (e *loginLogDownloadExporter) Export(payload, creatorID, filePath string, t
 	if err != nil {
 		return 0, err
 	}
-	query, err := buildLoginLogQuery(req, permission)
+	columns, err := resolveLoginLogExportColumns(req)
+	if err != nil {
+		return 0, err
+	}
+	query, err := buildLoginLogQuery(req.AuditLogListRequest, permission)
 	if err != nil {
 		return 0, err
 	}
 
-	headers := []interface{}{
-		"用户名", "事件类型", "HTTP状态", "执行状态", "耗时（毫秒）", "客户端IP", "浏览器 / User-Agent", "发生时间",
+	includeHeader := exportBoolValue(req.IsHeader, true)
+	useTitle := exportBoolValue(req.IsTitle, true)
+	original := exportBoolValue(req.Original, false)
+	headers := make([]interface{}, 0, len(columns))
+	widths := make([]int, 0, len(columns))
+	for _, column := range columns {
+		if useTitle {
+			headers = append(headers, column.Title)
+		} else {
+			headers = append(headers, column.Field)
+		}
+		widths = append(widths, column.Width)
 	}
+	sheetName := normalizeDownloadSheetName(req.SheetName)
 	var processed int64
-	err = writeDownloadWorkbook(filePath, "登录日志", headers, func(writer *excelize.StreamWriter) error {
+	err = writeDownloadWorkbookWithWidths(filePath, sheetName, headers, includeHeader, widths, func(writer *excelize.StreamWriter) error {
 		rows, err := query.Select(
 			"username", "event_type", "http_status", "status", "duration_ms", "ip", "user_agent", "create_date",
 		).Order(buildLoginLogOrder(req.Sorts)).Rows()
@@ -60,17 +117,12 @@ func (e *loginLogDownloadExporter) Export(payload, creatorID, filePath string, t
 		}
 		defer rows.Close()
 
+		rowOffset := 0
+		if includeHeader {
+			rowOffset = 1
+		}
 		for rows.Next() {
-			var row struct {
-				Username   string
-				EventType  string
-				HTTPStatus int
-				Status     int
-				DurationMs int64
-				IP         string
-				UserAgent  string
-				CreateDate time.Time
-			}
+			var row loginLogDownloadRow
 			if err := query.ScanRows(rows, &row); err != nil {
 				return err
 			}
@@ -78,19 +130,13 @@ func (e *loginLogDownloadExporter) Export(payload, creatorID, filePath string, t
 			if processed > totalRows {
 				return ErrDownloadDataChanged
 			}
-			cell, err := excelize.CoordinatesToCellName(1, int(processed)+1)
+			cell, err := excelize.CoordinatesToCellName(1, int(processed)+rowOffset)
 			if err != nil {
 				return err
 			}
-			values := []interface{}{
-				row.Username,
-				formatLoginLogEventType(row.EventType),
-				row.HTTPStatus,
-				formatLoginLogStatus(row.Status),
-				row.DurationMs,
-				row.IP,
-				row.UserAgent,
-				row.CreateDate.In(auditLogLocation).Format("2006-01-02 15:04:05"),
+			values := make([]interface{}, 0, len(columns))
+			for _, column := range columns {
+				values = append(values, loginLogExportColumnValue(column.Field, row, original))
 			}
 			if err := writer.SetRow(cell, values); err != nil {
 				return err
@@ -102,26 +148,34 @@ func (e *loginLogDownloadExporter) Export(payload, creatorID, filePath string, t
 	return processed, err
 }
 
-func parseLoginLogExportRequest(payload, creatorID string) (models.AuditLogListRequest, datapermission.Permission, error) {
+func parseLoginLogExportRequest(payload, creatorID string) (loginLogExportRequest, datapermission.Permission, error) {
 	request, err := decodeLoginLogExportRequest(payload)
 	if err != nil {
-		return models.AuditLogListRequest{}, datapermission.Permission{}, err
+		return loginLogExportRequest{}, datapermission.Permission{}, err
 	}
 	if creatorID == "" {
-		return models.AuditLogListRequest{}, datapermission.Permission{}, fmt.Errorf("导出任务缺少创建用户")
+		return loginLogExportRequest{}, datapermission.Permission{}, fmt.Errorf("导出任务缺少创建用户")
 	}
 	permission, err := resolveDataPermission(creatorID)
 	if err != nil {
-		return models.AuditLogListRequest{}, datapermission.Permission{}, err
+		return loginLogExportRequest{}, datapermission.Permission{}, err
 	}
-	return models.AuditLogListRequest{
-		Username:  request.Username,
-		EventType: request.EventType,
-		Status:    request.Status,
-		IP:        request.IP,
-		StartDate: request.StartDate,
-		EndDate:   request.EndDate,
-		Sorts:     request.Sorts,
+	return loginLogExportRequest{
+		AuditLogListRequest: models.AuditLogListRequest{
+			Username:  request.Username,
+			EventType: request.EventType,
+			Status:    request.Status,
+			IP:        request.IP,
+			StartDate: request.StartDate,
+			EndDate:   request.EndDate,
+			Sorts:     request.Sorts,
+		},
+		Filename:  request.Filename,
+		SheetName: request.SheetName,
+		Columns:   request.Columns,
+		IsHeader:  request.IsHeader,
+		IsTitle:   request.IsTitle,
+		Original:  request.Original,
 	}, permission, nil
 }
 
@@ -141,6 +195,81 @@ func decodeLoginLogExportRequest(payload string) (models.LoginLogExportRequest, 
 		return models.LoginLogExportRequest{}, err
 	}
 	return request, nil
+}
+
+func resolveLoginLogExportColumns(request loginLogExportRequest) ([]loginLogExportColumn, error) {
+	if len(request.Columns) == 0 {
+		return nil, fmt.Errorf("导出列不能为空")
+	}
+	columns := make([]loginLogExportColumn, 0, len(request.Columns))
+	seen := make(map[string]struct{}, len(request.Columns))
+	for _, selectedColumn := range request.Columns {
+		field := strings.TrimSpace(selectedColumn.Field)
+		title, ok := loginLogExportColumnTitles[field]
+		if !ok {
+			continue
+		}
+		if _, exists := seen[field]; exists {
+			continue
+		}
+		seen[field] = struct{}{}
+		if value := strings.TrimSpace(selectedColumn.Title); value != "" {
+			titleRunes := []rune(value)
+			if len(titleRunes) > 255 {
+				value = string(titleRunes[:255])
+			}
+			title = value
+		}
+		columns = append(columns, loginLogExportColumn{
+			Field: field,
+			Title: title,
+			Width: selectedColumn.Width,
+		})
+	}
+	if len(columns) == 0 {
+		return nil, fmt.Errorf("没有可导出的有效列")
+	}
+	return columns, nil
+}
+
+func loginLogExportColumnValue(field string, row loginLogDownloadRow, original bool) interface{} {
+	switch field {
+	case "username":
+		return row.Username
+	case "eventType":
+		if original {
+			return row.EventType
+		}
+		return formatLoginLogEventType(row.EventType)
+	case "httpStatus":
+		return row.HTTPStatus
+	case "status":
+		if original {
+			return row.Status
+		}
+		return formatLoginLogStatus(row.Status)
+	case "durationMs":
+		return row.DurationMs
+	case "ip":
+		return row.IP
+	case "userAgent":
+		return row.UserAgent
+	case "createDate":
+		if original {
+			return row.CreateDate
+		}
+		return row.CreateDate.In(auditLogLocation).Format("2006-01-02 15:04:05")
+	default:
+		return ""
+	}
+}
+
+func (e *loginLogDownloadExporter) ResolveFileName(payload string, _ time.Time) (string, error) {
+	request, err := decodeLoginLogExportRequest(payload)
+	if err != nil {
+		return "", err
+	}
+	return normalizeDownloadFileName(request.Filename), nil
 }
 
 func formatLoginLogEventType(value string) string {

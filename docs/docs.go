@@ -19421,7 +19421,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按当前筛选和排序创建异步XLSX导出任务；数据权限：Worker 执行时按创建用户重新解析当前角色数据范围，并按登录日志 user_id 过滤",
+                "description": "按当前筛选、排序和 VXE 导出配置创建异步 XLSX 导出任务；导出列仅允许登录日志白名单；数据权限：当前用户角色数据范围，Worker 执行时按创建用户重新解析当前角色数据范围，并按登录日志 user_id 过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -28112,6 +28112,12 @@ const docTemplate = `{
         "models.LoginLogExportRequest": {
             "type": "object",
             "properties": {
+                "columns": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DownloadExportColumn"
+                    }
+                },
                 "endDate": {
                     "type": "string",
                     "example": "2026-08-20 23:59:59"
@@ -28120,9 +28126,29 @@ const docTemplate = `{
                     "type": "string",
                     "example": "login"
                 },
+                "filename": {
+                    "type": "string",
+                    "example": "登录日志导出.xlsx"
+                },
                 "ip": {
                     "type": "string",
                     "example": "192.168.1.100"
+                },
+                "isHeader": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "isTitle": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "original": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "sheetName": {
+                    "type": "string",
+                    "example": "登录日志"
                 },
                 "sorts": {
                     "type": "string",

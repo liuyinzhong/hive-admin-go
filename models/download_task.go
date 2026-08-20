@@ -118,11 +118,17 @@ type DownloadExportColumn struct {
 }
 
 type LoginLogExportRequest struct {
-	Username  string `json:"username" example:"admin"`
-	EventType string `json:"eventType" example:"login"`
-	Status    *int   `json:"status" example:"1"`
-	IP        string `json:"ip" example:"192.168.1.100"`
-	StartDate string `json:"startDate" example:"2026-08-01 00:00:00"`
-	EndDate   string `json:"endDate" example:"2026-08-20 23:59:59"`
-	Sorts     string `json:"sorts" example:"createDate,desc"`
+	Username  string                 `json:"username" example:"admin"`
+	EventType string                 `json:"eventType" example:"login"`
+	Status    *int                   `json:"status" example:"1"`
+	IP        string                 `json:"ip" example:"192.168.1.100"`
+	StartDate string                 `json:"startDate" example:"2026-08-01 00:00:00"`
+	EndDate   string                 `json:"endDate" example:"2026-08-20 23:59:59"`
+	Sorts     string                 `json:"sorts" example:"createDate,desc"`
+	Filename  string                 `json:"filename" example:"登录日志导出.xlsx"`
+	SheetName string                 `json:"sheetName" example:"登录日志"`
+	Columns   []DownloadExportColumn `json:"columns"`
+	IsHeader  *bool                  `json:"isHeader" example:"true"`
+	IsTitle   *bool                  `json:"isTitle" example:"true"`
+	Original  *bool                  `json:"original" example:"false"`
 }

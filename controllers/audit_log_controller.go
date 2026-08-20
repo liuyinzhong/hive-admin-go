@@ -104,7 +104,7 @@ func (ctrl *SystemController) GetLoginLogs(c *gin.Context) {
 
 // CreateLoginLogExport 创建登录日志导出任务。
 // @Summary 创建登录日志导出任务
-// @Description 按当前筛选和排序创建异步XLSX导出任务；数据权限：Worker 执行时按创建用户重新解析当前角色数据范围，并按登录日志 user_id 过滤
+// @Description 按当前筛选、排序和 VXE 导出配置创建异步 XLSX 导出任务；导出列仅允许登录日志白名单；数据权限：当前用户角色数据范围，Worker 执行时按创建用户重新解析当前角色数据范围，并按登录日志 user_id 过滤
 // @Tags 系统管理/日志管理
 // @Accept json
 // @Produce json
@@ -126,6 +126,10 @@ func (ctrl *SystemController) CreateLoginLogExport(c *gin.Context) {
 	var req models.LoginLogExportRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
+		return
+	}
+	if len(req.Columns) == 0 {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "导出列不能为空"))
 		return
 	}
 	result, err := services.NewDownloadTaskService().CreateTask(
