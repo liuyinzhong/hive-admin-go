@@ -27,6 +27,13 @@ const (
 	demoMenuMessageContent = "测试消息"
 )
 
+type menuMessageEventName string
+
+const (
+	menuMessageEventNameUnreadSummary       menuMessageEventName = "unreadSummary"
+	menuMessageEventNameDownloadTaskChanged menuMessageEventName = "downloadTaskChanged"
+)
+
 // MenuMessageService 负责菜单消息的持久化、汇总和实时推送。
 type MenuMessageService struct {
 	hub *menuMessageHub
@@ -169,7 +176,7 @@ func (s *MenuMessageService) CreateMenuMessageForMenuName(userID, menuName, titl
 
 // PublishDownloadTaskChanged 将下载任务进度作为瞬时事件推送给当前用户。
 func (s *MenuMessageService) PublishDownloadTaskChanged(userID string, event models.DownloadTaskChangedEvent) {
-	s.hub.publish(userID, menuMessageEvent{name: "downloadTaskChanged", data: event})
+	s.hub.publish(userID, menuMessageEvent{name: menuMessageEventNameDownloadTaskChanged, data: event})
 }
 
 // StreamUnreadSummary 将当前用户的汇总以 SSE 推送，直到客户端断开。
@@ -192,7 +199,7 @@ func (s *MenuMessageService) StreamUnreadSummary(c *gin.Context, userID string) 
 		return errors.New("当前响应不支持 SSE")
 	}
 
-	if err := writeMenuMessageSSE(c.Writer, menuMessageEvent{name: "unreadSummary", data: summary}); err != nil {
+	if err := writeMenuMessageSSE(c.Writer, menuMessageEvent{name: menuMessageEventNameUnreadSummary, data: summary}); err != nil {
 		return err
 	}
 	flusher.Flush()
@@ -224,7 +231,7 @@ func (s *MenuMessageService) notifyUnreadSummary(userID string) {
 		log.Printf("menu message summary notification failed for user %s: %v", userID, err)
 		return
 	}
-	s.hub.publish(userID, menuMessageEvent{name: "unreadSummary", data: summary})
+	s.hub.publish(userID, menuMessageEvent{name: menuMessageEventNameUnreadSummary, data: summary})
 }
 
 func writeMenuMessageSSE(w interface{ Write([]byte) (int, error) }, event menuMessageEvent) error {
@@ -232,7 +239,7 @@ func writeMenuMessageSSE(w interface{ Write([]byte) (int, error) }, event menuMe
 	if err != nil {
 		return err
 	}
-	_, err = w.Write([]byte("event: " + event.name + "\ndata: " + string(payload) + "\n\n"))
+	_, err = w.Write([]byte("event: " + string(event.name) + "\ndata: " + string(payload) + "\n\n"))
 	return err
 }
 
@@ -258,7 +265,7 @@ type menuMessageHub struct {
 }
 
 type menuMessageEvent struct {
-	name string
+	name menuMessageEventName
 	data interface{}
 }
 
