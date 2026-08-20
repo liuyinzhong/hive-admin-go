@@ -91,11 +91,24 @@ type InventoryBalanceExportRequest struct {
 }
 
 type DevTaskExportRequest struct {
-	ProjectID    string `json:"projectId" example:"550e8400-e29b-41d4-a716-446655440000"`
-	VersionID    string `json:"versionId" example:"550e8400-e29b-41d4-a716-446655440000"`
-	TaskTitle    string `json:"taskTitle" example:"下载中心开发"`
-	TaskStatuses []int  `json:"taskStatus" example:"1,2"`
-	Sorts        string `json:"sorts" example:"createDate,desc"`
+	ProjectID    string                 `json:"projectId" example:"550e8400-e29b-41d4-a716-446655440000"`
+	VersionID    string                 `json:"versionId" example:"550e8400-e29b-41d4-a716-446655440000"`
+	TaskTitle    string                 `json:"taskTitle" example:"下载中心开发"`
+	TaskStatuses []int                  `json:"taskStatus" example:"1,2"`
+	Sorts        string                 `json:"sorts" example:"createDate,desc"`
+	Filename     string                 `json:"filename" example:"开发任务导出.xlsx"`
+	SheetName    string                 `json:"sheetName" example:"任务管理"`
+	Columns      []DownloadExportColumn `json:"columns"`
+	IsHeader     *bool                  `json:"isHeader" example:"true"`
+	IsTitle      *bool                  `json:"isTitle" example:"true"`
+	Original     *bool                  `json:"original" example:"false"`
+}
+
+// DownloadExportColumn 是前端导出列的最小描述；字段值只用于匹配后端白名单，不直接拼接 SQL。
+type DownloadExportColumn struct {
+	Field string `json:"field" example:"taskTitle"`
+	Title string `json:"title" example:"任务标题"`
+	Width int    `json:"width,omitempty" example:"200"`
 }
 
 type LoginLogExportRequest struct {

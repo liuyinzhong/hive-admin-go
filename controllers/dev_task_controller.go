@@ -14,7 +14,7 @@ import (
 
 // CreateTaskExport 创建任务管理导出任务。
 // @Summary 创建任务管理导出任务
-// @Description 按当前筛选和排序创建异步XLSX导出任务；Worker 在计数和生成时重新解析创建用户当前数据范围
+// @Description 按当前筛选、排序和 VXE 导出配置创建异步 XLSX 导出任务；导出列仅允许任务管理白名单；数据权限：当前用户角色数据范围，Worker 在计数和生成时重新解析创建用户当前数据范围
 // @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json

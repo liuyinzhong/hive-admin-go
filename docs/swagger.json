@@ -4000,7 +4000,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按当前筛选和排序创建异步XLSX导出任务；Worker 在计数和生成时重新解析创建用户当前数据范围",
+                "description": "按当前筛选、排序和 VXE 导出配置创建异步 XLSX 导出任务；导出列仅允许任务管理白名单；数据权限：当前用户角色数据范围，Worker 在计数和生成时重新解析创建用户当前数据范围",
                 "consumes": [
                     "application/json"
                 ],
@@ -25486,9 +25486,35 @@
         "models.DevTaskExportRequest": {
             "type": "object",
             "properties": {
+                "columns": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DownloadExportColumn"
+                    }
+                },
+                "filename": {
+                    "type": "string",
+                    "example": "开发任务导出.xlsx"
+                },
+                "isHeader": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "isTitle": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "original": {
+                    "type": "boolean",
+                    "example": false
+                },
                 "projectId": {
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "sheetName": {
+                    "type": "string",
+                    "example": "任务管理"
                 },
                 "sorts": {
                     "type": "string",
@@ -25964,6 +25990,23 @@
                 },
                 "startTime": {
                     "type": "string"
+                }
+            }
+        },
+        "models.DownloadExportColumn": {
+            "type": "object",
+            "properties": {
+                "field": {
+                    "type": "string",
+                    "example": "taskTitle"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "任务标题"
+                },
+                "width": {
+                    "type": "integer",
+                    "example": 200
                 }
             }
         },

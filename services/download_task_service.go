@@ -54,6 +54,12 @@ type downloadTaskExporter interface {
 	Export(payload, creatorID, filePath string, totalRows int64, onProgress func(int64)) (int64, error)
 }
 
+// downloadTaskFileNameResolver 是可选能力；来源导出器可以从请求中解析用户指定的文件名。
+// 没有实现该接口的旧导出器继续使用任务名称和时间戳生成文件名。
+type downloadTaskFileNameResolver interface {
+	ResolveFileName(payload string, now time.Time) (string, error)
+}
+
 type downloadTaskManager struct {
 	createMu  sync.Mutex
 	signal    chan struct{}
@@ -381,11 +387,22 @@ func (m *downloadTaskManager) processNext() bool {
 		}
 		task.TotalRows = processedRows
 	}
-	m.succeed(task, filePath)
+	fileName := fmt.Sprintf("%s_%s.xlsx", task.TaskName, time.Now().Format("20060102_150405"))
+	if resolver, ok := exporter.(downloadTaskFileNameResolver); ok {
+		resolved, resolveErr := resolver.ResolveFileName(task.RequestPayload, time.Now())
+		if resolveErr != nil {
+			m.fail(task, "解析导出文件名失败", resolveErr)
+			return true
+		}
+		if resolved != "" {
+			fileName = resolved
+		}
+	}
+	m.succeed(task, filePath, fileName)
 	return true
 }
 
-func (m *downloadTaskManager) succeed(task models.SysDownloadTask, filePath string) {
+func (m *downloadTaskManager) succeed(task models.SysDownloadTask, filePath, fileName string) {
 	info, err := os.Stat(filePath)
 	if err != nil {
 		m.fail(task, "读取导出文件失败", err)
@@ -393,7 +410,6 @@ func (m *downloadTaskManager) succeed(task models.SysDownloadTask, filePath stri
 	}
 	now := time.Now()
 	expireDate := now.AddDate(0, 0, downloadFileRetentionDays)
-	fileName := fmt.Sprintf("%s_%s.xlsx", task.TaskName, now.Format("20060102_150405"))
 	if err := database.DB.Model(&models.SysDownloadTask{}).Where("id = ?", task.ID).
 		Updates(map[string]interface{}{
 			"status":         models.DownloadTaskStatusSucceeded,

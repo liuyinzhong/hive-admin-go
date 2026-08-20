@@ -5,6 +5,14 @@ import (
 )
 
 func writeDownloadWorkbook(filePath, sheetName string, headers []interface{}, writeRows func(*excelize.StreamWriter) error) (resultErr error) {
+	return writeDownloadWorkbookWithHeader(filePath, sheetName, headers, true, writeRows)
+}
+
+func writeDownloadWorkbookWithHeader(filePath, sheetName string, headers []interface{}, includeHeader bool, writeRows func(*excelize.StreamWriter) error) (resultErr error) {
+	return writeDownloadWorkbookWithWidths(filePath, sheetName, headers, includeHeader, nil, writeRows)
+}
+
+func writeDownloadWorkbookWithWidths(filePath, sheetName string, headers []interface{}, includeHeader bool, widths []int, writeRows func(*excelize.StreamWriter) error) (resultErr error) {
 	file := excelize.NewFile()
 	defer func() {
 		if err := file.Close(); resultErr == nil && err != nil {
@@ -21,8 +29,22 @@ func writeDownloadWorkbook(filePath, sheetName string, headers []interface{}, wr
 	if err != nil {
 		return err
 	}
-	if err := writer.SetRow("A1", headers); err != nil {
-		return err
+	for index, width := range widths {
+		if width <= 0 {
+			continue
+		}
+		excelWidth := float64(width) / 7
+		if excelWidth < 1 {
+			excelWidth = 1
+		}
+		if err := writer.SetColWidth(index+1, index+1, excelWidth); err != nil {
+			return err
+		}
+	}
+	if includeHeader {
+		if err := writer.SetRow("A1", headers); err != nil {
+			return err
+		}
 	}
 	if err := writeRows(writer); err != nil {
 		return err

@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"hive-admin-go/database"
@@ -41,25 +42,63 @@ type devTaskDownloadRow struct {
 	CreateDate   *time.Time
 }
 
+type devTaskExportColumn struct {
+	Field string
+	Title string
+	Width int
+}
+
+var defaultDevTaskExportColumns = []models.DownloadExportColumn{
+	{Field: "taskNum", Title: "任务编号"},
+	{Field: "projectTitle", Title: "项目"},
+	{Field: "version", Title: "版本"},
+	{Field: "moduleTitle", Title: "模块"},
+	{Field: "storyTitle", Title: "需求"},
+	{Field: "taskTitle", Title: "任务标题"},
+	{Field: "userList", Title: "负责人"},
+	{Field: "taskStatus", Title: "状态"},
+	{Field: "taskType", Title: "类型"},
+	{Field: "planHours", Title: "计划工时"},
+	{Field: "actualHours", Title: "实际工时"},
+	{Field: "percent", Title: "进度"},
+	{Field: "startDate", Title: "开始日期"},
+	{Field: "endDate", Title: "结束日期"},
+	{Field: "creatorName", Title: "创建人"},
+	{Field: "createDate", Title: "创建时间"},
+}
+
+var devTaskExportColumnTitles = func() map[string]string {
+	result := make(map[string]string, len(defaultDevTaskExportColumns))
+	for _, column := range defaultDevTaskExportColumns {
+		result[column.Field] = column.Title
+	}
+	result["realName"] = "负责人"
+	return result
+}()
+
 func (e *devTaskDownloadExporter) Count(payload, creatorID string) (int64, error) {
-	params, permission, err := parseDevTaskExportParams(payload, creatorID)
+	request, permission, err := parseDevTaskExportRequest(payload, creatorID)
 	if err != nil {
 		return 0, err
 	}
 	var total int64
-	if err := buildDevTaskQuery(params, permission).Count(&total).Error; err != nil {
+	if err := buildDevTaskQuery(devTaskExportParams(request), permission).Count(&total).Error; err != nil {
 		return 0, err
 	}
 	return total, nil
 }
 
 func (e *devTaskDownloadExporter) Export(payload, creatorID, filePath string, totalRows int64, onProgress func(int64)) (int64, error) {
-	params, permission, err := parseDevTaskExportParams(payload, creatorID)
+	request, permission, err := parseDevTaskExportRequest(payload, creatorID)
 	if err != nil {
 		return 0, err
 	}
-	query := buildDevTaskQuery(params, permission)
-	order := buildDevTaskOrder(params)
+	columns, err := resolveDevTaskExportColumns(request)
+	if err != nil {
+		return 0, err
+	}
+	query := buildDevTaskQuery(devTaskExportParams(request), permission)
+	order := buildDevTaskOrder(devTaskExportParams(request))
 	dictLabels, err := loadDevTaskDownloadDictLabels()
 	if err != nil {
 		return 0, err
@@ -88,18 +127,34 @@ func (e *devTaskDownloadExporter) Export(payload, creatorID, filePath string, to
 		Joins("LEFT JOIN sys_user assignee ON assignee.user_id = dev_task.user_id AND assignee.del_flag = 0").
 		Joins("LEFT JOIN sys_user creator ON creator.user_id = dev_task.creator_id AND creator.del_flag = 0")
 
-	headers := []interface{}{
-		"任务编号", "项目", "版本", "模块", "需求", "任务标题", "负责人", "状态", "类型", "计划工时", "实际工时",
-		"进度", "开始日期", "结束日期", "创建人", "创建时间",
+	includeHeader := exportBoolValue(request.IsHeader, true)
+	useTitle := exportBoolValue(request.IsTitle, true)
+	original := exportBoolValue(request.Original, false)
+	headers := make([]interface{}, 0, len(columns))
+	for _, column := range columns {
+		if useTitle {
+			headers = append(headers, column.Title)
+		} else {
+			headers = append(headers, column.Field)
+		}
 	}
+	sheetName := normalizeDevTaskSheetName(request.SheetName)
 	var processed int64
-	err = writeDownloadWorkbook(filePath, "任务管理", headers, func(writer *excelize.StreamWriter) error {
+	widths := make([]int, 0, len(columns))
+	for _, column := range columns {
+		widths = append(widths, column.Width)
+	}
+	err = writeDownloadWorkbookWithWidths(filePath, sheetName, headers, includeHeader, widths, func(writer *excelize.StreamWriter) error {
 		rows, err := query.Select(selectFields).Order(order).Rows()
 		if err != nil {
 			return err
 		}
 		defer rows.Close()
 
+		rowOffset := 0
+		if includeHeader {
+			rowOffset = 1
+		}
 		for rows.Next() {
 			var row devTaskDownloadRow
 			if err := query.ScanRows(rows, &row); err != nil {
@@ -113,27 +168,13 @@ func (e *devTaskDownloadExporter) Export(payload, creatorID, filePath string, to
 			if processed > totalRows {
 				return ErrDownloadDataChanged
 			}
-			cell, err := excelize.CoordinatesToCellName(1, int(processed)+1)
+			cell, err := excelize.CoordinatesToCellName(1, int(processed)+rowOffset)
 			if err != nil {
 				return err
 			}
-			values := []interface{}{
-				fmt.Sprintf("#%d", row.TaskNum),
-				row.ProjectTitle,
-				row.Version,
-				row.ModuleTitle,
-				row.StoryTitle,
-				row.TaskTitle,
-				row.RealName,
-				formatDevTaskDownloadDictValue(dictLabels, "TASK_STATUS", row.TaskStatus),
-				formatDevTaskDownloadDictValue(dictLabels, "TASK_TYPE", row.TaskType),
-				row.PlanHours,
-				row.ActualHours,
-				fmt.Sprintf("%d%%", percent),
-				formatDownloadDate(row.StartDate),
-				formatDownloadDate(row.EndDate),
-				row.CreatorName,
-				utils.TimeToString(row.CreateDate),
+			values := make([]interface{}, 0, len(columns))
+			for _, column := range columns {
+				values = append(values, devTaskExportColumnValue(column.Field, row, dictLabels, percent, original))
 			}
 			if err := writer.SetRow(cell, values); err != nil {
 				return err
@@ -168,25 +209,115 @@ func formatDevTaskDownloadDictValue(labels map[string]string, dictType string, v
 	return rawValue
 }
 
-func parseDevTaskExportParams(payload, creatorID string) (map[string]interface{}, datapermission.Permission, error) {
+func devTaskExportColumnValue(field string, row devTaskDownloadRow, dictLabels map[string]string, percent int, original bool) interface{} {
+	switch field {
+	case "taskNum":
+		if original {
+			return row.TaskNum
+		}
+		return fmt.Sprintf("#%d", row.TaskNum)
+	case "projectTitle":
+		return row.ProjectTitle
+	case "version":
+		return row.Version
+	case "moduleTitle":
+		return row.ModuleTitle
+	case "storyTitle":
+		return row.StoryTitle
+	case "taskTitle":
+		return row.TaskTitle
+	case "userList", "realName":
+		return row.RealName
+	case "taskStatus":
+		if original {
+			return row.TaskStatus
+		}
+		return formatDevTaskDownloadDictValue(dictLabels, "TASK_STATUS", row.TaskStatus)
+	case "taskType":
+		if original {
+			return row.TaskType
+		}
+		return formatDevTaskDownloadDictValue(dictLabels, "TASK_TYPE", row.TaskType)
+	case "planHours":
+		return row.PlanHours
+	case "actualHours":
+		return row.ActualHours
+	case "percent":
+		if original {
+			return percent
+		}
+		return fmt.Sprintf("%d%%", percent)
+	case "startDate":
+		return formatDownloadDate(row.StartDate)
+	case "endDate":
+		return formatDownloadDate(row.EndDate)
+	case "creatorName":
+		return row.CreatorName
+	case "createDate":
+		return utils.TimeToString(row.CreateDate)
+	default:
+		return ""
+	}
+}
+
+func resolveDevTaskExportColumns(request models.DevTaskExportRequest) ([]devTaskExportColumn, error) {
+	selected := request.Columns
+	if selected == nil {
+		selected = defaultDevTaskExportColumns
+	}
+	if len(selected) == 0 {
+		return nil, fmt.Errorf("导出列不能为空")
+	}
+	columns := make([]devTaskExportColumn, 0, len(selected))
+	seen := make(map[string]struct{}, len(selected))
+	for _, selectedColumn := range selected {
+		field := strings.TrimSpace(selectedColumn.Field)
+		title, ok := devTaskExportColumnTitles[field]
+		if !ok {
+			continue
+		}
+		if _, exists := seen[field]; exists {
+			continue
+		}
+		seen[field] = struct{}{}
+		if value := strings.TrimSpace(selectedColumn.Title); value != "" {
+			titleRunes := []rune(value)
+			if len(titleRunes) > 255 {
+				value = string(titleRunes[:255])
+			}
+			title = value
+		}
+		columns = append(columns, devTaskExportColumn{Field: field, Title: title, Width: selectedColumn.Width})
+	}
+	if len(columns) == 0 {
+		return nil, fmt.Errorf("没有可导出的有效列")
+	}
+	return columns, nil
+}
+
+func parseDevTaskExportRequest(payload, creatorID string) (models.DevTaskExportRequest, datapermission.Permission, error) {
 	request, err := decodeDevTaskExportRequest(payload)
 	if err != nil {
-		return nil, datapermission.Permission{}, err
+		return models.DevTaskExportRequest{}, datapermission.Permission{}, err
 	}
 	if creatorID == "" {
-		return nil, datapermission.Permission{}, fmt.Errorf("导出任务缺少创建用户")
+		return models.DevTaskExportRequest{}, datapermission.Permission{}, fmt.Errorf("导出任务缺少创建用户")
 	}
 	permission, err := resolveDataPermission(creatorID)
 	if err != nil {
-		return nil, datapermission.Permission{}, err
+		return models.DevTaskExportRequest{}, datapermission.Permission{}, err
 	}
+	return request, permission, nil
+}
+
+func devTaskExportParams(request models.DevTaskExportRequest) map[string]interface{} {
 	return map[string]interface{}{
 		"taskTitle":    request.TaskTitle,
 		"projectId":    request.ProjectID,
 		"versionId":    request.VersionID,
 		"taskStatuses": request.TaskStatuses,
 		"sorts":        request.Sorts,
-	}, permission, nil
+	}
 }
 
 func decodeDevTaskExportRequest(payload string) (models.DevTaskExportRequest, error) {
@@ -212,4 +343,61 @@ func formatDownloadDate(value *time.Time) string {
 		return ""
 	}
 	return value.Format("2006-01-02")
+}
+
+func exportBoolValue(value *bool, fallback bool) bool {
+	if value == nil {
+		return fallback
+	}
+	return *value
+}
+
+func normalizeDevTaskSheetName(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return "任务管理"
+	}
+	value = strings.NewReplacer("[", "_", "]", "_", ":", "_", "*", "_", "?", "_", "/", "_", "\\", "_").Replace(value)
+	runes := []rune(value)
+	if len(runes) > 31 {
+		value = string(runes[:31])
+	}
+	if strings.TrimSpace(value) == "" {
+		return "任务管理"
+	}
+	return value
+}
+
+func normalizeDevTaskFileName(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return ""
+	}
+	value = strings.NewReplacer("<", "_", ">", "_", ":", "_", "\"", "_", "/", "_", "\\", "_", "|", "_", "?", "_", "*", "_").Replace(value)
+	filtered := make([]rune, 0, len(value))
+	for _, char := range value {
+		if char < 32 || char == 127 {
+			continue
+		}
+		filtered = append(filtered, char)
+	}
+	value = strings.Trim(string(filtered), " .")
+	if value == "" {
+		return ""
+	}
+	if runes := []rune(value); len(runes) > 180 {
+		value = strings.Trim(string(runes[:180]), " .")
+	}
+	if !strings.HasSuffix(strings.ToLower(value), ".xlsx") {
+		value += ".xlsx"
+	}
+	return value
+}
+
+func (e *devTaskDownloadExporter) ResolveFileName(payload string, _ time.Time) (string, error) {
+	request, err := decodeDevTaskExportRequest(payload)
+	if err != nil {
+		return "", err
+	}
+	return normalizeDevTaskFileName(request.Filename), nil
 }

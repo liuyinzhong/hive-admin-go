@@ -1140,8 +1140,27 @@ definitions:
     type: object
   models.DevTaskExportRequest:
     properties:
+      columns:
+        items:
+          $ref: '#/definitions/models.DownloadExportColumn'
+        type: array
+      filename:
+        example: 开发任务导出.xlsx
+        type: string
+      isHeader:
+        example: true
+        type: boolean
+      isTitle:
+        example: true
+        type: boolean
+      original:
+        example: false
+        type: boolean
       projectId:
         example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      sheetName:
+        example: 任务管理
         type: string
       sorts:
         example: createDate,desc
@@ -1496,6 +1515,18 @@ definitions:
         type: string
       startTime:
         type: string
+    type: object
+  models.DownloadExportColumn:
+    properties:
+      field:
+        example: taskTitle
+        type: string
+      title:
+        example: 任务标题
+        type: string
+      width:
+        example: 200
+        type: integer
     type: object
   models.DownloadPreviewURLResponse:
     properties:
@@ -11358,7 +11389,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: 按当前筛选和排序创建异步XLSX导出任务；Worker 在计数和生成时重新解析创建用户当前数据范围
+      description: 按当前筛选、排序和 VXE 导出配置创建异步 XLSX 导出任务；导出列仅允许任务管理白名单；数据权限：当前用户角色数据范围，Worker
+        在计数和生成时重新解析创建用户当前数据范围
       parameters:
       - description: 导出条件
         in: body
