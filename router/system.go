@@ -147,6 +147,7 @@ func registerSystemRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 		loginLogs := system.Group("/loginLogs")
 		{
 			loginLogs.GET("", permissionGuard.Require("system:loginLog:list"), systemController.GetLoginLogs)
+			loginLogs.POST("/exports", permissionGuard.Require("system:loginLog:export"), systemController.CreateLoginLogExport)
 			loginLogs.GET("/:logId", permissionGuard.Require("system:loginLog:detail"), systemController.GetLoginLog)
 		}
 	}

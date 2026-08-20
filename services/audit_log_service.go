@@ -127,6 +127,24 @@ func (s *AuditLogService) GetOperationLog(logID string, permission datapermissio
 }
 
 func (s *AuditLogService) GetLoginLogs(req models.AuditLogListRequest, permission datapermission.Permission) (*utils.PageResult, error) {
+	query, err := buildLoginLogQuery(req, permission)
+	if err != nil {
+		return nil, err
+	}
+	var rows []models.SysLoginLog
+	result, err := paginateAuditQuery(query.Select("log_id", "username", "event_type", "http_status", "status", "duration_ms", "ip", "user_agent", "create_date").Order(buildLoginLogOrder(req.Sorts)), normalizePage(req.Page), normalizePageSize(req.PageSize), &rows)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]models.LoginLogListResponse, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, loginLogListResponse(row))
+	}
+	result.Items = items
+	return result, nil
+}
+
+func buildLoginLogQuery(req models.AuditLogListRequest, permission datapermission.Permission) (*gorm.DB, error) {
 	query, err := applyCommonAuditFilters(database.DB.Model(&models.SysLoginLog{}), req)
 	if err != nil {
 		return nil, err
@@ -141,25 +159,17 @@ func (s *AuditLogService) GetLoginLogs(req models.AuditLogListRequest, permissio
 	if req.IP != "" {
 		query = query.Where("ip LIKE ?", "%"+req.IP+"%")
 	}
-	order := utils.BuildOrderBy(req.Sorts, map[string]string{
+	return query, nil
+}
+
+func buildLoginLogOrder(sorts string) string {
+	order := utils.BuildOrderBy(sorts, map[string]string{
 		"createDate": "create_date", "durationMs": "duration_ms", "httpStatus": "http_status",
 	})
 	if order == "" {
-		order = "create_date desc, log_id asc"
-	} else {
-		order += ", log_id asc"
+		return "create_date desc, log_id asc"
 	}
-	var rows []models.SysLoginLog
-	result, err := paginateAuditQuery(query.Select("log_id", "username", "event_type", "http_status", "status", "duration_ms", "ip", "user_agent", "create_date").Order(order), normalizePage(req.Page), normalizePageSize(req.PageSize), &rows)
-	if err != nil {
-		return nil, err
-	}
-	items := make([]models.LoginLogListResponse, 0, len(rows))
-	for _, row := range rows {
-		items = append(items, loginLogListResponse(row))
-	}
-	result.Items = items
-	return result, nil
+	return order + ", log_id asc"
 }
 
 func (s *AuditLogService) GetLoginLog(logID string, permission datapermission.Permission) (*models.LoginLogDetailResponse, error) {

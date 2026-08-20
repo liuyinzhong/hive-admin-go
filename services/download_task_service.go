@@ -65,6 +65,7 @@ var defaultDownloadTaskManager = &downloadTaskManager{
 	exporters: map[string]downloadTaskExporter{
 		models.DownloadTaskTypeInventoryBalance: &inventoryBalanceDownloadExporter{},
 		models.DownloadTaskTypeDevTask:          &devTaskDownloadExporter{},
+		models.DownloadTaskTypeLoginLog:         &loginLogDownloadExporter{},
 	},
 }
 

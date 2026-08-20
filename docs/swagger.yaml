@@ -3040,6 +3040,30 @@ definitions:
         example: admin
         type: string
     type: object
+  models.LoginLogExportRequest:
+    properties:
+      endDate:
+        example: "2026-08-20 23:59:59"
+        type: string
+      eventType:
+        example: login
+        type: string
+      ip:
+        example: 192.168.1.100
+        type: string
+      sorts:
+        example: createDate,desc
+        type: string
+      startDate:
+        example: "2026-08-01 00:00:00"
+        type: string
+      status:
+        example: 1
+        type: integer
+      username:
+        example: admin
+        type: string
+    type: object
   models.LoginLogListResponse:
     properties:
       createDate:
@@ -20666,6 +20690,56 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 获取登录日志详情
+      tags:
+      - 系统管理/日志管理
+  /system/loginLogs/exports:
+    post:
+      consumes:
+      - application/json
+      description: 按当前筛选和排序创建异步XLSX导出任务；数据权限：Worker 执行时按创建用户重新解析当前角色数据范围，并按登录日志 user_id
+        过滤
+      parameters:
+      - description: 导出条件
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginLogExportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.DownloadTaskCreatedResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: 活动任务数量已达上限
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 创建失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建登录日志导出任务
       tags:
       - 系统管理/日志管理
   /system/menus:

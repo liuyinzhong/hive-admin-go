@@ -23,6 +23,7 @@ stateDiagram-v2
 
 - `inventoryBalance`：库存余额导出，创建权限 `erp:inventoryBalance:export`。
 - `devTask`：开发任务导出，创建权限 `dev:task:export`。
+- `loginLog`：登录日志导出，创建权限 `system:loginLog:export`。
 
 增加任务类型时必须同时注册任务类型、导出器、来源接口、前端请求类型、权限和文档。
 
@@ -105,12 +106,13 @@ Worker 以下载任务记录不可由请求负载覆盖的 `creator_id` 作为�
 | `GET /api/public/downloads/preview/:token` | 公开取预览文件流 | 公开接口，通过 JWT 签名校验确保 token 由本服务签发且未过期，再复用创建者和文件可用性校验 |
 | `POST /api/erp/inventory/balances/exports` | 创建库存余额导出 | `erp:inventoryBalance:export` |
 | `POST /api/dev/tasks/exports` | 创建开发任务导出 | `dev:task:export` |
+| `POST /api/system/loginLogs/exports` | 创建登录日志导出 | `system:loginLog:export` |
 
 ## 代码入口
 
 - Model/DTO：`models/download_task.go`。
 - Service 与 Worker：`services/download_task_service.go`。
 - XLSX 公共写入：`services/download_workbook.go`。
-- 导出器：`services/erp_inventory_download_exporter.go`、`services/dev_task_download_exporter.go`。
+- 导出器：`services/erp_inventory_download_exporter.go`、`services/dev_task_download_exporter.go`、`services/login_log_download_exporter.go`。
 - Controller：`controllers/system_download_controller.go` 及来源模块 Controller。
 - 前端：`hive/apps/web-antdv-next/src/views/system/downloadCenter`。

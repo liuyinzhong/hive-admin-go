@@ -102,6 +102,50 @@ func (ctrl *SystemController) GetLoginLogs(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
 }
 
+// CreateLoginLogExport 创建登录日志导出任务。
+// @Summary 创建登录日志导出任务
+// @Description 按当前筛选和排序创建异步XLSX导出任务；数据权限：Worker 执行时按创建用户重新解析当前角色数据范围，并按登录日志 user_id 过滤
+// @Tags 系统管理/日志管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param request body models.LoginLogExportRequest true "导出条件"
+// @Success 200 {object} models.Response{data=models.DownloadTaskCreatedResponse} "创建成功"
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 401 {object} models.Response "未认证"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Failure 409 {object} models.Response "活动任务数量已达上限"
+// @Failure 500 {object} models.Response "创建失败"
+// @Router /system/loginLogs/exports [post]
+func (ctrl *SystemController) CreateLoginLogExport(c *gin.Context) {
+	userID, ok := currentUserID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, models.NewErrorResponse(nil, "用户未登录"))
+		return
+	}
+	var req models.LoginLogExportRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
+		return
+	}
+	result, err := services.NewDownloadTaskService().CreateTask(
+		userID,
+		models.DownloadTaskTypeLoginLog,
+		"登录日志导出",
+		"登录日志",
+		services.NewLoginLogExportPayload(req),
+	)
+	if err != nil {
+		if errors.Is(err, services.ErrDownloadTaskLimitReached) {
+			c.JSON(http.StatusConflict, models.NewErrorResponse(nil, err.Error()))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, "创建导出任务失败"))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
 // GetLoginLog 获取登录日志详情
 // @Summary 获取登录日志详情
 // @Description 按日志用户和当前角色数据范围获取登录日志详情，包含响应体、内容类型等完整信息

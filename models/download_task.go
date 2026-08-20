@@ -10,6 +10,7 @@ const (
 
 	DownloadTaskTypeInventoryBalance = "inventoryBalance"
 	DownloadTaskTypeDevTask          = "devTask"
+	DownloadTaskTypeLoginLog         = "loginLog"
 )
 
 // SysDownloadTask 保存当前用户发起的异步导出任务及生成文件元数据。
@@ -95,4 +96,14 @@ type DevTaskExportRequest struct {
 	TaskTitle    string `json:"taskTitle" example:"下载中心开发"`
 	TaskStatuses []int  `json:"taskStatus" example:"1,2"`
 	Sorts        string `json:"sorts" example:"createDate,desc"`
+}
+
+type LoginLogExportRequest struct {
+	Username  string `json:"username" example:"admin"`
+	EventType string `json:"eventType" example:"login"`
+	Status    *int   `json:"status" example:"1"`
+	IP        string `json:"ip" example:"192.168.1.100"`
+	StartDate string `json:"startDate" example:"2026-08-01 00:00:00"`
+	EndDate   string `json:"endDate" example:"2026-08-20 23:59:59"`
+	Sorts     string `json:"sorts" example:"createDate,desc"`
 }
