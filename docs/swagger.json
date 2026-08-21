@@ -17546,6 +17546,120 @@
                 }
             }
         },
+        "/public/feedback": {
+            "post": {
+                "description": "数据权限：公开接口，不按创建人过滤；type=story 写入 dev_story，type=bug 写入 dev_bug，source 固定为 10（外部反馈）。creator_id/version_id/project_id/module_id 全部留空，fileIds 必须由 /api/public/upload 公开上传产生。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "公共接口/外部反馈"
+                ],
+                "summary": "提交外部反馈工单",
+                "parameters": [
+                    {
+                        "description": "工单提交请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateStoryFeedbackRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CreateStoryFeedbackResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/public/upload": {
+            "post": {
+                "description": "数据权限：公开接口，不按创建人过滤；文件元数据 creator_id 写入固定占位标记 external-feedback，工单提交时校验附件必须由此接口产生，避免伪造内部登录用户上传的文件 ID。",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "公共接口/外部反馈"
+                ],
+                "summary": "公开上传外部反馈附件",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "文件",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.FileResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/statistics/dev/getTaskFindDay": {
             "get": {
                 "security": [
@@ -24074,6 +24188,20 @@
                     "type": "string",
                     "example": "管理员"
                 },
+                "fileIds": {
+                    "description": "附件ID数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "fileList": {
+                    "description": "附件列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.FileResponse"
+                    }
+                },
                 "moduleId": {
                     "description": "关联模块ID",
                     "type": "string",
@@ -24363,6 +24491,16 @@
                     "description": "用户代理",
                     "type": "string",
                     "example": "Mozilla/5.0"
+                },
+                "fileIds": {
+                    "description": "附件id数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
                 },
                 "moduleId": {
                     "description": "关联模块ID",
@@ -25080,6 +25218,60 @@
                         1
                     ],
                     "example": 1
+                }
+            }
+        },
+        "models.CreateStoryFeedbackRequest": {
+            "type": "object",
+            "required": [
+                "title",
+                "type"
+            ],
+            "properties": {
+                "fileIds": {
+                    "description": "附件id数组，由 /api/public/upload 公开上传产生",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
+                },
+                "richText": {
+                    "description": "工单描述(富文本)，对应 storyRichText/bugRichText",
+                    "type": "string",
+                    "example": "\u003cp\u003e反馈描述\u003c/p\u003e"
+                },
+                "title": {
+                    "description": "工单标题，对应 storyTitle/bugTitle",
+                    "type": "string",
+                    "example": "反馈标题"
+                },
+                "type": {
+                    "description": "工单类型: story=需求, bug=缺陷",
+                    "type": "string",
+                    "example": "story"
+                },
+                "userAgent": {
+                    "description": "提交方浏览器UA，仅 type=bug 时写入 bug_ua",
+                    "type": "string",
+                    "example": "Mozilla/5.0"
+                }
+            }
+        },
+        "models.CreateStoryFeedbackResponse": {
+            "type": "object",
+            "properties": {
+                "num": {
+                    "description": "工单编号，对应 storyNum/bugNum",
+                    "type": "integer",
+                    "example": 1
+                },
+                "type": {
+                    "description": "工单类型，回显请求 type",
+                    "type": "string",
+                    "example": "story"
                 }
             }
         },
@@ -33761,6 +33953,16 @@
                     "description": "用户代理",
                     "type": "string",
                     "example": "Mozilla/5.0"
+                },
+                "fileIds": {
+                    "description": "附件id数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
                 },
                 "moduleId": {
                     "description": "关联模块ID",
