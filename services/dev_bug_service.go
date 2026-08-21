@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -97,6 +98,7 @@ func buildBugResponses(bugs []models.DevBug) []models.BugResponse {
 	versionIDs := make([]string, 0)
 	moduleIDs := make([]string, 0)
 	storyIDs := make([]string, 0)
+	allFileIDs := make([]string, 0)
 
 	for _, b := range bugs {
 		if b.CreatorID != nil {
@@ -114,6 +116,14 @@ func buildBugResponses(bugs []models.DevBug) []models.BugResponse {
 		}
 		if b.StoryID != nil {
 			storyIDs = append(storyIDs, *b.StoryID)
+		}
+		if b.FileIDs != nil {
+			ids := strings.Split(*b.FileIDs, ",")
+			for _, id := range ids {
+				if id != "" {
+					allFileIDs = append(allFileIDs, id)
+				}
+			}
 		}
 	}
 
@@ -185,6 +195,34 @@ func buildBugResponses(bugs []models.DevBug) []models.BugResponse {
 		}
 	}
 
+	fileMap := make(map[string]models.FileResponse)
+	if len(allFileIDs) > 0 {
+		var files []models.SysFile
+		database.DB.Where("file_id IN ?", allFileIDs).Find(&files)
+
+		var fileCreatorIDs []string
+		for _, f := range files {
+			if f.CreatorID != nil {
+				fileCreatorIDs = append(fileCreatorIDs, *f.CreatorID)
+			}
+		}
+
+		fileCreatorNameMap := make(map[string]string)
+		if len(fileCreatorIDs) > 0 {
+			var fileCreators []models.SysUser
+			database.DB.Where("user_id IN ?", fileCreatorIDs).Find(&fileCreators)
+			for _, c := range fileCreators {
+				if c.RealName != nil {
+					fileCreatorNameMap[c.UserID] = *c.RealName
+				}
+			}
+		}
+
+		for _, f := range files {
+			fileMap[f.FileID] = *buildFileResponse(f, fileCreatorNameMap[utils.StringValue(f.CreatorID)])
+		}
+	}
+
 	var responses []models.BugResponse
 	for _, bug := range bugs {
 		creatorName := creators[utils.StringValue(bug.CreatorID)]
@@ -198,6 +236,20 @@ func buildBugResponses(bugs []models.DevBug) []models.BugResponse {
 			if u, ok := usersMap[*bug.UserID]; ok {
 				realName = u.RealName
 				avatar = u.Avatar
+			}
+		}
+
+		fileIDs := make([]string, 0)
+		fileList := make([]models.FileResponse, 0)
+		if bug.FileIDs != nil {
+			ids := strings.Split(*bug.FileIDs, ",")
+			for _, id := range ids {
+				if id != "" {
+					fileIDs = append(fileIDs, id)
+					if f, ok := fileMap[id]; ok {
+						fileList = append(fileList, f)
+					}
+				}
 			}
 		}
 
@@ -228,6 +280,8 @@ func buildBugResponses(bugs []models.DevBug) []models.BugResponse {
 			UpdateDate:       models.TimeToStringPtr(bug.UpdateDate),
 			CreateDate:       models.TimeToStringPtr(bug.CreateDate),
 			BugRichText:      bug.BugRichText,
+			FileIDs:          fileIDs,
+			FileList:         fileList,
 		})
 	}
 	return responses
@@ -316,6 +370,28 @@ func buildSingleBugResponse(bug *models.DevBug) *models.BugResponse {
 		}
 	}
 
+	fileIDs := make([]string, 0)
+	fileList := make([]models.FileResponse, 0)
+	if bug.FileIDs != nil {
+		ids := strings.Split(*bug.FileIDs, ",")
+		for _, id := range ids {
+			if id != "" {
+				fileIDs = append(fileIDs, id)
+				var f models.SysFile
+				database.DB.Where("file_id = ?", id).First(&f)
+				var fileCreatorName string
+				if f.CreatorID != nil {
+					var u models.SysUser
+					database.DB.Where("user_id = ?", *f.CreatorID).First(&u)
+					if u.RealName != nil {
+						fileCreatorName = *u.RealName
+					}
+				}
+				fileList = append(fileList, *buildFileResponse(f, fileCreatorName))
+			}
+		}
+	}
+
 	return &models.BugResponse{
 		BugID:            &bug.BugID,
 		BugTitle:         bug.BugTitle,
@@ -343,6 +419,8 @@ func buildSingleBugResponse(bug *models.DevBug) *models.BugResponse {
 		StoryTitle:       &storyTitle,
 		UpdateDate:       models.TimeToStringPtr(bug.UpdateDate),
 		CreateDate:       models.TimeToStringPtr(bug.CreateDate),
+		FileIDs:          fileIDs,
+		FileList:         fileList,
 	}
 }
 
@@ -354,6 +432,10 @@ func CreateBug(req *models.CreateBugRequest, creatorID string, permission datape
 
 func createBugTx(tx *gorm.DB, req *models.CreateBugRequest, creatorID string, permission datapermission.Permission) error {
 	assigneeID, err := validateRequiredDataPermissionUser(tx, req.UserID, "指派人", permission)
+	if err != nil {
+		return err
+	}
+	fileIDs, err := validateDataPermissionFiles(tx, req.FileIDs, permission)
 	if err != nil {
 		return err
 	}
@@ -387,6 +469,15 @@ func createBugTx(tx *gorm.DB, req *models.CreateBugRequest, creatorID string, pe
 		return err
 	}
 
+	fileIDsStr := ""
+	if len(fileIDs) > 0 {
+		fileIDsStr = strings.Join(fileIDs, ",")
+	}
+	var fileIDsPtr *string
+	if fileIDsStr != "" {
+		fileIDsPtr = &fileIDsStr
+	}
+
 	bug := models.DevBug{
 		BugID:            bugID,
 		BugTitle:         req.BugTitle,
@@ -399,6 +490,7 @@ func createBugTx(tx *gorm.DB, req *models.CreateBugRequest, creatorID string, pe
 		BugUa:            req.BugUa,
 		ProjectID:        req.ProjectID,
 		BugRichText:      req.BugRichText,
+		FileIDs:          fileIDsPtr,
 		VersionID:        req.VersionID,
 		ModuleID:         req.ModuleID,
 		StoryID:          req.StoryID,
@@ -442,6 +534,10 @@ func UpdateBug(bugID string, req *models.UpdateBugRequest, creatorID string, per
 	if err != nil {
 		return err
 	}
+	fileIDs, err := validateDataPermissionFiles(database.DB, req.FileIDs, permission)
+	if err != nil {
+		return err
+	}
 	if err := validateDevVersionReference(database.DB, req.VersionID, permission); err != nil {
 		return err
 	}
@@ -469,6 +565,11 @@ func UpdateBug(bugID string, req *models.UpdateBugRequest, creatorID string, per
 		return err
 	}
 
+	fileIDsStr := ""
+	if len(fileIDs) > 0 {
+		fileIDsStr = strings.Join(fileIDs, ",")
+	}
+
 	now := time.Now()
 	return updateDevRecordWithHistory(creatorID, bugID, 20, 10, "", func(tx *gorm.DB) error {
 		updateQuery := tx.Model(&models.DevBug{}).Where("bug_id = ? AND del_flag = ?", bugID, 0)
@@ -482,11 +583,17 @@ func UpdateBug(bugID string, req *models.UpdateBugRequest, creatorID string, per
 			"bug_ua":        req.BugUa,
 			"project_id":    req.ProjectID,
 			"bug_rich_text": req.BugRichText,
-			"version_id":    req.VersionID,
-			"module_id":     req.ModuleID,
-			"story_id":      req.StoryID,
-			"user_id":       assigneeID,
-			"update_date":   now,
+			"file_ids": func() interface{} {
+				if fileIDsStr == "" {
+					return nil
+				}
+				return fileIDsStr
+			}(),
+			"version_id":  req.VersionID,
+			"module_id":   req.ModuleID,
+			"story_id":    req.StoryID,
+			"user_id":     assigneeID,
+			"update_date": now,
 		})
 		if result.Error != nil {
 			return result.Error

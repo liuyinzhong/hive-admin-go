@@ -449,32 +449,34 @@ type TaskResponse struct {
 }
 
 type BugResponse struct {
-	BugID            *string `json:"bugId" example:"UUID"`                     // 缺陷ID
-	BugTitle         *string `json:"bugTitle" example:"缺陷标题"`                  // 缺陷标题
-	BugNum           int     `json:"bugNum" example:"1"`                       // 缺陷编号
-	BugStatus        string  `json:"bugStatus" example:"0"`                    // 缺陷状态
-	BugConfirmStatus string  `json:"bugConfirmStatus" example:"0"`             // 缺陷确认状态
-	BugLevel         string  `json:"bugLevel" example:"0"`                     // 缺陷等级
-	BugSource        string  `json:"bugSource" example:"0"`                    // 缺陷来源
-	BugType          string  `json:"bugType" example:"0"`                      // 缺陷类型
-	BugEnv           string  `json:"bugEnv" example:"0"`                       // 缺陷环境
-	BugUa            *string `json:"bugUa" example:"Mozilla/5.0"`              // 用户代理
-	UserID           *string `json:"userId" example:"UUID"`                    // 指派人ID
-	Avatar           *string `json:"avatar" example:"https://xxx/avatar.jpg"`  // 指派人头像
-	RealName         *string `json:"realName" example:"张三"`                    // 指派人姓名
-	CreatorName      *string `json:"creatorName" example:"管理员"`                // 创建人姓名
-	CreatorID        *string `json:"creatorId" example:"UUID"`                 // 创建人ID
-	VersionID        *string `json:"versionId" example:"UUID"`                 // 关联版本ID
-	Version          *string `json:"version" example:"v1.0.0"`                 // 关联版本号
-	ModuleID         *string `json:"moduleId" example:"UUID"`                  // 关联模块ID
-	ModuleTitle      *string `json:"moduleTitle" example:"模块名称"`               // 关联模块标题
-	ProjectID        *string `json:"projectId" example:"UUID"`                 // 关联项目ID
-	ProjectTitle     *string `json:"projectTitle" example:"crudelis"`          // 关联项目标题
-	StoryID          *string `json:"storyId" example:"UUID"`                   // 关联需求ID
-	StoryTitle       *string `json:"storyTitle" example:"需求标题"`                // 关联需求标题
-	UpdateDate       *string `json:"updateDate" example:"2024-01-01 12:00:00"` // 更新时间
-	CreateDate       *string `json:"createDate" example:"2024-01-01 12:00:00"` // 创建时间
-	BugRichText      *string `json:"bugRichText" example:"<p>缺陷描述</p>"`        // 缺陷描述(富文本)
+	BugID            *string        `json:"bugId" example:"UUID"`                     // 缺陷ID
+	BugTitle         *string        `json:"bugTitle" example:"缺陷标题"`                  // 缺陷标题
+	BugNum           int            `json:"bugNum" example:"1"`                       // 缺陷编号
+	BugStatus        string         `json:"bugStatus" example:"0"`                    // 缺陷状态
+	BugConfirmStatus string         `json:"bugConfirmStatus" example:"0"`             // 缺陷确认状态
+	BugLevel         string         `json:"bugLevel" example:"0"`                     // 缺陷等级
+	BugSource        string         `json:"bugSource" example:"0"`                    // 缺陷来源
+	BugType          string         `json:"bugType" example:"0"`                      // 缺陷类型
+	BugEnv           string         `json:"bugEnv" example:"0"`                       // 缺陷环境
+	BugUa            *string        `json:"bugUa" example:"Mozilla/5.0"`              // 用户代理
+	UserID           *string        `json:"userId" example:"UUID"`                    // 指派人ID
+	Avatar           *string        `json:"avatar" example:"https://xxx/avatar.jpg"`  // 指派人头像
+	RealName         *string        `json:"realName" example:"张三"`                    // 指派人姓名
+	CreatorName      *string        `json:"creatorName" example:"管理员"`                // 创建人姓名
+	CreatorID        *string        `json:"creatorId" example:"UUID"`                 // 创建人ID
+	VersionID        *string        `json:"versionId" example:"UUID"`                 // 关联版本ID
+	Version          *string        `json:"version" example:"v1.0.0"`                 // 关联版本号
+	ModuleID         *string        `json:"moduleId" example:"UUID"`                  // 关联模块ID
+	ModuleTitle      *string        `json:"moduleTitle" example:"模块名称"`               // 关联模块标题
+	ProjectID        *string        `json:"projectId" example:"UUID"`                 // 关联项目ID
+	ProjectTitle     *string        `json:"projectTitle" example:"crudelis"`          // 关联项目标题
+	StoryID          *string        `json:"storyId" example:"UUID"`                   // 关联需求ID
+	StoryTitle       *string        `json:"storyTitle" example:"需求标题"`                // 关联需求标题
+	UpdateDate       *string        `json:"updateDate" example:"2024-01-01 12:00:00"` // 更新时间
+	CreateDate       *string        `json:"createDate" example:"2024-01-01 12:00:00"` // 创建时间
+	BugRichText      *string        `json:"bugRichText" example:"<p>缺陷描述</p>"`        // 缺陷描述(富文本)
+	FileIDs          []string       `json:"fileIds"`                                  // 附件ID数组
+	FileList         []FileResponse `json:"fileList"`                                 // 附件列表
 }
 
 type ChangeHistoryResponse struct {
@@ -624,35 +626,37 @@ type UpdateTaskNextRequest struct {
 }
 
 type CreateBugRequest struct {
-	BugLevel    string  `json:"bugLevel" example:"0"`                        // 缺陷等级
-	BugEnv      string  `json:"bugEnv" example:"0"`                          // 缺陷环境
-	BugStatus   string  `json:"bugStatus" example:"0"`                       // 缺陷状态
-	BugSource   string  `json:"bugSource" example:"0"`                       // 缺陷来源
-	BugType     string  `json:"bugType" example:"0"`                         // 缺陷类型
-	BugUa       *string `json:"bugUa" example:"Mozilla/5.0"`                 // 用户代理
-	BugTitle    *string `json:"bugTitle" binding:"required" example:"缺陷标题"`  // 缺陷标题
-	ProjectID   string  `json:"projectId" binding:"required" example:"UUID"` // 关联项目ID
-	BugRichText *string `json:"bugRichText" example:"<p>缺陷描述</p>"`           // 缺陷描述(富文本)
-	VersionID   *string `json:"versionId" example:"UUID"`                    // 关联版本ID
-	ModuleID    *string `json:"moduleId" example:"UUID"`                     // 关联模块ID
-	StoryID     *string `json:"storyId" example:"UUID"`                      // 关联需求ID
-	UserID      *string `json:"userId" binding:"required" example:"UUID"`    // 指派人ID
+	BugLevel    string   `json:"bugLevel" example:"0"`                        // 缺陷等级
+	BugEnv      string   `json:"bugEnv" example:"0"`                          // 缺陷环境
+	BugStatus   string   `json:"bugStatus" example:"0"`                       // 缺陷状态
+	BugSource   string   `json:"bugSource" example:"0"`                       // 缺陷来源
+	BugType     string   `json:"bugType" example:"0"`                         // 缺陷类型
+	BugUa       *string  `json:"bugUa" example:"Mozilla/5.0"`                 // 用户代理
+	BugTitle    *string  `json:"bugTitle" binding:"required" example:"缺陷标题"`  // 缺陷标题
+	ProjectID   string   `json:"projectId" binding:"required" example:"UUID"` // 关联项目ID
+	BugRichText *string  `json:"bugRichText" example:"<p>缺陷描述</p>"`           // 缺陷描述(富文本)
+	VersionID   *string  `json:"versionId" example:"UUID"`                    // 关联版本ID
+	ModuleID    *string  `json:"moduleId" example:"UUID"`                     // 关联模块ID
+	StoryID     *string  `json:"storyId" example:"UUID"`                      // 关联需求ID
+	UserID      *string  `json:"userId" binding:"required" example:"UUID"`    // 指派人ID
+	FileIDs     []string `json:"fileIds" example:"[\"UUID\"]"`                // 附件id数组
 }
 
 type UpdateBugRequest struct {
-	BugLevel    string  `json:"bugLevel" example:"0"`                        // 缺陷等级
-	BugEnv      string  `json:"bugEnv" example:"0"`                          // 缺陷环境
-	BugStatus   string  `json:"bugStatus" example:"0"`                       // 缺陷状态
-	BugSource   string  `json:"bugSource" example:"0"`                       // 缺陷来源
-	BugType     string  `json:"bugType" example:"0"`                         // 缺陷类型
-	BugUa       *string `json:"bugUa" example:"Mozilla/5.0"`                 // 用户代理
-	BugTitle    *string `json:"bugTitle" binding:"required" example:"缺陷标题"`  // 缺陷标题
-	ProjectID   string  `json:"projectId" binding:"required" example:"UUID"` // 关联项目ID
-	BugRichText *string `json:"bugRichText" example:"<p>缺陷描述</p>"`           // 缺陷描述(富文本)
-	VersionID   *string `json:"versionId" example:"UUID"`                    // 关联版本ID
-	ModuleID    *string `json:"moduleId" example:"UUID"`                     // 关联模块ID
-	StoryID     *string `json:"storyId" example:"UUID"`                      // 关联需求ID
-	UserID      *string `json:"userId" binding:"required" example:"UUID"`    // 指派人ID
+	BugLevel    string   `json:"bugLevel" example:"0"`                        // 缺陷等级
+	BugEnv      string   `json:"bugEnv" example:"0"`                          // 缺陷环境
+	BugStatus   string   `json:"bugStatus" example:"0"`                       // 缺陷状态
+	BugSource   string   `json:"bugSource" example:"0"`                       // 缺陷来源
+	BugType     string   `json:"bugType" example:"0"`                         // 缺陷类型
+	BugUa       *string  `json:"bugUa" example:"Mozilla/5.0"`                 // 用户代理
+	BugTitle    *string  `json:"bugTitle" binding:"required" example:"缺陷标题"`  // 缺陷标题
+	ProjectID   string   `json:"projectId" binding:"required" example:"UUID"` // 关联项目ID
+	BugRichText *string  `json:"bugRichText" example:"<p>缺陷描述</p>"`           // 缺陷描述(富文本)
+	VersionID   *string  `json:"versionId" example:"UUID"`                    // 关联版本ID
+	ModuleID    *string  `json:"moduleId" example:"UUID"`                     // 关联模块ID
+	StoryID     *string  `json:"storyId" example:"UUID"`                      // 关联需求ID
+	UserID      *string  `json:"userId" binding:"required" example:"UUID"`    // 指派人ID
+	FileIDs     []string `json:"fileIds" example:"[\"UUID\"]"`                // 附件id数组
 }
 
 type UpdateBugFieldRequest struct {

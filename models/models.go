@@ -273,6 +273,7 @@ type DevBug struct {
 	BugTitle         *string    `gorm:"column:bug_title;type:varchar(128)" json:"bugTitle"`
 	BugNum           int        `gorm:"column:bug_num;type:int;autoIncrement" json:"bugNum"`
 	BugRichText      *string    `gorm:"column:bug_rich_text;type:longtext" json:"bugRichText"`
+	FileIDs          *string    `gorm:"column:file_ids;type:text" json:"fileIds"`
 	BugStatus        int        `gorm:"column:bug_status;type:tinyint;default:0" json:"bugStatus"`
 	BugConfirmStatus int        `gorm:"column:bug_confirm_status;type:tinyint;default:0" json:"bugConfirmStatus"`
 	BugLevel         int        `gorm:"column:bug_level;type:tinyint;default:0" json:"bugLevel"`

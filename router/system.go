@@ -14,6 +14,7 @@ func registerSystemRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 	menuMessageController := controllers.NewMenuMessageController()
 	downloadTaskController := controllers.NewDownloadTaskController()
 	externalPageController := controllers.NewExternalPageController()
+	publicFeedbackController := controllers.NewPublicFeedbackController()
 	permissionGuard := deps.PermissionGuard
 	dataPermissionMiddleware := deps.DataPermissionMiddleware
 
@@ -21,6 +22,8 @@ func registerSystemRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 	{
 		public.GET("/externalPages/:name", externalPageController.GetPublicExternalPage)
 		public.GET("/downloads/preview/:token", downloadTaskController.PreviewFile)
+		public.POST("/feedback", publicFeedbackController.CreateFeedback)
+		public.POST("/upload", publicFeedbackController.UploadFile)
 	}
 
 	auth := api.Group("/auth")
