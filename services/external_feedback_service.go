@@ -120,7 +120,10 @@ func createExternalFeedbackStory(req *models.CreateStoryFeedbackRequest) (int, e
 		if err := tx.Create(&story).Error; err != nil {
 			return err
 		}
-		num = story.StoryNum
+		// StoryID 是手动赋值的主键(UUID)，GORM 仅回填主键；非主键自增的 story_num 需用主键回查
+		if err := tx.Raw("SELECT story_num FROM dev_story WHERE story_id = ?", storyID).Scan(&num).Error; err != nil {
+			return err
+		}
 		return nil
 	})
 	if err != nil {
@@ -162,7 +165,10 @@ func createExternalFeedbackBug(req *models.CreateStoryFeedbackRequest) (int, err
 		if err := tx.Create(&bug).Error; err != nil {
 			return err
 		}
-		num = bug.BugNum
+		// BugID 是手动赋值的主键(UUID)，GORM 仅回填主键；非主键自增的 bug_num 需用主键回查
+		if err := tx.Raw("SELECT bug_num FROM dev_bug WHERE bug_id = ?", bugID).Scan(&num).Error; err != nil {
+			return err
+		}
 		_ = fileIDsStr
 		return nil
 	})
