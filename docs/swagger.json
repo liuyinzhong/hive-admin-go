@@ -19278,7 +19278,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按文件创建人和当前角色数据范围分页获取文件元数据；不改变 /uploads/** 的公开静态访问边界",
+                "description": "按文件创建人和当前角色数据范围分页获取文件元数据；不改变 /uploads/** 的公开静态访问边界。支持按文件状态 status 精确过滤（0=正式，1=临时未绑定），响应包含 status 字段",
                 "consumes": [
                     "application/json"
                 ],
@@ -19318,6 +19318,12 @@
                         "type": "string",
                         "description": "文件扩展名(精确匹配，如 .jpg)",
                         "name": "fileExt",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "文件状态(精确匹配，0=正式，1=临时未绑定)",
+                        "name": "status",
                         "in": "query"
                     },
                     {
@@ -27816,6 +27822,11 @@
                     "description": "文件大小(字节)",
                     "type": "integer",
                     "example": 102400
+                },
+                "status": {
+                    "description": "文件状态；0=正式，1=临时未绑定",
+                    "type": "integer",
+                    "example": 0
                 },
                 "thumbnailPath": {
                     "description": "缩略图路径(图片专用)",

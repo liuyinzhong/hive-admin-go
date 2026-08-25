@@ -48,7 +48,7 @@ func (ctrl *SystemController) UploadFile(c *gin.Context) {
 // @Param originalName query string false "原始文件名(模糊搜索)"
 // @Param type query string false "MIME类型(精确匹配)"
 // @Param fileExt query string false "文件扩展名(精确匹配，如 .jpg)"
-// @Param status query int false "文件状态(精确匹配，0=正式，1=临时未绑定)"
+// @Param status query int false "使用状态(精确匹配，0=已使用，1=未使用)"
 // @Param sorts query string false "排序参数(如 createDate,desc;size,asc)"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.FileResponse}} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"

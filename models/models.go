@@ -325,7 +325,7 @@ type SysFile struct {
 	ThumbnailPath *string    `gorm:"column:thumbnail_path;type:varchar(512)" json:"thumbnailPath"`
 	ThumbnailURL  *string    `gorm:"column:thumbnail_url;type:varchar(512)" json:"thumbnailUrl"`
 	CreatorID     *string    `gorm:"column:creator_id;type:char(36)" json:"creatorId"`
-	Status        *int       `gorm:"column:status;type:tinyint;not null;default:0" json:"status"` // 0=正式(默认),1=临时未绑定(预留,当前无写入方)
+	Status        *int       `gorm:"column:status;type:tinyint;not null;default:0" json:"status"` // 使用状态:0=已使用(默认),1=未使用(预留,当前无写入方)
 	CreateDate    *time.Time `gorm:"column:create_date" json:"createDate"`
 }
 

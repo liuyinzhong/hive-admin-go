@@ -104,7 +104,7 @@ func (s *FileService) UploadFile(fileHeader *multipart.FileHeader, creatorID str
 	}
 
 	now := time.Now()
-	// 当前所有上传入口（登录用户与公开反馈）统一默认正式态；临时态标记由后续孤儿清理阶段实现
+	// 当前所有上传入口（登录用户与公开反馈）统一默认已使用；未使用标记由后续孤儿清理阶段实现
 	status := 0
 	file := models.SysFile{
 		FileID:        fileID,

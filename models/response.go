@@ -418,7 +418,7 @@ type FileResponse struct {
 	ThumbnailURL  *string `json:"thumbnailUrl" example:"/uploads/thumb/abc.jpg"` // 缩略图URL(图片专用)
 	CreatorID     *string `json:"creatorId" example:"UUID"`                      // 创建人id
 	CreatorName   *string `json:"creatorName" example:"创建人姓名"`                   // 创建人姓名
-	Status        *int    `json:"status" example:"0"`                            // 文件状态；0=正式，1=临时未绑定
+	Status        *int    `json:"status" example:"0"`                            // 使用状态；0=已使用，1=未使用
 	CreateDate    *string `json:"createDate" example:"2024-01-01 12:00:00"`      // 创建日期
 }
 
