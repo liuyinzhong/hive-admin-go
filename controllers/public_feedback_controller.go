@@ -55,7 +55,7 @@ func (ctrl *PublicFeedbackController) CreateFeedback(c *gin.Context) {
 
 // UploadFile 公开上传外部反馈附件。
 // @Summary 公开上传外部反馈附件
-// @Description 数据权限：公开接口，不按创建人过滤；文件元数据 creator_id 写入固定占位标记 external-feedback，工单提交时校验附件必须由此接口产生，避免伪造内部登录用户上传的文件 ID。
+// @Description 数据权限：公开接口，不按创建人过滤；文件元数据 creator_id 写 NULL，工单提交时校验附件必须由此接口产生（creator_id IS NULL），避免伪造内部登录用户上传的文件 ID。
 // @Tags 公共接口/外部反馈
 // @Accept mpfd
 // @Produce json
@@ -70,8 +70,8 @@ func (ctrl *PublicFeedbackController) UploadFile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "请选择上传文件"))
 		return
 	}
-	// 公开上传固定使用占位 creator_id，工单提交时据此校验附件来源
-	result, err := ctrl.fileService.UploadFile(fileHeader, models.ExternalFeedbackFileCreatorID)
+	// 公开上传无登录态，creator_id 传空，由 FileService 写 NULL；工单提交时据此校验附件来源
+	result, err := ctrl.fileService.UploadFile(fileHeader, "")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
 		return

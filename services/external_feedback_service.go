@@ -26,8 +26,8 @@ var ErrExternalFeedbackTitleRequired = errors.New("工单标题 title 不能为�
 var ErrExternalFeedbackFileIDsInvalid = errors.New("附件 ID 不存在或不是由公开上传接口产生")
 
 // validateExternalFeedbackFileIDs 校验 fileIds 全部由公开上传接口产生。
-// 公开上传接口在 sys_file.creator_id 写入 ExternalFeedbackFileCreatorID 占位标记，
-// 此处只校验 creator_id 等于该占位标记且 file_id 存在，避免外部伪造内部登录用户上传的文件 ID。
+// 公开上传接口无登录态，sys_file.creator_id 写 NULL；
+// 此处只校验 creator_id IS NULL 且 file_id 存在，避免外部伪造内部登录用户上传的文件 ID。
 func validateExternalFeedbackFileIDs(tx *gorm.DB, fileIDs []string) error {
 	ids := uniqueNonEmptyStrings(fileIDs)
 	if len(ids) == 0 {
@@ -40,7 +40,7 @@ func validateExternalFeedbackFileIDs(tx *gorm.DB, fileIDs []string) error {
 	}
 	var count int64
 	if err := tx.Model(&models.SysFile{}).
-		Where("file_id IN ? AND creator_id = ?", ids, models.ExternalFeedbackFileCreatorID).
+		Where("file_id IN ? AND creator_id IS NULL", ids).
 		Count(&count).Error; err != nil {
 		return err
 	}

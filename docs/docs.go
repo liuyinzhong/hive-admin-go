@@ -17608,7 +17608,7 @@ const docTemplate = `{
         },
         "/public/upload": {
             "post": {
-                "description": "数据权限：公开接口，不按创建人过滤；文件元数据 creator_id 写入固定占位标记 external-feedback，工单提交时校验附件必须由此接口产生，避免伪造内部登录用户上传的文件 ID。",
+                "description": "数据权限：公开接口，不按创建人过滤；文件元数据 creator_id 写 NULL，工单提交时校验附件必须由此接口产生（creator_id IS NULL），避免伪造内部登录用户上传的文件 ID。",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -19324,7 +19324,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "文件状态(精确匹配，0=正式，1=临时未绑定)",
+                        "description": "使用状态(精确匹配，0=已使用，1=未使用)",
                         "name": "status",
                         "in": "query"
                     },
@@ -27752,11 +27752,11 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string",
-                    "example": "externalDemo"
+                    "example": "publicDemo"
                 },
                 "path": {
                     "type": "string",
-                    "example": "/external/demo"
+                    "example": "/public/demo"
                 },
                 "status": {
                     "type": "integer",
@@ -27826,7 +27826,7 @@ const docTemplate = `{
                     "example": 102400
                 },
                 "status": {
-                    "description": "文件状态；0=正式，1=临时未绑定",
+                    "description": "使用状态；0=已使用，1=未使用",
                     "type": "integer",
                     "example": 0
                 },
@@ -31197,11 +31197,11 @@ const docTemplate = `{
             "properties": {
                 "name": {
                     "type": "string",
-                    "example": "externalDemo"
+                    "example": "publicDemo"
                 },
                 "path": {
                     "type": "string",
-                    "example": "/external/demo"
+                    "example": "/public/demo"
                 }
             }
         },

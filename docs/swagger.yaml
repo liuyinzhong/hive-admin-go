@@ -2749,10 +2749,10 @@ definitions:
         example: UUID
         type: string
       name:
-        example: externalDemo
+        example: publicDemo
         type: string
       path:
-        example: /external/demo
+        example: /public/demo
         type: string
       status:
         example: 1
@@ -2807,7 +2807,7 @@ definitions:
         example: 102400
         type: integer
       status:
-        description: 文件状态；0=正式，1=临时未绑定
+        description: 使用状态；0=已使用，1=未使用
         example: 0
         type: integer
       thumbnailPath:
@@ -5299,10 +5299,10 @@ definitions:
   models.PublicExternalPageResponse:
     properties:
       name:
-        example: externalDemo
+        example: publicDemo
         type: string
       path:
-        example: /external/demo
+        example: /public/demo
         type: string
     type: object
   models.PublishPrintTemplateRequest:
@@ -19670,8 +19670,8 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: 数据权限：公开接口，不按创建人过滤；文件元数据 creator_id 写入固定占位标记 external-feedback，工单提交时校验附件必须由此接口产生，避免伪造内部登录用户上传的文件
-        ID。
+      description: 数据权限：公开接口，不按创建人过滤；文件元数据 creator_id 写 NULL，工单提交时校验附件必须由此接口产生（creator_id
+        IS NULL），避免伪造内部登录用户上传的文件 ID。
       parameters:
       - description: 文件
         in: formData
@@ -20729,7 +20729,7 @@ paths:
         in: query
         name: fileExt
         type: string
-      - description: 文件状态(精确匹配，0=正式，1=临时未绑定)
+      - description: 使用状态(精确匹配，0=已使用，1=未使用)
         in: query
         name: status
         type: integer

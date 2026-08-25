@@ -6,10 +6,6 @@ const (
 	ExternalFeedbackTypeBug   = "bug"
 )
 
-// externalFeedbackFileCreatorID 公开上传接口在 sys_file.creator_id 写入的占位标记，
-// 用于外部反馈提交时校验 fileIds 是否由公开上传产生，避免伪造内部登录用户上传的文件 ID。
-const ExternalFeedbackFileCreatorID = "external-feedback"
-
 // CreateStoryFeedbackRequest 外部反馈工单提交请求体。
 // 不绑定登录态，由公开接口 /api/public/feedback 接收；
 // type 决定写入 dev_story 还是 dev_bug，source 固定写 10（外部反馈）。
