@@ -235,7 +235,7 @@ func normalizeCreateExternalPage(req models.CreateExternalPageRequest) (string, 
 }
 
 func isValidExternalPath(value string) bool {
-	if !strings.HasPrefix(value, "/external/") || strings.HasSuffix(value, "/") {
+	if !strings.HasPrefix(value, "/public/") || strings.HasSuffix(value, "/") {
 		return false
 	}
 	if strings.ContainsAny(value, "?#:*") || strings.ContainsAny(value, "\t\r\n ") {

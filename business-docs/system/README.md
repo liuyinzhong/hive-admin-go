@@ -19,7 +19,7 @@
 | 字典和系统参数 | [dictionary-parameter.md](./dictionary-parameter.md) | dict、param |
 | 上传与文件列表 | [file-management.md](./file-management.md) | file_controller.go、file_service.go |
 | 操作日志和登录日志 | [audit-log.md](./audit-log.md) | operation_log、login_log、audit middleware |
-| 外部页面 | [external-page.md](./external-page.md) | external_page_controller.go、external_page_service.go |
+| 外部页面 | [public-page.md](./public-page.md) | external_page_controller.go、external_page_service.go |
 | 支付渠道 | [payment-channel.md](./payment-channel.md) | pay_channel_controller.go、pay_channel_service.go |
 | 菜单消息与 SSE | [message-push.md](./message-push.md) | menu_message、system_menu_message |
 | 异步导出与文件下载 | [download-center.md](./download-center.md) | download_task、download exporter |

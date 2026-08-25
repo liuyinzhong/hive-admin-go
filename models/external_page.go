@@ -32,8 +32,8 @@ type DeleteExternalPagesRequest struct {
 type ExternalPageResponse struct {
 	ID          string  `json:"id" example:"UUID"`
 	Title       string  `json:"title" example:"外部演示页面"`
-	Name        string  `json:"name" example:"externalDemo"`
-	Path        string  `json:"path" example:"/external/demo"`
+	Name        string  `json:"name" example:"publicDemo"`
+	Path        string  `json:"path" example:"/public/demo"`
 	Status      int     `json:"status" example:"1"`
 	CreatorID   *string `json:"creatorId" example:"UUID"`
 	CreatorName *string `json:"creatorName" example:"管理员"`
@@ -42,6 +42,6 @@ type ExternalPageResponse struct {
 }
 
 type PublicExternalPageResponse struct {
-	Name string `json:"name" example:"externalDemo"`
-	Path string `json:"path" example:"/external/demo"`
+	Name string `json:"name" example:"publicDemo"`
+	Path string `json:"path" example:"/public/demo"`
 }
