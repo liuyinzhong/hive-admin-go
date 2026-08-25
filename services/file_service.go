@@ -104,6 +104,8 @@ func (s *FileService) UploadFile(fileHeader *multipart.FileHeader, creatorID str
 	}
 
 	now := time.Now()
+	// 当前所有上传入口（登录用户与公开反馈）统一默认正式态；临时态标记由后续孤儿清理阶段实现
+	status := 0
 	file := models.SysFile{
 		FileID:        fileID,
 		URL:           &urlValue,
@@ -117,6 +119,7 @@ func (s *FileService) UploadFile(fileHeader *multipart.FileHeader, creatorID str
 		ThumbnailPath: thumbnailPath,
 		ThumbnailURL:  thumbnailURL,
 		CreatorID:     creatorIDPtr,
+		Status:        &status,
 		CreateDate:    &now,
 	}
 
@@ -151,6 +154,9 @@ func (s *FileService) GetFileList(req models.FileListRequest, permission dataper
 	}
 	if req.FileExt != "" {
 		db = db.Where("LOWER(file_ext) = ?", strings.ToLower(req.FileExt))
+	}
+	if req.Status != nil {
+		db = db.Where("status = ?", *req.Status)
 	}
 
 	order := utils.BuildOrderBy(req.Sorts, map[string]string{
@@ -213,6 +219,7 @@ func buildFileResponse(file models.SysFile, creatorName string) *models.FileResp
 		ThumbnailURL:  file.ThumbnailURL,
 		CreatorID:     file.CreatorID,
 		CreatorName:   &creatorName,
+		Status:        file.Status,
 		CreateDate:    models.TimeToStringPtr(file.CreateDate),
 	}
 }

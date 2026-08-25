@@ -100,6 +100,7 @@ type FileListRequest struct {
 	OriginalName string `form:"originalName" example:"文件名"`               // 原始文件名，模糊搜索
 	Type         string `form:"type" example:"image/jpeg"`                // MIME类型，精确匹配
 	FileExt      string `form:"fileExt" example:".jpg"`                   // 文件扩展名，精确匹配
+	Status       *int   `form:"status" example:"0"`                       // 文件状态，精确匹配；0=正式，1=临时未绑定
 	Sorts        string `form:"sorts" example:"createDate,desc;size,asc"` // 排序参数
 }
 
@@ -417,6 +418,7 @@ type FileResponse struct {
 	ThumbnailURL  *string `json:"thumbnailUrl" example:"/uploads/thumb/abc.jpg"` // 缩略图URL(图片专用)
 	CreatorID     *string `json:"creatorId" example:"UUID"`                      // 创建人id
 	CreatorName   *string `json:"creatorName" example:"创建人姓名"`                   // 创建人姓名
+	Status        *int    `json:"status" example:"0"`                            // 文件状态；0=正式，1=临时未绑定
 	CreateDate    *string `json:"createDate" example:"2024-01-01 12:00:00"`      // 创建日期
 }
 

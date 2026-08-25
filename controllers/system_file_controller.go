@@ -38,7 +38,7 @@ func (ctrl *SystemController) UploadFile(c *gin.Context) {
 
 // GetFileList 获取文件列表
 // @Summary 获取文件列表
-// @Description 按文件创建人和当前角色数据范围分页获取文件元数据；不改变 /uploads/** 的公开静态访问边界
+// @Description 按文件创建人和当前角色数据范围分页获取文件元数据；不改变 /uploads/** 的公开静态访问边界。支持按文件状态 status 精确过滤（0=正式，1=临时未绑定），响应包含 status 字段
 // @Tags 系统管理/文件管理
 // @Accept json
 // @Produce json
@@ -48,6 +48,7 @@ func (ctrl *SystemController) UploadFile(c *gin.Context) {
 // @Param originalName query string false "原始文件名(模糊搜索)"
 // @Param type query string false "MIME类型(精确匹配)"
 // @Param fileExt query string false "文件扩展名(精确匹配，如 .jpg)"
+// @Param status query int false "文件状态(精确匹配，0=正式，1=临时未绑定)"
 // @Param sorts query string false "排序参数(如 createDate,desc;size,asc)"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.FileResponse}} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
