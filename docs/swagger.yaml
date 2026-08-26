@@ -5607,6 +5607,10 @@ definitions:
         description: 数据范围
         example: all
         type: string
+      remark:
+        description: 备注
+        example: 超级管理员
+        type: string
       roleId:
         description: 角色ID
         example: UUID
@@ -8400,6 +8404,29 @@ definitions:
         example: 0
         type: integer
     type: object
+  models.WorkflowBusinessSummaryResponse:
+    properties:
+      businessId:
+        description: 业务对象主键
+        example: UUID
+        type: string
+      businessLabel:
+        description: 业务类型中文名:详情页展示
+        example: 需求
+        type: string
+      businessTitle:
+        description: 业务对象标题:详情页展示
+        example: 网站首页改版
+        type: string
+      businessType:
+        description: 业务类型:流程定义声明的业务归属标识
+        example: story
+        type: string
+      detailPath:
+        description: 前端详情页路径:点击跳转
+        example: /dev/story/detail/42
+        type: string
+    type: object
   models.WorkflowCopyResponse:
     properties:
       copyId:
@@ -8512,6 +8539,10 @@ definitions:
     type: object
   models.WorkflowInstanceDetailResponse:
     properties:
+      business:
+        allOf:
+        - $ref: '#/definitions/models.WorkflowBusinessSummaryResponse'
+        description: 关联业务摘要:纯流程实例为 null
       instance:
         allOf:
         - $ref: '#/definitions/models.WorkflowInstanceResponse'

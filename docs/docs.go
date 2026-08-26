@@ -31793,6 +31793,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "all"
                 },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "超级管理员"
+                },
                 "roleId": {
                     "description": "角色ID",
                     "type": "string",
@@ -35492,6 +35497,36 @@ const docTemplate = `{
                 }
             }
         },
+        "models.WorkflowBusinessSummaryResponse": {
+            "type": "object",
+            "properties": {
+                "businessId": {
+                    "description": "业务对象主键",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "businessLabel": {
+                    "description": "业务类型中文名:详情页展示",
+                    "type": "string",
+                    "example": "需求"
+                },
+                "businessTitle": {
+                    "description": "业务对象标题:详情页展示",
+                    "type": "string",
+                    "example": "网站首页改版"
+                },
+                "businessType": {
+                    "description": "业务类型:流程定义声明的业务归属标识",
+                    "type": "string",
+                    "example": "story"
+                },
+                "detailPath": {
+                    "description": "前端详情页路径:点击跳转",
+                    "type": "string",
+                    "example": "/dev/story/detail/42"
+                }
+            }
+        },
         "models.WorkflowCopyResponse": {
             "type": "object",
             "properties": {
@@ -35635,6 +35670,14 @@ const docTemplate = `{
         "models.WorkflowInstanceDetailResponse": {
             "type": "object",
             "properties": {
+                "business": {
+                    "description": "关联业务摘要:纯流程实例为 null",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.WorkflowBusinessSummaryResponse"
+                        }
+                    ]
+                },
                 "instance": {
                     "description": "流程实例信息",
                     "allOf": [

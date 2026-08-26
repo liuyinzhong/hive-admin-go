@@ -95,9 +95,21 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 		if err != nil {
 			return err
 		}
-		formFields, formSchemaJSON, formLayout, err := loadWorkflowFormSchema(tx, definition.FormSchemaID, true)
-		if err != nil {
-			return err
+		// 表单 Schema 可选:未绑定表单的流程定义也允许发起(纯审批流程或与业务解耦的流程)
+		var formFields []models.FormSchemaField
+		var formSchemaJSON, formLayout string
+		if definition.FormSchemaID != nil && strings.TrimSpace(*definition.FormSchemaID) != "" {
+			loadedFields, loadedJSON, loadedLayout, formErr := loadWorkflowFormSchema(tx, definition.FormSchemaID, true)
+			if formErr != nil {
+				return formErr
+			}
+			formFields = loadedFields
+			formSchemaJSON = loadedJSON
+			formLayout = loadedLayout
+		}
+		var formSnapshot *string
+		if formSchemaJSON != "" {
+			formSnapshot = &formSchemaJSON
 		}
 		starter, err := getActiveWorkflowUser(tx, starterID)
 		if err != nil {
@@ -133,7 +145,7 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 			Status:            models.WorkflowInstanceStatusRunning,
 			Variables:         string(variablesJSON),
 			FlowSnapshot:      *definition.FlowData,
-			FormSnapshot:      &formSchemaJSON,
+			FormSnapshot:      formSnapshot,
 			FormLayout:        formLayout,
 			StartDate:         &now,
 			CreateDate:        &now,
@@ -311,7 +323,11 @@ func GetWorkflowInstanceDetail(instanceID, userID string) (*models.WorkflowInsta
 	if err != nil {
 		return nil, err
 	}
-	return &models.WorkflowInstanceDetailResponse{Instance: instanceResponse, Nodes: nodes}, nil
+	return &models.WorkflowInstanceDetailResponse{
+		Instance: instanceResponse,
+		Nodes:    nodes,
+		Business: buildWorkflowBusinessSummary(instance.InstanceID),
+	}, nil
 }
 
 // ApproveWorkflowTask 审批通过任务，并按或签/会签规则推进流程。

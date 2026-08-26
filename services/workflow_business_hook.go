@@ -2,9 +2,12 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"sort"
 
 	"gorm.io/gorm"
+
+	"hive-admin-go/database"
 	"hive-admin-go/models"
 )
 
@@ -23,6 +26,9 @@ type BusinessStateHook interface {
 	// SupportedNodeKeys 返回本钩子支持的节点业务键定义,供流程设计器节点业务键下拉选择。
 	// 返回顺序即设计器下拉展示顺序,需与 OnNodeCompleted 内部映射保持一致。
 	SupportedNodeKeys() []models.BusinessNodeKeyDef
+	// GetBusinessSummary 返回业务对象摘要(标题+前端详情页路径),供流程实例详情页展示关联业务。
+	// businessID 不存在时返回 error,由调用方决定容错策略;不传 tx,只读查询不参与流程事务。
+	GetBusinessSummary(businessID string) (title string, detailPath string, err error)
 }
 
 // businessHookRegistry 业务状态钩子注册表，按 business_type 索引。
@@ -86,4 +92,33 @@ func triggerBusinessStateHook(tx *gorm.DB, instance *models.WfProcessInstance, n
 		return nil
 	}
 	return hook.OnNodeCompleted(tx, instance, binding.BusinessID, nodeBusinessKey, approved)
+}
+
+// buildWorkflowBusinessSummary 组装流程实例关联业务摘要。
+// 供流程实例详情页展示"关联业务"入口:纯流程实例返回 nil;
+// 钩子未注册或业务对象已删除时降级为仅展示业务类型和ID,不影响详情页整体加载。
+func buildWorkflowBusinessSummary(instanceID string) *models.WorkflowBusinessSummaryResponse {
+	binding, err := getWorkflowBusinessInstanceByInstanceID(database.DB, instanceID)
+	if err != nil || binding == nil {
+		return nil
+	}
+	summary := &models.WorkflowBusinessSummaryResponse{
+		BusinessType: binding.BusinessType,
+		BusinessID:   binding.BusinessID,
+	}
+	hook, exists := getBusinessHook(binding.BusinessType)
+	if !exists {
+		summary.BusinessLabel = binding.BusinessType
+		return summary
+	}
+	summary.BusinessLabel = hook.BusinessLabel()
+	title, path, err := hook.GetBusinessSummary(binding.BusinessID)
+	if err != nil {
+		log.Printf("[workflow] 查询业务摘要失败: instanceID=%s, businessType=%s, businessID=%s, err=%v",
+			instanceID, binding.BusinessType, binding.BusinessID, err)
+		return summary
+	}
+	summary.BusinessTitle = title
+	summary.DetailPath = path
+	return summary
 }

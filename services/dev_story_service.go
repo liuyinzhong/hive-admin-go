@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -434,13 +435,49 @@ func buildSingleStoryResponse(story *models.DevStory, permission datapermission.
 }
 
 func CreateStory(req *models.CreateStoryRequest, creatorID string, permission datapermission.Permission) error {
-	return database.DB.Transaction(func(tx *gorm.DB) error {
-		return createStoryTx(tx, req, creatorID, permission)
+	var storyID string
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		return createStoryTx(tx, req, creatorID, permission, &storyID)
 	})
+	if err != nil {
+		return err
+	}
+	// 需求创建成功后,自动匹配已发布的 story 类型流程定义并发起流程,实现需求与流程的联动。
+	autoStartStoryWorkflow(storyID, creatorID)
+	return nil
 }
 
-func createStoryTx(tx *gorm.DB, req *models.CreateStoryRequest, creatorID string, permission datapermission.Permission) error {
+// autoStartStoryWorkflow 需求创建后自动匹配并发起流程。
+// 查找 business_type=story 且已发布的最新流程定义,找到则发起流程绑定到该需求;
+// 未找到已发布流程定义时不报错,需求保持已创建状态(不绑流程);
+// 发起失败时记日志不抛错,需求创建不受影响,可后续手动发起。
+func autoStartStoryWorkflow(storyID, creatorID string) {
+	var definition models.WfProcessDefinition
+	err := database.DB.Where("business_type = ? AND status = ? AND del_flag = ?", "story", 1, 0).
+		Order("update_date DESC").First(&definition).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return // 未配置已发布的 story 流程定义,不绑流程
+		}
+		log.Printf("[workflow] 自动匹配需求流程失败: storyID=%s, err=%v", storyID, err)
+		return
+	}
+	businessID := storyID
+	req := &models.StartWorkflowInstanceRequest{
+		DefinitionID: definition.DefinitionID,
+		BusinessID:   &businessID,
+	}
+	if _, err := StartWorkflowInstance(req, creatorID); err != nil {
+		log.Printf("[workflow] 自动发起需求流程失败: storyID=%s, definitionID=%s, err=%v",
+			storyID, definition.DefinitionID, err)
+	}
+}
+
+func createStoryTx(tx *gorm.DB, req *models.CreateStoryRequest, creatorID string, permission datapermission.Permission, outStoryID *string) error {
 	storyID := uuid.New().String()
+	if outStoryID != nil {
+		*outStoryID = storyID
+	}
 	now := time.Now()
 
 	userIDs, err := validateDataPermissionUsers(tx, req.UserIDs, permission)
@@ -523,7 +560,7 @@ func createStoryTx(tx *gorm.DB, req *models.CreateStoryRequest, creatorID string
 func CreateStorys(reqs []models.CreateStoryRequest, creatorID string, permission datapermission.Permission) error {
 	return database.DB.Transaction(func(tx *gorm.DB) error {
 		for index := range reqs {
-			if err := createStoryTx(tx, &reqs[index], creatorID, permission); err != nil {
+			if err := createStoryTx(tx, &reqs[index], creatorID, permission, nil); err != nil {
 				return fmt.Errorf("第%d条需求：%w", index+1, err)
 			}
 		}

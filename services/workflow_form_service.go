@@ -62,9 +62,10 @@ func loadWorkflowFormSchema(db *gorm.DB, formSchemaID *string, requireEnabled bo
 }
 
 // parseWorkflowFormSnapshot 解析流程实例发起时保存的表单快照。
+// 快照为空(纯审批流程未绑定表单)时返回空字段列表,不报错,由调用方按空字段处理。
 func parseWorkflowFormSnapshot(snapshot *string) ([]models.FormSchemaField, error) {
 	if snapshot == nil || strings.TrimSpace(*snapshot) == "" {
-		return nil, fmt.Errorf("流程实例缺少表单快照")
+		return nil, nil
 	}
 	fields, _, err := parseAndValidateFormSchema(json.RawMessage(*snapshot))
 	return fields, err

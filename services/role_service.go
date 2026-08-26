@@ -61,6 +61,7 @@ func (s *RoleService) GetAllRoles() ([]*models.RoleSimpleResponse, error) {
 		responses = append(responses, &models.RoleSimpleResponse{
 			RoleId:    role.RoleID,
 			RoleTitle: roleTitle,
+			Remark:    role.Remark,
 			DataScope: role.DataScope,
 			Status:    role.Status,
 		})

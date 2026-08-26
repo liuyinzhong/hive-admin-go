@@ -280,6 +280,7 @@ type WorkflowNodeInstanceResponse struct {
 
 // WorkflowInstanceDetailResponse 聚合实例和按流转顺序排列的节点实例。
 type WorkflowInstanceDetailResponse struct {
-	Instance WorkflowInstanceResponse       `json:"instance"` // 流程实例信息
-	Nodes    []WorkflowNodeInstanceResponse `json:"nodes"`    // 节点实例列表
+	Instance WorkflowInstanceResponse         `json:"instance"` // 流程实例信息
+	Nodes    []WorkflowNodeInstanceResponse   `json:"nodes"`    // 节点实例列表
+	Business *WorkflowBusinessSummaryResponse `json:"business"` // 关联业务摘要:纯流程实例为 null
 }

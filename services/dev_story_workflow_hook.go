@@ -6,6 +6,7 @@ import (
 
 	"gorm.io/gorm"
 
+	"hive-admin-go/database"
 	"hive-admin-go/models"
 )
 
@@ -50,6 +51,22 @@ func (h *storyStateHook) BusinessLabel() string {
 // SupportedNodeKeys 返回需求流程支持的节点业务键定义,供流程设计器节点业务键下拉选择。
 func (h *storyStateHook) SupportedNodeKeys() []models.BusinessNodeKeyDef {
 	return storyNodeKeyDefinitions
+}
+
+// GetBusinessSummary 返回需求摘要,供流程实例详情页展示关联业务。
+// 详情页路径用 storyNum(与前端路由 /dev/story/detail/:storyNum 一致),便于 URL 直接传播。
+func (h *storyStateHook) GetBusinessSummary(businessID string) (string, string, error) {
+	var story models.DevStory
+	if err := database.DB.Select("story_id", "story_title", "story_num").
+		Where("story_id = ? AND del_flag = 0", businessID).
+		First(&story).Error; err != nil {
+		return "", "", fmt.Errorf("需求不存在或已删除: %w", err)
+	}
+	title := ""
+	if story.StoryTitle != nil {
+		title = *story.StoryTitle
+	}
+	return title, fmt.Sprintf("/dev/story/detail/%d", story.StoryNum), nil
 }
 
 // OnNodeCompleted 实现业务状态钩子契约。

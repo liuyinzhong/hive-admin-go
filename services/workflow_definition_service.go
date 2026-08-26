@@ -194,19 +194,24 @@ func PublishWorkflowDefinition(definitionID string) error {
 	if err != nil {
 		return err
 	}
-	formFields, _, _, err := loadWorkflowFormSchema(database.DB, definition.FormSchemaID, true)
-	if err != nil {
-		return err
-	}
-	hasValueField := false
-	for _, field := range formFields {
-		if formComponentHasValue(field.Component) {
-			hasValueField = true
-			break
+	// 表单 Schema 可选:未绑定表单的流程定义也允许发布(纯审批流程或与业务解耦的流程)
+	var formFields []models.FormSchemaField
+	if definition.FormSchemaID != nil && strings.TrimSpace(*definition.FormSchemaID) != "" {
+		loadedFields, _, _, err := loadWorkflowFormSchema(database.DB, definition.FormSchemaID, true)
+		if err != nil {
+			return err
 		}
-	}
-	if !hasValueField {
-		return fmt.Errorf("流程关联的表单 Schema 没有字段")
+		formFields = loadedFields
+		hasValueField := false
+		for _, field := range formFields {
+			if formComponentHasValue(field.Component) {
+				hasValueField = true
+				break
+			}
+		}
+		if !hasValueField {
+			return fmt.Errorf("流程关联的表单 Schema 没有字段")
+		}
 	}
 	if err := validateWorkflowConditionFields(graph, formFields); err != nil {
 		return err

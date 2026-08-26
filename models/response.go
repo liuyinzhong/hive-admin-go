@@ -200,10 +200,11 @@ type RoleDetailResponse struct {
 }
 
 type RoleSimpleResponse struct {
-	RoleId    string `json:"roleId" example:"UUID"`          // 角色ID
-	RoleTitle string `json:"roleTitle" example:"SuperAdmin"` // 角色名称
-	DataScope string `json:"dataScope" example:"all"`        // 数据范围
-	Status    int    `json:"status" example:"1"`             // 状态 0=禁用 1=启用
+	RoleId    string  `json:"roleId" example:"UUID"`          // 角色ID
+	RoleTitle string  `json:"roleTitle" example:"SuperAdmin"` // 角色名称
+	Remark    *string `json:"remark" example:"超级管理员"`         // 备注
+	DataScope string  `json:"dataScope" example:"all"`        // 数据范围
+	Status    int     `json:"status" example:"1"`             // 状态 0=禁用 1=启用
 }
 
 type UpdateStatusRequest struct {

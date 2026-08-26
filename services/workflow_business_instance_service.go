@@ -67,26 +67,29 @@ func getWorkflowBusinessInstanceByBusiness(tx *gorm.DB, businessType, businessID
 
 // GetWorkflowBusinessInstanceDetailResponse 业务关联详情响应(供前端展示)。
 type WorkflowBusinessInstanceResponse struct {
-	BindingID    string  `json:"bindingId" example:"UUID"`                 // 关联ID
-	BusinessType string  `json:"businessType" example:"story"`             // 业务类型
-	BusinessID   string  `json:"businessId" example:"UUID"`                // 业务对象ID
-	InstanceID   string  `json:"instanceId" example:"UUID"`                // 流程实例ID
-	InstanceNo   string  `json:"instanceNo" example:"WI000001"`            // 流程编号
-	DefinitionID string  `json:"definitionId" example:"UUID"`              // 流程定义ID
-	StarterID    string  `json:"starterId" example:"UUID"`                 // 发起人ID
-	StarterName  string  `json:"starterName" example:"张三"`                 // 发起人姓名
-	Status       string  `json:"status" example:"0"`                       // 流程实例状态:0运行中 1已完成 2已拒绝 3已取消
-	CreateDate   *string `json:"createDate" example:"2026-01-15 09:00:00"` // 关联建立时间
+	BindingID      string  `json:"bindingId" example:"UUID"`                 // 关联ID
+	BusinessType   string  `json:"businessType" example:"story"`             // 业务类型
+	BusinessID     string  `json:"businessId" example:"UUID"`                // 业务对象ID
+	InstanceID     string  `json:"instanceId" example:"UUID"`                // 流程实例ID
+	InstanceNo     string  `json:"instanceNo" example:"WI000001"`            // 流程编号
+	DefinitionID   string  `json:"definitionId" example:"UUID"`              // 流程定义ID
+	DefinitionName string  `json:"definitionName" example:"需求开发流程"`          // 流程定义名称:详情页展示
+	Title          string  `json:"title" example:"需求开发流程-张三"`                // 流程实例标题:详情页展示
+	StarterID      string  `json:"starterId" example:"UUID"`                 // 发起人ID
+	StarterName    string  `json:"starterName" example:"张三"`                 // 发起人姓名
+	Status         string  `json:"status" example:"0"`                       // 流程实例状态:0运行中 1已完成 2已拒绝 3已取消
+	CreateDate     *string `json:"createDate" example:"2026-01-15 09:00:00"` // 关联建立时间
 }
 
 // GetWorkflowBusinessInstanceDetail 按业务对象查询关联详情,聚合实例信息。
+// 业务对象未绑定流程时返回 (nil, nil),未绑定是正常业务状态(如流程定义未发布期间创建的需求),调用方据此展示空态。
 func GetWorkflowBusinessInstanceDetail(businessType, businessID string) (*WorkflowBusinessInstanceResponse, error) {
 	binding, err := GetWorkflowBusinessInstanceByBusiness(businessType, businessID)
 	if err != nil {
 		return nil, err
 	}
 	if binding == nil {
-		return nil, fmt.Errorf("该业务对象未绑定流程实例")
+		return nil, nil
 	}
 	var instance models.WfProcessInstance
 	if err := database.DB.Where("instance_id = ? AND del_flag = 0", binding.InstanceID).First(&instance).Error; err != nil {
@@ -97,15 +100,17 @@ func GetWorkflowBusinessInstanceDetail(businessType, businessID string) (*Workfl
 		starterName = workflowUserName(user)
 	}
 	return &WorkflowBusinessInstanceResponse{
-		BindingID:    binding.BindingID,
-		BusinessType: binding.BusinessType,
-		BusinessID:   binding.BusinessID,
-		InstanceID:   instance.InstanceID,
-		InstanceNo:   instance.InstanceNo,
-		DefinitionID: instance.DefinitionID,
-		StarterID:    binding.StarterID,
-		StarterName:  starterName,
-		Status:       fmt.Sprintf("%d", instance.Status),
-		CreateDate:   models.TimeToStringPtr(binding.CreateDate),
+		BindingID:      binding.BindingID,
+		BusinessType:   binding.BusinessType,
+		BusinessID:     binding.BusinessID,
+		InstanceID:     instance.InstanceID,
+		InstanceNo:     instance.InstanceNo,
+		DefinitionID:   instance.DefinitionID,
+		DefinitionName: instance.DefinitionName,
+		Title:          instance.Title,
+		StarterID:      binding.StarterID,
+		StarterName:    starterName,
+		Status:         fmt.Sprintf("%d", instance.Status),
+		CreateDate:     models.TimeToStringPtr(binding.CreateDate),
 	}, nil
 }
