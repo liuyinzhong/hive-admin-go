@@ -69,9 +69,8 @@ type FormSchemaResponse struct {
 	UpdateDate   *string         `json:"updateDate" example:"2026-07-15 15:30:26"`
 }
 
-// UpsertFormSchemaRequest 创建或更新一份表单 Schema。
+// UpsertFormSchemaRequest 创建或更新一份表单 Schema。SchemaKey 由后端通过公共编码流水自动生成，不接受前端传入。
 type UpsertFormSchemaRequest struct {
-	SchemaKey  string          `json:"schemaKey" binding:"required" example:"expense_apply"`
 	SchemaName string          `json:"schemaName" binding:"required" example:"报销申请表"`
 	Category   *string         `json:"category" example:"workflow"`
 	Layout     string          `json:"layout" binding:"required" example:"single"`

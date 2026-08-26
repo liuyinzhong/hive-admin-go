@@ -19,17 +19,6 @@ import (
 
 const workflowMaxAutomaticSteps = 100
 
-var workflowCategoryPrefixes = map[string]string{
-	"general":        "TY",
-	"finance":        "CW",
-	"hr":             "RS",
-	"administration": "XZ",
-	"procurement":    "CG",
-	"development":    "DEV",
-	"system":         "SYS",
-	"other":          "QT",
-}
-
 type workflowGraph struct {
 	Nodes []workflowNode `json:"nodes"`
 	Edges []workflowEdge `json:"edges"`
@@ -126,11 +115,7 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 		}
 
 		now := time.Now()
-		categoryPrefix, err := workflowCategoryPrefix(definition.Category)
-		if err != nil {
-			return err
-		}
-		instanceNo, err := nextWorkflowInstanceNo(tx, categoryPrefix, now)
+		instanceNo, err := NewBaseCodeSequenceService().NextBusinessCode(tx, "WORKFLOW_INSTANCE", "WI", 6)
 		if err != nil {
 			return err
 		}
@@ -1288,49 +1273,6 @@ func buildWorkflowInstanceResponse(instance models.WfProcessInstance) (models.Wo
 		Variables: variables, FormSchema: formSchema, FormLayout: instance.FormLayout, StartDate: models.TimeToStringPtr(instance.StartDate),
 		EndDate: models.TimeToStringPtr(instance.EndDate), CreateDate: models.TimeToStringPtr(instance.CreateDate),
 	}, nil
-}
-
-// workflowCategoryPrefix 返回流程分类对应的实例编号前缀。
-func workflowCategoryPrefix(category *string) (string, error) {
-	if category == nil {
-		return "", fmt.Errorf("流程定义未配置流程分类")
-	}
-	prefix, exists := workflowCategoryPrefixes[*category]
-	if !exists {
-		return "", fmt.Errorf("流程分类 %s 不支持生成实例编号", *category)
-	}
-	return prefix, nil
-}
-
-// nextWorkflowInstanceNo 在当前事务连接中原子递增分类的当日流水号。
-func nextWorkflowInstanceNo(tx *gorm.DB, prefix string, now time.Time) (string, error) {
-	businessDate := now.Format("2006-01-02")
-	result := tx.Exec(`
-INSERT INTO wf_process_instance_sequence (prefix, business_date, current_value, create_date, update_date)
-VALUES (?, ?, LAST_INSERT_ID(1), ?, ?)
-ON DUPLICATE KEY UPDATE
-  current_value = LAST_INSERT_ID(current_value + 1),
-  update_date = VALUES(update_date)`, prefix, businessDate, now, now)
-	if result.Error != nil {
-		return "", result.Error
-	}
-
-	var sequence int64
-	if err := tx.Raw("SELECT LAST_INSERT_ID()").Scan(&sequence).Error; err != nil {
-		return "", err
-	}
-	return formatWorkflowInstanceNo(prefix, now, sequence)
-}
-
-// formatWorkflowInstanceNo 组合分类前缀、业务日期和六位当日流水号。
-func formatWorkflowInstanceNo(prefix string, now time.Time, sequence int64) (string, error) {
-	if prefix == "" {
-		return "", fmt.Errorf("流程实例编号前缀不能为空")
-	}
-	if sequence < 1 || sequence > 999999 {
-		return "", fmt.Errorf("流程实例编号当日流水号超出范围")
-	}
-	return fmt.Sprintf("%s%s%06d", prefix, now.Format("20060102"), sequence), nil
 }
 
 // workflowInstanceTitle 生成流程实例标题。

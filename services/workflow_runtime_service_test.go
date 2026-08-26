@@ -39,59 +39,6 @@ func TestEvaluateWorkflowRule(t *testing.T) {
 	}
 }
 
-func TestWorkflowCategoryPrefix(t *testing.T) {
-	tests := []struct {
-		category string
-		want     string
-	}{
-		{category: "general", want: "TY"},
-		{category: "finance", want: "CW"},
-		{category: "hr", want: "RS"},
-		{category: "administration", want: "XZ"},
-		{category: "procurement", want: "CG"},
-		{category: "development", want: "DEV"},
-		{category: "system", want: "SYS"},
-		{category: "other", want: "QT"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.category, func(t *testing.T) {
-			got, err := workflowCategoryPrefix(&tt.category)
-			if err != nil {
-				t.Fatalf("workflowCategoryPrefix() error = %v", err)
-			}
-			if got != tt.want {
-				t.Fatalf("workflowCategoryPrefix() = %s, want %s", got, tt.want)
-			}
-		})
-	}
-
-	if _, err := workflowCategoryPrefix(nil); err == nil {
-		t.Fatal("workflowCategoryPrefix() accepted nil category")
-	}
-	unknown := "unknown"
-	if _, err := workflowCategoryPrefix(&unknown); err == nil {
-		t.Fatal("workflowCategoryPrefix() accepted unknown category")
-	}
-}
-
-func TestFormatWorkflowInstanceNo(t *testing.T) {
-	now := time.Date(2026, time.July, 15, 15, 49, 19, 0, time.Local)
-	got, err := formatWorkflowInstanceNo("CW", now, 1)
-	if err != nil {
-		t.Fatalf("formatWorkflowInstanceNo() error = %v", err)
-	}
-	if got != "CW20260715000001" {
-		t.Fatalf("formatWorkflowInstanceNo() = %s", got)
-	}
-
-	if _, err = formatWorkflowInstanceNo("CW", now, 0); err == nil {
-		t.Fatal("formatWorkflowInstanceNo() accepted zero sequence")
-	}
-	if _, err = formatWorkflowInstanceNo("CW", now, 1_000_000); err == nil {
-		t.Fatal("formatWorkflowInstanceNo() accepted overflowing sequence")
-	}
-}
-
 func TestWorkflowInstanceTitle(t *testing.T) {
 	got := workflowInstanceTitle("报销流程", "李四员工")
 	if got != "报销流程-李四员工" {

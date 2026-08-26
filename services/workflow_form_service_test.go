@@ -119,17 +119,16 @@ func TestValidateWorkflowFieldPermissions(t *testing.T) {
 
 func TestNormalizeFormSchemaRequestLayout(t *testing.T) {
 	req := &models.UpsertFormSchemaRequest{
-		SchemaKey:  "expense_apply",
 		SchemaName: "报销申请表",
 		Layout:     models.FormSchemaLayoutDouble,
 		Schema:     json.RawMessage(`[{"component":"Input","fieldName":"name"}]`),
 	}
-	_, _, layout, _, _, err := normalizeFormSchemaRequest(req)
+	_, layout, _, _, err := normalizeFormSchemaRequest(req)
 	if err != nil || layout != models.FormSchemaLayoutDouble {
 		t.Fatalf("normalizeFormSchemaRequest() layout = %s, error = %v", layout, err)
 	}
 	req.Layout = "invalid"
-	if _, _, _, _, _, err := normalizeFormSchemaRequest(req); err == nil {
+	if _, _, _, _, err := normalizeFormSchemaRequest(req); err == nil {
 		t.Fatal("normalizeFormSchemaRequest() accepted invalid layout")
 	}
 }

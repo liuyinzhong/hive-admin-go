@@ -38,20 +38,20 @@ type WorkflowDefinitionResponse struct {
 	UpdateDate     *string `json:"updateDate" example:"2026-05-18 15:30:26"`       // 更新时间
 }
 
+// CreateWorkflowDefinitionRequest 创建流程定义请求。DefinitionKey 由后端通过公共编码流水自动生成，不接受前端传入。
 type CreateWorkflowDefinitionRequest struct {
-	DefinitionKey  string  `json:"definitionKey" binding:"required" example:"story_approval"` // 流程标识，系统内唯一
-	DefinitionName string  `json:"definitionName" binding:"required" example:"需求审批流程"`        // 流程名称
-	Category       *string `json:"category" example:"dev"`                                    // 流程分类
-	FlowData       *string `json:"flowData" example:"{\"nodes\":[],\"edges\":[]}"`            // LogicFlow画布JSON
-	Remark         *string `json:"remark" example:"流程说明"`                                     // 备注
+	DefinitionName string  `json:"definitionName" binding:"required" example:"需求审批流程"` // 流程名称
+	Category       *string `json:"category" example:"dev"`                             // 流程分类
+	FlowData       *string `json:"flowData" example:"{\"nodes\":[],\"edges\":[]}"`     // LogicFlow画布JSON
+	Remark         *string `json:"remark" example:"流程说明"`                              // 备注
 }
 
+// UpdateWorkflowDefinitionRequest 更新流程定义请求。DefinitionKey 由后端自动生成且不可修改，不接受前端传入。
 type UpdateWorkflowDefinitionRequest struct {
-	DefinitionKey  string  `json:"definitionKey" binding:"required" example:"story_approval"` // 流程标识，系统内唯一
-	DefinitionName string  `json:"definitionName" binding:"required" example:"需求审批流程"`        // 流程名称
-	Category       *string `json:"category" example:"dev"`                                    // 流程分类
-	FlowData       *string `json:"flowData" example:"{\"nodes\":[],\"edges\":[]}"`            // LogicFlow画布JSON
-	Remark         *string `json:"remark" example:"流程说明"`                                     // 备注
+	DefinitionName string  `json:"definitionName" binding:"required" example:"需求审批流程"` // 流程名称
+	Category       *string `json:"category" example:"dev"`                             // 流程分类
+	FlowData       *string `json:"flowData" example:"{\"nodes\":[],\"edges\":[]}"`     // LogicFlow画布JSON
+	Remark         *string `json:"remark" example:"流程说明"`                              // 备注
 }
 
 type UpdateWorkflowCanvasRequest struct {

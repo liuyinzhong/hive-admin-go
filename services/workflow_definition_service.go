@@ -86,11 +86,8 @@ func GetWorkflowDefinition(definitionID string) (*models.WorkflowDefinitionRespo
 	return &responses[0], nil
 }
 
+// CreateWorkflowDefinition 创建流程定义。DefinitionKey 通过公共编码流水 WORKFLOW_DEFINITION 域自动生成，保证全局唯一且递增。
 func CreateWorkflowDefinition(req *models.CreateWorkflowDefinitionRequest, creatorID string) error {
-	if err := ensureWorkflowDefinitionKeyUnique(req.DefinitionKey, ""); err != nil {
-		return err
-	}
-
 	flowData := normalizeWorkflowFlowData(req.FlowData)
 	if req.FlowData != nil && strings.TrimSpace(*req.FlowData) != "" {
 		if err := validateWorkflowFlowData(flowData); err != nil {
@@ -101,7 +98,6 @@ func CreateWorkflowDefinition(req *models.CreateWorkflowDefinitionRequest, creat
 	now := time.Now()
 	definition := models.WfProcessDefinition{
 		DefinitionID:   uuid.New().String(),
-		DefinitionKey:  strings.TrimSpace(req.DefinitionKey),
 		DefinitionName: strings.TrimSpace(req.DefinitionName),
 		Category:       req.Category,
 		Status:         0,
@@ -114,9 +110,17 @@ func CreateWorkflowDefinition(req *models.CreateWorkflowDefinitionRequest, creat
 		DelFlag:        0,
 	}
 
-	return database.DB.Create(&definition).Error
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		key, err := NewBaseCodeSequenceService().NextBusinessCode(tx, "WORKFLOW_DEFINITION", "WF", 6)
+		if err != nil {
+			return err
+		}
+		definition.DefinitionKey = key
+		return tx.Create(&definition).Error
+	})
 }
 
+// UpdateWorkflowDefinition 更新流程定义。DefinitionKey 由后端自动生成且不可修改，更新时不接受前端传入的 DefinitionKey。
 func UpdateWorkflowDefinition(definitionID string, req *models.UpdateWorkflowDefinitionRequest) error {
 	var definition models.WfProcessDefinition
 	err := database.DB.Where("definition_id = ? AND del_flag = ?", definitionID, 0).First(&definition).Error
@@ -127,12 +131,7 @@ func UpdateWorkflowDefinition(definitionID string, req *models.UpdateWorkflowDef
 		return err
 	}
 
-	if err := ensureWorkflowDefinitionKeyUnique(req.DefinitionKey, definitionID); err != nil {
-		return err
-	}
-
 	updates := map[string]interface{}{
-		"definition_key":  strings.TrimSpace(req.DefinitionKey),
 		"definition_name": strings.TrimSpace(req.DefinitionName),
 		"category":        req.Category,
 		"remark":          req.Remark,
@@ -294,29 +293,6 @@ func buildWorkflowDefinitionResponses(definitions []models.WfProcessDefinition) 
 	}
 
 	return responses
-}
-
-func ensureWorkflowDefinitionKeyUnique(definitionKey string, excludeDefinitionID string) error {
-	key := strings.TrimSpace(definitionKey)
-	if key == "" {
-		return fmt.Errorf("流程标识不能为空")
-	}
-
-	db := database.DB.Model(&models.WfProcessDefinition{}).
-		Where("definition_key = ? AND del_flag = ?", key, 0)
-	if excludeDefinitionID != "" {
-		db = db.Where("definition_id <> ?", excludeDefinitionID)
-	}
-
-	var count int64
-	if err := db.Count(&count).Error; err != nil {
-		return err
-	}
-	if count > 0 {
-		return fmt.Errorf("流程标识已存在")
-	}
-
-	return nil
 }
 
 func normalizeWorkflowFlowData(flowData *string) string {

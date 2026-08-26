@@ -96,23 +96,28 @@ func GetFormSchema(formSchemaID string) (*models.FormSchemaResponse, error) {
 	return &responses[0], nil
 }
 
+// CreateFormSchema 创建表单 Schema。SchemaKey 通过公共编码流水 FORM_SCHEMA 域自动生成，保证全局唯一且递增。
 func CreateFormSchema(req *models.UpsertFormSchemaRequest, creatorID string) error {
-	key, name, layout, status, schemaJSON, err := normalizeFormSchemaRequest(req)
+	name, layout, status, schemaJSON, err := normalizeFormSchemaRequest(req)
 	if err != nil {
 		return err
 	}
-	if err := ensureFormSchemaKeyUnique(key, ""); err != nil {
-		return err
-	}
 	now := time.Now()
-	return database.DB.Create(&models.SysFormSchema{
-		FormSchemaID: utils.GenerateUUID(), SchemaKey: key, SchemaName: name,
-		Category: normalizeOptionalString(req.Category), Layout: layout, SchemaJSON: schemaJSON, Status: status,
-		Remark: normalizeOptionalString(req.Remark), CreatorID: &creatorID,
-		CreateDate: &now, UpdateDate: &now, DelFlag: 0,
-	}).Error
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		key, err := NewBaseCodeSequenceService().NextBusinessCode(tx, "FORM_SCHEMA", "FS", 6)
+		if err != nil {
+			return err
+		}
+		return tx.Create(&models.SysFormSchema{
+			FormSchemaID: utils.GenerateUUID(), SchemaKey: key, SchemaName: name,
+			Category: normalizeOptionalString(req.Category), Layout: layout, SchemaJSON: schemaJSON, Status: status,
+			Remark: normalizeOptionalString(req.Remark), CreatorID: &creatorID,
+			CreateDate: &now, UpdateDate: &now, DelFlag: 0,
+		}).Error
+	})
 }
 
+// UpdateFormSchema 更新表单 Schema。SchemaKey 由后端自动生成且不可修改，更新时不接受前端传入的 SchemaKey。
 func UpdateFormSchema(formSchemaID string, req *models.UpsertFormSchemaRequest) error {
 	if _, err := uuid.Parse(formSchemaID); err != nil {
 		return fmt.Errorf("表单 Schema ID 无效")
@@ -124,18 +129,15 @@ func UpdateFormSchema(formSchemaID string, req *models.UpsertFormSchemaRequest) 
 		}
 		return err
 	}
-	key, name, layout, status, schemaJSON, err := normalizeFormSchemaRequest(req)
+	name, layout, status, schemaJSON, err := normalizeFormSchemaRequest(req)
 	if err != nil {
-		return err
-	}
-	if err := ensureFormSchemaKeyUnique(key, formSchemaID); err != nil {
 		return err
 	}
 	requiresRepublish := schema.SchemaJSON != schemaJSON || schema.Layout != layout || schema.Status != status
 	return database.DB.Transaction(func(tx *gorm.DB) error {
 		now := time.Now()
 		if err := tx.Model(&schema).Updates(map[string]interface{}{
-			"schema_key": key, "schema_name": name, "category": normalizeOptionalString(req.Category), "layout": layout,
+			"schema_name": name, "category": normalizeOptionalString(req.Category), "layout": layout,
 			"schema_json": schemaJSON, "status": status, "remark": normalizeOptionalString(req.Remark),
 			"update_date": now,
 		}).Error; err != nil {
@@ -182,32 +184,29 @@ func DeleteFormSchemas(formSchemaIDs []string) error {
 	})
 }
 
-func normalizeFormSchemaRequest(req *models.UpsertFormSchemaRequest) (string, string, string, int, string, error) {
-	key := strings.TrimSpace(req.SchemaKey)
+// normalizeFormSchemaRequest 校验并规范化表单 Schema 请求。SchemaKey 不再由前端传入，故不参与校验。
+func normalizeFormSchemaRequest(req *models.UpsertFormSchemaRequest) (string, string, int, string, error) {
 	name := strings.TrimSpace(req.SchemaName)
-	if !formFieldNamePattern.MatchString(key) || len(key) > 128 {
-		return "", "", "", 0, "", fmt.Errorf("Schema 标识只能使用字母、数字、下划线和点，且必须以字母开头")
-	}
 	if name == "" || utf8.RuneCountInString(name) > 128 {
-		return "", "", "", 0, "", fmt.Errorf("Schema 名称不能为空且不能超过128个字符")
+		return "", "", 0, "", fmt.Errorf("Schema 名称不能为空且不能超过128个字符")
 	}
 	layout := strings.TrimSpace(req.Layout)
 	if layout != models.FormSchemaLayoutSingle && layout != models.FormSchemaLayoutDouble && layout != models.FormSchemaLayoutTriple {
-		return "", "", "", 0, "", fmt.Errorf("表单布局只能是single、double或triple")
+		return "", "", 0, "", fmt.Errorf("表单布局只能是single、double或triple")
 	}
 	status := 1
 	if req.Status != nil {
 		parsed, err := strconv.Atoi(*req.Status)
 		if err != nil || (parsed != 0 && parsed != 1) {
-			return "", "", "", 0, "", fmt.Errorf("Schema 状态只能是0或1")
+			return "", "", 0, "", fmt.Errorf("Schema 状态只能是0或1")
 		}
 		status = parsed
 	}
 	_, schemaJSON, err := parseAndValidateFormSchema(req.Schema)
 	if err != nil {
-		return "", "", "", 0, "", err
+		return "", "", 0, "", err
 	}
-	return key, name, layout, status, schemaJSON, nil
+	return name, layout, status, schemaJSON, nil
 }
 
 func parseAndValidateFormSchema(raw json.RawMessage) ([]models.FormSchemaField, string, error) {
@@ -496,21 +495,6 @@ func formNumber(value interface{}) (float64, bool) {
 	default:
 		return 0, false
 	}
-}
-
-func ensureFormSchemaKeyUnique(key, excludeID string) error {
-	db := database.DB.Model(&models.SysFormSchema{}).Where("schema_key = ? AND del_flag = 0", key)
-	if excludeID != "" {
-		db = db.Where("form_schema_id <> ?", excludeID)
-	}
-	var count int64
-	if err := db.Count(&count).Error; err != nil {
-		return err
-	}
-	if count > 0 {
-		return fmt.Errorf("Schema 标识已存在")
-	}
-	return nil
 }
 
 func buildFormSchemaResponses(schemas []models.SysFormSchema) ([]models.FormSchemaResponse, error) {
