@@ -57,6 +57,8 @@ func startServer() {
 	services.StartMedicalScheduleAutoScheduler()
 	services.StartAuditLogCleanupScheduler(config.AppConfig.AuditLog.RetentionDays, config.AppConfig.AuditLog.CleanupHour)
 	services.StartDownloadTaskWorker()
+	// 注册业务状态钩子:流程引擎在节点完成时按 businessType 调用对应业务模块的状态同步逻辑。
+	services.InitBusinessHooks()
 
 	// 设置 GIN 为 release 模式，减少日志输出
 	gin.SetMode(gin.ReleaseMode)

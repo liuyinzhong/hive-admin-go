@@ -7,6 +7,7 @@ type WfProcessDefinition struct {
 	DefinitionKey  string     `gorm:"column:definition_key;type:varchar(128)" json:"definitionKey"`
 	DefinitionName string     `gorm:"column:definition_name;type:varchar(128)" json:"definitionName"`
 	Category       *string    `gorm:"column:category;type:varchar(64)" json:"category"`
+	BusinessType   *string    `gorm:"column:business_type;type:varchar(64);index" json:"businessType"` // 业务归属类型:story/bug/task,作为业务状态钩子注册键
 	Status         int        `gorm:"column:status;type:tinyint;default:0" json:"status"`
 	Version        int        `gorm:"column:version;type:int;default:0" json:"version"`
 	FlowData       *string    `gorm:"column:flow_data;type:longtext" json:"flowData"`
@@ -27,6 +28,7 @@ type WorkflowDefinitionResponse struct {
 	DefinitionKey  string  `json:"definitionKey" example:"story_approval"`         // 流程标识
 	DefinitionName string  `json:"definitionName" example:"需求审批流程"`                // 流程名称
 	Category       *string `json:"category" example:"dev"`                         // 流程分类
+	BusinessType   *string `json:"businessType" example:"story"`                   // 业务归属类型:story/bug/task
 	Status         string  `json:"status" example:"0"`                             // 流程状态：0草稿 1已发布 2已停用
 	Version        int     `json:"version" example:"1"`                            // 发布版本号
 	FlowData       *string `json:"flowData" example:"{\"nodes\":[],\"edges\":[]}"` // LogicFlow画布JSON
@@ -42,6 +44,7 @@ type WorkflowDefinitionResponse struct {
 type CreateWorkflowDefinitionRequest struct {
 	DefinitionName string  `json:"definitionName" binding:"required" example:"需求审批流程"` // 流程名称
 	Category       *string `json:"category" example:"dev"`                             // 流程分类
+	BusinessType   *string `json:"businessType" example:"story"`                       // 业务归属类型:story/bug/task
 	FlowData       *string `json:"flowData" example:"{\"nodes\":[],\"edges\":[]}"`     // LogicFlow画布JSON
 	Remark         *string `json:"remark" example:"流程说明"`                              // 备注
 }
@@ -50,6 +53,7 @@ type CreateWorkflowDefinitionRequest struct {
 type UpdateWorkflowDefinitionRequest struct {
 	DefinitionName string  `json:"definitionName" binding:"required" example:"需求审批流程"` // 流程名称
 	Category       *string `json:"category" example:"dev"`                             // 流程分类
+	BusinessType   *string `json:"businessType" example:"story"`                       // 业务归属类型:story/bug/task
 	FlowData       *string `json:"flowData" example:"{\"nodes\":[],\"edges\":[]}"`     // LogicFlow画布JSON
 	Remark         *string `json:"remark" example:"流程说明"`                              // 备注
 }

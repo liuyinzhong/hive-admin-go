@@ -35,7 +35,6 @@ type WfProcessInstance struct {
 	DefinitionName    string     `gorm:"column:definition_name;type:varchar(128)" json:"definitionName"`
 	DefinitionVersion int        `gorm:"column:definition_version;type:int" json:"definitionVersion"`
 	Title             string     `gorm:"column:title;type:varchar(128)" json:"title"`
-	BusinessKey       *string    `gorm:"column:business_key;type:varchar(128);index" json:"businessKey"`
 	StarterID         string     `gorm:"column:starter_id;type:char(36);index" json:"starterId"`
 	StarterName       string     `gorm:"column:starter_name;type:varchar(36)" json:"starterName"`
 	Status            int        `gorm:"column:status;type:tinyint;default:0;index" json:"status"`
@@ -131,10 +130,19 @@ type WfProcessCopy struct {
 func (WfProcessCopy) TableName() string { return "wf_process_copy" }
 
 // StartWorkflowInstanceRequest 是发起流程请求。
+// BusinessID 为业务对象主键(如 dev_story.story_id),由业务发起方(如 CreateStory)传入;
+// 为空时表示发起纯流程实例(不绑定业务)。BusinessType 不由前端传入,后端从流程定义读取并校验。
 type StartWorkflowInstanceRequest struct {
 	DefinitionID string                 `json:"definitionId" binding:"required" example:"UUID"` // 流程定义ID
-	BusinessKey  *string                `json:"businessKey" example:"purchase:UUID"`            // 业务对象唯一标识
+	BusinessID   *string                `json:"businessId" example:"UUID"`                      // 业务对象主键,可空
 	Variables    map[string]interface{} `json:"variables"`                                      // 条件判断业务变量
+}
+
+// StartStoryWorkflowRequest 为需求发起流程的专用请求。
+// businessId 不由前端传入,后端从路径参数 storyId 取,保证业务对象与 URL 一致。
+type StartStoryWorkflowRequest struct {
+	DefinitionID string                 `json:"definitionId" binding:"required" example:"UUID"` // 已发布的流程定义ID
+	Variables    map[string]interface{} `json:"variables"`                                      // 流程变量
 }
 
 // WorkflowTaskActionRequest 是审批操作请求。
@@ -175,23 +183,22 @@ type WorkflowReturnTargetResponse struct {
 
 // WorkflowInstanceResponse 是流程实例列表与详情基础数据。
 type WorkflowInstanceResponse struct {
-	InstanceID        string                 `json:"instanceId" example:"550e8400-e29b-41d4-a716-446655440000"`        // 流程实例ID
-	InstanceNo        string                 `json:"instanceNo" example:"WF202601150001"`                              // 流程编号
-	DefinitionID      string                 `json:"definitionId" example:"550e8400-e29b-41d4-a716-446655440000"`      // 流程定义ID
-	DefinitionKey     string                 `json:"definitionKey" example:"story_approval"`                           // 流程标识
-	DefinitionName    string                 `json:"definitionName" example:"需求审批流程"`                                  // 流程名称
-	DefinitionVersion int                    `json:"definitionVersion" example:"1"`                                    // 流程定义版本
-	Title             string                 `json:"title" example:"XX功能需求审批"`                                         // 流程标题
-	BusinessKey       *string                `json:"businessKey" example:"story:550e8400-e29b-41d4-a716-446655440000"` // 业务对象标识
-	StarterID         string                 `json:"starterId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 发起人ID
-	StarterName       string                 `json:"starterName" example:"张三"`                                         // 发起人姓名
-	Status            string                 `json:"status" example:"0"`                                               // 流程状态：0运行中 1已完成 2已拒绝 3已取消
-	Variables         map[string]interface{} `json:"variables"`                                                        // 条件判断业务变量
-	FormSchema        json.RawMessage        `json:"formSchema" swaggertype:"array,object"`                            // 表单Schema快照
-	FormLayout        string                 `json:"formLayout" example:"single"`                                      // 表单布局
-	StartDate         *string                `json:"startDate" example:"2026-01-15 09:00:00"`                          // 开始时间
-	EndDate           *string                `json:"endDate" example:"2026-01-15 18:00:00"`                            // 结束时间
-	CreateDate        *string                `json:"createDate" example:"2026-01-15 09:00:00"`                         // 创建时间
+	InstanceID        string                 `json:"instanceId" example:"550e8400-e29b-41d4-a716-446655440000"`   // 流程实例ID
+	InstanceNo        string                 `json:"instanceNo" example:"WI000001"`                               // 流程编号
+	DefinitionID      string                 `json:"definitionId" example:"550e8400-e29b-41d4-a716-446655440000"` // 流程定义ID
+	DefinitionKey     string                 `json:"definitionKey" example:"WF000001"`                            // 流程标识
+	DefinitionName    string                 `json:"definitionName" example:"需求审批流程"`                             // 流程名称
+	DefinitionVersion int                    `json:"definitionVersion" example:"1"`                               // 流程定义版本
+	Title             string                 `json:"title" example:"XX功能需求审批"`                                    // 流程标题
+	StarterID         string                 `json:"starterId" example:"550e8400-e29b-41d4-a716-446655440000"`    // 发起人ID
+	StarterName       string                 `json:"starterName" example:"张三"`                                    // 发起人姓名
+	Status            string                 `json:"status" example:"0"`                                          // 流程状态：0运行中 1已完成 2已拒绝 3已取消
+	Variables         map[string]interface{} `json:"variables"`                                                   // 条件判断业务变量
+	FormSchema        json.RawMessage        `json:"formSchema" swaggertype:"array,object"`                       // 表单Schema快照
+	FormLayout        string                 `json:"formLayout" example:"single"`                                 // 表单布局
+	StartDate         *string                `json:"startDate" example:"2026-01-15 09:00:00"`                     // 开始时间
+	EndDate           *string                `json:"endDate" example:"2026-01-15 18:00:00"`                       // 结束时间
+	CreateDate        *string                `json:"createDate" example:"2026-01-15 09:00:00"`                    // 创建时间
 }
 
 // WorkflowTaskResponse 是用户待办和已办任务数据。

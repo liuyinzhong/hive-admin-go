@@ -130,6 +130,45 @@ definitions:
         example: UUID
         type: string
     type: object
+  models.BusinessHookRegistryItem:
+    properties:
+      businessType:
+        description: 业务类型:流程定义声明的业务归属标识
+        example: story
+        type: string
+      label:
+        description: 业务类型中文名:设计器下拉展示
+        example: 需求
+        type: string
+      nodeKeys:
+        description: 该业务类型支持的节点业务键列表
+        items:
+          $ref: '#/definitions/models.BusinessNodeKeyDef'
+        type: array
+    type: object
+  models.BusinessHookRegistryResponse:
+    properties:
+      items:
+        description: 全部已注册业务类型及其节点键
+        items:
+          $ref: '#/definitions/models.BusinessHookRegistryItem'
+        type: array
+    type: object
+  models.BusinessNodeKeyDef:
+    properties:
+      description:
+        description: 说明:设计器下拉提示
+        example: 节点通过后需求状态改为已评审
+        type: string
+      label:
+        description: 中文名:设计器下拉展示
+        example: 评审通过
+        type: string
+      nodeKey:
+        description: 节点业务键:流程节点上配置的稳定语义标识
+        example: review
+        type: string
+    type: object
   models.ChangeHistoryResponse:
     properties:
       businessId:
@@ -1087,13 +1126,13 @@ definitions:
     type: object
   models.CreateWorkflowDefinitionRequest:
     properties:
+      businessType:
+        description: 业务归属类型:story/bug/task
+        example: story
+        type: string
       category:
         description: 流程分类
         example: dev
-        type: string
-      definitionKey:
-        description: 流程标识，系统内唯一
-        example: story_approval
         type: string
       definitionName:
         description: 流程名称
@@ -1108,7 +1147,6 @@ definitions:
         example: 流程说明
         type: string
     required:
-    - definitionKey
     - definitionName
     type: object
   models.DeleteErpWarehouseLocationRequest:
@@ -7054,11 +7092,24 @@ definitions:
           type: integer
         type: array
     type: object
+  models.StartStoryWorkflowRequest:
+    properties:
+      definitionId:
+        description: 已发布的流程定义ID
+        example: UUID
+        type: string
+      variables:
+        additionalProperties: true
+        description: 流程变量
+        type: object
+    required:
+    - definitionId
+    type: object
   models.StartWorkflowInstanceRequest:
     properties:
-      businessKey:
-        description: 业务对象唯一标识
-        example: purchase:UUID
+      businessId:
+        description: 业务对象主键,可空
+        example: UUID
         type: string
       definitionId:
         description: 流程定义ID
@@ -8146,13 +8197,13 @@ definitions:
     type: object
   models.UpdateWorkflowDefinitionRequest:
     properties:
+      businessType:
+        description: 业务归属类型:story/bug/task
+        example: story
+        type: string
       category:
         description: 流程分类
         example: dev
-        type: string
-      definitionKey:
-        description: 流程标识，系统内唯一
-        example: story_approval
         type: string
       definitionName:
         description: 流程名称
@@ -8167,7 +8218,6 @@ definitions:
         example: 流程说明
         type: string
     required:
-    - definitionKey
     - definitionName
     type: object
   models.UpdateWorkflowFormSchemaRequest:
@@ -8202,9 +8252,6 @@ definitions:
         items:
           type: object
         type: array
-      schemaKey:
-        example: expense_apply
-        type: string
       schemaName:
         example: 报销申请表
         type: string
@@ -8214,7 +8261,6 @@ definitions:
     required:
     - layout
     - schema
-    - schemaKey
     - schemaName
     type: object
   models.VersionResponse:
@@ -8407,6 +8453,10 @@ definitions:
     type: object
   models.WorkflowDefinitionResponse:
     properties:
+      businessType:
+        description: 业务归属类型:story/bug/task
+        example: story
+        type: string
       category:
         description: 流程分类
         example: dev
@@ -8474,10 +8524,6 @@ definitions:
     type: object
   models.WorkflowInstanceResponse:
     properties:
-      businessKey:
-        description: 业务对象标识
-        example: story:550e8400-e29b-41d4-a716-446655440000
-        type: string
       createDate:
         description: 创建时间
         example: "2026-01-15 09:00:00"
@@ -8488,7 +8534,7 @@ definitions:
         type: string
       definitionKey:
         description: 流程标识
-        example: story_approval
+        example: WF000001
         type: string
       definitionName:
         description: 流程名称
@@ -8517,7 +8563,7 @@ definitions:
         type: string
       instanceNo:
         description: 流程编号
-        example: WF202601150001
+        example: WI000001
         type: string
       startDate:
         description: 开始时间
@@ -8835,6 +8881,49 @@ definitions:
       taskTotalNum:
         description: 任务总数
         type: integer
+    type: object
+  services.WorkflowBusinessInstanceResponse:
+    properties:
+      bindingId:
+        description: 关联ID
+        example: UUID
+        type: string
+      businessId:
+        description: 业务对象ID
+        example: UUID
+        type: string
+      businessType:
+        description: 业务类型
+        example: story
+        type: string
+      createDate:
+        description: 关联建立时间
+        example: "2026-01-15 09:00:00"
+        type: string
+      definitionId:
+        description: 流程定义ID
+        example: UUID
+        type: string
+      instanceId:
+        description: 流程实例ID
+        example: UUID
+        type: string
+      instanceNo:
+        description: 流程编号
+        example: WI000001
+        type: string
+      starterId:
+        description: 发起人ID
+        example: UUID
+        type: string
+      starterName:
+        description: 发起人姓名
+        example: 张三
+        type: string
+      status:
+        description: 流程实例状态:0运行中 1已完成 2已拒绝 3已取消
+        example: "0"
+        type: string
     type: object
   utils.PageResult:
     properties:
@@ -10979,6 +11068,79 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 获取需求详情
+      tags:
+      - 开发管理/需求管理
+  /dev/storys/{storyNum}/workflow:
+    get:
+      description: 返回需求当前关联的流程实例摘要,用于需求详情页展示流程入口。需求未发起流程时 data 为 null。数据权限:角色数据范围,沿用
+        dev:story:detail 边界,先按 storyNum 反查需求校验记录级权限,再返回流程绑定。
+      parameters:
+      - description: 需求编号
+        in: path
+        name: storyNum
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/services.WorkflowBusinessInstanceResponse'
+              type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 查询需求流程绑定
+      tags:
+      - 开发管理/需求管理
+    post:
+      consumes:
+      - application/json
+      description: 创建需求后调用本接口发起流程,自动绑定 businessId=storyId。流程定义声明的 BusinessType 必须为
+        story,否则绑定被拒。数据权限:角色数据范围,沿用 dev:story:update 边界,先按 storyNum 反查需求校验记录级权限,再发起流程。
+      parameters:
+      - description: 需求编号
+        in: path
+        name: storyNum
+        required: true
+        type: integer
+      - description: 流程发起信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.StartStoryWorkflowRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 发起成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.WorkflowInstanceResponse'
+              type: object
+        "400":
+          description: 参数或流程配置错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 为需求发起流程
       tags:
       - 开发管理/需求管理
   /dev/storys/all:
@@ -22812,6 +22974,31 @@ paths:
       summary: 获取所有用户
       tags:
       - 系统管理/用户管理
+  /workflow/business-hooks:
+    get:
+      description: 返回所有已注册业务状态钩子的元数据,供流程设计器加载业务类型和节点业务键下拉选项。数据权限:公开接口(登录后可访问),不使用记录级数据权限,返回的是钩子元数据不涉及业务记录,不按创建人过滤。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.BusinessHookRegistryResponse'
+              type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 查询业务状态钩子注册表
+      tags:
+      - 流程管理/业务绑定
   /workflow/copies:
     get:
       parameters:

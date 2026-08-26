@@ -54,6 +54,8 @@ func registerDevRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 			storys.PUT("/:storyId", permissionGuard.Require("dev:story:update"), devController.UpdateStory)
 			storys.PUT("/:storyId/field", permissionGuard.Require("dev:story:fieldUpdate"), devController.UpdateStoryField)
 			storys.PUT("/:storyId/next", permissionGuard.Require("dev:story:advance"), devController.UpdateStoryNext)
+			storys.POST("/:storyNum/workflow", permissionGuard.Require("dev:story:update"), devController.StartStoryWorkflow)
+			storys.GET("/:storyNum/workflow", permissionGuard.Require("dev:story:detail"), devController.GetStoryWorkflowBinding)
 			storys.DELETE("", permissionGuard.Require("dev:story:delete"), devController.DeleteStorys)
 		}
 

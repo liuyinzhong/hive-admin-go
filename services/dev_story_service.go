@@ -531,6 +531,33 @@ func CreateStorys(reqs []models.CreateStoryRequest, creatorID string, permission
 	})
 }
 
+// StartStoryWorkflow 为需求发起流程,自动把 businessId 绑定为 storyId。
+// 前端在创建需求后调用,传入已发布的流程定义ID和流程变量。
+// 流程定义声明的 BusinessType 必须为 "story",否则 StartWorkflowInstance 会拒绝绑定,
+// 这样防止需求误绑定到 bug/task 等其它业务流程。返回创建好的流程实例。
+func StartStoryWorkflow(storyID, definitionID, creatorID string, variables map[string]interface{}) (*models.WorkflowInstanceResponse, error) {
+	var story models.DevStory
+	if err := database.DB.Where("story_id = ? AND del_flag = 0", storyID).First(&story).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("需求不存在")
+		}
+		return nil, err
+	}
+	businessID := storyID
+	req := &models.StartWorkflowInstanceRequest{
+		DefinitionID: definitionID,
+		BusinessID:   &businessID,
+		Variables:    variables,
+	}
+	return StartWorkflowInstance(req, creatorID)
+}
+
+// GetStoryWorkflowBinding 查询需求当前绑定的流程实例,用于需求详情页展示流程入口。
+// 需求未发起流程时返回 nil 不报错,调用方据此决定是否显示"发起流程"按钮。
+func GetStoryWorkflowBinding(storyID string) (*WorkflowBusinessInstanceResponse, error) {
+	return GetWorkflowBusinessInstanceDetail("story", storyID)
+}
+
 func UpdateStory(storyID string, req *models.UpdateStoryRequest, creatorID string, permission datapermission.Permission) error {
 	var story models.DevStory
 	query := database.DB.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = ?", storyID, 0)

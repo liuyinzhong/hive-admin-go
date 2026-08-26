@@ -325,3 +325,81 @@ func (dc *DevController) DeleteStorys(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
 }
+
+// StartStoryWorkflow 为需求发起流程。
+// @Summary 为需求发起流程
+// @Description 创建需求后调用本接口发起流程,自动绑定 businessId=storyId。流程定义声明的 BusinessType 必须为 story,否则绑定被拒。数据权限:角色数据范围,沿用 dev:story:update 边界,先按 storyNum 反查需求校验记录级权限,再发起流程。
+// @Tags 开发管理/需求管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param storyNum path int true "需求编号"
+// @Param request body models.StartStoryWorkflowRequest true "流程发起信息"
+// @Success 200 {object} models.Response{data=models.WorkflowInstanceResponse} "发起成功"
+// @Failure 400 {object} models.Response "参数或流程配置错误"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /dev/storys/{storyNum}/workflow [post]
+func (dc *DevController) StartStoryWorkflow(c *gin.Context) {
+	// 路径参数为需求编号(便于URL传播),内部反查 storyId(UUID) 用于绑定流程业务对象
+	storyNum, err := strconv.Atoi(c.Param("storyNum"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
+		return
+	}
+	// 复用 dev:story:detail 数据权限边界,未授权用户无法发起流程
+	story, err := services.GetStoryByNum(storyNum, currentDataPermission(c))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+	if story.StoryID == nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "需求ID缺失"))
+		return
+	}
+	var req models.StartStoryWorkflowRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
+		return
+	}
+	result, err := services.StartStoryWorkflow(*story.StoryID, req.DefinitionID, c.GetString("userId"), req.Variables)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
+// GetStoryWorkflowBinding 查询需求当前绑定的流程实例。
+// @Summary 查询需求流程绑定
+// @Description 返回需求当前关联的流程实例摘要,用于需求详情页展示流程入口。需求未发起流程时 data 为 null。数据权限:角色数据范围,沿用 dev:story:detail 边界,先按 storyNum 反查需求校验记录级权限,再返回流程绑定。
+// @Tags 开发管理/需求管理
+// @Produce json
+// @Security ApiKeyAuth
+// @Param storyNum path int true "需求编号"
+// @Success 200 {object} models.Response{data=services.WorkflowBusinessInstanceResponse} "获取成功"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /dev/storys/{storyNum}/workflow [get]
+func (dc *DevController) GetStoryWorkflowBinding(c *gin.Context) {
+	// 路径参数为需求编号(便于URL传播),内部反查 storyId(UUID) 用于查询流程绑定
+	storyNum, err := strconv.Atoi(c.Param("storyNum"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
+		return
+	}
+	// 复用 dev:story:detail 数据权限边界,未授权用户无法查询流程绑定
+	story, err := services.GetStoryByNum(storyNum, currentDataPermission(c))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+	if story.StoryID == nil {
+		c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+		return
+	}
+	result, err := services.GetStoryWorkflowBinding(*story.StoryID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}

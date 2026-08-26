@@ -3604,6 +3604,126 @@ const docTemplate = `{
                 }
             }
         },
+        "/dev/storys/{storyNum}/workflow": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "返回需求当前关联的流程实例摘要,用于需求详情页展示流程入口。需求未发起流程时 data 为 null。数据权限:角色数据范围,沿用 dev:story:detail 边界,先按 storyNum 反查需求校验记录级权限,再返回流程绑定。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "开发管理/需求管理"
+                ],
+                "summary": "查询需求流程绑定",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "需求编号",
+                        "name": "storyNum",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/services.WorkflowBusinessInstanceResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "创建需求后调用本接口发起流程,自动绑定 businessId=storyId。流程定义声明的 BusinessType 必须为 story,否则绑定被拒。数据权限:角色数据范围,沿用 dev:story:update 边界,先按 storyNum 反查需求校验记录级权限,再发起流程。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "开发管理/需求管理"
+                ],
+                "summary": "为需求发起流程",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "需求编号",
+                        "name": "storyNum",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "流程发起信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.StartStoryWorkflowRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "发起成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.WorkflowInstanceResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数或流程配置错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/dev/tasks": {
             "get": {
                 "security": [
@@ -22637,6 +22757,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/workflow/business-hooks": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "返回所有已注册业务状态钩子的元数据,供流程设计器加载业务类型和节点业务键下拉选项。数据权限:公开接口(登录后可访问),不使用记录级数据权限,返回的是钩子元数据不涉及业务记录,不按创建人过滤。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "流程管理/业务绑定"
+                ],
+                "summary": "查询业务状态钩子注册表",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.BusinessHookRegistryResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/workflow/copies": {
             "get": {
                 "security": [
@@ -24267,6 +24431,60 @@ const docTemplate = `{
                 }
             }
         },
+        "models.BusinessHookRegistryItem": {
+            "type": "object",
+            "properties": {
+                "businessType": {
+                    "description": "业务类型:流程定义声明的业务归属标识",
+                    "type": "string",
+                    "example": "story"
+                },
+                "label": {
+                    "description": "业务类型中文名:设计器下拉展示",
+                    "type": "string",
+                    "example": "需求"
+                },
+                "nodeKeys": {
+                    "description": "该业务类型支持的节点业务键列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.BusinessNodeKeyDef"
+                    }
+                }
+            }
+        },
+        "models.BusinessHookRegistryResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "description": "全部已注册业务类型及其节点键",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.BusinessHookRegistryItem"
+                    }
+                }
+            }
+        },
+        "models.BusinessNodeKeyDef": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "说明:设计器下拉提示",
+                    "type": "string",
+                    "example": "节点通过后需求状态改为已评审"
+                },
+                "label": {
+                    "description": "中文名:设计器下拉展示",
+                    "type": "string",
+                    "example": "评审通过"
+                },
+                "nodeKey": {
+                    "description": "节点业务键:流程节点上配置的稳定语义标识",
+                    "type": "string",
+                    "example": "review"
+                }
+            }
+        },
         "models.ChangeHistoryResponse": {
             "type": "object",
             "properties": {
@@ -25536,19 +25754,18 @@ const docTemplate = `{
         "models.CreateWorkflowDefinitionRequest": {
             "type": "object",
             "required": [
-                "definitionKey",
                 "definitionName"
             ],
             "properties": {
+                "businessType": {
+                    "description": "业务归属类型:story/bug/task",
+                    "type": "string",
+                    "example": "story"
+                },
                 "category": {
                     "description": "流程分类",
                     "type": "string",
                     "example": "dev"
-                },
-                "definitionKey": {
-                    "description": "流程标识，系统内唯一",
-                    "type": "string",
-                    "example": "story_approval"
                 },
                 "definitionName": {
                     "description": "流程名称",
@@ -33531,16 +33748,34 @@ const docTemplate = `{
                 }
             }
         },
+        "models.StartStoryWorkflowRequest": {
+            "type": "object",
+            "required": [
+                "definitionId"
+            ],
+            "properties": {
+                "definitionId": {
+                    "description": "已发布的流程定义ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "variables": {
+                    "description": "流程变量",
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
         "models.StartWorkflowInstanceRequest": {
             "type": "object",
             "required": [
                 "definitionId"
             ],
             "properties": {
-                "businessKey": {
-                    "description": "业务对象唯一标识",
+                "businessId": {
+                    "description": "业务对象主键,可空",
                     "type": "string",
-                    "example": "purchase:UUID"
+                    "example": "UUID"
                 },
                 "definitionId": {
                     "description": "流程定义ID",
@@ -34991,19 +35226,18 @@ const docTemplate = `{
         "models.UpdateWorkflowDefinitionRequest": {
             "type": "object",
             "required": [
-                "definitionKey",
                 "definitionName"
             ],
             "properties": {
+                "businessType": {
+                    "description": "业务归属类型:story/bug/task",
+                    "type": "string",
+                    "example": "story"
+                },
                 "category": {
                     "description": "流程分类",
                     "type": "string",
                     "example": "dev"
-                },
-                "definitionKey": {
-                    "description": "流程标识，系统内唯一",
-                    "type": "string",
-                    "example": "story_approval"
                 },
                 "definitionName": {
                     "description": "流程名称",
@@ -35052,7 +35286,6 @@ const docTemplate = `{
             "required": [
                 "layout",
                 "schema",
-                "schemaKey",
                 "schemaName"
             ],
             "properties": {
@@ -35073,10 +35306,6 @@ const docTemplate = `{
                     "items": {
                         "type": "object"
                     }
-                },
-                "schemaKey": {
-                    "type": "string",
-                    "example": "expense_apply"
                 },
                 "schemaName": {
                     "type": "string",
@@ -35331,6 +35560,11 @@ const docTemplate = `{
         "models.WorkflowDefinitionResponse": {
             "type": "object",
             "properties": {
+                "businessType": {
+                    "description": "业务归属类型:story/bug/task",
+                    "type": "string",
+                    "example": "story"
+                },
                 "category": {
                     "description": "流程分类",
                     "type": "string",
@@ -35421,11 +35655,6 @@ const docTemplate = `{
         "models.WorkflowInstanceResponse": {
             "type": "object",
             "properties": {
-                "businessKey": {
-                    "description": "业务对象标识",
-                    "type": "string",
-                    "example": "story:550e8400-e29b-41d4-a716-446655440000"
-                },
                 "createDate": {
                     "description": "创建时间",
                     "type": "string",
@@ -35439,7 +35668,7 @@ const docTemplate = `{
                 "definitionKey": {
                     "description": "流程标识",
                     "type": "string",
-                    "example": "story_approval"
+                    "example": "WF000001"
                 },
                 "definitionName": {
                     "description": "流程名称",
@@ -35476,7 +35705,7 @@ const docTemplate = `{
                 "instanceNo": {
                     "description": "流程编号",
                     "type": "string",
-                    "example": "WF202601150001"
+                    "example": "WI000001"
                 },
                 "startDate": {
                     "description": "开始时间",
@@ -35894,6 +36123,61 @@ const docTemplate = `{
                 "taskTotalNum": {
                     "description": "任务总数",
                     "type": "integer"
+                }
+            }
+        },
+        "services.WorkflowBusinessInstanceResponse": {
+            "type": "object",
+            "properties": {
+                "bindingId": {
+                    "description": "关联ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "businessId": {
+                    "description": "业务对象ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "businessType": {
+                    "description": "业务类型",
+                    "type": "string",
+                    "example": "story"
+                },
+                "createDate": {
+                    "description": "关联建立时间",
+                    "type": "string",
+                    "example": "2026-01-15 09:00:00"
+                },
+                "definitionId": {
+                    "description": "流程定义ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "instanceId": {
+                    "description": "流程实例ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "instanceNo": {
+                    "description": "流程编号",
+                    "type": "string",
+                    "example": "WI000001"
+                },
+                "starterId": {
+                    "description": "发起人ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "starterName": {
+                    "description": "发起人姓名",
+                    "type": "string",
+                    "example": "张三"
+                },
+                "status": {
+                    "description": "流程实例状态:0运行中 1已完成 2已拒绝 3已取消",
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },

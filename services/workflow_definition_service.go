@@ -100,6 +100,7 @@ func CreateWorkflowDefinition(req *models.CreateWorkflowDefinitionRequest, creat
 		DefinitionID:   uuid.New().String(),
 		DefinitionName: strings.TrimSpace(req.DefinitionName),
 		Category:       req.Category,
+		BusinessType:   normalizeWorkflowBusinessType(req.BusinessType),
 		Status:         0,
 		Version:        0,
 		FlowData:       &flowData,
@@ -136,6 +137,12 @@ func UpdateWorkflowDefinition(definitionID string, req *models.UpdateWorkflowDef
 		"category":        req.Category,
 		"remark":          req.Remark,
 		"update_date":     time.Now(),
+	}
+	// business_type 支持清空(nil → NULL)和赋值,GORM 对 map 中 nil 值会跳过更新,故显式用 Expr 处理清空
+	if businessType := normalizeWorkflowBusinessType(req.BusinessType); businessType == nil {
+		updates["business_type"] = gorm.Expr("NULL")
+	} else {
+		updates["business_type"] = *businessType
 	}
 	if req.FlowData != nil && strings.TrimSpace(*req.FlowData) != "" {
 		flowData := normalizeWorkflowFlowData(req.FlowData)
@@ -280,6 +287,7 @@ func buildWorkflowDefinitionResponses(definitions []models.WfProcessDefinition) 
 			DefinitionKey:  definition.DefinitionKey,
 			DefinitionName: definition.DefinitionName,
 			Category:       definition.Category,
+			BusinessType:   definition.BusinessType,
 			Status:         fmt.Sprintf("%d", definition.Status),
 			Version:        definition.Version,
 			FlowData:       definition.FlowData,
@@ -293,6 +301,19 @@ func buildWorkflowDefinitionResponses(definitions []models.WfProcessDefinition) 
 	}
 
 	return responses
+}
+
+// normalizeWorkflowBusinessType 规范化业务归属类型:去空白后转 nil,允许空值(纯流程不绑定业务)。
+// 当前不限制枚举,业务模块自定义键名(如 story/bug/task),需与 RegisterBusinessHook 注册键一致。
+func normalizeWorkflowBusinessType(value *string) *string {
+	if value == nil {
+		return nil
+	}
+	trimmed := strings.TrimSpace(*value)
+	if trimmed == "" {
+		return nil
+	}
+	return &trimmed
 }
 
 func normalizeWorkflowFlowData(flowData *string) string {

@@ -44,6 +44,7 @@ type workflowNodeProperties struct {
 	CopyType         string            `json:"copyType"`
 	CopyIDs          []string          `json:"copyIds"`
 	BranchMode       string            `json:"branchMode"`
+	NodeBusinessKey  string            `json:"nodeBusinessKey"` // 节点业务键:业务模块在节点属性中配置的稳定语义标识,作为业务状态钩子入参
 	FieldPermissions map[string]string `json:"fieldPermissions"`
 }
 
@@ -127,7 +128,6 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 			DefinitionName:    definition.DefinitionName,
 			DefinitionVersion: definition.Version,
 			Title:             workflowInstanceTitle(definition.DefinitionName, workflowUserName(starter)),
-			BusinessKey:       normalizeOptionalString(req.BusinessKey),
 			StarterID:         starter.UserID,
 			StarterName:       workflowUserName(starter),
 			Status:            models.WorkflowInstanceStatusRunning,
@@ -145,6 +145,20 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 		}
 		if err := tx.Create(&instance).Error; err != nil {
 			return err
+		}
+		// 业务对象绑定:BusinessID 非空时,要求流程定义声明 BusinessType,然后写入 wf_business_instance 关联表。
+		// BusinessID 为空表示纯流程实例,跳过绑定。BusinessType 不由前端传入,统一从流程定义读取,保证业务归属声明的单一来源。
+		if req.BusinessID != nil {
+			businessID := strings.TrimSpace(*req.BusinessID)
+			if businessID != "" {
+				if definition.BusinessType == nil || strings.TrimSpace(*definition.BusinessType) == "" {
+					return fmt.Errorf("流程定义未声明业务归属类型,无法绑定业务对象")
+				}
+				businessType := strings.TrimSpace(*definition.BusinessType)
+				if err := createWorkflowBusinessInstance(tx, businessType, businessID, instance.InstanceID, instance.DefinitionID, instance.StarterID); err != nil {
+					return err
+				}
+			}
 		}
 		startNode := findWorkflowNodeByType(graph, "start")
 		if startNode == nil {
@@ -809,6 +823,13 @@ func handleWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionReq
 		if err := completeWorkflowNode(tx, nodeInstance); err != nil {
 			return err
 		}
+		// 节点完成后触发业务状态钩子:从流程画布反查节点业务键,调用对应业务模块的状态同步逻辑。
+		// 共享 tx 保证业务状态更新与流程流转原子性。无 nodeBusinessKey、无业务绑定或无 hook 注册时静默跳过。
+		if completedNode := findWorkflowNode(graph, nodeInstance.NodeID); completedNode != nil && completedNode.Properties.NodeBusinessKey != "" {
+			if err := triggerBusinessStateHook(tx, &instance, completedNode.Properties.NodeBusinessKey, true); err != nil {
+				return err
+			}
+		}
 		context := &workflowExecutionContext{graph: graph, instance: &instance, variables: variables}
 		return rebuildWorkflowRouteAfterNode(tx, context, nodeInstance)
 	})
@@ -1268,7 +1289,7 @@ func buildWorkflowInstanceResponse(instance models.WfProcessInstance) (models.Wo
 		InstanceID: instance.InstanceID, InstanceNo: instance.InstanceNo, DefinitionID: instance.DefinitionID,
 		DefinitionKey: instance.DefinitionKey, DefinitionName: instance.DefinitionName,
 		DefinitionVersion: instance.DefinitionVersion, Title: instance.Title,
-		BusinessKey: instance.BusinessKey, StarterID: instance.StarterID,
+		StarterID:   instance.StarterID,
 		StarterName: instance.StarterName, Status: strconv.Itoa(instance.Status),
 		Variables: variables, FormSchema: formSchema, FormLayout: instance.FormLayout, StartDate: models.TimeToStringPtr(instance.StartDate),
 		EndDate: models.TimeToStringPtr(instance.EndDate), CreateDate: models.TimeToStringPtr(instance.CreateDate),

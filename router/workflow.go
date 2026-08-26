@@ -14,6 +14,8 @@ func registerWorkflowRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 
 	workflow := api.Group("/workflow", middleware.AuthMiddleware(), deps.DataPermissionMiddleware)
 	{
+		// 业务状态钩子注册表:返回钩子元数据,登录后即可访问,无需数据权限校验
+		workflow.GET("/business-hooks", workflowController.ListBusinessHooks)
 		definitions := workflow.Group("/definitions")
 		{
 			definitions.GET("", permissionGuard.Require("workflow:definition:list"), workflowController.GetWorkflowDefinitions)
