@@ -8935,6 +8935,10 @@ definitions:
         description: 流程定义ID
         example: UUID
         type: string
+      definitionName:
+        description: 流程定义名称:详情页展示
+        example: 需求开发流程
+        type: string
       instanceId:
         description: 流程实例ID
         example: UUID
@@ -8954,6 +8958,10 @@ definitions:
       status:
         description: 流程实例状态:0运行中 1已完成 2已拒绝 3已取消
         example: "0"
+        type: string
+      title:
+        description: 流程实例标题:详情页展示
+        example: 需求开发流程-张三
         type: string
     type: object
   utils.PageResult:

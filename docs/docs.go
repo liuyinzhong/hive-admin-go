@@ -36197,6 +36197,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "UUID"
                 },
+                "definitionName": {
+                    "description": "流程定义名称:详情页展示",
+                    "type": "string",
+                    "example": "需求开发流程"
+                },
                 "instanceId": {
                     "description": "流程实例ID",
                     "type": "string",
@@ -36221,6 +36226,11 @@ const docTemplate = `{
                     "description": "流程实例状态:0运行中 1已完成 2已拒绝 3已取消",
                     "type": "string",
                     "example": "0"
+                },
+                "title": {
+                    "description": "流程实例标题:详情页展示",
+                    "type": "string",
+                    "example": "需求开发流程-张三"
                 }
             }
         },
