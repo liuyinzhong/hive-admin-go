@@ -22780,6 +22780,10 @@ paths:
         in: query
         name: deptId
         type: string
+      - description: 角色ID，查询拥有该角色的用户
+        in: query
+        name: roleId
+        type: string
       produces:
       - application/json
       responses:

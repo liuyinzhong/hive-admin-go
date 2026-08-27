@@ -92,6 +92,7 @@ type UserListRequest struct {
 	Status   *int   `form:"status" example:"1"`              // 状态 0=禁用 1=启用
 	Sorts    string `form:"sorts" example:"createDate,desc"` // 排序参数
 	DeptId   string `form:"deptId" example:"UUID"`           // 部门ID，查询该部门及子部门的用户
+	RoleId   string `form:"roleId" example:"UUID"`           // 角色ID，查询拥有该角色的用户
 }
 
 type FileListRequest struct {

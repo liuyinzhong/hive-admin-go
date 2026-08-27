@@ -45,6 +45,15 @@ func (s *UserService) GetUserList(req models.UserListRequest, permission dataper
 			query = query.Where("1 = 0")
 		}
 	}
+	if req.RoleId != "" {
+		var userIds []string
+		database.DB.Model(&models.SysUserRole{}).Where("role_id = ? AND del_flag = 0", req.RoleId).Pluck("user_id", &userIds)
+		if len(userIds) > 0 {
+			query = query.Where("user_id IN ?", userIds)
+		} else {
+			query = query.Where("1 = 0")
+		}
+	}
 
 	sorts, _ := utils.ParseSortParams(req.Sorts)
 	query = utils.ApplySorting(query, sorts, "create_date desc")

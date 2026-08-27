@@ -22326,6 +22326,12 @@
                         "description": "部门ID，查询该部门及子部门的用户",
                         "name": "deptId",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "角色ID，查询拥有该角色的用户",
+                        "name": "roleId",
+                        "in": "query"
                     }
                 ],
                 "responses": {

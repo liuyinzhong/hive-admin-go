@@ -22,6 +22,7 @@ import (
 // @Param phone query string false "手机号"
 // @Param status query int false "状态"
 // @Param deptId query string false "部门ID，查询该部门及子部门的用户"
+// @Param roleId query string false "角色ID，查询拥有该角色的用户"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.ProfileResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Failure 403 {object} models.Response "无接口访问权限"
