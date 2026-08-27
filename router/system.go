@@ -30,6 +30,7 @@ func registerSystemRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 	{
 		auth.POST("/login", authController.Login)
 		auth.GET("/profile", middleware.AuthMiddleware(), authController.GetProfile)
+		auth.PUT("/profile", middleware.AuthMiddleware(), authController.UpdateProfile)
 		auth.GET("/menus", middleware.AuthMiddleware(), authController.GetMenus)
 		auth.GET("/codes", middleware.AuthMiddleware(), authController.GetAuthCodes)
 		auth.POST("/logout", middleware.AuthMiddleware(), authController.Logout)

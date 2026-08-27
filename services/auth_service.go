@@ -5,6 +5,9 @@ import (
 	"hive-admin-go/database"
 	"hive-admin-go/models"
 	"hive-admin-go/utils"
+	"net/mail"
+	"strings"
+	"time"
 )
 
 type AuthService struct {
@@ -98,6 +101,43 @@ func (s *AuthService) GetProfile(userID string) (*models.ProfileResponse, error)
 	}
 
 	return profile, nil
+}
+
+// UpdateProfile 当前用户更新自己的头像和邮箱，返回更新后的用户资料。
+// 字段为 nil 表示不修改；空字符串表示清空（写入 NULL）。只允许操作当前 Token 对应的用户。
+func (s *AuthService) UpdateProfile(userID string, req models.UpdateProfileRequest) (*models.ProfileResponse, error) {
+	updates := map[string]interface{}{}
+	if req.Avatar != nil {
+		avatar := strings.TrimSpace(*req.Avatar)
+		if avatar == "" {
+			updates["avatar"] = nil
+		} else {
+			updates["avatar"] = avatar
+		}
+	}
+	if req.Email != nil {
+		email := strings.TrimSpace(*req.Email)
+		if email == "" {
+			updates["email"] = nil
+		} else {
+			if _, err := mail.ParseAddress(email); err != nil {
+				return nil, errors.New("邮箱格式错误")
+			}
+			updates["email"] = email
+		}
+	}
+
+	if len(updates) > 0 {
+		updates["update_date"] = time.Now()
+		if err := database.DB.Model(&models.SysUser{}).
+			Where("user_id = ? AND del_flag = 0", userID).
+			Updates(updates).Error; err != nil {
+			return nil, err
+		}
+	}
+
+	// 更新后重新读取完整资料；用户不存在时由 GetProfile 统一返回错误
+	return s.GetProfile(userID)
 }
 
 func (s *AuthService) GetMenus(userID string) ([]*models.MenuTreeResponse, error) {

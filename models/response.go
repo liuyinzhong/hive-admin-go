@@ -40,6 +40,12 @@ type ProfileResponse struct {
 	UpdateDate     *string  `json:"updateDate" example:"2024-01-01 12:00:00"` // 更新时间
 }
 
+// UpdateProfileRequest 当前用户更新个人资料请求：字段为 nil 表示不修改，空字符串表示清空
+type UpdateProfileRequest struct {
+	Avatar *string `json:"avatar" binding:"omitempty,max=512" example:"https://xxx/avatar.jpg"` // 用户头像URL，空字符串表示清空
+	Email  *string `json:"email" binding:"omitempty,max=128" example:"admin@example.com"`       // 邮箱，空字符串表示清空
+}
+
 type MenuMeta struct {
 	ActiveIcon               *string `json:"activeIcon" example:"lucide:home"`         // 激活图标
 	ActivePath               *string `json:"activePath" example:"/dashboard"`          // 激活路径

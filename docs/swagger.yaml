@@ -7873,6 +7873,19 @@ definitions:
     required:
     - expectedRowVersion
     type: object
+  models.UpdateProfileRequest:
+    properties:
+      avatar:
+        description: 用户头像URL，空字符串表示清空
+        example: https://xxx/avatar.jpg
+        maxLength: 512
+        type: string
+      email:
+        description: 邮箱，空字符串表示清空
+        example: admin@example.com
+        maxLength: 128
+        type: string
+    type: object
   models.UpdateProjectRequest:
     properties:
       description:
@@ -9126,6 +9139,45 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 获取用户信息
+      tags:
+      - 认证管理
+    put:
+      consumes:
+      - application/json
+      description: 当前用户更新自己的头像和邮箱。数据权限：当前用户归属，只允许修改当前 Token 对应用户的记录，不经过角色数据范围；登录名、真实姓名等其余字段不在此接口开放。字段为
+        null 表示不修改，空字符串表示清空
+      parameters:
+      - description: 资料更新请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功，返回最新用户资料
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.ProfileResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 用户未登录
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新当前用户资料
       tags:
       - 认证管理
   /base/classificationSystems:

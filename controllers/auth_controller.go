@@ -72,6 +72,40 @@ func (ctrl *AuthController) GetProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(profile))
 }
 
+// UpdateProfile 更新当前用户资料
+// @Summary 更新当前用户资料
+// @Description 当前用户更新自己的头像和邮箱。数据权限：当前用户归属，只允许修改当前 Token 对应用户的记录，不经过角色数据范围；登录名、真实姓名等其余字段不在此接口开放。字段为 null 表示不修改，空字符串表示清空
+// @Tags 认证管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param request body models.UpdateProfileRequest true "资料更新请求参数"
+// @Success 200 {object} models.Response{data=models.ProfileResponse} "更新成功，返回最新用户资料"
+// @Failure 400 {object} map[string]interface{} "请求参数错误"
+// @Failure 401 {object} map[string]interface{} "用户未登录"
+// @Router /auth/profile [put]
+func (ctrl *AuthController) UpdateProfile(c *gin.Context) {
+	userID, exists := c.Get("userId")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.NewErrorResponse(nil, "用户未登录"))
+		return
+	}
+
+	var req models.UpdateProfileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "请求参数错误"))
+		return
+	}
+
+	profile, err := ctrl.authService.UpdateProfile(userID.(string), req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NewSuccessResponse(profile))
+}
+
 // GetMenus 获取用户菜单
 // @Summary 获取用户菜单
 // @Description 获取当前登录用户的菜单权限
