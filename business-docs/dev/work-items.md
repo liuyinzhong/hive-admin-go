@@ -24,9 +24,9 @@ storyStatus、taskStatus、bugStatus 和 bugConfirmStatus 以数字字符串在�
 
 局部字段接口只允许修改 userIds、storyType、storyLevel、source。只有 storyStatus=0 的待评审需求可以删除。
 
-需求流转未填写流转说明时，后端自动写入默认内容"流转至「目标状态名称」，请及时跟进"（状态名称取 STORY_STATUS 字典），保证变更记录始终有正文；填写了说明则以填写内容为准。
+需求流转未填写流转说明时，后端自动写入默认内容"流转至「目标状态名称」，请及时跟进"（状态名称取 STORY\_STATUS 字典），保证变更记录始终有正文；填写了说明则以填写内容为准。
 
-需求列表与详情响应均返回 `statusOwnerNames` 字段：当前需求状态下负责人的姓名聚合（参与人中 `story_status` 等于需求当前 `story_status` 的用户，多个用顿号分隔，无负责人时为空串），前端列表"负责人"列和详情"当前负责人"项直接消费该字段。
+需求列表与详情响应均返回 `thisUserList` 字段：当前需求状态负责人的用户列表（参与人中 `story_status` 等于需求当前 `story_status` 的用户，结构与 `userList` 一致，无负责人时为空数组），前端列表"当前负责人"列和详情"当前负责人"项复用 `UserAvatarGroup` 组件渲染头像+姓名。
 
 ## 任务
 
@@ -50,7 +50,7 @@ storyStatus、taskStatus、bugStatus 和 bugConfirmStatus 以数字字符串在�
 
 ### DEV-ITEM-008 缺陷确认是独立动作
 
-确认状态写为 1 时，当前实现同时把缺陷状态改为 10；确认状态写为 2 时，缺陷状态改为 1。状态重新流转到 0 时会重置确认状态。调整这些数值含义必须同步 BUG_STATUS、BUG_CONFIRM_STATUS 字典和前端动作。
+确认状态写为 1 时，当前实现同时把缺陷状态改为 10；确认状态写为 2 时，缺陷状态改为 1。状态重新流转到 0 时会重置确认状态。调整这些数值含义必须同步 BUG\_STATUS、BUG\_CONFIRM\_STATUS 字典和前端动作。
 
 ## 数据权限
 
@@ -66,14 +66,21 @@ storyStatus、taskStatus、bugStatus 和 bugConfirmStatus 以数字字符串在�
 
 ## 权限
 
-- 需求：dev:story:list、create、batchCreate、detail、update、fieldUpdate、advance、delete。
-- 任务：dev:task:list、create、batchCreate、detail、update、fieldUpdate、advance、delete、export。
-- 缺陷：dev:bug:list、create、batchCreate、detail、update、fieldUpdate、advance、confirm、delete。
-- 变更记录：dev:changeHistory:list、create。
+* 需求：dev:story:list、create、batchCreate、detail、update、fieldUpdate、advance、delete。
+
+* 任务：dev:task:list、create、batchCreate、detail、update、fieldUpdate、advance、delete、export。
+
+* 缺陷：dev:bug:list、create、batchCreate、detail、update、fieldUpdate、advance、confirm、delete。
+
+* 变更记录：dev:changeHistory:list、create。
 
 ## 代码入口
 
-- Model：models/models.go 中 DevStory、DevTask、DevBug、DevChangeHistory。
-- Service：services/dev_story_service.go、dev_task_service.go、dev_bug_service.go、dev_change_history_service.go。
-- Router：/api/dev/storys、/tasks、/bugs、/changeHistory。storys 是当前既有接口拼写，修改需同步前后端。
-- 前端：hive/apps/web-antdv-next/src/views/dev/story、task、bug。
+* Model：models/models.go 中 DevStory、DevTask、DevBug、DevChangeHistory。
+
+* Service：services/dev\_story\_service.go、dev\_task\_service.go、dev\_bug\_service.go、dev\_change\_history\_service.go。
+
+* Router：/api/dev/storys、/tasks、/bugs、/changeHistory。storys 是当前既有接口拼写，修改需同步前后端。
+
+* 前端：hive/apps/web-antdv-next/src/views/dev/story、task、bug。
+

@@ -387,30 +387,30 @@ type StoryUserItem struct {
 }
 
 type StoryResponse struct {
-	StoryID          *string         `json:"storyId" example:"UUID"`                   // 需求ID
-	StoryTitle       *string         `json:"storyTitle" example:"需求标题"`                // 需求标题
-	StoryNum         int             `json:"storyNum" example:"1"`                     // 需求编号
-	CreatorName      *string         `json:"creatorName" example:"管理员"`                // 创建人姓名
-	CreatorID        *string         `json:"creatorId" example:"UUID"`                 // 创建人ID
-	StoryType        string          `json:"storyType" example:"0"`                    // 需求类型
-	StoryStatus      string          `json:"storyStatus" example:"0"`                  // 需求状态
-	StatusOwnerNames string          `json:"statusOwnerNames" example:"张三、李四"`         // 当前状态负责人姓名,多个用顿号分隔,无负责人时为空
-	StoryLevel       string          `json:"storyLevel" example:"0"`                   // 需求优先级
-	VersionID        *string         `json:"versionId" example:"UUID"`                 // 关联版本ID
-	Version          *string         `json:"version" example:"v1.0.0"`                 // 关联版本号
-	ProjectID        *string         `json:"projectId" example:"UUID"`                 // 关联项目ID
-	ProjectTitle     *string         `json:"projectTitle" example:"crudelis"`          // 关联项目标题
-	ModuleID         *string         `json:"moduleId" example:"UUID"`                  // 关联模块ID
-	ModuleTitle      *string         `json:"moduleTitle" example:"模块名称"`               // 关联模块标题
-	Source           string          `json:"source" example:"0"`                       // 需求来源
-	UpdateDate       *string         `json:"updateDate" example:"2024-01-01 12:00:00"` // 更新时间
-	CreateDate       *string         `json:"createDate" example:"2024-01-01 12:00:00"` // 创建时间
-	UserList         []StoryUserItem `json:"userList"`                                 // 参与人员列表
-	StoryRichText    *string         `json:"storyRichText" example:"<p>需求描述</p>"`      // 需求描述(富文本)
-	FileIDs          []string        `json:"fileIds"`                                  // 附件ID数组
-	FileList         []FileResponse  `json:"fileList"`                                 // 附件列表
-	TaskList         []TaskResponse  `json:"taskList"`                                 // 关联任务列表
-	BugList          []BugResponse   `json:"bugList"`                                  // 关联缺陷列表
+	StoryID       *string         `json:"storyId" example:"UUID"`                   // 需求ID
+	StoryTitle    *string         `json:"storyTitle" example:"需求标题"`                // 需求标题
+	StoryNum      int             `json:"storyNum" example:"1"`                     // 需求编号
+	CreatorName   *string         `json:"creatorName" example:"管理员"`                // 创建人姓名
+	CreatorID     *string         `json:"creatorId" example:"UUID"`                 // 创建人ID
+	StoryType     string          `json:"storyType" example:"0"`                    // 需求类型
+	StoryStatus   string          `json:"storyStatus" example:"0"`                  // 需求状态
+	ThisUserList  []StoryUserItem `json:"thisUserList"`                             // 当前状态负责人列表(参与人中story_status等于需求当前状态的用户),无负责人时为空数组
+	StoryLevel    string          `json:"storyLevel" example:"0"`                   // 需求优先级
+	VersionID     *string         `json:"versionId" example:"UUID"`                 // 关联版本ID
+	Version       *string         `json:"version" example:"v1.0.0"`                 // 关联版本号
+	ProjectID     *string         `json:"projectId" example:"UUID"`                 // 关联项目ID
+	ProjectTitle  *string         `json:"projectTitle" example:"crudelis"`          // 关联项目标题
+	ModuleID      *string         `json:"moduleId" example:"UUID"`                  // 关联模块ID
+	ModuleTitle   *string         `json:"moduleTitle" example:"模块名称"`               // 关联模块标题
+	Source        string          `json:"source" example:"0"`                       // 需求来源
+	UpdateDate    *string         `json:"updateDate" example:"2024-01-01 12:00:00"` // 更新时间
+	CreateDate    *string         `json:"createDate" example:"2024-01-01 12:00:00"` // 创建时间
+	UserList      []StoryUserItem `json:"userList"`                                 // 参与人员列表
+	StoryRichText *string         `json:"storyRichText" example:"<p>需求描述</p>"`      // 需求描述(富文本)
+	FileIDs       []string        `json:"fileIds"`                                  // 附件ID数组
+	FileList      []FileResponse  `json:"fileList"`                                 // 附件列表
+	TaskList      []TaskResponse  `json:"taskList"`                                 // 关联任务列表
+	BugList       []BugResponse   `json:"bugList"`                                  // 关联缺陷列表
 }
 
 type FileResponse struct {

@@ -269,32 +269,32 @@ func buildStoryResponses(storys []models.DevStory, permission datapermission.Per
 			}
 		}
 
-		// 当前状态负责人姓名:参与人中 story_status 等于需求当前状态的用户,多个用顿号拼接
-		statusOwnerNames := buildStoryStatusOwnerNames(storyUserMap[story.StoryID], userMap, story.StoryStatus)
+		// 当前状态负责人列表:参与人中 story_status 等于需求当前状态的用户
+		thisUserList := buildStoryThisUserList(storyUserMap[story.StoryID], userMap, story.StoryStatus)
 
 		responses = append(responses, models.StoryResponse{
-			StoryID:          &story.StoryID,
-			StoryTitle:       story.StoryTitle,
-			StoryNum:         story.StoryNum,
-			CreatorName:      &creatorName,
-			CreatorID:        story.CreatorID,
-			StoryType:        intToString(story.StoryType),
-			StoryStatus:      intToString(story.StoryStatus),
-			StatusOwnerNames: statusOwnerNames,
-			StoryLevel:       intToString(story.StoryLevel),
-			VersionID:        story.VersionID,
-			Version:          &version,
-			ProjectID:        &story.ProjectID,
-			ProjectTitle:     &projectTitle,
-			ModuleID:         story.ModuleID,
-			ModuleTitle:      &moduleTitle,
-			Source:           intToString(story.Source),
-			UpdateDate:       models.TimeToStringPtr(story.UpdateDate),
-			CreateDate:       models.TimeToStringPtr(story.CreateDate),
-			UserList:         userList,
-			StoryRichText:    story.StoryRichText,
-			FileIDs:          fileIDs,
-			FileList:         fileList,
+			StoryID:       &story.StoryID,
+			StoryTitle:    story.StoryTitle,
+			StoryNum:      story.StoryNum,
+			CreatorName:   &creatorName,
+			CreatorID:     story.CreatorID,
+			StoryType:     intToString(story.StoryType),
+			StoryStatus:   intToString(story.StoryStatus),
+			ThisUserList:  thisUserList,
+			StoryLevel:    intToString(story.StoryLevel),
+			VersionID:     story.VersionID,
+			Version:       &version,
+			ProjectID:     &story.ProjectID,
+			ProjectTitle:  &projectTitle,
+			ModuleID:      story.ModuleID,
+			ModuleTitle:   &moduleTitle,
+			Source:        intToString(story.Source),
+			UpdateDate:    models.TimeToStringPtr(story.UpdateDate),
+			CreateDate:    models.TimeToStringPtr(story.CreateDate),
+			UserList:      userList,
+			StoryRichText: story.StoryRichText,
+			FileIDs:       fileIDs,
+			FileList:      fileList,
 		})
 	}
 
@@ -319,18 +319,25 @@ func loadStoryUserMap(storyIDs []string) map[string][]models.DevStoryUser {
 	return result
 }
 
-// buildStoryStatusOwnerNames 从参与人关联行中筛选负责指定状态的用户,返回顿号拼接的姓名串。
-func buildStoryStatusOwnerNames(rows []models.DevStoryUser, userMap map[string]models.SysUser, storyStatus int) string {
-	names := make([]string, 0)
+// buildStoryThisUserList 从参与人关联行中筛选负责指定状态的用户,返回 StoryUserItem 列表。
+func buildStoryThisUserList(rows []models.DevStoryUser, userMap map[string]models.SysUser, storyStatus int) []models.StoryUserItem {
+	result := make([]models.StoryUserItem, 0)
 	for _, row := range rows {
 		if row.StoryStatus == nil || *row.StoryStatus != storyStatus {
 			continue
 		}
-		if u, ok := userMap[row.UserID]; ok && u.RealName != nil {
-			names = append(names, *u.RealName)
+		if u, ok := userMap[row.UserID]; ok {
+			item := models.StoryUserItem{
+				UserID:   &u.UserID,
+				Avatar:   u.Avatar,
+				RealName: u.RealName,
+			}
+			status := intToString(storyStatus)
+			item.StoryStatus = &status
+			result = append(result, item)
 		}
 	}
-	return strings.Join(names, "、")
+	return result
 }
 
 func GetStoryByNum(storyNum int, permission datapermission.Permission) (*models.StoryResponse, error) {
@@ -464,30 +471,30 @@ func buildSingleStoryResponse(story *models.DevStory, permission datapermission.
 	}
 
 	return &models.StoryResponse{
-		StoryID:          &story.StoryID,
-		StoryTitle:       story.StoryTitle,
-		StoryNum:         story.StoryNum,
-		CreatorName:      &creatorName,
-		CreatorID:        story.CreatorID,
-		StoryType:        intToString(story.StoryType),
-		StoryStatus:      intToString(story.StoryStatus),
-		StatusOwnerNames: buildStoryStatusOwnerNames(storyUserRows, userMap, story.StoryStatus),
-		StoryLevel:       intToString(story.StoryLevel),
-		VersionID:        story.VersionID,
-		Version:          &version,
-		ProjectID:        &story.ProjectID,
-		ProjectTitle:     &projectTitle,
-		ModuleID:         story.ModuleID,
-		ModuleTitle:      &moduleTitle,
-		Source:           intToString(story.Source),
-		UpdateDate:       models.TimeToStringPtr(story.UpdateDate),
-		CreateDate:       models.TimeToStringPtr(story.CreateDate),
-		UserList:         userList,
-		StoryRichText:    story.StoryRichText,
-		FileIDs:          fileIDs,
-		FileList:         fileList,
-		TaskList:         taskList,
-		BugList:          bugList,
+		StoryID:       &story.StoryID,
+		StoryTitle:    story.StoryTitle,
+		StoryNum:      story.StoryNum,
+		CreatorName:   &creatorName,
+		CreatorID:     story.CreatorID,
+		StoryType:     intToString(story.StoryType),
+		StoryStatus:   intToString(story.StoryStatus),
+		ThisUserList:  buildStoryThisUserList(storyUserRows, userMap, story.StoryStatus),
+		StoryLevel:    intToString(story.StoryLevel),
+		VersionID:     story.VersionID,
+		Version:       &version,
+		ProjectID:     &story.ProjectID,
+		ProjectTitle:  &projectTitle,
+		ModuleID:      story.ModuleID,
+		ModuleTitle:   &moduleTitle,
+		Source:        intToString(story.Source),
+		UpdateDate:    models.TimeToStringPtr(story.UpdateDate),
+		CreateDate:    models.TimeToStringPtr(story.CreateDate),
+		UserList:      userList,
+		StoryRichText: story.StoryRichText,
+		FileIDs:       fileIDs,
+		FileList:      fileList,
+		TaskList:      taskList,
+		BugList:       bugList,
 	}
 }
 
@@ -619,20 +626,26 @@ func saveStoryUserTx(tx *gorm.DB, storyID string, reqs []models.StoryUserRequest
 }
 
 // buildStoryUserRows 校验参与人请求并构造关联表行。
-// 参与人必须处于当前数据范围;负责状态为空或 null 时视为普通参与人;同一用户重复提交时保留最后一条。
+// userId 和 storyStatus 均必填,过滤后至少保留一条有效记录;
+// 按 userId+storyStatus 去重,同一用户可负责不同状态;参与人必须处于当前数据范围。
 func buildStoryUserRows(tx *gorm.DB, storyID string, reqs []models.StoryUserRequest, permission datapermission.Permission) ([]models.DevStoryUser, error) {
 	deduped := make([]models.StoryUserRequest, 0, len(reqs))
-	indexByUserID := make(map[string]int, len(reqs))
+	seen := make(map[string]bool, len(reqs))
 	for _, req := range reqs {
-		if req.UserID == "" {
+		// 过滤无效项:userId 或 storyStatus 为空均跳过
+		if req.UserID == "" || req.StoryStatus == nil || strings.TrimSpace(*req.StoryStatus) == "" {
 			continue
 		}
-		if idx, ok := indexByUserID[req.UserID]; ok {
-			deduped[idx] = req
-		} else {
-			indexByUserID[req.UserID] = len(deduped)
-			deduped = append(deduped, req)
+		// 按 userId+storyStatus 去重,重复项只保留首条
+		dedupKey := req.UserID + ":" + *req.StoryStatus
+		if seen[dedupKey] {
+			continue
 		}
+		seen[dedupKey] = true
+		deduped = append(deduped, req)
+	}
+	if len(deduped) == 0 {
+		return nil, fmt.Errorf("参与人至少需要一条有效记录,且必须填写人员和负责状态")
 	}
 
 	userIDs := make([]string, 0, len(deduped))
@@ -654,21 +667,22 @@ func buildStoryUserRows(tx *gorm.DB, storyID string, reqs []models.StoryUserRequ
 		if _, ok := validUserIDSet[req.UserID]; !ok {
 			continue
 		}
-		row := models.DevStoryUser{
-			ID:         uuid.New().String(),
-			StoryID:    storyID,
-			UserID:     req.UserID,
-			CreateDate: &now,
-			UpdateDate: &now,
+		status, err := parseStringInt(*req.StoryStatus, "storyStatus")
+		if err != nil {
+			return nil, err
 		}
-		if req.StoryStatus != nil && strings.TrimSpace(*req.StoryStatus) != "" {
-			status, err := parseStringInt(*req.StoryStatus, "storyStatus")
-			if err != nil {
-				return nil, err
-			}
-			row.StoryStatus = &status
+		row := models.DevStoryUser{
+			ID:          uuid.New().String(),
+			StoryID:     storyID,
+			UserID:      req.UserID,
+			StoryStatus: &status,
+			CreateDate:  &now,
+			UpdateDate:  &now,
 		}
 		rows = append(rows, row)
+	}
+	if len(rows) == 0 {
+		return nil, fmt.Errorf("参与人至少需要一条有效记录,且必须填写人员和负责状态")
 	}
 	return rows, nil
 }

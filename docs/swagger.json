@@ -34026,6 +34026,13 @@
                         "$ref": "#/definitions/models.TaskResponse"
                     }
                 },
+                "thisUserList": {
+                    "description": "当前状态负责人列表(参与人中story_status等于需求当前状态的用户),无负责人时为空数组",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.StoryUserItem"
+                    }
+                },
                 "updateDate": {
                     "description": "更新时间",
                     "type": "string",
