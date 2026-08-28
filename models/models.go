@@ -232,7 +232,6 @@ type DevStory struct {
 	ModuleID      *string    `gorm:"column:module_id;type:char(36)" json:"moduleId"`
 	Source        int        `gorm:"column:source;type:tinyint;default:0" json:"source"`
 	FileIDs       *string    `gorm:"column:file_ids;type:text" json:"fileIds"`
-	UserIDs       *string    `gorm:"column:user_ids;type:varchar(128)" json:"userIds"`
 	CreateDate    *time.Time `gorm:"column:create_date" json:"createDate"`
 	UpdateDate    *time.Time `gorm:"column:update_date" json:"updateDate"`
 	DelFlag       int        `gorm:"column:del_flag;type:tinyint;default:0" json:"delFlag"`
@@ -240,6 +239,21 @@ type DevStory struct {
 
 func (DevStory) TableName() string {
 	return "dev_story"
+}
+
+// DevStoryUser 需求参与人关联表,替代原 dev_story.user_ids 逗号拼接存储;
+// story_status 记录参与人负责的需求状态(字典STORY_STATUS值),NULL 表示普通参与人。
+type DevStoryUser struct {
+	ID          string     `gorm:"column:id;type:char(36);primaryKey" json:"id"`
+	StoryID     string     `gorm:"column:story_id;type:char(36)" json:"storyId"`
+	UserID      string     `gorm:"column:user_id;type:char(36)" json:"userId"`
+	StoryStatus *int       `gorm:"column:story_status;type:tinyint" json:"storyStatus"`
+	CreateDate  *time.Time `gorm:"column:create_date" json:"createDate"`
+	UpdateDate  *time.Time `gorm:"column:update_date" json:"updateDate"`
+}
+
+func (DevStoryUser) TableName() string {
+	return "dev_story_user"
 }
 
 type DevTask struct {

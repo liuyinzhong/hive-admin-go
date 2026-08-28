@@ -176,7 +176,7 @@ func TestApplyInvalidOwnerColumnFailsClosed(t *testing.T) {
 	}
 }
 
-func TestApplyCSVIncludesParticipantUsers(t *testing.T) {
+func TestApplyWithUserTableIncludesParticipantUsers(t *testing.T) {
 	db, err := gorm.Open(mysql.New(mysql.Config{
 		DSN:                       "user:pass@tcp(127.0.0.1:3306)/hive?charset=utf8mb4&parseTime=True&loc=Local",
 		SkipInitializeWithVersion: true,
@@ -186,13 +186,13 @@ func TestApplyCSVIncludesParticipantUsers(t *testing.T) {
 	}
 
 	permission := Permission{UserID: "user-1", IncludeSelf: true, DepartmentIDs: []string{"dept-a"}}
-	query := permission.ApplyWithCSVUsers(db.Table("dev_story"), []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"})
+	query := permission.ApplyWithUserTable(db.Table("dev_story"), []string{"dev_story.creator_id"}, "dev_story.story_id", "dev_story_user", "story_id", "user_id")
 	statement := query.Find(&[]struct{}{}).Statement
 	sql := statement.SQL.String()
 	for _, fragment := range []string{
 		"dev_story.creator_id = ?",
-		"FIND_IN_SET(?, dev_story.user_ids) > 0",
-		"FIND_IN_SET(data_permission_user_dept.user_id, dev_story.user_ids) > 0",
+		"EXISTS (SELECT 1 FROM dev_story_user WHERE dev_story_user.story_id = dev_story.story_id AND dev_story_user.user_id = ?)",
+		"EXISTS (SELECT 1 FROM dev_story_user JOIN sys_user_dept AS data_permission_user_dept ON data_permission_user_dept.user_id = dev_story_user.user_id WHERE dev_story_user.story_id = dev_story.story_id AND data_permission_user_dept.dept_id IN (?) AND data_permission_user_dept.del_flag = 0)",
 	} {
 		if !strings.Contains(sql, fragment) {
 			t.Fatalf("SQL %q does not contain %q", sql, fragment)

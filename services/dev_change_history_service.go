@@ -120,7 +120,7 @@ func ensureDevBusinessAccess(businessID string, businessType int, permission dat
 	switch businessType {
 	case 0:
 		query = database.DB.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = ?", businessID, 0)
-		query = permission.ApplyWithCSVUsers(query, []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"})
+		query = applyStoryPermission(query, permission)
 	case 10:
 		query = database.DB.Model(&models.DevTask{}).Where("task_id = ? AND del_flag = ?", businessID, 0)
 		query = permission.Apply(query, "dev_task.creator_id", "dev_task.user_id")

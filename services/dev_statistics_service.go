@@ -77,7 +77,7 @@ func GetWorkspaceEnum(permission datapermission.Permission) (*models.WorkspaceEn
 	var taskTotal, taskActive int64
 	var bugTotal, bugActive int64
 
-	storyQuery := permission.ApplyWithCSVUsers(database.DB.Model(&models.DevStory{}), []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"})
+	storyQuery := applyStoryPermission(database.DB.Model(&models.DevStory{}), permission)
 	taskQuery := permission.Apply(database.DB.Model(&models.DevTask{}), "dev_task.creator_id", "dev_task.user_id")
 	bugQuery := permission.Apply(database.DB.Model(&models.DevBug{}), "dev_bug.creator_id", "dev_bug.user_id")
 

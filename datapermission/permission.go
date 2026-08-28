@@ -144,21 +144,56 @@ func (r *Resolver) Resolve(ctx context.Context, userID string) (Permission, erro
 }
 
 func (p Permission) Apply(query *gorm.DB, ownerColumns ...string) *gorm.DB {
-	return p.apply(query, ownerColumns, nil)
+	return p.apply(query, ownerColumns)
 }
 
-func (p Permission) ApplyWithCSVUsers(query *gorm.DB, ownerColumns, csvUserColumns []string) *gorm.DB {
-	return p.apply(query, ownerColumns, csvUserColumns)
-}
-
-func (p Permission) apply(query *gorm.DB, ownerColumns, csvUserColumns []string) *gorm.DB {
+// ApplyWithUserTable 基于独立关联表的参与人数据权限过滤。
+// ownerColumns 为业务表归属列(如创建人列)；businessKeyColumn 为业务表中被关联的列(如 dev_story.story_id)；
+// userTable 为关联表名(如 dev_story_user)；relationColumn 为关联表中指向 businessKeyColumn 的列；
+// userColumn 为关联表中存放参与用户ID的列。
+func (p Permission) ApplyWithUserTable(query *gorm.DB, ownerColumns []string, businessKeyColumn, userTable, relationColumn, userColumn string) *gorm.DB {
 	if query == nil || p.All {
 		return query
 	}
-	if len(ownerColumns) == 0 && len(csvUserColumns) == 0 {
+	identifiers := append([]string{businessKeyColumn, userTable, relationColumn, userColumn}, ownerColumns...)
+	for _, identifier := range identifiers {
+		if !ownerColumnPattern.MatchString(identifier) {
+			return query.Where("1 = 0")
+		}
+	}
+
+	conditions := make([]string, 0, len(ownerColumns)*2)
+	args := make([]interface{}, 0, len(ownerColumns)*2)
+	if p.IncludeSelf && p.UserID != "" {
+		for _, column := range ownerColumns {
+			conditions = append(conditions, column+" = ?")
+			args = append(args, p.UserID)
+		}
+		conditions = append(conditions, "EXISTS (SELECT 1 FROM "+userTable+" WHERE "+userTable+"."+relationColumn+" = "+businessKeyColumn+" AND "+userTable+"."+userColumn+" = ?)")
+		args = append(args, p.UserID)
+	}
+	if len(p.DepartmentIDs) > 0 {
+		for _, column := range ownerColumns {
+			conditions = append(conditions, "EXISTS (SELECT 1 FROM sys_user_dept AS data_permission_user_dept WHERE data_permission_user_dept.user_id = "+column+" AND data_permission_user_dept.dept_id IN ? AND data_permission_user_dept.del_flag = 0)")
+			args = append(args, p.DepartmentIDs)
+		}
+		conditions = append(conditions, "EXISTS (SELECT 1 FROM "+userTable+" JOIN sys_user_dept AS data_permission_user_dept ON data_permission_user_dept.user_id = "+userTable+"."+userColumn+" WHERE "+userTable+"."+relationColumn+" = "+businessKeyColumn+" AND data_permission_user_dept.dept_id IN ? AND data_permission_user_dept.del_flag = 0)")
+		args = append(args, p.DepartmentIDs)
+	}
+	if len(conditions) == 0 {
 		return query.Where("1 = 0")
 	}
-	for _, column := range append(append([]string{}, ownerColumns...), csvUserColumns...) {
+	return query.Where("("+strings.Join(conditions, " OR ")+")", args...)
+}
+
+func (p Permission) apply(query *gorm.DB, ownerColumns []string) *gorm.DB {
+	if query == nil || p.All {
+		return query
+	}
+	if len(ownerColumns) == 0 {
+		return query.Where("1 = 0")
+	}
+	for _, column := range ownerColumns {
 		if !ownerColumnPattern.MatchString(column) {
 			return query.Where("1 = 0")
 		}
@@ -171,18 +206,10 @@ func (p Permission) apply(query *gorm.DB, ownerColumns, csvUserColumns []string)
 			conditions = append(conditions, column+" = ?")
 			args = append(args, p.UserID)
 		}
-		for _, column := range csvUserColumns {
-			conditions = append(conditions, "FIND_IN_SET(?, "+column+") > 0")
-			args = append(args, p.UserID)
-		}
 	}
 	if len(p.DepartmentIDs) > 0 {
 		for _, column := range ownerColumns {
 			conditions = append(conditions, "EXISTS (SELECT 1 FROM sys_user_dept AS data_permission_user_dept WHERE data_permission_user_dept.user_id = "+column+" AND data_permission_user_dept.dept_id IN ? AND data_permission_user_dept.del_flag = 0)")
-			args = append(args, p.DepartmentIDs)
-		}
-		for _, column := range csvUserColumns {
-			conditions = append(conditions, "EXISTS (SELECT 1 FROM sys_user_dept AS data_permission_user_dept WHERE FIND_IN_SET(data_permission_user_dept.user_id, "+column+") > 0 AND data_permission_user_dept.dept_id IN ? AND data_permission_user_dept.del_flag = 0)")
 			args = append(args, p.DepartmentIDs)
 		}
 	}

@@ -10,7 +10,7 @@ import (
 
 // GetDictTree 获取字典树
 // @Summary 获取字典树
-// @Description 获取字典树结构，支持按名称、值、类型筛选，支持多字段排序
+// @Description 获取字典树结构，支持按名称、值、类型筛选，支持多字段排序。数据权限：全局主数据，由接口权限码控制访问，不按创建人过滤
 // @Tags 系统管理/字典管理
 // @Accept json
 // @Produce json
@@ -31,6 +31,26 @@ func (ctrl *SystemController) GetDictTree(c *gin.Context) {
 	}
 
 	result, err := ctrl.dictService.GetDictTree(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
+// GetDictValues 公共字典树查询
+// @Summary 公共字典树查询
+// @Description 返回全部启用状态的字典树（status=1），按 value 升序，供全系统本地字典消费。数据权限：全局主数据，公开查询接口（仅需登录），不按创建人过滤
+// @Tags 系统管理/字典管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} models.Response{data=[]models.DictTreeResponse} "获取成功"
+// @Failure 401 {object} map[string]interface{} "未授权"
+// @Router /system/dicts/values [post]
+func (ctrl *SystemController) GetDictValues(c *gin.Context) {
+	result, err := ctrl.dictService.GetDictValues()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
 		return

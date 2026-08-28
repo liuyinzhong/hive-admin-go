@@ -118,6 +118,8 @@ func registerSystemRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 			dicts.PUT("/:id", permissionGuard.Require("system:dict:update"), systemController.UpdateDict)
 			dicts.PUT("/:id/status", permissionGuard.Require("system:dict:status"), systemController.UpdateDictStatus)
 			dicts.DELETE("", permissionGuard.Require("system:dict:delete"), systemController.DeleteDicts)
+			// 公共字典树查询:需登录但无接口权限
+			dicts.POST("/values", systemController.GetDictValues)
 		}
 
 		params := system.Group("/params")

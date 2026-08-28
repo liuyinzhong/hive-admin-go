@@ -24,6 +24,10 @@ storyStatus、taskStatus、bugStatus 和 bugConfirmStatus 以数字字符串在�
 
 局部字段接口只允许修改 userIds、storyType、storyLevel、source。只有 storyStatus=0 的待评审需求可以删除。
 
+需求流转未填写流转说明时，后端自动写入默认内容"流转至「目标状态名称」，请及时跟进"（状态名称取 STORY_STATUS 字典），保证变更记录始终有正文；填写了说明则以填写内容为准。
+
+需求列表与详情响应均返回 `statusOwnerNames` 字段：当前需求状态下负责人的姓名聚合（参与人中 `story_status` 等于需求当前 `story_status` 的用户，多个用顿号分隔，无负责人时为空串），前端列表"负责人"列和详情"当前负责人"项直接消费该字段。
+
 ## 任务
 
 ### DEV-ITEM-005 任务连接需求、执行人和工时

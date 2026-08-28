@@ -13,7 +13,7 @@ import (
 
 // GetStorys 获取需求列表
 // @Summary 获取需求列表
-// @Description 按创建人或参与人及当前角色数据范围分页获取需求
+// @Description 数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤，参与人含负责状态负责人
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -74,7 +74,7 @@ func (dc *DevController) GetStorys(c *gin.Context) {
 
 // GetAllStorys 获取所有需求
 // @Summary 获取所有需求
-// @Description 按创建人或参与人及当前角色数据范围获取所有需求（不分页）
+// @Description 数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤，参与人含负责状态负责人
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -117,7 +117,7 @@ func (dc *DevController) GetAllStorys(c *gin.Context) {
 
 // GetStory 获取需求详情
 // @Summary 获取需求详情
-// @Description 按创建人或参与人及当前角色数据范围获取需求详情，关联任务和缺陷继续按各自范围过滤
+// @Description 数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤，参与人含负责状态负责人；关联任务和缺陷继续按各自范围过滤
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -145,7 +145,7 @@ func (dc *DevController) GetStory(c *gin.Context) {
 
 // CreateStory 创建需求
 // @Summary 创建需求
-// @Description 创建新需求；参与人、附件和关联版本必须处于当前数据范围
+// @Description 创建新需求；参与人及负责状态、附件和关联版本必须处于当前数据范围，参与人写入 dev_story_user 关联表
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -174,7 +174,7 @@ func (dc *DevController) CreateStory(c *gin.Context) {
 
 // CreateStorys 批量创建需求
 // @Summary 批量创建需求
-// @Description 批量创建需求；每条记录的参与人、附件和关联版本均须处于当前数据范围
+// @Description 批量创建需求；每条记录的参与人及负责状态、附件和关联版本均须处于当前数据范围，参与人写入 dev_story_user 关联表
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -203,7 +203,7 @@ func (dc *DevController) CreateStorys(c *gin.Context) {
 
 // UpdateStory 更新需求
 // @Summary 更新需求
-// @Description 按当前数据范围更新需求；参与人、附件和关联版本不得越界
+// @Description 数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；参与人及负责状态、附件和关联版本不得越界
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -235,7 +235,7 @@ func (dc *DevController) UpdateStory(c *gin.Context) {
 
 // UpdateStoryField 更新需求字段
 // @Summary 更新需求字段
-// @Description 按当前数据范围更新需求单个字段；修改参与人时校验目标用户范围
+// @Description 数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；仅允许行内编辑 storyType、storyLevel、source，参与人及负责状态请走更新需求接口
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -267,7 +267,7 @@ func (dc *DevController) UpdateStoryField(c *gin.Context) {
 
 // UpdateStoryNext 需求流转状态
 // @Summary 需求流转状态
-// @Description 按当前数据范围更新需求状态
+// @Description 数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；流转成功后向负责新状态的参与人推送需求管理菜单未读消息
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json
@@ -299,7 +299,7 @@ func (dc *DevController) UpdateStoryNext(c *gin.Context) {
 
 // DeleteStorys 删除需求
 // @Summary 删除需求
-// @Description 按当前数据范围批量删除需求；任一记录不存在或越界时整批失败
+// @Description 数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；任一记录不存在或越界时整批失败，删除时同步清理 dev_story_user 关联行
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json

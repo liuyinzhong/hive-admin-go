@@ -91,7 +91,7 @@ func validateDevStoryReference(tx *gorm.DB, storyID *string, permission dataperm
 		return fmt.Errorf("需求ID格式错误")
 	}
 	query := tx.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = 0", *storyID)
-	query = permission.ApplyWithCSVUsers(query, []string{"dev_story.creator_id"}, []string{"dev_story.user_ids"})
+	query = applyStoryPermission(query, permission)
 	var count int64
 	if err := query.Count(&count).Error; err != nil {
 		return err
@@ -115,22 +115,6 @@ func dataPermissionStringValue(value interface{}, label string) (string, error) 
 	result, ok := value.(string)
 	if !ok || result == "" {
 		return "", fmt.Errorf("%s必须是非空字符串", label)
-	}
-	return result, nil
-}
-
-func dataPermissionStringSlice(value interface{}, label string) ([]string, error) {
-	values, ok := value.([]interface{})
-	if !ok {
-		return nil, fmt.Errorf("%s必须是字符串数组", label)
-	}
-	result := make([]string, 0, len(values))
-	for _, value := range values {
-		item, ok := value.(string)
-		if !ok {
-			return nil, fmt.Errorf("%s必须是字符串数组", label)
-		}
-		result = append(result, item)
 	}
 	return result, nil
 }

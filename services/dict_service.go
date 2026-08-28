@@ -41,6 +41,22 @@ func (s *DictService) GetDictTree(req models.DictListRequest) ([]*models.DictTre
 	return tree, nil
 }
 
+// GetDictValues 公共字典树查询
+// 仅返回 status=1 && del_flag=0 的字典，按 value 升序排列，供全系统本地字典消费
+func (s *DictService) GetDictValues() ([]*models.DictTreeResponse, error) {
+	var dicts []models.SysDict
+	err := database.DB.Model(&models.SysDict{}).
+		Where("del_flag = 0 AND status = 1").
+		Find(&dicts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	tree := s.buildDictTree(dicts)
+	s.sortDictTree(tree, []dictSortRule{{field: "value", direction: "asc"}}, 0)
+	return tree, nil
+}
+
 func (s *DictService) CreateDict(req models.CreateDictRequest) error {
 	var count int64
 	database.DB.Model(&models.SysDict{}).Where("type = ? AND label = ? AND del_flag = 0", req.Type, req.Label).Count(&count)

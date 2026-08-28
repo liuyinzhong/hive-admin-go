@@ -3016,7 +3016,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按创建人或参与人及当前角色数据范围分页获取需求",
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤，参与人含负责状态负责人",
                 "consumes": [
                     "application/json"
                 ],
@@ -3138,7 +3138,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "创建新需求；参与人、附件和关联版本必须处于当前数据范围",
+                "description": "创建新需求；参与人及负责状态、附件和关联版本必须处于当前数据范围，参与人写入 dev_story_user 关联表",
                 "consumes": [
                     "application/json"
                 ],
@@ -3195,7 +3195,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按当前数据范围批量删除需求；任一记录不存在或越界时整批失败",
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；任一记录不存在或越界时整批失败，删除时同步清理 dev_story_user 关联行",
                 "consumes": [
                     "application/json"
                 ],
@@ -3257,7 +3257,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按创建人或参与人及当前角色数据范围获取所有需求（不分页）",
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤，参与人含负责状态负责人",
                 "consumes": [
                     "application/json"
                 ],
@@ -3345,7 +3345,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "批量创建需求；每条记录的参与人、附件和关联版本均须处于当前数据范围",
+                "description": "批量创建需求；每条记录的参与人及负责状态、附件和关联版本均须处于当前数据范围，参与人写入 dev_story_user 关联表",
                 "consumes": [
                     "application/json"
                 ],
@@ -3407,7 +3407,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按当前数据范围更新需求；参与人、附件和关联版本不得越界",
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；参与人及负责状态、附件和关联版本不得越界",
                 "consumes": [
                     "application/json"
                 ],
@@ -3473,7 +3473,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按当前数据范围更新需求单个字段；修改参与人时校验目标用户范围",
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；仅允许行内编辑 storyType、storyLevel、source，参与人及负责状态请走更新需求接口",
                 "consumes": [
                     "application/json"
                 ],
@@ -3539,7 +3539,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按当前数据范围更新需求状态",
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；流转成功后向负责新状态的参与人推送需求管理菜单未读消息",
                 "consumes": [
                     "application/json"
                 ],
@@ -3605,7 +3605,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按创建人或参与人及当前角色数据范围获取需求详情，关联任务和缺陷继续按各自范围过滤",
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤，参与人含负责状态负责人；关联任务和缺陷继续按各自范围过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -18403,7 +18403,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "获取字典树结构，支持按名称、值、类型筛选，支持多字段排序",
+                "description": "获取字典树结构，支持按名称、值、类型筛选，支持多字段排序。数据权限：全局主数据，由接口权限码控制访问，不按创建人过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -18590,6 +18590,56 @@ const docTemplate = `{
                         "description": "无接口访问权限",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/dicts/values": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "返回全部启用状态的字典树（status=1），按 value 升序，供全系统本地字典消费。数据权限：全局主数据，公开查询接口（仅需登录），不按创建人过滤",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/字典管理"
+                ],
+                "summary": "公共字典树查询",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.DictTreeResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -25630,15 +25680,12 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0"
                 },
-                "userIds": {
-                    "description": "参与人员id数组",
+                "storyUsers": {
+                    "description": "参与人员及负责状态",
                     "type": "array",
                     "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "[\"UUID\"]"
-                    ]
+                        "$ref": "#/definitions/models.StoryUserRequest"
+                    }
                 },
                 "versionId": {
                     "description": "关联版本id",
@@ -33986,13 +34033,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2024-01-01 12:00:00"
                 },
-                "userIds": {
-                    "description": "参与人员ID数组",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "userList": {
                     "description": "参与人员列表",
                     "type": "array",
@@ -34025,8 +34065,31 @@ const docTemplate = `{
                     "type": "string",
                     "example": "张三"
                 },
+                "storyStatus": {
+                    "description": "负责的需求状态,字典STORY_STATUS值,null=普通参与人",
+                    "type": "string",
+                    "example": "0"
+                },
                 "userId": {
                     "description": "用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                }
+            }
+        },
+        "models.StoryUserRequest": {
+            "type": "object",
+            "required": [
+                "userId"
+            ],
+            "properties": {
+                "storyStatus": {
+                    "description": "负责的需求状态,字典STORY_STATUS值,空=普通参与人",
+                    "type": "string",
+                    "example": "0"
+                },
+                "userId": {
+                    "description": "参与人员ID",
                     "type": "string",
                     "example": "UUID"
                 }
@@ -35070,11 +35133,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0"
                 },
-                "userIds": {
-                    "description": "参与人员ID数组",
+                "storyUsers": {
+                    "description": "参与人员及负责状态",
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/models.StoryUserRequest"
                     }
                 },
                 "versionId": {

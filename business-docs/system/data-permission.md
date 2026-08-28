@@ -71,6 +71,7 @@ Bearer Token 认证
 | `/api/system/operationLogs/**`、`loginLogs/**` | 角色数据范围 | 按日志 `user_id`；未认证或空用户日志仅 `all` 可见 |
 | `/api/system/roles/**` | 全局授权配置 | 列表/详情用于授权配置；角色创建、更新、启停、删除额外要求操作者为 `all` |
 | `/api/system/menus/**`、`externalPages/**`、`depts/**`、`dicts/**`、`params/**`、`payChannels/**` | 全局主数据 | 全系统共享配置，由各自原子权限和业务校验控制 |
+| `POST /api/system/dicts/values`、`POST /api/system/params/values` | 公开接口 | 公共字典树和公开参数批量查询，仅需登录、不要求字典或参数管理权限（SYS-CFG-006、SYS-CFG-012） |
 | `/api/dev/projects/**`、`modules/**` | 全局主数据 | 研发公共规划维度，不按创建人拆分 |
 | `/api/dev/versions/**` | 角色数据范围 | 按版本 `creator_id`，包括 latest、all、详情和写动作 |
 | `/api/dev/storys/**` | 角色数据范围 | 创建人或参与人；参与人使用现有 `user_ids` |
