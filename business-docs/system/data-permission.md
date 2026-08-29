@@ -29,7 +29,7 @@ Bearer Token 认证
 - **SYS-DATA-010** 一个用户拥有多个有效角色时取范围并集；任一角色为 `all` 时结果为全部数据。`none` 只是不贡献范围，不抵消其它角色。
 - **SYS-DATA-011** `is_sys=1` 的启用系统内置用户直接取得全部数据范围。普通用户不能通过用户名、角色名称或前端标记获得该特例。
 - **SYS-DATA-012** 部门范围使用当前有效的 `sys_user_dept`、`sys_dept`、`sys_user_role`、`sys_role` 和 `sys_role_dept` 关系实时计算，不把部门快照复制到每张业务表。用户调岗、角色停用或自定义部门调整会影响后续请求。
-- **SYS-DATA-013** 业务记录以 `creator_id`、`user_id`、`operator_id` 等明确归属用户字段建立范围；多归属字段取 OR。需求参与人沿用现有逗号分隔字段并参与可见性判断。
+- **SYS-DATA-013** 业务记录以 `creator_id`、`user_id`、`operator_id` 等明确归属用户字段建立范围；多归属字段取 OR。需求参与人通过独立关联表 `dev_story_user` 的 EXISTS 子查询参与可见性判断。
 - **SYS-DATA-014** 归属字段为空且无法可靠推断的历史记录只对 `all` 可见。禁止把空归属解释为公共数据。
 - **SYS-DATA-015** `none` 只控制记录范围，不撤销已经授予的创建动作权限。若角色拥有创建权限但范围为 `none`，其新建记录仍按当前用户落归属，但该用户之后不能仅凭 `none` 查询该记录；角色配置应同时核对动作权限和数据范围。
 
@@ -73,8 +73,9 @@ Bearer Token 认证
 | `/api/system/menus/**`、`externalPages/**`、`depts/**`、`dicts/**`、`params/**`、`payChannels/**` | 全局主数据 | 全系统共享配置，由各自原子权限和业务校验控制 |
 | `POST /api/system/dicts/values`、`POST /api/system/params/values` | 公开接口 | 公共字典树和公开参数批量查询，仅需登录、不要求字典或参数管理权限（SYS-CFG-006、SYS-CFG-012） |
 | `/api/dev/projects/**`、`modules/**` | 全局主数据 | 研发公共规划维度，不按创建人拆分 |
+| `/api/dev/project-users` | 公开接口（查询）/ 接口权限（写入） | 登录即可查看项目用户；全量保存需 `dev:project:user` 权限码，不做记录级数据权限过滤 |
 | `/api/dev/versions/**` | 角色数据范围 | 按版本 `creator_id`，包括 latest、all、详情和写动作 |
-| `/api/dev/storys/**` | 角色数据范围 | 创建人或参与人；参与人使用现有 `user_ids` |
+| `/api/dev/storys/**` | 角色数据范围 | 创建人或参与人；参与人通过 `dev_story_user` 关联表 EXISTS 子查询过滤 |
 | `/api/dev/tasks/**` | 角色数据范围 | 创建人或执行人；异步导出重新解析创建者当前范围 |
 | `/api/dev/bugs/**` | 角色数据范围 | 创建人或处理人 |
 | `/api/dev/changeHistory` | 来源继承 | 按需求、任务、缺陷或版本父对象校验 |

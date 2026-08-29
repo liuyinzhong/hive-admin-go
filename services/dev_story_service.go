@@ -603,7 +603,7 @@ func createStoryTx(tx *gorm.DB, req *models.CreateStoryRequest, creatorID string
 		return err
 	}
 
-	if err := saveStoryUserTx(tx, storyID, req.StoryUsers, permission); err != nil {
+	if err := saveStoryUserTx(tx, storyID, req.UserList, permission); err != nil {
 		return err
 	}
 
@@ -793,7 +793,7 @@ func UpdateStory(storyID string, req *models.UpdateStoryRequest, creatorID strin
 		if result.RowsAffected != 1 {
 			return fmt.Errorf("需求不存在或无权操作")
 		}
-		return saveStoryUserTx(tx, storyID, req.StoryUsers, permission)
+		return saveStoryUserTx(tx, storyID, req.UserList, permission)
 	})
 }
 

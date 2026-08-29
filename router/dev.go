@@ -23,6 +23,12 @@ func registerDevRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 			projects.PUT("/:projectId", permissionGuard.Require("dev:project:update"), devController.UpdateProject)
 		}
 
+		projectUsers := dev.Group("/project-users")
+		{
+			projectUsers.GET("", devController.GetProjectUsers)
+			projectUsers.PUT("", permissionGuard.Require("dev:project:user"), devController.SaveProjectUsers)
+		}
+
 		modules := dev.Group("/modules")
 		{
 			modules.GET("", permissionGuard.Require("dev:module:list"), devController.GetModules)

@@ -2761,6 +2761,122 @@
                 }
             }
         },
+        "/dev/project-users": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "数据权限：公开接口,登录即可查看;返回项目成员及负责状态,不做记录级数据权限过滤",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "开发管理/项目用户"
+                ],
+                "summary": "获取项目用户列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "项目ID",
+                        "name": "projectId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.ProjectUserResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "数据权限：需要 dev:project:user 权限码;全删全插替换项目成员及负责状态,移除用户时同步清理状态配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "开发管理/项目用户"
+                ],
+                "summary": "全量保存项目用户",
+                "parameters": [
+                    {
+                        "description": "项目用户信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveProjectUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/dev/projects": {
             "get": {
                 "security": [
@@ -25678,7 +25794,7 @@
                     "type": "string",
                     "example": "0"
                 },
-                "storyUsers": {
+                "userList": {
                     "description": "参与人员及负责状态",
                     "type": "array",
                     "items": {
@@ -31523,6 +31639,49 @@
                 }
             }
         },
+        "models.ProjectUserItemReq": {
+            "type": "object",
+            "required": [
+                "userId"
+            ],
+            "properties": {
+                "storyStatus": {
+                    "description": "负责状态,null=普通成员",
+                    "type": "string",
+                    "example": "0,1"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                }
+            }
+        },
+        "models.ProjectUserResponse": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "用户头像",
+                    "type": "string",
+                    "example": "https://xxx/a.jpg"
+                },
+                "realName": {
+                    "description": "真实姓名",
+                    "type": "string",
+                    "example": "张三"
+                },
+                "storyStatus": {
+                    "description": "负责状态(逗号拼接STORY_STATUS值),null=普通成员",
+                    "type": "string",
+                    "example": "0,1"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                }
+            }
+        },
         "models.PublicExternalPageResponse": {
             "type": "object",
             "properties": {
@@ -33333,6 +33492,26 @@
                 }
             }
         },
+        "models.SaveProjectUserRequest": {
+            "type": "object",
+            "required": [
+                "projectId"
+            ],
+            "properties": {
+                "projectId": {
+                    "description": "项目ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "users": {
+                    "description": "用户列表(含负责状态)",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ProjectUserItemReq"
+                    }
+                }
+            }
+        },
         "models.SaveScheduleRequest": {
             "type": "object",
             "required": [
@@ -35138,7 +35317,7 @@
                     "type": "string",
                     "example": "0"
                 },
-                "storyUsers": {
+                "userList": {
                     "description": "参与人员及负责状态",
                     "type": "array",
                     "items": {

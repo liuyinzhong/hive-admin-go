@@ -972,7 +972,7 @@ definitions:
         description: 需求类型,字典STORY_TYPE值
         example: "0"
         type: string
-      storyUsers:
+      userList:
         description: 参与人员及负责状态
         items:
           $ref: '#/definitions/models.StoryUserRequest'
@@ -5332,6 +5332,38 @@ definitions:
         example: crudelis
         type: string
     type: object
+  models.ProjectUserItemReq:
+    properties:
+      storyStatus:
+        description: 负责状态,null=普通成员
+        example: 0,1
+        type: string
+      userId:
+        description: 用户ID
+        example: UUID
+        type: string
+    required:
+    - userId
+    type: object
+  models.ProjectUserResponse:
+    properties:
+      avatar:
+        description: 用户头像
+        example: https://xxx/a.jpg
+        type: string
+      realName:
+        description: 真实姓名
+        example: 张三
+        type: string
+      storyStatus:
+        description: 负责状态(逗号拼接STORY_STATUS值),null=普通成员
+        example: 0,1
+        type: string
+      userId:
+        description: 用户ID
+        example: UUID
+        type: string
+    type: object
   models.PublicExternalPageResponse:
     properties:
       name:
@@ -6682,6 +6714,20 @@ definitions:
     required:
     - productName
     - productType
+    type: object
+  models.SaveProjectUserRequest:
+    properties:
+      projectId:
+        description: 项目ID
+        example: UUID
+        type: string
+      users:
+        description: 用户列表(含负责状态)
+        items:
+          $ref: '#/definitions/models.ProjectUserItemReq'
+        type: array
+    required:
+    - projectId
     type: object
   models.SaveScheduleRequest:
     properties:
@@ -8037,7 +8083,7 @@ definitions:
         description: 需求类型
         example: "0"
         type: string
-      storyUsers:
+      userList:
         description: 参与人员及负责状态
         items:
           $ref: '#/definitions/models.StoryUserRequest'
@@ -10700,6 +10746,78 @@ paths:
       summary: 更新模块
       tags:
       - 开发管理/模块管理
+  /dev/project-users:
+    get:
+      consumes:
+      - application/json
+      description: 数据权限：公开接口,登录即可查看;返回项目成员及负责状态,不做记录级数据权限过滤
+      parameters:
+      - description: 项目ID
+        in: query
+        name: projectId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.ProjectUserResponse'
+                  type: array
+              type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取项目用户列表
+      tags:
+      - 开发管理/项目用户
+    put:
+      consumes:
+      - application/json
+      description: 数据权限：需要 dev:project:user 权限码;全删全插替换项目成员及负责状态,移除用户时同步清理状态配置
+      parameters:
+      - description: 项目用户信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveProjectUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 全量保存项目用户
+      tags:
+      - 开发管理/项目用户
   /dev/projects:
     get:
       consumes:

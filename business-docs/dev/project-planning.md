@@ -20,7 +20,7 @@
 
 ### DEV-PLAN-004 发布状态由研发字典表达
 
-releaseStatus 以数字字符串在接口中传输，显示名称来自 RELEASE_STATUS 字典。创建、整体编辑和“流转”接口都可以写入状态；当前后端未维护固定状态流转矩阵，不能仅依据接口名假设只能前进一个状态。
+releaseStatus 以数字字符串在接口中传输，显示名称来自 RELEASE\_STATUS 字典。创建、整体编辑和“流转”接口都可以写入状态；当前后端未维护固定状态流转矩阵，不能仅依据接口名假设只能前进一个状态。
 
 ### DEV-PLAN-005 版本流转追加变更记录
 
@@ -34,16 +34,35 @@ releaseStatus 以数字字符串在接口中传输，显示名称来自 RELEASE_
 
 项目和模块是研发公共规划主数据，不按创建人应用角色部门范围，仍由各自原子权限控制。版本列表、全量选项、最新版本、详情、修改、流转和删除按版本 `creator_id` 使用当前角色数据范围；跨范围版本不能通过 ID 直接读取或写入。
 
+### DEV-PLAN-008 项目用户统一管理成员与状态负责人
+
+项目用户表 `dev_project_user` 以 `project_id + user_id` 唯一约束管理项目成员，`story_status` 字段存储逗号拼接的 STORY\_STATUS 字典值（如 `"0,1"`），NULL 表示普通成员无负责状态。同一用户可负责多个状态。
+
+项目用户管理接口采用全删全插模式：PUT 请求提交完整用户列表，后端先删除该项目所有行再插入新行。移除用户即同步清除其状态负责人配置，无需额外联动代码。
+
+项目用户不做记录级数据权限过滤：登录用户可见任意项目的成员列表；写入（全量保存）需要 `dev:project:user` 权限码。
+
+需求参与人、缺陷修复人、任务执行人的候选范围均改为项目用户。需求创建选择项目后，前端从 `dev_project_user` 中 `story_status` 非空的记录拆分逗号字符串，映射为 `storyUsers` 数组自动填充参与人及负责状态；编辑已有需求时不触发自动填充。已存 `dev_story_user` 参与人数据与项目成员为弱约束关系：候选下拉只展示项目用户，但已存参与人数据即使不在项目用户表中也不丢失。
+
 ## 权限和接口
 
-- 项目：dev:project:list、create、detail、update。
-- 模块：dev:module:list、create、detail、update、delete。
-- 版本：dev:version:list、latest、create、advance、detail、update、delete。
-- 路由：/api/dev/projects、/modules、/versions。
+* 项目：dev:project:list、create、detail、update。
+
+* 项目用户：dev:project:user（全量保存）；查询登录即可。
+
+* 模块：dev:module:list、create、detail、update、delete。
+
+* 版本：dev:version:list、latest、create、advance、detail、update、delete。
+
+* 路由：/api/dev/projects、/project-users、/modules、/versions。
 
 ## 代码入口
 
-- Model：models/models.go 中 DevProject、DevModule、DevVersion。
-- Service：services/dev_project_service.go、dev_module_service.go、dev_version_service.go。
-- Controller：controllers/dev_*_controller.go。
-- 前端：hive/apps/web-antdv-next/src/views/dev/project、dev/versions。
+* Model：models/models.go 中 DevProject、DevProjectUser、DevModule、DevVersion。
+
+* Service：services/dev\_project\_service.go、dev\_project\_user\_service.go、dev\_module\_service.go、dev\_version\_service.go。
+
+* Controller：controllers/dev\_\*\_controller.go。
+
+* 前端：hive/apps/web-antdv-next/src/views/dev/project、dev/versions、dev/base/baseSchema.ts。
+
