@@ -302,7 +302,7 @@ func (dc *DevController) UpdateBugField(c *gin.Context) {
 
 // UpdateBugNext 缺陷流转状态
 // @Summary 缺陷流转状态
-// @Description 流转缺陷状态；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；推进到状态 30 或 99 且当前尚无验证人时，写入当前登录人为 verifier_id
+// @Description 流转缺陷状态；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；流转到状态 10（待修复）时打回次数 return_num 自动加 1；推进到状态 30 或 99 且当前尚无验证人时，写入当前登录人为 verifier_id
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json

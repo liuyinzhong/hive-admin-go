@@ -275,6 +275,7 @@ func buildBugResponses(bugs []models.DevBug) []models.BugResponse {
 			BugID:            &bug.BugID,
 			BugTitle:         bug.BugTitle,
 			BugNum:           bug.BugNum,
+			ReturnNum:        bug.ReturnNum,
 			BugStatus:        intToString(bug.BugStatus),
 			BugConfirmStatus: intToString(bug.BugConfirmStatus),
 			BugLevel:         intToString(bug.BugLevel),
@@ -430,6 +431,7 @@ func buildSingleBugResponse(bug *models.DevBug) *models.BugResponse {
 		BugID:            &bug.BugID,
 		BugTitle:         bug.BugTitle,
 		BugNum:           bug.BugNum,
+		ReturnNum:        bug.ReturnNum,
 		BugRichText:      bug.BugRichText,
 		BugStatus:        intToString(bug.BugStatus),
 		BugConfirmStatus: intToString(bug.BugConfirmStatus),
@@ -717,6 +719,10 @@ func UpdateBugNext(bugID string, bugStatus string, changeRichText string, creato
 
 	if bugStatusInt == 0 {
 		updateMap["bug_confirm_status"] = 0
+	}
+	// 流转到状态 10（待修复）视为一次打回，打回次数加 1
+	if bugStatusInt == 10 {
+		updateMap["return_num"] = gorm.Expr("return_num + 1")
 	}
 	// 推进到状态 30（待验证）或 99（已关闭）时，若当前缺陷尚无验证人，则写入当前登录人为验证人
 	if (bugStatusInt == 30 || bugStatusInt == 99) && (bug.VerifierID == nil || *bug.VerifierID == "") {

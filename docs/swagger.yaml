@@ -105,6 +105,10 @@ definitions:
         description: 关联项目标题
         example: crudelis
         type: string
+      returnNum:
+        description: 打回次数
+        example: 0
+        type: integer
       storyId:
         description: 关联需求ID
         example: UUID
@@ -10309,8 +10313,8 @@ paths:
     put:
       consumes:
       - application/json
-      description: 流转缺陷状态；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；推进到状态
-        30 或 99 且当前尚无验证人时，写入当前登录人为 verifier_id
+      description: 流转缺陷状态；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；流转到状态
+        10（待修复）时打回次数 return_num 自动加 1；推进到状态 30 或 99 且当前尚无验证人时，写入当前登录人为 verifier_id
       parameters:
       - description: 缺陷ID
         in: path

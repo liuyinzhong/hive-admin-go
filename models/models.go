@@ -311,6 +311,7 @@ type DevBug struct {
 	BugEnv           int        `gorm:"column:bug_env;type:tinyint;default:0" json:"bugEnv"`
 	BugSource        int        `gorm:"column:bug_source;type:tinyint;default:0" json:"bugSource"`
 	BugType          int        `gorm:"column:bug_type;type:tinyint;default:0" json:"bugType"`
+	ReturnNum        int        `gorm:"column:return_num;type:int;default:0" json:"returnNum"`
 	BugUa            *string    `gorm:"column:bug_ua;type:varchar(256)" json:"bugUa"`
 	FixUserID        *string    `gorm:"column:fix_user_id;type:char(36)" json:"fixUserId"`
 	VerifierID       *string    `gorm:"column:verifier_id;type:char(36)" json:"verifierId"`

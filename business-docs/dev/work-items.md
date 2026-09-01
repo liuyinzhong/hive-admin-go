@@ -54,6 +54,10 @@ storyStatus、taskStatus、bugStatus 和 bugConfirmStatus 以数字字符串在�
 
 确认状态写为 1 时，当前实现同时把缺陷状态改为 10；确认状态写为 2 时，缺陷状态改为 1。状态重新流转到 0 时会重置确认状态。调整这些数值含义必须同步 BUG\_STATUS、BUG\_CONFIRM\_STATUS 字典和前端动作。
 
+### DEV-ITEM-011 缺陷打回次数随流转累计
+
+缺陷维护打回次数 `return_num`，默认 0；流转接口 `/dev/bugs/{bugId}/next` 推进到 bugStatus=10（待修复）时在数据库中原子自增 1。打回次数是系统累计值，不在新建、编辑、局部字段和确认接口中修改；确认动作写状态 10 不计入打回。列表、全量选项和详情响应均返回 `returnNum`（int），前端缺陷列表以「打回次数」列只读展示。
+
 ## 数据权限
 
 ### DEV-ITEM-009 工作项范围贯穿全部入口

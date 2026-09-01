@@ -490,6 +490,7 @@ type BugResponse struct {
 	BugID            *string        `json:"bugId" example:"UUID"`                     // 缺陷ID
 	BugTitle         *string        `json:"bugTitle" example:"缺陷标题"`                  // 缺陷标题
 	BugNum           int            `json:"bugNum" example:"1"`                       // 缺陷编号
+	ReturnNum        int            `json:"returnNum" example:"0"`                    // 打回次数
 	BugStatus        string         `json:"bugStatus" example:"0"`                    // 缺陷状态
 	BugConfirmStatus string         `json:"bugConfirmStatus" example:"0"`             // 缺陷确认状态
 	BugLevel         string         `json:"bugLevel" example:"0"`                     // 缺陷等级
