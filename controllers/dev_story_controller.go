@@ -26,6 +26,7 @@ import (
 // @Param versionId query string false "版本ID"
 // @Param moduleId query string false "模块ID"
 // @Param storyStatus query string false "需求状态，支持多选：1,2"
+// @Param thisUserId query string false "当前负责人用户ID，筛选该用户名下(负责当前状态)的需求"
 // @Param sorts query string false "排序参数"
 // @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.StoryResponse}} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
@@ -61,6 +62,7 @@ func (dc *DevController) GetStorys(c *gin.Context) {
 		"versionId":     c.Query("versionId"),
 		"moduleId":      c.Query("moduleId"),
 		"storyStatuses": storyStatuses,
+		"thisUserId":    c.Query("thisUserId"),
 		"sorts":         c.Query("sorts"),
 	}
 

@@ -3194,6 +3194,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "当前负责人用户ID，筛选该用户名下(负责当前状态)的需求",
+                        "name": "thisUserId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "排序参数",
                         "name": "sorts",
                         "in": "query"

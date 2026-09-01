@@ -49,6 +49,10 @@ func GetStorys(page, pageSize int, params map[string]interface{}, permission dat
 	if storyStatuses, ok := params["storyStatuses"].([]int); ok && len(storyStatuses) > 0 {
 		db = db.Where("story_status IN ?", storyStatuses)
 	}
+	// 按当前负责人筛选:用户视角查询名下需求,即参与人中负责需求当前状态的用户
+	if thisUserID, ok := params["thisUserId"].(string); ok && thisUserID != "" {
+		db = db.Where("EXISTS (SELECT 1 FROM dev_story_user dsu WHERE dsu.story_id = dev_story.story_id AND dsu.story_status = dev_story.story_status AND dsu.user_id = ?)", thisUserID)
+	}
 
 	sorts := params["sorts"].(string)
 	order := utils.BuildOrderBy(sorts, map[string]string{
