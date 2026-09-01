@@ -126,7 +126,7 @@ func ensureDevBusinessAccess(businessID string, businessType int, permission dat
 		query = permission.Apply(query, "dev_task.creator_id", "dev_task.user_id")
 	case 20:
 		query = database.DB.Model(&models.DevBug{}).Where("bug_id = ? AND del_flag = ?", businessID, 0)
-		query = permission.Apply(query, "dev_bug.creator_id", "dev_bug.user_id")
+		query = permission.Apply(query, "dev_bug.creator_id", "dev_bug.fix_user_id")
 	case 30:
 		query = database.DB.Model(&models.DevVersion{}).Where("version_id = ? AND del_flag = ?", businessID, 0)
 		query = permission.Apply(query, "dev_version.creator_id")

@@ -13,7 +13,7 @@ import (
 
 // GetBugs 获取缺陷列表
 // @Summary 获取缺陷列表
-// @Description 按创建人或处理人及当前角色数据范围分页获取缺陷
+// @Description 分页获取缺陷；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 过滤
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -75,7 +75,7 @@ func (dc *DevController) GetBugs(c *gin.Context) {
 
 // GetAllBugs 获取所有缺陷
 // @Summary 获取所有缺陷
-// @Description 按创建人或处理人及当前角色数据范围获取所有缺陷（不分页）
+// @Description 获取所有缺陷（不分页）；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 过滤
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -120,7 +120,7 @@ func (dc *DevController) GetAllBugs(c *gin.Context) {
 
 // GetBug 获取缺陷详情
 // @Summary 获取缺陷详情
-// @Description 按创建人或处理人及当前角色数据范围获取缺陷详情
+// @Description 获取缺陷详情；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 过滤
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -148,7 +148,7 @@ func (dc *DevController) GetBug(c *gin.Context) {
 
 // CreateBug 创建缺陷
 // @Summary 创建缺陷
-// @Description 创建新缺陷；处理人、关联版本和关联需求必须处于当前数据范围
+// @Description 创建新缺陷；数据权限：当前用户归属，写入 creator_id 为当前登录人，fix_user_id、关联版本和关联需求须处于当前数据范围
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -177,7 +177,7 @@ func (dc *DevController) CreateBug(c *gin.Context) {
 
 // ConfirmBug 确认缺陷
 // @Summary 确认缺陷
-// @Description 按当前数据范围确认缺陷并更新缺陷状态
+// @Description 确认缺陷并更新缺陷状态；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -209,7 +209,7 @@ func (dc *DevController) ConfirmBug(c *gin.Context) {
 
 // CreateBugs 批量创建缺陷
 // @Summary 批量创建缺陷
-// @Description 批量创建缺陷；每条记录的处理人、关联版本和关联需求均须处于当前数据范围
+// @Description 批量创建缺陷；数据权限：当前用户归属，每条记录写入 creator_id 为当前登录人，fix_user_id、关联版本和关联需求须处于当前数据范围
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -238,7 +238,7 @@ func (dc *DevController) CreateBugs(c *gin.Context) {
 
 // UpdateBug 更新缺陷
 // @Summary 更新缺陷
-// @Description 按当前数据范围更新缺陷；处理人、关联版本和关联需求不得越界
+// @Description 更新缺陷；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；fix_user_id、关联版本和关联需求不得越界
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -270,7 +270,7 @@ func (dc *DevController) UpdateBug(c *gin.Context) {
 
 // UpdateBugField 更新缺陷字段
 // @Summary 更新缺陷字段
-// @Description 按当前数据范围更新缺陷的单个字段；修改处理人时校验目标用户范围
+// @Description 更新缺陷单个字段；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；修改 fix_user_id 时校验目标用户范围
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -302,7 +302,7 @@ func (dc *DevController) UpdateBugField(c *gin.Context) {
 
 // UpdateBugNext 缺陷流转状态
 // @Summary 缺陷流转状态
-// @Description 按当前数据范围更新缺陷状态
+// @Description 流转缺陷状态；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；推进到状态 30 时写入当前登录人为 verifier_id
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json
@@ -334,7 +334,7 @@ func (dc *DevController) UpdateBugNext(c *gin.Context) {
 
 // DeleteBugs 删除缺陷
 // @Summary 删除缺陷
-// @Description 按当前数据范围批量删除缺陷；任一记录不存在或越界时整批失败
+// @Description 批量删除缺陷；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；任一记录不存在或越界时整批失败
 // @Tags 开发管理/缺陷管理
 // @Accept json
 // @Produce json

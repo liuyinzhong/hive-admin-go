@@ -479,6 +479,13 @@ type TaskResponse struct {
 	TaskRichText *string `json:"taskRichText" example:"<p>任务描述</p>"`       // 任务描述(富文本)
 }
 
+// BugUserItem 缺陷关联用户信息（修复人/验证人）
+type BugUserItem struct {
+	UserID   *string `json:"userId" example:"UUID"`                   // 用户ID
+	Avatar   *string `json:"avatar" example:"https://xxx/avatar.jpg"` // 用户头像
+	RealName *string `json:"realName" example:"张三"`                   // 真实姓名
+}
+
 type BugResponse struct {
 	BugID            *string        `json:"bugId" example:"UUID"`                     // 缺陷ID
 	BugTitle         *string        `json:"bugTitle" example:"缺陷标题"`                  // 缺陷标题
@@ -490,9 +497,10 @@ type BugResponse struct {
 	BugType          string         `json:"bugType" example:"0"`                      // 缺陷类型
 	BugEnv           string         `json:"bugEnv" example:"0"`                       // 缺陷环境
 	BugUa            *string        `json:"bugUa" example:"Mozilla/5.0"`              // 用户代理
-	UserID           *string        `json:"userId" example:"UUID"`                    // 指派人ID
-	Avatar           *string        `json:"avatar" example:"https://xxx/avatar.jpg"`  // 指派人头像
-	RealName         *string        `json:"realName" example:"张三"`                    // 指派人姓名
+	FixUserID        *string        `json:"fixUserId" example:"UUID"`                 // 修复人ID
+	FixUserInfo      *BugUserItem   `json:"fixUserInfo" example:""`                   // 修复人信息
+	VerifierID       *string        `json:"verifierId" example:"UUID"`                // 验证人ID
+	VerifierUserInfo *BugUserItem   `json:"verifierUserInfo" example:""`              // 验证人信息
 	CreatorName      *string        `json:"creatorName" example:"管理员"`                // 创建人姓名
 	CreatorID        *string        `json:"creatorId" example:"UUID"`                 // 创建人ID
 	VersionID        *string        `json:"versionId" example:"UUID"`                 // 关联版本ID
@@ -675,7 +683,7 @@ type CreateBugRequest struct {
 	VersionID   *string  `json:"versionId" example:"UUID"`                    // 关联版本ID
 	ModuleID    *string  `json:"moduleId" example:"UUID"`                     // 关联模块ID
 	StoryID     *string  `json:"storyId" example:"UUID"`                      // 关联需求ID
-	UserID      *string  `json:"userId" binding:"required" example:"UUID"`    // 指派人ID
+	FixUserID   *string  `json:"fixUserId" binding:"required" example:"UUID"` // 修复人ID
 	FileIDs     []string `json:"fileIds" example:"[\"UUID\"]"`                // 附件id数组
 }
 
@@ -692,7 +700,7 @@ type UpdateBugRequest struct {
 	VersionID   *string  `json:"versionId" example:"UUID"`                    // 关联版本ID
 	ModuleID    *string  `json:"moduleId" example:"UUID"`                     // 关联模块ID
 	StoryID     *string  `json:"storyId" example:"UUID"`                      // 关联需求ID
-	UserID      *string  `json:"userId" binding:"required" example:"UUID"`    // 指派人ID
+	FixUserID   *string  `json:"fixUserId" binding:"required" example:"UUID"` // 修复人ID
 	FileIDs     []string `json:"fileIds" example:"[\"UUID\"]"`                // 附件id数组
 }
 

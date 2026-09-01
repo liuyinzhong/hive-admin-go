@@ -10780,7 +10780,7 @@ paths:
       - ApiKeyAuth: []
       summary: 获取项目用户列表
       tags:
-      - 开发管理/项目用户
+      - 开发管理/项目管理
     put:
       consumes:
       - application/json
@@ -10817,7 +10817,7 @@ paths:
       - ApiKeyAuth: []
       summary: 全量保存项目用户
       tags:
-      - 开发管理/项目用户
+      - 开发管理/项目管理
   /dev/projects:
     get:
       consumes:

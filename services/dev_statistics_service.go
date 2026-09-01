@@ -79,7 +79,7 @@ func GetWorkspaceEnum(permission datapermission.Permission) (*models.WorkspaceEn
 
 	storyQuery := applyStoryPermission(database.DB.Model(&models.DevStory{}), permission)
 	taskQuery := permission.Apply(database.DB.Model(&models.DevTask{}), "dev_task.creator_id", "dev_task.user_id")
-	bugQuery := permission.Apply(database.DB.Model(&models.DevBug{}), "dev_bug.creator_id", "dev_bug.user_id")
+	bugQuery := permission.Apply(database.DB.Model(&models.DevBug{}), "dev_bug.creator_id", "dev_bug.fix_user_id")
 
 	if err := storyQuery.Where("dev_story.del_flag = ?", 0).Count(&storyTotal).Error; err != nil {
 		return nil, err

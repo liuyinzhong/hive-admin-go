@@ -312,7 +312,8 @@ type DevBug struct {
 	BugSource        int        `gorm:"column:bug_source;type:tinyint;default:0" json:"bugSource"`
 	BugType          int        `gorm:"column:bug_type;type:tinyint;default:0" json:"bugType"`
 	BugUa            *string    `gorm:"column:bug_ua;type:varchar(256)" json:"bugUa"`
-	UserID           *string    `gorm:"column:user_id;type:char(36)" json:"userId"`
+	FixUserID        *string    `gorm:"column:fix_user_id;type:char(36)" json:"fixUserId"`
+	VerifierID       *string    `gorm:"column:verifier_id;type:char(36)" json:"verifierId"`
 	CreatorID        *string    `gorm:"column:creator_id;type:char(36)" json:"creatorId"`
 	VersionID        *string    `gorm:"column:version_id;type:char(36)" json:"versionId"`
 	ModuleID         *string    `gorm:"column:module_id;type:char(36)" json:"moduleId"`

@@ -2778,7 +2778,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理/项目用户"
+                    "开发管理/项目管理"
                 ],
                 "summary": "获取项目用户列表",
                 "parameters": [
@@ -2835,7 +2835,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "开发管理/项目用户"
+                    "开发管理/项目管理"
                 ],
                 "summary": "全量保存项目用户",
                 "parameters": [
