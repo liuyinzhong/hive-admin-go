@@ -1591,7 +1591,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按创建人或处理人及当前角色数据范围分页获取缺陷",
+                "description": "分页获取缺陷；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -1719,7 +1719,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "创建新缺陷；处理人、关联版本和关联需求必须处于当前数据范围",
+                "description": "创建新缺陷；数据权限：当前用户归属，写入 creator_id 为当前登录人，fix_user_id、关联版本和关联需求须处于当前数据范围",
                 "consumes": [
                     "application/json"
                 ],
@@ -1776,7 +1776,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按当前数据范围批量删除缺陷；任一记录不存在或越界时整批失败",
+                "description": "批量删除缺陷；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；任一记录不存在或越界时整批失败",
                 "consumes": [
                     "application/json"
                 ],
@@ -1838,7 +1838,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按创建人或处理人及当前角色数据范围获取所有缺陷（不分页）",
+                "description": "获取所有缺陷（不分页）；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -1932,7 +1932,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "批量创建缺陷；每条记录的处理人、关联版本和关联需求均须处于当前数据范围",
+                "description": "批量创建缺陷；数据权限：当前用户归属，每条记录写入 creator_id 为当前登录人，fix_user_id、关联版本和关联需求须处于当前数据范围",
                 "consumes": [
                     "application/json"
                 ],
@@ -1994,7 +1994,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按当前数据范围更新缺陷；处理人、关联版本和关联需求不得越界",
+                "description": "更新缺陷；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；fix_user_id、关联版本和关联需求不得越界",
                 "consumes": [
                     "application/json"
                 ],
@@ -2060,7 +2060,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按当前数据范围确认缺陷并更新缺陷状态",
+                "description": "确认缺陷并更新缺陷状态；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验",
                 "consumes": [
                     "application/json"
                 ],
@@ -2126,7 +2126,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按当前数据范围更新缺陷的单个字段；修改处理人时校验目标用户范围",
+                "description": "更新缺陷单个字段；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；修改 fix_user_id 时校验目标用户范围",
                 "consumes": [
                     "application/json"
                 ],
@@ -2192,7 +2192,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按当前数据范围更新缺陷状态",
+                "description": "流转缺陷状态；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；推进到状态 30 时写入当前登录人为 verifier_id",
                 "consumes": [
                     "application/json"
                 ],
@@ -2258,7 +2258,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按创建人或处理人及当前角色数据范围获取缺陷详情",
+                "description": "获取缺陷详情；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -24520,11 +24520,6 @@ const docTemplate = `{
         "models.BugResponse": {
             "type": "object",
             "properties": {
-                "avatar": {
-                    "description": "指派人头像",
-                    "type": "string",
-                    "example": "https://xxx/avatar.jpg"
-                },
                 "bugConfirmStatus": {
                     "description": "缺陷确认状态",
                     "type": "string",
@@ -24609,6 +24604,19 @@ const docTemplate = `{
                         "$ref": "#/definitions/models.FileResponse"
                     }
                 },
+                "fixUserId": {
+                    "description": "修复人ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "fixUserInfo": {
+                    "description": "修复人信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.BugUserItem"
+                        }
+                    ]
+                },
                 "moduleId": {
                     "description": "关联模块ID",
                     "type": "string",
@@ -24629,11 +24637,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "crudelis"
                 },
-                "realName": {
-                    "description": "指派人姓名",
-                    "type": "string",
-                    "example": "张三"
-                },
                 "storyId": {
                     "description": "关联需求ID",
                     "type": "string",
@@ -24649,10 +24652,18 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2024-01-01 12:00:00"
                 },
-                "userId": {
-                    "description": "指派人ID",
+                "verifierId": {
+                    "description": "验证人ID",
                     "type": "string",
                     "example": "UUID"
+                },
+                "verifierUserInfo": {
+                    "description": "验证人信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.BugUserItem"
+                        }
+                    ]
                 },
                 "version": {
                     "description": "关联版本号",
@@ -24661,6 +24672,26 @@ const docTemplate = `{
                 },
                 "versionId": {
                     "description": "关联版本ID",
+                    "type": "string",
+                    "example": "UUID"
+                }
+            }
+        },
+        "models.BugUserItem": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "用户头像",
+                    "type": "string",
+                    "example": "https://xxx/avatar.jpg"
+                },
+                "realName": {
+                    "description": "真实姓名",
+                    "type": "string",
+                    "example": "张三"
+                },
+                "userId": {
+                    "description": "用户ID",
                     "type": "string",
                     "example": "UUID"
                 }
@@ -24909,8 +24940,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "bugTitle",
-                "projectId",
-                "userId"
+                "fixUserId",
+                "projectId"
             ],
             "properties": {
                 "bugEnv": {
@@ -24963,6 +24994,11 @@ const docTemplate = `{
                         "[\"UUID\"]"
                     ]
                 },
+                "fixUserId": {
+                    "description": "修复人ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
                 "moduleId": {
                     "description": "关联模块ID",
                     "type": "string",
@@ -24975,11 +25011,6 @@ const docTemplate = `{
                 },
                 "storyId": {
                     "description": "关联需求ID",
-                    "type": "string",
-                    "example": "UUID"
-                },
-                "userId": {
-                    "description": "指派人ID",
                     "type": "string",
                     "example": "UUID"
                 },
@@ -34481,8 +34512,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "bugTitle",
-                "projectId",
-                "userId"
+                "fixUserId",
+                "projectId"
             ],
             "properties": {
                 "bugEnv": {
@@ -34535,6 +34566,11 @@ const docTemplate = `{
                         "[\"UUID\"]"
                     ]
                 },
+                "fixUserId": {
+                    "description": "修复人ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
                 "moduleId": {
                     "description": "关联模块ID",
                     "type": "string",
@@ -34547,11 +34583,6 @@ const docTemplate = `{
                 },
                 "storyId": {
                     "description": "关联需求ID",
-                    "type": "string",
-                    "example": "UUID"
-                },
-                "userId": {
-                    "description": "指派人ID",
                     "type": "string",
                     "example": "UUID"
                 },

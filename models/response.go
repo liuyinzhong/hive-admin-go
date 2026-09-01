@@ -498,9 +498,9 @@ type BugResponse struct {
 	BugEnv           string         `json:"bugEnv" example:"0"`                       // 缺陷环境
 	BugUa            *string        `json:"bugUa" example:"Mozilla/5.0"`              // 用户代理
 	FixUserID        *string        `json:"fixUserId" example:"UUID"`                 // 修复人ID
-	FixUserInfo      *BugUserItem   `json:"fixUserInfo" example:""`                   // 修复人信息
+	FixUserInfo      *BugUserItem   `json:"fixUserInfo"`                              // 修复人信息
 	VerifierID       *string        `json:"verifierId" example:"UUID"`                // 验证人ID
-	VerifierUserInfo *BugUserItem   `json:"verifierUserInfo" example:""`              // 验证人信息
+	VerifierUserInfo *BugUserItem   `json:"verifierUserInfo"`                         // 验证人信息
 	CreatorName      *string        `json:"creatorName" example:"管理员"`                // 创建人姓名
 	CreatorID        *string        `json:"creatorId" example:"UUID"`                 // 创建人ID
 	VersionID        *string        `json:"versionId" example:"UUID"`                 // 关联版本ID

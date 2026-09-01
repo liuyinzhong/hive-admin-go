@@ -15,10 +15,6 @@ definitions:
     type: object
   models.BugResponse:
     properties:
-      avatar:
-        description: 指派人头像
-        example: https://xxx/avatar.jpg
-        type: string
       bugConfirmStatus:
         description: 缺陷确认状态
         example: "0"
@@ -85,6 +81,14 @@ definitions:
         items:
           $ref: '#/definitions/models.FileResponse'
         type: array
+      fixUserId:
+        description: 修复人ID
+        example: UUID
+        type: string
+      fixUserInfo:
+        allOf:
+        - $ref: '#/definitions/models.BugUserItem'
+        description: 修复人信息
       moduleId:
         description: 关联模块ID
         example: UUID
@@ -101,10 +105,6 @@ definitions:
         description: 关联项目标题
         example: crudelis
         type: string
-      realName:
-        description: 指派人姓名
-        example: 张三
-        type: string
       storyId:
         description: 关联需求ID
         example: UUID
@@ -117,16 +117,35 @@ definitions:
         description: 更新时间
         example: "2024-01-01 12:00:00"
         type: string
-      userId:
-        description: 指派人ID
+      verifierId:
+        description: 验证人ID
         example: UUID
         type: string
+      verifierUserInfo:
+        allOf:
+        - $ref: '#/definitions/models.BugUserItem'
+        description: 验证人信息
       version:
         description: 关联版本号
         example: v1.0.0
         type: string
       versionId:
         description: 关联版本ID
+        example: UUID
+        type: string
+    type: object
+  models.BugUserItem:
+    properties:
+      avatar:
+        description: 用户头像
+        example: https://xxx/avatar.jpg
+        type: string
+      realName:
+        description: 真实姓名
+        example: 张三
+        type: string
+      userId:
+        description: 用户ID
         example: UUID
         type: string
     type: object
@@ -353,6 +372,10 @@ definitions:
         items:
           type: string
         type: array
+      fixUserId:
+        description: 修复人ID
+        example: UUID
+        type: string
       moduleId:
         description: 关联模块ID
         example: UUID
@@ -365,18 +388,14 @@ definitions:
         description: 关联需求ID
         example: UUID
         type: string
-      userId:
-        description: 指派人ID
-        example: UUID
-        type: string
       versionId:
         description: 关联版本ID
         example: UUID
         type: string
     required:
     - bugTitle
+    - fixUserId
     - projectId
-    - userId
     type: object
   models.CreateChangeHistoryRequest:
     properties:
@@ -7505,6 +7524,10 @@ definitions:
         items:
           type: string
         type: array
+      fixUserId:
+        description: 修复人ID
+        example: UUID
+        type: string
       moduleId:
         description: 关联模块ID
         example: UUID
@@ -7517,18 +7540,14 @@ definitions:
         description: 关联需求ID
         example: UUID
         type: string
-      userId:
-        description: 指派人ID
-        example: UUID
-        type: string
       versionId:
         description: 关联版本ID
         example: UUID
         type: string
     required:
     - bugTitle
+    - fixUserId
     - projectId
-    - userId
     type: object
   models.UpdateClassificationNodeStatusRequest:
     properties:
@@ -10004,7 +10023,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 按当前数据范围批量删除缺陷；任一记录不存在或越界时整批失败
+      description: 批量删除缺陷；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；任一记录不存在或越界时整批失败
       parameters:
       - description: 缺陷ID列表
         in: body
@@ -10043,7 +10062,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 按创建人或处理人及当前角色数据范围分页获取缺陷
+      description: 分页获取缺陷；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 过滤
       parameters:
       - description: 页码
         in: query
@@ -10121,7 +10140,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建新缺陷；处理人、关联版本和关联需求必须处于当前数据范围
+      description: 创建新缺陷；数据权限：当前用户归属，写入 creator_id 为当前登录人，fix_user_id、关联版本和关联需求须处于当前数据范围
       parameters:
       - description: 缺陷信息
         in: body
@@ -10159,7 +10178,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 按当前数据范围更新缺陷；处理人、关联版本和关联需求不得越界
+      description: 更新缺陷；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；fix_user_id、关联版本和关联需求不得越界
       parameters:
       - description: 缺陷ID
         in: path
@@ -10202,7 +10221,8 @@ paths:
     put:
       consumes:
       - application/json
-      description: 按当前数据范围确认缺陷并更新缺陷状态
+      description: 确认缺陷并更新缺陷状态；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id
+        校验
       parameters:
       - description: 缺陷ID
         in: path
@@ -10245,7 +10265,8 @@ paths:
     put:
       consumes:
       - application/json
-      description: 按当前数据范围更新缺陷的单个字段；修改处理人时校验目标用户范围
+      description: 更新缺陷单个字段；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id
+        校验；修改 fix_user_id 时校验目标用户范围
       parameters:
       - description: 缺陷ID
         in: path
@@ -10288,7 +10309,8 @@ paths:
     put:
       consumes:
       - application/json
-      description: 按当前数据范围更新缺陷状态
+      description: 流转缺陷状态；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；推进到状态
+        30 时写入当前登录人为 verifier_id
       parameters:
       - description: 缺陷ID
         in: path
@@ -10331,7 +10353,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 按创建人或处理人及当前角色数据范围获取缺陷详情
+      description: 获取缺陷详情；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 过滤
       parameters:
       - description: 缺陷编号
         in: path
@@ -10373,7 +10395,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: 按创建人或处理人及当前角色数据范围获取所有缺陷（不分页）
+      description: 获取所有缺陷（不分页）；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id
+        过滤
       parameters:
       - description: 缺陷编号
         in: query
@@ -10431,7 +10454,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 批量创建缺陷；每条记录的处理人、关联版本和关联需求均须处于当前数据范围
+      description: 批量创建缺陷；数据权限：当前用户归属，每条记录写入 creator_id 为当前登录人，fix_user_id、关联版本和关联需求须处于当前数据范围
       parameters:
       - description: 缺陷信息列表
         in: body
