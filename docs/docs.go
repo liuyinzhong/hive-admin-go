@@ -2770,7 +2770,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "数据权限：公开接口,登录即可查看;返回项目成员及负责状态,不做记录级数据权限过滤",
+                "description": "数据权限：公开接口,登录即可查看;返回项目成员,不做记录级数据权限过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -2827,7 +2827,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "数据权限：需要 dev:project:user 权限码;全删全插替换项目成员及负责状态,移除用户时同步清理状态配置",
+                "description": "数据权限：需要 dev:project:user 权限码;全删全插替换项目成员,不做记录级数据权限过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -3132,7 +3132,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤，参与人含负责状态负责人",
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人(历次流转指定的状态负责人)过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -3254,7 +3254,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "创建新需求；参与人及负责状态、附件和关联版本必须处于当前数据范围，参与人写入 dev_story_user 关联表",
+                "description": "创建新需求；附件和关联版本必须处于当前数据范围。不接收参与人，参与人由需求流转接口写入 dev_story_user 关联表",
                 "consumes": [
                     "application/json"
                 ],
@@ -3373,7 +3373,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤，参与人含负责状态负责人",
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人(历次流转指定的状态负责人)过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -3461,7 +3461,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "批量创建需求；每条记录的参与人及负责状态、附件和关联版本均须处于当前数据范围，参与人写入 dev_story_user 关联表",
+                "description": "批量创建需求；每条记录的附件和关联版本均须处于当前数据范围。不接收参与人，参与人由需求流转接口写入 dev_story_user 关联表",
                 "consumes": [
                     "application/json"
                 ],
@@ -3523,7 +3523,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；参与人及负责状态、附件和关联版本不得越界",
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；附件和关联版本不得越界",
                 "consumes": [
                     "application/json"
                 ],
@@ -3589,7 +3589,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；仅允许行内编辑 storyType、storyLevel、source，参与人及负责状态请走更新需求接口",
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；仅允许行内编辑 storyType、storyLevel、source",
                 "consumes": [
                     "application/json"
                 ],
@@ -3655,7 +3655,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；流转成功后向负责新状态的参与人推送需求管理菜单未读消息",
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；流转时须指定目标状态负责人（须为该项目成员），负责人写入 dev_story_user 关联表并接收需求管理菜单未读消息；流转到 99(已关闭) 时无需指定负责人，不写关联表、不推送通知",
                 "consumes": [
                     "application/json"
                 ],
@@ -3721,7 +3721,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤，参与人含负责状态负责人；关联任务和缺陷继续按各自范围过滤",
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人(历次流转指定的状态负责人)过滤；关联任务和缺陷继续按各自范围过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -25832,13 +25832,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0"
                 },
-                "userList": {
-                    "description": "参与人员及负责状态",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.StoryUserRequest"
-                    }
-                },
                 "versionId": {
                     "description": "关联版本id",
                     "type": "string",
@@ -31683,11 +31676,6 @@ const docTemplate = `{
                 "userId"
             ],
             "properties": {
-                "storyStatus": {
-                    "description": "负责状态,null=普通成员",
-                    "type": "string",
-                    "example": "0,1"
-                },
                 "userId": {
                     "description": "用户ID",
                     "type": "string",
@@ -31707,11 +31695,6 @@ const docTemplate = `{
                     "description": "真实姓名",
                     "type": "string",
                     "example": "张三"
-                },
-                "storyStatus": {
-                    "description": "负责状态(逗号拼接STORY_STATUS值),null=普通成员",
-                    "type": "string",
-                    "example": "0,1"
                 },
                 "userId": {
                     "description": "用户ID",
@@ -33542,7 +33525,7 @@ const docTemplate = `{
                     "example": "UUID"
                 },
                 "users": {
-                    "description": "用户列表(含负责状态)",
+                    "description": "用户列表",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.ProjectUserItemReq"
@@ -34243,12 +34226,13 @@ const docTemplate = `{
                         "$ref": "#/definitions/models.TaskResponse"
                     }
                 },
-                "thisUserList": {
-                    "description": "当前状态负责人列表(参与人中story_status等于需求当前状态的用户),无负责人时为空数组",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.StoryUserItem"
-                    }
+                "thisUser": {
+                    "description": "当前状态负责人(参与人中story_status等于需求当前状态的用户,由流转时指定),无负责人时为null",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.StoryUserItem"
+                        }
+                    ]
                 },
                 "updateDate": {
                     "description": "更新时间",
@@ -34256,7 +34240,7 @@ const docTemplate = `{
                     "example": "2024-01-01 12:00:00"
                 },
                 "userList": {
-                    "description": "参与人员列表",
+                    "description": "参与人员列表(历次推进指定的状态负责人)",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.StoryUserItem"
@@ -34288,30 +34272,12 @@ const docTemplate = `{
                     "example": "张三"
                 },
                 "storyStatus": {
-                    "description": "负责的需求状态,字典STORY_STATUS值,null=普通参与人",
+                    "description": "负责的需求状态(需求推进至该状态时指定),字典STORY_STATUS值",
                     "type": "string",
                     "example": "0"
                 },
                 "userId": {
                     "description": "用户ID",
-                    "type": "string",
-                    "example": "UUID"
-                }
-            }
-        },
-        "models.StoryUserRequest": {
-            "type": "object",
-            "required": [
-                "userId"
-            ],
-            "properties": {
-                "storyStatus": {
-                    "description": "负责的需求状态,字典STORY_STATUS值,空=普通参与人",
-                    "type": "string",
-                    "example": "0"
-                },
-                "userId": {
-                    "description": "参与人员ID",
                     "type": "string",
                     "example": "UUID"
                 }
@@ -35295,6 +35261,11 @@ const docTemplate = `{
                     "description": "需求状态",
                     "type": "string",
                     "example": "0"
+                },
+                "userId": {
+                    "description": "状态负责人ID,流转到99(已关闭)可不传;其余状态必填,须为该项目成员,写入需求参与人关联表",
+                    "type": "string",
+                    "example": "UUID"
                 }
             }
         },
@@ -35354,13 +35325,6 @@ const docTemplate = `{
                     "description": "需求类型",
                     "type": "string",
                     "example": "0"
-                },
-                "userList": {
-                    "description": "参与人员及负责状态",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.StoryUserRequest"
-                    }
                 },
                 "versionId": {
                     "description": "关联版本ID",

@@ -11,7 +11,7 @@ import (
 
 // GetProjectUsers 获取项目用户列表
 // @Summary 获取项目用户列表
-// @Description 数据权限：公开接口,登录即可查看;返回项目成员及负责状态,不做记录级数据权限过滤
+// @Description 数据权限：公开接口,登录即可查看;返回项目成员,不做记录级数据权限过滤
 // @Tags 开发管理/项目管理
 // @Accept json
 // @Produce json
@@ -37,7 +37,7 @@ func (dc *DevController) GetProjectUsers(c *gin.Context) {
 
 // SaveProjectUsers 全量保存项目用户
 // @Summary 全量保存项目用户
-// @Description 数据权限：需要 dev:project:user 权限码;全删全插替换项目成员及负责状态,移除用户时同步清理状态配置
+// @Description 数据权限：需要 dev:project:user 权限码;全删全插替换项目成员,不做记录级数据权限过滤
 // @Tags 开发管理/项目管理
 // @Accept json
 // @Produce json

@@ -845,7 +845,6 @@ CREATE TABLE `dev_project_user`  (
   `id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '主键,UUID格式',
   `project_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '项目id,关联dev_project.project_id',
   `user_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '用户id,关联sys_user.user_id',
-  `story_status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '负责需求状态,逗号拼接STORY_STATUS值,NULL=普通成员',
   `create_date` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_date` datetime NULL DEFAULT NULL COMMENT '修改时间',
   `del_flag` tinyint NOT NULL DEFAULT 0 COMMENT '逻辑删除:0=正常,1=删除',
@@ -858,9 +857,9 @@ CREATE TABLE `dev_project_user`  (
 -- ----------------------------
 -- Records of dev_project_user
 -- ----------------------------
-INSERT INTO `dev_project_user` VALUES ('c538cc0f-2c01-48be-9e1a-1f8276c362c8', '9352dcc0-585b-4516-bda2-04e31a77437d', '3fce9e33-88fd-4f73-91bc-ade445f2ee04', '30', '2026-08-29 18:02:26', '2026-08-29 18:02:26', 0);
-INSERT INTO `dev_project_user` VALUES ('e418a313-c93d-44cb-8676-37cdbf2ff5fe', '9352dcc0-585b-4516-bda2-04e31a77437d', '30e4bc4e-5750-48db-9c11-7535a27010a2', '0,10', '2026-08-29 18:02:26', '2026-08-29 18:02:26', 0);
-INSERT INTO `dev_project_user` VALUES ('f35e2f49-f22d-4689-9f82-8d9e04ec58d9', '9352dcc0-585b-4516-bda2-04e31a77437d', '6b12f392-76e6-4488-abeb-e723a424d39b', '51', '2026-08-29 18:02:26', '2026-08-29 18:02:26', 0);
+INSERT INTO `dev_project_user` VALUES ('c538cc0f-2c01-48be-9e1a-1f8276c362c8', '9352dcc0-585b-4516-bda2-04e31a77437d', '3fce9e33-88fd-4f73-91bc-ade445f2ee04', '2026-08-29 18:02:26', '2026-08-29 18:02:26', 0);
+INSERT INTO `dev_project_user` VALUES ('e418a313-c93d-44cb-8676-37cdbf2ff5fe', '9352dcc0-585b-4516-bda2-04e31a77437d', '30e4bc4e-5750-48db-9c11-7535a27010a2', '2026-08-29 18:02:26', '2026-08-29 18:02:26', 0);
+INSERT INTO `dev_project_user` VALUES ('f35e2f49-f22d-4689-9f82-8d9e04ec58d9', '9352dcc0-585b-4516-bda2-04e31a77437d', '6b12f392-76e6-4488-abeb-e723a424d39b', '2026-08-29 18:02:26', '2026-08-29 18:02:26', 0);
 
 -- ----------------------------
 -- Table structure for dev_story
@@ -930,13 +929,13 @@ CREATE TABLE `dev_story_user`  (
   `id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '主键,UUID格式',
   `story_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '需求id,关联dev_story.story_id',
   `user_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参与用户id,关联sys_user.user_id',
-  `story_status` tinyint NULL DEFAULT NULL COMMENT '参与人负责的需求状态,字典STORY_STATUS值,NULL=普通参与人',
+  `story_status` tinyint NULL DEFAULT NULL COMMENT '参与人负责的需求状态(需求推进至该状态时写入),字典STORY_STATUS值',
   `create_date` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_date` datetime NULL DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_dev_story_user_story`(`story_id` ASC) USING BTREE COMMENT '按需求查参与人',
   INDEX `idx_dev_story_user_user`(`user_id` ASC) USING BTREE COMMENT '按用户查参与的需求(数据权限EXISTS过滤)',
-  INDEX `idx_dev_story_user_status`(`story_id` ASC, `story_status` ASC) USING BTREE COMMENT '按需求+负责状态查通知对象'
+  INDEX `idx_dev_story_user_status`(`story_id` ASC, `story_status` ASC) USING BTREE COMMENT '按需求+负责状态查当前负责人'
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '需求参与人关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------

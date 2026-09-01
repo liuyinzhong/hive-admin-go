@@ -42,8 +42,7 @@ func GetProjectUsers(projectID string) ([]models.ProjectUserResponse, error) {
 	responses := make([]models.ProjectUserResponse, 0, len(rows))
 	for _, r := range rows {
 		resp := models.ProjectUserResponse{
-			UserID:      r.UserID,
-			StoryStatus: r.StoryStatus,
+			UserID: r.UserID,
 		}
 		if u, ok := userMap[r.UserID]; ok {
 			resp.RealName = stringValue(u.RealName)
@@ -76,13 +75,12 @@ func SaveProjectUsers(req *models.SaveProjectUserRequest) error {
 		}
 		seen[u.UserID] = true
 		rows = append(rows, models.DevProjectUser{
-			ID:          uuid.New().String(),
-			ProjectID:   req.ProjectID,
-			UserID:      u.UserID,
-			StoryStatus: u.StoryStatus,
-			CreateDate:  &now,
-			UpdateDate:  &now,
-			DelFlag:     0,
+			ID:         uuid.New().String(),
+			ProjectID:  req.ProjectID,
+			UserID:     u.UserID,
+			CreateDate: &now,
+			UpdateDate: &now,
+			DelFlag:    0,
 		})
 	}
 

@@ -351,24 +351,22 @@ type ProjectResponse struct {
 	CreateDate   *string `json:"createDate" example:"2024-01-01 12:00:00"`   // 创建时间
 }
 
-// ProjectUserResponse 项目用户响应,含用户基本信息和负责状态。
+// ProjectUserResponse 项目用户响应,含用户基本信息。
 type ProjectUserResponse struct {
-	UserID      string  `json:"userId" example:"UUID"`              // 用户ID
-	RealName    string  `json:"realName" example:"张三"`              // 真实姓名
-	Avatar      *string `json:"avatar" example:"https://xxx/a.jpg"` // 用户头像
-	StoryStatus *string `json:"storyStatus" example:"0,1"`          // 负责状态(逗号拼接STORY_STATUS值),null=普通成员
+	UserID   string  `json:"userId" example:"UUID"`              // 用户ID
+	RealName string  `json:"realName" example:"张三"`              // 真实姓名
+	Avatar   *string `json:"avatar" example:"https://xxx/a.jpg"` // 用户头像
 }
 
 // SaveProjectUserRequest 项目用户全量保存请求。
 type SaveProjectUserRequest struct {
 	ProjectID string               `json:"projectId" binding:"required" example:"UUID"` // 项目ID
-	Users     []ProjectUserItemReq `json:"users"`                                       // 用户列表(含负责状态)
+	Users     []ProjectUserItemReq `json:"users"`                                       // 用户列表
 }
 
 // ProjectUserItemReq 项目用户单项,用于全量保存。
 type ProjectUserItemReq struct {
-	UserID      string  `json:"userId" binding:"required" example:"UUID"` // 用户ID
-	StoryStatus *string `json:"storyStatus" example:"0,1"`                // 负责状态,null=普通成员
+	UserID string `json:"userId" binding:"required" example:"UUID"` // 用户ID
 }
 
 type ModuleResponse struct {
@@ -403,7 +401,7 @@ type StoryUserItem struct {
 	UserID      *string `json:"userId" example:"UUID"`                   // 用户ID
 	Avatar      *string `json:"avatar" example:"https://xxx/avatar.jpg"` // 用户头像
 	RealName    *string `json:"realName" example:"张三"`                   // 真实姓名
-	StoryStatus *string `json:"storyStatus" example:"0"`                 // 负责的需求状态,字典STORY_STATUS值,null=普通参与人
+	StoryStatus *string `json:"storyStatus" example:"0"`                 // 负责的需求状态(需求推进至该状态时指定),字典STORY_STATUS值
 }
 
 type StoryResponse struct {
@@ -414,7 +412,7 @@ type StoryResponse struct {
 	CreatorID     *string         `json:"creatorId" example:"UUID"`                 // 创建人ID
 	StoryType     string          `json:"storyType" example:"0"`                    // 需求类型
 	StoryStatus   string          `json:"storyStatus" example:"0"`                  // 需求状态
-	ThisUserList  []StoryUserItem `json:"thisUserList"`                             // 当前状态负责人列表(参与人中story_status等于需求当前状态的用户),无负责人时为空数组
+	ThisUser      *StoryUserItem  `json:"thisUser"`                                 // 当前状态负责人(参与人中story_status等于需求当前状态的用户,由流转时指定),无负责人时为null
 	StoryLevel    string          `json:"storyLevel" example:"0"`                   // 需求优先级
 	VersionID     *string         `json:"versionId" example:"UUID"`                 // 关联版本ID
 	Version       *string         `json:"version" example:"v1.0.0"`                 // 关联版本号
@@ -425,7 +423,7 @@ type StoryResponse struct {
 	Source        string          `json:"source" example:"0"`                       // 需求来源
 	UpdateDate    *string         `json:"updateDate" example:"2024-01-01 12:00:00"` // 更新时间
 	CreateDate    *string         `json:"createDate" example:"2024-01-01 12:00:00"` // 创建时间
-	UserList      []StoryUserItem `json:"userList"`                                 // 参与人员列表
+	UserList      []StoryUserItem `json:"userList"`                                 // 参与人员列表(历次推进指定的状态负责人)
 	StoryRichText *string         `json:"storyRichText" example:"<p>需求描述</p>"`      // 需求描述(富文本)
 	FileIDs       []string        `json:"fileIds"`                                  // 附件ID数组
 	FileList      []FileResponse  `json:"fileList"`                                 // 附件列表
@@ -587,38 +585,30 @@ type UpdateVersionNextRequest struct {
 	ChangeRichText string `json:"changeRichText" example:"<p>变更详情</p>"` // 变更详情(富文本)
 }
 
-// StoryUserRequest 需求参与人请求项;storyStatus 为负责的需求状态(字典STORY_STATUS值),空或null表示普通参与人。
-type StoryUserRequest struct {
-	UserID      string  `json:"userId" binding:"required" example:"UUID"` // 参与人员ID
-	StoryStatus *string `json:"storyStatus" example:"0"`                  // 负责的需求状态,字典STORY_STATUS值,空=普通参与人
-}
-
 type CreateStoryRequest struct {
-	StoryStatus   string             `json:"storyStatus" example:"0"`                      // 需求状态,字典STORY_STATUS值
-	StoryType     string             `json:"storyType" binding:"required" example:"0"`     // 需求类型,字典STORY_TYPE值
-	StoryLevel    string             `json:"storyLevel" example:"0"`                       // 需求优先级,字典STORY_LEVEL值
-	Source        string             `json:"source" example:"0"`                           // 需求来源,字典STORY_SOURCE值
-	StoryTitle    *string            `json:"storyTitle" binding:"required" example:"需求标题"` // 需求标题
-	StoryRichText *string            `json:"storyRichText" example:"需求描述"`                 // 需求描述,富文本格式
-	UserList      []StoryUserRequest `json:"userList"`                                     // 参与人员及负责状态
-	ProjectID     string             `json:"projectId" binding:"required" example:"UUID"`  // 关联项目id
-	VersionID     *string            `json:"versionId" binding:"required" example:"UUID"`  // 关联版本id
-	ModuleID      *string            `json:"moduleId" binding:"required" example:"UUID"`   // 关联模块id
-	FileIDs       []string           `json:"fileIds" example:"[\"UUID\"]"`                 // 附件id数组
+	StoryStatus   string   `json:"storyStatus" example:"0"`                      // 需求状态,字典STORY_STATUS值
+	StoryType     string   `json:"storyType" binding:"required" example:"0"`     // 需求类型,字典STORY_TYPE值
+	StoryLevel    string   `json:"storyLevel" example:"0"`                       // 需求优先级,字典STORY_LEVEL值
+	Source        string   `json:"source" example:"0"`                           // 需求来源,字典STORY_SOURCE值
+	StoryTitle    *string  `json:"storyTitle" binding:"required" example:"需求标题"` // 需求标题
+	StoryRichText *string  `json:"storyRichText" example:"需求描述"`                 // 需求描述,富文本格式
+	ProjectID     string   `json:"projectId" binding:"required" example:"UUID"`  // 关联项目id
+	VersionID     *string  `json:"versionId" binding:"required" example:"UUID"`  // 关联版本id
+	ModuleID      *string  `json:"moduleId" binding:"required" example:"UUID"`   // 关联模块id
+	FileIDs       []string `json:"fileIds" example:"[\"UUID\"]"`                 // 附件id数组
 }
 
 type UpdateStoryRequest struct {
-	StoryStatus   string             `json:"storyStatus" example:"0"`                      // 需求状态
-	StoryType     string             `json:"storyType" binding:"required" example:"0"`     // 需求类型
-	StoryLevel    string             `json:"storyLevel" example:"0"`                       // 需求优先级
-	Source        string             `json:"source" example:"0"`                           // 需求来源
-	StoryTitle    *string            `json:"storyTitle" binding:"required" example:"需求标题"` // 需求标题
-	StoryRichText *string            `json:"storyRichText" example:"<p>需求描述</p>"`          // 需求描述(富文本)
-	UserList      []StoryUserRequest `json:"userList"`                                     // 参与人员及负责状态
-	ProjectID     string             `json:"projectId" binding:"required" example:"UUID"`  // 关联项目ID
-	VersionID     *string            `json:"versionId" binding:"required" example:"UUID"`  // 关联版本ID
-	ModuleID      *string            `json:"moduleId" binding:"required" example:"UUID"`   // 关联模块ID
-	FileIDs       []string           `json:"fileIds"`                                      // 附件ID数组
+	StoryStatus   string   `json:"storyStatus" example:"0"`                      // 需求状态
+	StoryType     string   `json:"storyType" binding:"required" example:"0"`     // 需求类型
+	StoryLevel    string   `json:"storyLevel" example:"0"`                       // 需求优先级
+	Source        string   `json:"source" example:"0"`                           // 需求来源
+	StoryTitle    *string  `json:"storyTitle" binding:"required" example:"需求标题"` // 需求标题
+	StoryRichText *string  `json:"storyRichText" example:"<p>需求描述</p>"`          // 需求描述(富文本)
+	ProjectID     string   `json:"projectId" binding:"required" example:"UUID"`  // 关联项目ID
+	VersionID     *string  `json:"versionId" binding:"required" example:"UUID"`  // 关联版本ID
+	ModuleID      *string  `json:"moduleId" binding:"required" example:"UUID"`   // 关联模块ID
+	FileIDs       []string `json:"fileIds"`                                      // 附件ID数组
 }
 
 type UpdateStoryFieldRequest struct {
@@ -628,6 +618,7 @@ type UpdateStoryFieldRequest struct {
 
 type UpdateStoryNextRequest struct {
 	StoryStatus    string `json:"storyStatus" binding:"required" example:"0"` // 需求状态
+	UserID         string `json:"userId" example:"UUID"`                      // 状态负责人ID,流转到99(已关闭)可不传;其余状态必填,须为该项目成员,写入需求参与人关联表
 	ChangeRichText string `json:"changeRichText" example:"<p>流转说明</p>"`       // 流转说明(富文本)
 }
 

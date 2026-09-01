@@ -182,17 +182,15 @@ func (DevProject) TableName() string {
 	return "dev_project"
 }
 
-// DevProjectUser 项目用户关联表,统一管理项目成员及其负责的需求状态。
-// story_status 为逗号拼接的 STORY_STATUS 字典值(如 "0,1"),NULL 表示普通成员无负责状态。
+// DevProjectUser 项目用户关联表,统一管理项目成员。
 // 一个项目内同一用户只有一行,通过 project_id + user_id 唯一约束保证。
 type DevProjectUser struct {
-	ID          string     `gorm:"column:id;type:char(36);primaryKey" json:"id"`
-	ProjectID   string     `gorm:"column:project_id;type:char(36)" json:"projectId"`
-	UserID      string     `gorm:"column:user_id;type:char(36)" json:"userId"`
-	StoryStatus *string    `gorm:"column:story_status;type:varchar(50)" json:"storyStatus"`
-	CreateDate  *time.Time `gorm:"column:create_date" json:"createDate"`
-	UpdateDate  *time.Time `gorm:"column:update_date" json:"updateDate"`
-	DelFlag     int        `gorm:"column:del_flag;type:tinyint;default:0" json:"delFlag"`
+	ID         string     `gorm:"column:id;type:char(36);primaryKey" json:"id"`
+	ProjectID  string     `gorm:"column:project_id;type:char(36)" json:"projectId"`
+	UserID     string     `gorm:"column:user_id;type:char(36)" json:"userId"`
+	CreateDate *time.Time `gorm:"column:create_date" json:"createDate"`
+	UpdateDate *time.Time `gorm:"column:update_date" json:"updateDate"`
+	DelFlag    int        `gorm:"column:del_flag;type:tinyint;default:0" json:"delFlag"`
 }
 
 func (DevProjectUser) TableName() string {
@@ -259,7 +257,8 @@ func (DevStory) TableName() string {
 }
 
 // DevStoryUser 需求参与人关联表,替代原 dev_story.user_ids 逗号拼接存储;
-// story_status 记录参与人负责的需求状态(字典STORY_STATUS值),NULL 表示普通参与人。
+// 数据来源为需求推进接口:每次流转由操作人选定目标状态的负责人写入一行;
+// story_status 记录该参与人负责的需求状态(字典STORY_STATUS值)。
 type DevStoryUser struct {
 	ID          string     `gorm:"column:id;type:char(36);primaryKey" json:"id"`
 	StoryID     string     `gorm:"column:story_id;type:char(36)" json:"storyId"`

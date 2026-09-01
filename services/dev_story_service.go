@@ -19,6 +19,9 @@ import (
 // storyListMenuName 需求管理菜单的路由名称,流转通知的菜单未读消息推送目标。
 const storyListMenuName = "devStory"
 
+// storyStatusClosed 需求已关闭状态值(STORY_STATUS 字典),流转到该状态无需指定状态负责人。
+const storyStatusClosed = 99
+
 // applyStoryPermission 应用需求模块数据权限:创建人或 dev_story_user 参与人可见。
 func applyStoryPermission(query *gorm.DB, permission datapermission.Permission) *gorm.DB {
 	return permission.ApplyWithUserTable(query, []string{"dev_story.creator_id"}, "dev_story.story_id", "dev_story_user", "story_id", "user_id")
@@ -269,8 +272,8 @@ func buildStoryResponses(storys []models.DevStory, permission datapermission.Per
 			}
 		}
 
-		// 当前状态负责人列表:参与人中 story_status 等于需求当前状态的用户
-		thisUserList := buildStoryThisUserList(storyUserMap[story.StoryID], userMap, story.StoryStatus)
+		// 当前状态负责人:参与人中 story_status 等于需求当前状态的用户
+		thisUser := buildStoryThisUser(storyUserMap[story.StoryID], userMap, story.StoryStatus)
 
 		responses = append(responses, models.StoryResponse{
 			StoryID:       &story.StoryID,
@@ -280,7 +283,7 @@ func buildStoryResponses(storys []models.DevStory, permission datapermission.Per
 			CreatorID:     story.CreatorID,
 			StoryType:     intToString(story.StoryType),
 			StoryStatus:   intToString(story.StoryStatus),
-			ThisUserList:  thisUserList,
+			ThisUser:      thisUser,
 			StoryLevel:    intToString(story.StoryLevel),
 			VersionID:     story.VersionID,
 			Version:       &version,
@@ -319,9 +322,9 @@ func loadStoryUserMap(storyIDs []string) map[string][]models.DevStoryUser {
 	return result
 }
 
-// buildStoryThisUserList 从参与人关联行中筛选负责指定状态的用户,返回 StoryUserItem 列表。
-func buildStoryThisUserList(rows []models.DevStoryUser, userMap map[string]models.SysUser, storyStatus int) []models.StoryUserItem {
-	result := make([]models.StoryUserItem, 0)
+// buildStoryThisUser 从参与人关联行中筛选负责指定状态的用户,返回当前状态负责人;
+// 同一需求同一状态仅保留最新指定的负责人,异常多行时取最早写入的一条。
+func buildStoryThisUser(rows []models.DevStoryUser, userMap map[string]models.SysUser, storyStatus int) *models.StoryUserItem {
 	for _, row := range rows {
 		if row.StoryStatus == nil || *row.StoryStatus != storyStatus {
 			continue
@@ -334,10 +337,10 @@ func buildStoryThisUserList(rows []models.DevStoryUser, userMap map[string]model
 			}
 			status := intToString(storyStatus)
 			item.StoryStatus = &status
-			result = append(result, item)
+			return &item
 		}
 	}
-	return result
+	return nil
 }
 
 func GetStoryByNum(storyNum int, permission datapermission.Permission) (*models.StoryResponse, error) {
@@ -478,7 +481,7 @@ func buildSingleStoryResponse(story *models.DevStory, permission datapermission.
 		CreatorID:     story.CreatorID,
 		StoryType:     intToString(story.StoryType),
 		StoryStatus:   intToString(story.StoryStatus),
-		ThisUserList:  buildStoryThisUserList(storyUserRows, userMap, story.StoryStatus),
+		ThisUser:      buildStoryThisUser(storyUserRows, userMap, story.StoryStatus),
 		StoryLevel:    intToString(story.StoryLevel),
 		VersionID:     story.VersionID,
 		Version:       &version,
@@ -603,88 +606,7 @@ func createStoryTx(tx *gorm.DB, req *models.CreateStoryRequest, creatorID string
 		return err
 	}
 
-	if err := saveStoryUserTx(tx, storyID, req.UserList, permission); err != nil {
-		return err
-	}
-
 	return createChangeHistoryTx(tx, creatorID, storyID, 0, 0, "")
-}
-
-// saveStoryUserTx 校验参与人请求后全删全插需求参与人关联表。
-func saveStoryUserTx(tx *gorm.DB, storyID string, reqs []models.StoryUserRequest, permission datapermission.Permission) error {
-	rows, err := buildStoryUserRows(tx, storyID, reqs, permission)
-	if err != nil {
-		return err
-	}
-	if err := tx.Where("story_id = ?", storyID).Delete(&models.DevStoryUser{}).Error; err != nil {
-		return err
-	}
-	if len(rows) == 0 {
-		return nil
-	}
-	return tx.Create(&rows).Error
-}
-
-// buildStoryUserRows 校验参与人请求并构造关联表行。
-// userId 和 storyStatus 均必填,过滤后至少保留一条有效记录;
-// 按 userId+storyStatus 去重,同一用户可负责不同状态;参与人必须处于当前数据范围。
-func buildStoryUserRows(tx *gorm.DB, storyID string, reqs []models.StoryUserRequest, permission datapermission.Permission) ([]models.DevStoryUser, error) {
-	deduped := make([]models.StoryUserRequest, 0, len(reqs))
-	seen := make(map[string]bool, len(reqs))
-	for _, req := range reqs {
-		// 过滤无效项:userId 或 storyStatus 为空均跳过
-		if req.UserID == "" || req.StoryStatus == nil || strings.TrimSpace(*req.StoryStatus) == "" {
-			continue
-		}
-		// 按 userId+storyStatus 去重,重复项只保留首条
-		dedupKey := req.UserID + ":" + *req.StoryStatus
-		if seen[dedupKey] {
-			continue
-		}
-		seen[dedupKey] = true
-		deduped = append(deduped, req)
-	}
-	if len(deduped) == 0 {
-		return nil, fmt.Errorf("参与人至少需要一条有效记录,且必须填写人员和负责状态")
-	}
-
-	userIDs := make([]string, 0, len(deduped))
-	for _, req := range deduped {
-		userIDs = append(userIDs, req.UserID)
-	}
-	validUserIDs, err := validateDataPermissionUsers(tx, userIDs, permission)
-	if err != nil {
-		return nil, err
-	}
-	validUserIDSet := make(map[string]struct{}, len(validUserIDs))
-	for _, id := range validUserIDs {
-		validUserIDSet[id] = struct{}{}
-	}
-
-	now := time.Now()
-	rows := make([]models.DevStoryUser, 0, len(deduped))
-	for _, req := range deduped {
-		if _, ok := validUserIDSet[req.UserID]; !ok {
-			continue
-		}
-		status, err := parseStringInt(*req.StoryStatus, "storyStatus")
-		if err != nil {
-			return nil, err
-		}
-		row := models.DevStoryUser{
-			ID:          uuid.New().String(),
-			StoryID:     storyID,
-			UserID:      req.UserID,
-			StoryStatus: &status,
-			CreateDate:  &now,
-			UpdateDate:  &now,
-		}
-		rows = append(rows, row)
-	}
-	if len(rows) == 0 {
-		return nil, fmt.Errorf("参与人至少需要一条有效记录,且必须填写人员和负责状态")
-	}
-	return rows, nil
 }
 
 func CreateStorys(reqs []models.CreateStoryRequest, creatorID string, permission datapermission.Permission) error {
@@ -793,7 +715,7 @@ func UpdateStory(storyID string, req *models.UpdateStoryRequest, creatorID strin
 		if result.RowsAffected != 1 {
 			return fmt.Errorf("需求不存在或无权操作")
 		}
-		return saveStoryUserTx(tx, storyID, req.UserList, permission)
+		return nil
 	})
 }
 
@@ -838,7 +760,7 @@ func UpdateStoryField(storyID string, key string, value interface{}, creatorID s
 	})
 }
 
-func UpdateStoryNext(storyID string, storyStatus string, changeRichText string, creatorID string, permission datapermission.Permission) error {
+func UpdateStoryNext(storyID string, storyStatus string, userID string, changeRichText string, creatorID string, permission datapermission.Permission) error {
 	var story models.DevStory
 	query := database.DB.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = ?", storyID, 0)
 	err := applyStoryPermission(query, permission).First(&story).Error
@@ -852,6 +774,17 @@ func UpdateStoryNext(storyID string, storyStatus string, changeRichText string, 
 	storyStatusInt, err := parseStringInt(storyStatus, "storyStatus")
 	if err != nil {
 		return err
+	}
+
+	// 流转到已关闭状态不指定负责人,其余状态必须指定项目成员作为目标状态负责人
+	hasOwner := storyStatusInt != storyStatusClosed
+	if hasOwner {
+		if userID == "" {
+			return fmt.Errorf("请选择状态负责人")
+		}
+		if err := validateStoryProjectUser(story.ProjectID, userID); err != nil {
+			return err
+		}
 	}
 
 	// 流转说明为空时自动生成默认内容,保证变更记录始终记录流转去向
@@ -873,38 +806,64 @@ func UpdateStoryNext(storyID string, storyStatus string, changeRichText string, 
 		if result.RowsAffected != 1 {
 			return fmt.Errorf("需求不存在或无权操作")
 		}
-		return nil
+		if !hasOwner {
+			return nil
+		}
+		return saveStoryNextUserTx(tx, storyID, userID, storyStatusInt)
 	})
 	if err != nil {
 		return err
 	}
 
-	notifyStoryStatusOwners(&story, storyStatusInt)
+	if hasOwner {
+		notifyStoryStatusOwner(&story, storyStatusInt, userID)
+	}
 	return nil
 }
 
-// notifyStoryStatusOwners 需求流转成功后,向负责新状态的参与人推送需求管理菜单未读消息。
-// 推送在事务提交后执行,失败仅记日志不影响流转结果;不排除操作人自己。
-func notifyStoryStatusOwners(story *models.DevStory, storyStatus int) {
-	var rows []models.DevStoryUser
-	if err := database.DB.Where("story_id = ? AND story_status = ?", story.StoryID, storyStatus).Find(&rows).Error; err != nil {
-		log.Printf("[story] 查询流转通知对象失败: storyID=%s, status=%d, err=%v", story.StoryID, storyStatus, err)
-		return
+// validateStoryProjectUser 校验推进指定的状态负责人是需求所属项目的成员。
+func validateStoryProjectUser(projectID, userID string) error {
+	var count int64
+	if err := database.DB.Model(&models.DevProjectUser{}).
+		Where("project_id = ? AND user_id = ? AND del_flag = ?", projectID, userID, 0).
+		Count(&count).Error; err != nil {
+		return err
 	}
-	if len(rows) == 0 {
-		return
+	if count == 0 {
+		return fmt.Errorf("状态负责人必须是该项目成员")
 	}
+	return nil
+}
 
+// saveStoryNextUserTx 保存推进指定的状态负责人,写入需求参与人关联表;
+// 同一需求同一状态只保留最新指定的负责人,先删后插。
+func saveStoryNextUserTx(tx *gorm.DB, storyID, userID string, storyStatus int) error {
+	if err := tx.Where("story_id = ? AND story_status = ?", storyID, storyStatus).
+		Delete(&models.DevStoryUser{}).Error; err != nil {
+		return err
+	}
+	now := time.Now()
+	return tx.Create(&models.DevStoryUser{
+		ID:          uuid.New().String(),
+		StoryID:     storyID,
+		UserID:      userID,
+		StoryStatus: &storyStatus,
+		CreateDate:  &now,
+		UpdateDate:  &now,
+	}).Error
+}
+
+// notifyStoryStatusOwner 需求流转成功后,向本次指定的状态负责人推送需求管理菜单未读消息。
+// 推送在事务提交后执行,失败仅记日志不影响流转结果。
+func notifyStoryStatusOwner(story *models.DevStory, storyStatus int, userID string) {
 	statusLabel := loadStoryStatusLabel(storyStatus)
 	title := "需求流转通知"
 	content := fmt.Sprintf("需求「%s」已流转至「%s」，请及时跟进", utils.StringValue(story.StoryTitle), statusLabel)
 
 	service := NewMenuMessageService()
-	for _, row := range rows {
-		if err := service.CreateMenuMessageForMenuName(row.UserID, storyListMenuName, title, content); err != nil {
-			log.Printf("[story] 流转菜单消息推送失败: storyID=%s, status=%d, userID=%s, err=%v",
-				story.StoryID, storyStatus, row.UserID, err)
-		}
+	if err := service.CreateMenuMessageForMenuName(userID, storyListMenuName, title, content); err != nil {
+		log.Printf("[story] 流转菜单消息推送失败: storyID=%s, status=%d, userID=%s, err=%v",
+			story.StoryID, storyStatus, userID, err)
 	}
 }
 
