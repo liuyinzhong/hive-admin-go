@@ -718,8 +718,8 @@ func UpdateBugNext(bugID string, bugStatus string, changeRichText string, creato
 	if bugStatusInt == 0 {
 		updateMap["bug_confirm_status"] = 0
 	}
-	// 推进到状态 30（待验证）时，写入当前登录人为验证人
-	if bugStatusInt == 30 {
+	// 推进到状态 30（待验证）或 99（已关闭）时，若当前缺陷尚无验证人，则写入当前登录人为验证人
+	if (bugStatusInt == 30 || bugStatusInt == 99) && (bug.VerifierID == nil || *bug.VerifierID == "") {
 		updateMap["verifier_id"] = creatorID
 	}
 

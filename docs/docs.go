@@ -2192,7 +2192,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "流转缺陷状态；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；推进到状态 30 时写入当前登录人为 verifier_id",
+                "description": "流转缺陷状态；数据权限：角色数据范围，按 dev_bug.creator_id 或 dev_bug.fix_user_id 校验；推进到状态 30 或 99 且当前尚无验证人时，写入当前登录人为 verifier_id",
                 "consumes": [
                     "application/json"
                 ],
