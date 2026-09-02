@@ -176,7 +176,7 @@ func (dc *DevController) CreateStory(c *gin.Context) {
 
 // CreateStorys 批量创建需求
 // @Summary 批量创建需求
-// @Description 批量创建需求；每条记录的附件和关联版本均须处于当前数据范围。不接收参与人，参与人由需求流转接口写入 dev_story_user 关联表
+// @Description 批量创建需求；每条记录的附件和关联版本均须处于当前数据范围，整批一个事务任一条失败全部回滚。不接收参与人，参与人由需求流转接口写入 dev_story_user 关联表；创建成功后与单条创建一致自动发起流程
 // @Tags 开发管理/需求管理
 // @Accept json
 // @Produce json

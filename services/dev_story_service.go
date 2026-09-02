@@ -614,14 +614,25 @@ func createStoryTx(tx *gorm.DB, req *models.CreateStoryRequest, creatorID string
 }
 
 func CreateStorys(reqs []models.CreateStoryRequest, creatorID string, permission datapermission.Permission) error {
-	return database.DB.Transaction(func(tx *gorm.DB) error {
+	storyIDs := make([]string, 0, len(reqs))
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		for index := range reqs {
-			if err := createStoryTx(tx, &reqs[index], creatorID, permission, nil); err != nil {
+			var storyID string
+			if err := createStoryTx(tx, &reqs[index], creatorID, permission, &storyID); err != nil {
 				return fmt.Errorf("第%d条需求：%w", index+1, err)
 			}
+			storyIDs = append(storyIDs, storyID)
 		}
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+	// 与单条创建保持一致:创建成功后自动匹配并发起流程,失败仅记日志不影响创建结果
+	for _, storyID := range storyIDs {
+		autoStartStoryWorkflow(storyID, creatorID)
+	}
+	return nil
 }
 
 // StartStoryWorkflow 为需求发起流程,自动把 businessId 绑定为 storyId。
