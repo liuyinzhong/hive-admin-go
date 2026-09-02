@@ -3522,6 +3522,65 @@ const docTemplate = `{
                 }
             }
         },
+        "/dev/storys/batch-next": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；批量将多条需求流转到同一目标状态并指定同一位状态负责人（须为该项目成员），负责人写入 dev_story_user 关联表并接收需求管理菜单未读消息；流转到 99(已关闭) 时无需指定负责人，不写关联表、不推送通知；包含已关闭需求或跨项目需求时整批拒绝，任一条失败整批回滚",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "开发管理/需求管理"
+                ],
+                "summary": "批量流转需求",
+                "parameters": [
+                    {
+                        "description": "批量流转信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BatchUpdateStoryNextRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "流转成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/dev/storys/{storyId}": {
             "put": {
                 "security": [
@@ -24520,6 +24579,40 @@ const docTemplate = `{
                 "remark": {
                     "type": "string",
                     "maxLength": 512
+                }
+            }
+        },
+        "models.BatchUpdateStoryNextRequest": {
+            "type": "object",
+            "required": [
+                "storyIds",
+                "storyStatus"
+            ],
+            "properties": {
+                "changeRichText": {
+                    "description": "流转说明(富文本),留空自动生成默认文案",
+                    "type": "string",
+                    "example": "\u003cp\u003e流转说明\u003c/p\u003e"
+                },
+                "storyIds": {
+                    "description": "需求ID列表,须属于同一项目且不含已关闭需求",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
+                },
+                "storyStatus": {
+                    "description": "目标需求状态,统一应用到所有选中需求",
+                    "type": "string",
+                    "example": "10"
+                },
+                "userId": {
+                    "description": "状态负责人ID,统一应用到所有选中需求;流转到99(已关闭)可不传,其余状态必填且须为该项目成员",
+                    "type": "string",
+                    "example": "UUID"
                 }
             }
         },

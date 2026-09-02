@@ -299,6 +299,35 @@ func (dc *DevController) UpdateStoryNext(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
 }
 
+// BatchUpdateStoryNext 批量流转需求
+// @Summary 批量流转需求
+// @Description 数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；批量将多条需求流转到同一目标状态并指定同一位状态负责人（须为该项目成员），负责人写入 dev_story_user 关联表并接收需求管理菜单未读消息；流转到 99(已关闭) 时无需指定负责人，不写关联表、不推送通知；包含已关闭需求或跨项目需求时整批拒绝，任一条失败整批回滚
+// @Tags 开发管理/需求管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param request body models.BatchUpdateStoryNextRequest true "批量流转信息"
+// @Success 200 {object} models.Response "流转成功"
+// @Failure 400 {object} map[string]interface{} "参数错误"
+// @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /dev/storys/batch-next [put]
+func (dc *DevController) BatchUpdateStoryNext(c *gin.Context) {
+	var req models.BatchUpdateStoryNextRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
+		return
+	}
+
+	creatorID := c.GetString("userId")
+	err := services.BatchUpdateStoryNext(&req, creatorID, currentDataPermission(c))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+}
+
 // DeleteStorys 删除需求
 // @Summary 删除需求
 // @Description 数据权限：角色数据范围，按创建人或 dev_story_user 关联表参与人过滤；任一记录不存在或越界时整批失败，删除时同步清理 dev_story_user 关联行

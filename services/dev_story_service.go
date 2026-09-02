@@ -799,21 +799,7 @@ func UpdateStoryNext(storyID string, storyStatus string, userID string, changeRi
 
 	now := time.Now()
 	err = updateDevRecordWithHistory(creatorID, storyID, 0, 40, changeRichText, func(tx *gorm.DB) error {
-		updateQuery := tx.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = ?", storyID, 0)
-		result := applyStoryPermission(updateQuery, permission).Updates(map[string]interface{}{
-			"story_status": storyStatusInt,
-			"update_date":  now,
-		})
-		if result.Error != nil {
-			return result.Error
-		}
-		if result.RowsAffected != 1 {
-			return fmt.Errorf("需求不存在或无权操作")
-		}
-		if !hasOwner {
-			return nil
-		}
-		return saveStoryNextUserTx(tx, storyID, userID, storyStatusInt)
+		return applyStoryNextTx(tx, &story, storyStatusInt, userID, hasOwner, now, permission)
 	})
 	if err != nil {
 		return err
@@ -821,6 +807,100 @@ func UpdateStoryNext(storyID string, storyStatus string, userID string, changeRi
 
 	if hasOwner {
 		notifyStoryStatusOwner(&story, storyStatusInt, userID)
+	}
+	return nil
+}
+
+// applyStoryNextTx 在事务内执行单条需求流转:更新需求状态并写入状态负责人行。
+// 单条流转与批量流转共用,调用方负责前置校验和变更记录。
+func applyStoryNextTx(tx *gorm.DB, story *models.DevStory, storyStatusInt int, userID string, hasOwner bool, now time.Time, permission datapermission.Permission) error {
+	updateQuery := tx.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = ?", story.StoryID, 0)
+	result := applyStoryPermission(updateQuery, permission).Updates(map[string]interface{}{
+		"story_status": storyStatusInt,
+		"update_date":  now,
+	})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected != 1 {
+		return fmt.Errorf("需求不存在或无权操作")
+	}
+	if !hasOwner {
+		return nil
+	}
+	return saveStoryNextUserTx(tx, story.StoryID, userID, storyStatusInt)
+}
+
+// BatchUpdateStoryNext 批量流转需求:统一目标状态、同一位状态负责人,整批原子,
+// 任一条失败整体回滚;包含已关闭需求或跨项目需求时整批拒绝。
+func BatchUpdateStoryNext(req *models.BatchUpdateStoryNextRequest, creatorID string, permission datapermission.Permission) error {
+	storyIDs := uniqueNonEmptyStrings(req.StoryIDs)
+	if len(storyIDs) == 0 {
+		return fmt.Errorf("请选择要流转的需求")
+	}
+	storyStatusInt, err := parseStringInt(req.StoryStatus, "storyStatus")
+	if err != nil {
+		return err
+	}
+	hasOwner := storyStatusInt != storyStatusClosed
+
+	// 前置校验:按数据权限查出全部需求,数量不符说明存在越界或已删除的记录
+	var storys []models.DevStory
+	query := database.DB.Model(&models.DevStory{}).Where("story_id IN ? AND del_flag = ?", storyIDs, 0)
+	if err := applyStoryPermission(query, permission).Find(&storys).Error; err != nil {
+		return err
+	}
+	if len(storys) != len(storyIDs) {
+		return fmt.Errorf("需求不存在或无权操作")
+	}
+
+	projectIDs := make(map[string]struct{}, 1)
+	for _, story := range storys {
+		if story.StoryStatus == storyStatusClosed {
+			return fmt.Errorf("需求「%s」已关闭,不能再流转", utils.StringValue(story.StoryTitle))
+		}
+		projectIDs[story.ProjectID] = struct{}{}
+	}
+	if len(projectIDs) > 1 {
+		return fmt.Errorf("批量流转的需求必须属于同一个项目")
+	}
+	if hasOwner {
+		if req.UserID == "" {
+			return fmt.Errorf("请选择状态负责人")
+		}
+		for projectID := range projectIDs {
+			if err := validateStoryProjectUser(projectID, req.UserID); err != nil {
+				return err
+			}
+		}
+	}
+
+	// 流转说明为空时自动生成默认内容,保证变更记录始终记录流转去向
+	changeRichText := strings.TrimSpace(req.ChangeRichText)
+	if changeRichText == "" {
+		changeRichText = fmt.Sprintf("批量流转至「%s」，请及时跟进", loadStoryStatusLabel(storyStatusInt))
+	}
+
+	now := time.Now()
+	err = database.DB.Transaction(func(tx *gorm.DB) error {
+		for i := range storys {
+			if err := applyStoryNextTx(tx, &storys[i], storyStatusInt, req.UserID, hasOwner, now, permission); err != nil {
+				return fmt.Errorf("第%d条需求：%w", i+1, err)
+			}
+			if err := createChangeHistoryTx(tx, creatorID, storys[i].StoryID, 0, 40, changeRichText); err != nil {
+				return fmt.Errorf("第%d条需求：%w", i+1, err)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	if hasOwner {
+		for i := range storys {
+			notifyStoryStatusOwner(&storys[i], storyStatusInt, req.UserID)
+		}
 	}
 	return nil
 }

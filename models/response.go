@@ -622,6 +622,13 @@ type UpdateStoryNextRequest struct {
 	ChangeRichText string `json:"changeRichText" example:"<p>流转说明</p>"`       // 流转说明(富文本)
 }
 
+type BatchUpdateStoryNextRequest struct {
+	StoryIDs       []string `json:"storyIds" binding:"required,gt=0" example:"[\"UUID\"]"` // 需求ID列表,须属于同一项目且不含已关闭需求
+	StoryStatus    string   `json:"storyStatus" binding:"required" example:"10"`           // 目标需求状态,统一应用到所有选中需求
+	UserID         string   `json:"userId" example:"UUID"`                                 // 状态负责人ID,统一应用到所有选中需求;流转到99(已关闭)可不传,其余状态必填且须为该项目成员
+	ChangeRichText string   `json:"changeRichText" example:"<p>流转说明</p>"`                  // 流转说明(富文本),留空自动生成默认文案
+}
+
 type CreateTaskRequest struct {
 	PlanHours    float64 `json:"planHours" binding:"required" example:"8"`          // 计划工时
 	TaskStatus   string  `json:"taskStatus" example:"0"`                            // 任务状态
