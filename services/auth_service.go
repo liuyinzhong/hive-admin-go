@@ -87,6 +87,7 @@ func (s *AuthService) GetProfile(userID string) (*models.ProfileResponse, error)
 		RoleTitles: roleTitles,
 		RoleIds:    roleIds,
 		Email:      user.Email,
+		Signature:  user.Signature,
 		HomePath:   user.HomePath,
 		DeptTitles: deptTitles,
 		DeptIds:    deptIds,
@@ -103,7 +104,7 @@ func (s *AuthService) GetProfile(userID string) (*models.ProfileResponse, error)
 	return profile, nil
 }
 
-// UpdateProfile 当前用户更新自己的头像和邮箱，返回更新后的用户资料。
+// UpdateProfile 当前用户更新自己的头像、邮箱和签名，返回更新后的用户资料。
 // 字段为 nil 表示不修改；空字符串表示清空（写入 NULL）。只允许操作当前 Token 对应的用户。
 func (s *AuthService) UpdateProfile(userID string, req models.UpdateProfileRequest) (*models.ProfileResponse, error) {
 	updates := map[string]interface{}{}
@@ -113,6 +114,14 @@ func (s *AuthService) UpdateProfile(userID string, req models.UpdateProfileReque
 			updates["avatar"] = nil
 		} else {
 			updates["avatar"] = avatar
+		}
+	}
+	if req.Signature != nil {
+		signature := strings.TrimSpace(*req.Signature)
+		if signature == "" {
+			updates["signature"] = nil
+		} else {
+			updates["signature"] = signature
 		}
 	}
 	if req.Email != nil {

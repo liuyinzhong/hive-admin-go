@@ -30,6 +30,7 @@ type ProfileResponse struct {
 	RoleIds        []string `json:"roleIds"`                                  // 角色id数组
 	Desc           *string  `json:"desc" example:"超级管理员"`                     // 用户描述
 	Email          *string  `json:"email" example:"admin@example.com"`        // 邮箱
+	Signature      *string  `json:"signature" example:"https://xxx/sign.png"` // 签名图片URL
 	HomePath       *string  `json:"homePath" example:"/dashboard/analytics"`  // 首页路径
 	LeaderUserId   *string  `json:"leaderUserId" example:"UUID"`              // 直属上级用户ID
 	LeaderUserName *string  `json:"leaderUserName" example:"张三"`              // 直属上级用户姓名
@@ -42,8 +43,9 @@ type ProfileResponse struct {
 
 // UpdateProfileRequest 当前用户更新个人资料请求：字段为 nil 表示不修改，空字符串表示清空
 type UpdateProfileRequest struct {
-	Avatar *string `json:"avatar" binding:"omitempty,max=512" example:"https://xxx/avatar.jpg"` // 用户头像URL，空字符串表示清空
-	Email  *string `json:"email" binding:"omitempty,max=128" example:"admin@example.com"`       // 邮箱，空字符串表示清空
+	Avatar    *string `json:"avatar" binding:"omitempty,max=512" example:"https://xxx/avatar.jpg"`  // 用户头像URL，空字符串表示清空
+	Email     *string `json:"email" binding:"omitempty,max=128" example:"admin@example.com"`        // 邮箱，空字符串表示清空
+	Signature *string `json:"signature" binding:"omitempty,max=512" example:"https://xxx/sign.png"` // 签名图片URL，空字符串表示清空
 }
 
 type MenuMeta struct {

@@ -210,7 +210,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "获取当前登录用户的信息",
+                "description": "获取当前登录用户的信息（含头像、签名等资料）。数据权限：当前用户归属，只返回当前 Token 对应用户的资料，不经过角色数据范围",
                 "consumes": [
                     "application/json"
                 ],
@@ -255,7 +255,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "当前用户更新自己的头像和邮箱。数据权限：当前用户归属，只允许修改当前 Token 对应用户的记录，不经过角色数据范围；登录名、真实姓名等其余字段不在此接口开放。字段为 null 表示不修改，空字符串表示清空",
+                "description": "当前用户更新自己的头像、邮箱和签名图片。数据权限：当前用户归属，只允许修改当前 Token 对应用户的记录，不经过角色数据范围；登录名、真实姓名等其余字段不在此接口开放。字段为 null 表示不修改，空字符串表示清空",
                 "consumes": [
                     "application/json"
                 ],
@@ -31717,6 +31717,11 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "signature": {
+                    "description": "签名图片URL",
+                    "type": "string",
+                    "example": "https://xxx/sign.png"
+                },
                 "status": {
                     "description": "用户状态 0=禁用 1=启用",
                     "type": "integer",
@@ -35228,6 +35233,12 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 128,
                     "example": "admin@example.com"
+                },
+                "signature": {
+                    "description": "签名图片URL，空字符串表示清空",
+                    "type": "string",
+                    "maxLength": 512,
+                    "example": "https://xxx/sign.png"
                 }
             }
         },

@@ -388,7 +388,7 @@ func AddWorkflowTaskSign(taskID, userID string, req *models.WorkflowTaskAddSignR
 		if len(userIDs) == 0 || len(userIDs) > 20 {
 			return fmt.Errorf("加签用户数量必须在1到20人之间")
 		}
-		users, err := resolveWorkflowActors(tx, instance, "user", userIDs)
+		users, err := resolveWorkflowActors(tx, instance, "user", userIDs, true)
 		if err != nil {
 			return err
 		}
@@ -851,8 +851,10 @@ func handleWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionReq
 	})
 }
 
-// resolveWorkflowActors 按用户、角色或发起人直属上级解析启用用户。
-func resolveWorkflowActors(tx *gorm.DB, instance *models.WfProcessInstance, actorType string, actorIDs []string) ([]models.SysUser, error) {
+// resolveWorkflowActors 按用户、角色、发起人直属上级、流程发起人或审批参与人解析启用用户。
+// strict=true(审批节点):解析结果为空或部分人员停用时报错阻塞流程;
+// strict=false(抄送节点):过滤停用人员,结果可为空,不阻塞流程。
+func resolveWorkflowActors(tx *gorm.DB, instance *models.WfProcessInstance, actorType string, actorIDs []string, strict bool) ([]models.SysUser, error) {
 	userIDs := make([]string, 0)
 	switch actorType {
 	case "user":
@@ -874,18 +876,34 @@ func resolveWorkflowActors(tx *gorm.DB, instance *models.WfProcessInstance, acto
 			return nil, fmt.Errorf("发起人未配置直属上级")
 		}
 		userIDs = append(userIDs, *starter.LeaderUserID)
+	case "starter":
+		// 流程发起人本人,运行期恒为单人
+		userIDs = append(userIDs, instance.StarterID)
+	case "participant":
+		// 审批参与人:发起人 + 截至当前节点已审批过该实例的全部人员
+		userIDs = append(userIDs, instance.StarterID)
+		var assigneeIDs []string
+		if err := tx.Model(&models.WfProcessTask{}).
+			Where("instance_id = ? AND status != ? AND del_flag = 0", instance.InstanceID, models.WorkflowTaskStatusPending).
+			Distinct().Pluck("assignee_id", &assigneeIDs).Error; err != nil {
+			return nil, err
+		}
+		userIDs = append(userIDs, assigneeIDs...)
 	default:
 		return nil, fmt.Errorf("不支持的人员类型：%s", actorType)
 	}
 	userIDs = uniqueStrings(userIDs)
 	if len(userIDs) == 0 {
-		return nil, fmt.Errorf("没有解析到处理人")
+		if strict {
+			return nil, fmt.Errorf("没有解析到处理人")
+		}
+		return []models.SysUser{}, nil
 	}
 	var users []models.SysUser
 	if err := tx.Where("user_id IN ? AND status = 1 AND del_flag = 0", userIDs).Find(&users).Error; err != nil {
 		return nil, err
 	}
-	if len(users) != len(userIDs) {
+	if strict && len(users) != len(userIDs) {
 		return nil, fmt.Errorf("部分处理人不存在或已停用")
 	}
 	return users, nil

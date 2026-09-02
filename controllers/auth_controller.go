@@ -48,7 +48,7 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 
 // GetProfile 获取用户信息
 // @Summary 获取用户信息
-// @Description 获取当前登录用户的信息
+// @Description 获取当前登录用户的信息（含头像、签名等资料）。数据权限：当前用户归属，只返回当前 Token 对应用户的资料，不经过角色数据范围
 // @Tags 认证管理
 // @Accept json
 // @Produce json
@@ -74,7 +74,7 @@ func (ctrl *AuthController) GetProfile(c *gin.Context) {
 
 // UpdateProfile 更新当前用户资料
 // @Summary 更新当前用户资料
-// @Description 当前用户更新自己的头像和邮箱。数据权限：当前用户归属，只允许修改当前 Token 对应用户的记录，不经过角色数据范围；登录名、真实姓名等其余字段不在此接口开放。字段为 null 表示不修改，空字符串表示清空
+// @Description 当前用户更新自己的头像、邮箱和签名图片。数据权限：当前用户归属，只允许修改当前 Token 对应用户的记录，不经过角色数据范围；登录名、真实姓名等其余字段不在此接口开放。字段为 null 表示不修改，空字符串表示清空
 // @Tags 认证管理
 // @Accept json
 // @Produce json

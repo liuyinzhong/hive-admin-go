@@ -5335,6 +5335,10 @@ definitions:
         items:
           type: string
         type: array
+      signature:
+        description: 签名图片URL
+        example: https://xxx/sign.png
+        type: string
       status:
         description: 用户状态 0=禁用 1=启用
         example: 1
@@ -7967,6 +7971,11 @@ definitions:
         example: admin@example.com
         maxLength: 128
         type: string
+      signature:
+        description: 签名图片URL，空字符串表示清空
+        example: https://xxx/sign.png
+        maxLength: 512
+        type: string
     type: object
   models.UpdateProjectRequest:
     properties:
@@ -9199,7 +9208,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取当前登录用户的信息
+      description: 获取当前登录用户的信息（含头像、签名等资料）。数据权限：当前用户归属，只返回当前 Token 对应用户的资料，不经过角色数据范围
       produces:
       - application/json
       responses:
@@ -9225,7 +9234,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 当前用户更新自己的头像和邮箱。数据权限：当前用户归属，只允许修改当前 Token 对应用户的记录，不经过角色数据范围；登录名、真实姓名等其余字段不在此接口开放。字段为
+      description: 当前用户更新自己的头像、邮箱和签名图片。数据权限：当前用户归属，只允许修改当前 Token 对应用户的记录，不经过角色数据范围；登录名、真实姓名等其余字段不在此接口开放。字段为
         null 表示不修改，空字符串表示清空
       parameters:
       - description: 资料更新请求参数

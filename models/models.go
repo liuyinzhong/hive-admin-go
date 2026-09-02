@@ -12,6 +12,7 @@ type SysUser struct {
 	Desc         *string    `gorm:"column:desc;type:varchar(128)" json:"desc"`
 	Email        *string    `gorm:"column:email;type:varchar(128)" json:"email"`
 	Phone        *string    `gorm:"column:phone;type:varchar(20)" json:"phone"`
+	Signature    *string    `gorm:"column:signature;type:varchar(256)" json:"signature"`
 	Password     *string    `gorm:"column:password;type:varchar(512)" json:"-"`
 	HomePath     *string    `gorm:"column:home_path;type:varchar(128)" json:"homePath"`
 	LeaderUserID *string    `gorm:"column:leader_user_id;type:char(36)" json:"leaderUserId"`

@@ -138,9 +138,12 @@ func nextWorkflowRouteNode(graph *workflowGraph, node *workflowNode, variables m
 	return outgoing[0].TargetNodeID, nil, false, nil
 }
 
+// resolveWorkflowNodeActorSnapshot 解析节点处理人快照。
+// 审批节点严格解析(人员缺失阻塞流程);抄送节点宽松解析(过滤停用人员,可为空)。
 func resolveWorkflowNodeActorSnapshot(tx *gorm.DB, instance *models.WfProcessInstance, node *workflowNode) ([]string, []string, error) {
 	actorType := ""
 	actorIDs := []string(nil)
+	strict := true
 	switch node.Properties.NodeType {
 	case "approve":
 		actorType = node.Properties.AssigneeType
@@ -148,13 +151,14 @@ func resolveWorkflowNodeActorSnapshot(tx *gorm.DB, instance *models.WfProcessIns
 	case "copy":
 		actorType = node.Properties.CopyType
 		actorIDs = node.Properties.CopyIDs
+		strict = false
 	default:
 		if node.Properties.NodeType == "start" {
 			return []string{instance.StarterID}, []string{instance.StarterName}, nil
 		}
 		return []string{}, []string{}, nil
 	}
-	users, err := resolveWorkflowActors(tx, instance, actorType, actorIDs)
+	users, err := resolveWorkflowActors(tx, instance, actorType, actorIDs, strict)
 	if err != nil {
 		return nil, nil, err
 	}
