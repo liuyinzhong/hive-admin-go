@@ -4302,7 +4302,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "批量创建任务；每条记录的执行人、关联版本和关联需求均须处于当前数据范围",
+                "description": "批量创建任务；每条记录的执行人、关联版本和关联需求均须处于当前数据范围；携带 storyId 的记录由后端继承该需求的 moduleId 和 versionId，无需前端传入",
                 "consumes": [
                     "application/json"
                 ],

@@ -222,7 +222,7 @@ func (dc *DevController) CreateTask(c *gin.Context) {
 
 // CreateTasks 批量创建任务
 // @Summary 批量创建任务
-// @Description 批量创建任务；每条记录的执行人、关联版本和关联需求均须处于当前数据范围
+// @Description 批量创建任务；每条记录的执行人、关联版本和关联需求均须处于当前数据范围；携带 storyId 的记录由后端继承该需求的 moduleId 和 versionId，无需前端传入
 // @Tags 开发管理/任务管理
 // @Accept json
 // @Produce json

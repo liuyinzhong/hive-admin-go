@@ -429,6 +429,10 @@ func createTaskTx(tx *gorm.DB, req *models.CreateTaskRequest, creatorID string, 
 }
 
 func CreateTasks(reqs []models.CreateTaskRequest, creatorID string, permission datapermission.Permission) error {
+	// 批量创建按 storyId 继承关联需求的模块和版本,前端批量表格不提供版本/模块列
+	if err := inheritStoryRefsForTasks(reqs); err != nil {
+		return err
+	}
 	return database.DB.Transaction(func(tx *gorm.DB) error {
 		for index := range reqs {
 			if err := createTaskTx(tx, &reqs[index], creatorID, permission); err != nil {
@@ -437,6 +441,41 @@ func CreateTasks(reqs []models.CreateTaskRequest, creatorID string, permission d
 		}
 		return nil
 	})
+}
+
+// inheritStoryRefsForTasks 为携带 storyId 的任务请求继承关联需求的 moduleId 和 versionId;
+// 需求不存在时不在此报错,交由 createTaskTx 的引用校验统一处理。
+func inheritStoryRefsForTasks(reqs []models.CreateTaskRequest) error {
+	storyIDs := make([]string, 0, len(reqs))
+	for _, req := range reqs {
+		if req.StoryID != nil && *req.StoryID != "" {
+			storyIDs = append(storyIDs, *req.StoryID)
+		}
+	}
+	if len(storyIDs) == 0 {
+		return nil
+	}
+
+	var storys []models.DevStory
+	if err := database.DB.Where("story_id IN ? AND del_flag = ?", storyIDs, 0).Find(&storys).Error; err != nil {
+		return err
+	}
+	storyMap := make(map[string]models.DevStory, len(storys))
+	for _, story := range storys {
+		storyMap[story.StoryID] = story
+	}
+
+	for index := range reqs {
+		req := &reqs[index]
+		if req.StoryID == nil || *req.StoryID == "" {
+			continue
+		}
+		if story, ok := storyMap[*req.StoryID]; ok {
+			req.ModuleID = story.ModuleID
+			req.VersionID = story.VersionID
+		}
+	}
+	return nil
 }
 
 func UpdateTask(taskID string, req *models.UpdateTaskRequest, creatorID string, permission datapermission.Permission) error {
