@@ -81,36 +81,62 @@ type WorkflowBusinessInstanceResponse struct {
 	CreateDate     *string `json:"createDate" example:"2026-01-15 09:00:00"` // 关联建立时间
 }
 
-// GetWorkflowBusinessInstanceDetail 按业务对象查询关联详情,聚合实例信息。
-// 业务对象未绑定流程时返回 (nil, nil),未绑定是正常业务状态(如流程定义未发布期间创建的需求),调用方据此展示空态。
-func GetWorkflowBusinessInstanceDetail(businessType, businessID string) (*WorkflowBusinessInstanceResponse, error) {
-	binding, err := GetWorkflowBusinessInstanceByBusiness(businessType, businessID)
-	if err != nil {
+// GetWorkflowBusinessInstanceList 按业务对象查询全部关联流程实例摘要,按绑定时间倒序。
+// 需求详情页展示"关联流程"列表:既包含自动发起的需求流程,也包含结束后动作落地创建时写入的来源审批实例。
+// 业务对象未绑定流程时返回空列表(未绑定是正常业务状态,如流程定义未发布期间创建的需求);
+// 绑定对应的流程实例缺失时返回错误(脏数据不静默跳过)。
+func GetWorkflowBusinessInstanceList(businessType, businessID string) ([]WorkflowBusinessInstanceResponse, error) {
+	var bindings []models.WfBusinessInstance
+	if err := database.DB.Where("business_type = ? AND business_id = ? AND del_flag = 0", businessType, businessID).
+		Order("create_date DESC").Find(&bindings).Error; err != nil {
 		return nil, err
 	}
-	if binding == nil {
-		return nil, nil
+	if len(bindings) == 0 {
+		return []WorkflowBusinessInstanceResponse{}, nil
 	}
-	var instance models.WfProcessInstance
-	if err := database.DB.Where("instance_id = ? AND del_flag = 0", binding.InstanceID).First(&instance).Error; err != nil {
-		return nil, fmt.Errorf("流程实例不存在")
+	instanceIDs := make([]string, 0, len(bindings))
+	starterIDs := make([]string, 0, len(bindings))
+	for _, binding := range bindings {
+		instanceIDs = append(instanceIDs, binding.InstanceID)
+		starterIDs = append(starterIDs, binding.StarterID)
 	}
-	starterName := ""
-	if user, err := getActiveWorkflowUser(database.DB, binding.StarterID); err == nil {
-		starterName = workflowUserName(user)
+	var instances []models.WfProcessInstance
+	if err := database.DB.Where("instance_id IN ? AND del_flag = 0", instanceIDs).Find(&instances).Error; err != nil {
+		return nil, err
 	}
-	return &WorkflowBusinessInstanceResponse{
-		BindingID:      binding.BindingID,
-		BusinessType:   binding.BusinessType,
-		BusinessID:     binding.BusinessID,
-		InstanceID:     instance.InstanceID,
-		InstanceNo:     instance.InstanceNo,
-		DefinitionID:   instance.DefinitionID,
-		DefinitionName: instance.DefinitionName,
-		Title:          instance.Title,
-		StarterID:      binding.StarterID,
-		StarterName:    starterName,
-		Status:         fmt.Sprintf("%d", instance.Status),
-		CreateDate:     models.TimeToStringPtr(binding.CreateDate),
-	}, nil
+	instanceMap := make(map[string]models.WfProcessInstance, len(instances))
+	for _, instance := range instances {
+		instanceMap[instance.InstanceID] = instance
+	}
+	// 发起人姓名批量解析,不逐条查询;包含已停用用户,展示名不依赖启用状态
+	var users []models.SysUser
+	if err := database.DB.Where("user_id IN ?", starterIDs).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	userNames := make(map[string]string, len(users))
+	for _, user := range users {
+		userNames[user.UserID] = workflowUserName(user)
+	}
+	responses := make([]WorkflowBusinessInstanceResponse, 0, len(bindings))
+	for _, binding := range bindings {
+		instance, exists := instanceMap[binding.InstanceID]
+		if !exists {
+			return nil, fmt.Errorf("流程实例不存在")
+		}
+		responses = append(responses, WorkflowBusinessInstanceResponse{
+			BindingID:      binding.BindingID,
+			BusinessType:   binding.BusinessType,
+			BusinessID:     binding.BusinessID,
+			InstanceID:     instance.InstanceID,
+			InstanceNo:     instance.InstanceNo,
+			DefinitionID:   instance.DefinitionID,
+			DefinitionName: instance.DefinitionName,
+			Title:          instance.Title,
+			StarterID:      binding.StarterID,
+			StarterName:    userNames[binding.StarterID],
+			Status:         fmt.Sprintf("%d", instance.Status),
+			CreateDate:     models.TimeToStringPtr(binding.CreateDate),
+		})
+	}
+	return responses, nil
 }

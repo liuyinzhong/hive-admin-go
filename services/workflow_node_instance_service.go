@@ -220,7 +220,19 @@ func activateWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeIn
 		if err := completeWorkflowNode(tx, nodeInstance); err != nil {
 			return err
 		}
-		return finishWorkflowInstance(tx, context.instance, models.WorkflowInstanceStatusCompleted)
+		if err := finishWorkflowInstance(tx, context.instance, models.WorkflowInstanceStatusCompleted); err != nil {
+			return err
+		}
+		// 结束后动作:结束节点开启落地创建时,实例写入"已通过"终态后,在同一事务创建规划中需求。
+		// 创建失败返回错误,整个审批操作回滚;新需求 ID 暂存到上下文,待事务提交成功后链式自动发起需求流程。
+		if endNode := findWorkflowNode(context.graph, nodeInstance.NodeID); endNode != nil && endNode.Properties.CreateStoryOnFinish {
+			storyID, err := landStoryFromWorkflow(tx, context.instance)
+			if err != nil {
+				return err
+			}
+			context.pendingAutoStartStories = append(context.pendingAutoStartStories, storyID)
+		}
+		return nil
 	default:
 		return fmt.Errorf("不支持的流程节点类型：%s", nodeInstance.NodeType)
 	}

@@ -3853,14 +3853,14 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "返回需求当前关联的流程实例摘要,用于需求详情页展示流程入口。需求未发起流程时 data 为 null。数据权限:角色数据范围,沿用 dev:story:detail 边界,先按 storyNum 反查需求校验记录级权限,再返回流程绑定。",
+                "description": "返回需求关联的全部流程实例摘要,按绑定时间倒序,用于需求详情页展示关联流程列表:既包含需求自动发起的需求流程,也包含审批流程通过后落地创建该需求时写入的来源审批实例。需求未关联流程时 data 为空数组。数据权限:角色数据范围,沿用 dev:story:detail 边界,先按 storyNum 反查需求校验记录级权限,再返回流程关联列表。",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "开发管理/需求管理"
                 ],
-                "summary": "查询需求流程绑定",
+                "summary": "查询需求关联流程列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -3882,7 +3882,10 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/services.WorkflowBusinessInstanceResponse"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/services.WorkflowBusinessInstanceResponse"
+                                            }
                                         }
                                     }
                                 }

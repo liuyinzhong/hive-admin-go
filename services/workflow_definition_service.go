@@ -216,6 +216,9 @@ func PublishWorkflowDefinition(definitionID string) error {
 	if err := validateWorkflowConditionFields(graph, formFields); err != nil {
 		return err
 	}
+	if err := validateWorkflowStoryLandingConfig(&definition, graph, formFields); err != nil {
+		return err
+	}
 
 	version := definition.Version + 1
 	if version < 1 {
@@ -227,6 +230,38 @@ func PublishWorkflowDefinition(definitionID string) error {
 		"version":     version,
 		"update_date": time.Now(),
 	}).Error
+}
+
+// validateWorkflowStoryLandingConfig 校验结束后动作(流程通过后落地创建需求)的发布前置条件。
+// 开启 createStoryOnFinish 的定义必须与 business_type 互斥:business_type 表示流程服务于已有业务对象
+// (状态同步事件回写状态、自动发起流程按其匹配),与"结束后创建新需求"并存会导致自动发起误匹配和状态回写错乱。
+// 落地创建按表单同名字段映射写需求,story_title 为需求表非空字段,未绑定表单或缺少该字段时发布拦截。
+func validateWorkflowStoryLandingConfig(definition *models.WfProcessDefinition, graph *workflowGraph, formFields []models.FormSchemaField) error {
+	createStoryOnFinish := false
+	for index := range graph.Nodes {
+		node := &graph.Nodes[index]
+		if node.Properties.NodeType == "end" && node.Properties.CreateStoryOnFinish {
+			createStoryOnFinish = true
+			break
+		}
+	}
+	if !createStoryOnFinish {
+		return nil
+	}
+	if definition.BusinessType != nil && strings.TrimSpace(*definition.BusinessType) != "" {
+		return fmt.Errorf("开启结束后创建需求的流程不能声明业务归属类型:业务归属表示流程服务于已有业务对象,与结束后创建新需求互斥")
+	}
+	hasStoryTitle := false
+	for _, field := range formFields {
+		if field.FieldName == workflowStoryLandingTitleField {
+			hasStoryTitle = true
+			break
+		}
+	}
+	if !hasStoryTitle {
+		return fmt.Errorf("开启结束后创建需求的流程必须绑定包含 %s 字段的表单,供同名映射写入需求名称", workflowStoryLandingTitleField)
+	}
+	return nil
 }
 
 func UpdateWorkflowDefinitionStatus(definitionID string, status int) error {

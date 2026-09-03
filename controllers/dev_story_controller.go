@@ -400,34 +400,34 @@ func (dc *DevController) StartStoryWorkflow(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
 }
 
-// GetStoryWorkflowBinding 查询需求当前绑定的流程实例。
-// @Summary 查询需求流程绑定
-// @Description 返回需求当前关联的流程实例摘要,用于需求详情页展示流程入口。需求未发起流程时 data 为 null。数据权限:角色数据范围,沿用 dev:story:detail 边界,先按 storyNum 反查需求校验记录级权限,再返回流程绑定。
+// GetStoryWorkflowBindings 查询需求关联的全部流程实例。
+// @Summary 查询需求关联流程列表
+// @Description 返回需求关联的全部流程实例摘要,按绑定时间倒序,用于需求详情页展示关联流程列表:既包含需求自动发起的需求流程,也包含审批流程通过后落地创建该需求时写入的来源审批实例。需求未关联流程时 data 为空数组。数据权限:角色数据范围,沿用 dev:story:detail 边界,先按 storyNum 反查需求校验记录级权限,再返回流程关联列表。
 // @Tags 开发管理/需求管理
 // @Produce json
 // @Security ApiKeyAuth
 // @Param storyNum path int true "需求编号"
-// @Success 200 {object} models.Response{data=services.WorkflowBusinessInstanceResponse} "获取成功"
+// @Success 200 {object} models.Response{data=[]services.WorkflowBusinessInstanceResponse} "获取成功"
 // @Failure 403 {object} models.Response "无接口访问权限"
 // @Router /dev/storys/{storyNum}/workflow [get]
-func (dc *DevController) GetStoryWorkflowBinding(c *gin.Context) {
-	// 路径参数为需求编号(便于URL传播),内部反查 storyId(UUID) 用于查询流程绑定
+func (dc *DevController) GetStoryWorkflowBindings(c *gin.Context) {
+	// 路径参数为需求编号(便于URL传播),内部反查 storyId(UUID) 用于查询流程关联
 	storyNum, err := strconv.Atoi(c.Param("storyNum"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
 		return
 	}
-	// 复用 dev:story:detail 数据权限边界,未授权用户无法查询流程绑定
+	// 复用 dev:story:detail 数据权限边界,未授权用户无法查询流程关联
 	story, err := services.GetStoryByNum(storyNum, currentDataPermission(c))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
 		return
 	}
 	if story.StoryID == nil {
-		c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+		c.JSON(http.StatusOK, models.NewSuccessResponse([]interface{}{}))
 		return
 	}
-	result, err := services.GetStoryWorkflowBinding(*story.StoryID)
+	result, err := services.GetStoryWorkflowBindings(*story.StoryID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
 		return

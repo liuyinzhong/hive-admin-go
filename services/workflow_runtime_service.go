@@ -37,15 +37,16 @@ type workflowElementText struct {
 }
 
 type workflowNodeProperties struct {
-	NodeType         string            `json:"nodeType"`
-	AssigneeType     string            `json:"assigneeType"`
-	AssigneeIDs      []string          `json:"assigneeIds"`
-	ApprovalMode     string            `json:"approvalMode"`
-	CopyType         string            `json:"copyType"`
-	CopyIDs          []string          `json:"copyIds"`
-	BranchMode       string            `json:"branchMode"`
-	NodeBusinessKey  string            `json:"nodeBusinessKey"` // 节点业务键:业务模块在节点属性中配置的稳定语义标识,作为业务状态钩子入参
-	FieldPermissions map[string]string `json:"fieldPermissions"`
+	NodeType            string            `json:"nodeType"`
+	AssigneeType        string            `json:"assigneeType"`
+	AssigneeIDs         []string          `json:"assigneeIds"`
+	ApprovalMode        string            `json:"approvalMode"`
+	CopyType            string            `json:"copyType"`
+	CopyIDs             []string          `json:"copyIds"`
+	BranchMode          string            `json:"branchMode"`
+	NodeBusinessKey     string            `json:"nodeBusinessKey"` // 状态同步事件(原节点业务键):业务模块在节点属性中配置的稳定语义标识,作为业务状态钩子入参
+	FieldPermissions    map[string]string `json:"fieldPermissions"`
+	CreateStoryOnFinish bool              `json:"createStoryOnFinish"` // 结束后动作:结束节点开启时,实例通过后在同事务落地创建一条规划中需求;与 business_type 互斥
 }
 
 type workflowEdge struct {
@@ -73,11 +74,16 @@ type workflowExecutionContext struct {
 	instance  *models.WfProcessInstance
 	variables map[string]interface{}
 	steps     int
+	// pendingAutoStartStories 结束后动作在同事务落地创建的需求 ID。
+	// 落地本身与审批同事务,链式自动发起需求流程必须在事务提交成功后执行,故先暂存。
+	pendingAutoStartStories []string
 }
 
 // StartWorkflowInstance 创建实例快照并推进到第一个人工节点。
 func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID string) (*models.WorkflowInstanceResponse, error) {
 	var response *models.WorkflowInstanceResponse
+	// 落地上下文提至事务外:发起事务提交成功后,为结束后动作创建的需求链式自动发起需求流程。
+	var landingContext *workflowExecutionContext
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		var definition models.WfProcessDefinition
 		if err := tx.Where("definition_id = ? AND status = 1 AND del_flag = 0", req.DefinitionID).
@@ -176,8 +182,8 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 		if startNode == nil {
 			return fmt.Errorf("流程缺少开始节点")
 		}
-		context := &workflowExecutionContext{graph: graph, instance: &instance, variables: variables}
-		if err := initializeWorkflowRoute(tx, context, startNode.ID); err != nil {
+		landingContext = &workflowExecutionContext{graph: graph, instance: &instance, variables: variables}
+		if err := initializeWorkflowRoute(tx, landingContext, startNode.ID); err != nil {
 			return err
 		}
 
@@ -188,7 +194,11 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 		response = &result
 		return nil
 	})
-	return response, err
+	if err != nil {
+		return response, err
+	}
+	flushWorkflowLandingAutoStart(landingContext)
+	return response, nil
 }
 
 // GetWorkflowInstances 分页获取当前用户发起的流程实例。
@@ -747,7 +757,9 @@ func workflowOperationComment(summary string, comment *string) *string {
 
 // handleWorkflowTask 在事务内处理审批并推进或终止实例。
 func handleWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionRequest, approved bool) error {
-	return database.DB.Transaction(func(tx *gorm.DB) error {
+	// 落地上下文提至事务外:审批事务提交成功后,为结束后动作创建的需求链式自动发起需求流程。
+	var landingContext *workflowExecutionContext
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		var task models.WfProcessTask
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
 			Where("task_id = ? AND del_flag = 0", taskID).First(&task).Error; err != nil {
@@ -839,16 +851,21 @@ func handleWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionReq
 		if err := completeWorkflowNode(tx, nodeInstance); err != nil {
 			return err
 		}
-		// 节点完成后触发业务状态钩子:从流程画布反查节点业务键,调用对应业务模块的状态同步逻辑。
+		// 节点完成后触发业务状态钩子(状态同步事件):从流程画布反查节点声明的状态同步事件,调用对应业务模块的状态同步逻辑。
 		// 共享 tx 保证业务状态更新与流程流转原子性。无 nodeBusinessKey、无业务绑定或无 hook 注册时静默跳过。
 		if completedNode := findWorkflowNode(graph, nodeInstance.NodeID); completedNode != nil && completedNode.Properties.NodeBusinessKey != "" {
 			if err := triggerBusinessStateHook(tx, &instance, completedNode.Properties.NodeBusinessKey, true); err != nil {
 				return err
 			}
 		}
-		context := &workflowExecutionContext{graph: graph, instance: &instance, variables: variables}
-		return rebuildWorkflowRouteAfterNode(tx, context, nodeInstance)
+		landingContext = &workflowExecutionContext{graph: graph, instance: &instance, variables: variables}
+		return rebuildWorkflowRouteAfterNode(tx, landingContext, nodeInstance)
 	})
+	if err != nil {
+		return err
+	}
+	flushWorkflowLandingAutoStart(landingContext)
+	return nil
 }
 
 // resolveWorkflowActors 按用户、角色、发起人直属上级、流程发起人或审批参与人解析启用用户。

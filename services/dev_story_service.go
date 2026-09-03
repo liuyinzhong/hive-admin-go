@@ -656,10 +656,11 @@ func StartStoryWorkflow(storyID, definitionID, creatorID string, variables map[s
 	return StartWorkflowInstance(req, creatorID)
 }
 
-// GetStoryWorkflowBinding 查询需求当前绑定的流程实例,用于需求详情页展示流程入口。
-// 需求未发起流程时返回 nil 不报错,调用方据此决定是否显示"发起流程"按钮。
-func GetStoryWorkflowBinding(storyID string) (*WorkflowBusinessInstanceResponse, error) {
-	return GetWorkflowBusinessInstanceDetail("story", storyID)
+// GetStoryWorkflowBindings 查询需求关联的全部流程实例,用于需求详情页展示关联流程列表。
+// 包含自动发起的需求流程和结束后动作落地创建的来源审批实例,按绑定时间倒序;
+// 需求未关联流程时返回空列表,调用方据此决定是否显示"发起流程"按钮。
+func GetStoryWorkflowBindings(storyID string) ([]WorkflowBusinessInstanceResponse, error) {
+	return GetWorkflowBusinessInstanceList("story", storyID)
 }
 
 func UpdateStory(storyID string, req *models.UpdateStoryRequest, creatorID string, permission datapermission.Permission) error {
