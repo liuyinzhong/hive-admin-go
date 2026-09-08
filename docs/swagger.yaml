@@ -13,6 +13,74 @@ definitions:
     - effectiveDate
     - feeAmount
     type: object
+  models.AutomationActionConfig:
+    properties:
+      targetField:
+        description: 目标字段,须在业务类型可写字段白名单内
+        example: story_status
+        type: string
+      targetValue:
+        description: 目标值,字典字段须为对应字典的合法值
+        example: "10"
+        type: string
+    type: object
+  models.AutomationFieldMeta:
+    properties:
+      dictType:
+        example: STORY_STATUS
+        type: string
+      field:
+        example: story_status
+        type: string
+      label:
+        example: 需求状态
+        type: string
+    type: object
+  models.AutomationResponse:
+    properties:
+      actionType:
+        example: update_field
+        type: string
+      automationId:
+        example: UUID
+        type: string
+      automationName:
+        example: 需求评审通过
+        type: string
+      businessType:
+        example: "0"
+        type: string
+      createDate:
+        example: "2026-09-03 10:00:00"
+        type: string
+      creatorId:
+        example: UUID
+        type: string
+      creatorName:
+        example: 管理员
+        type: string
+      dictType:
+        example: STORY_STATUS
+        type: string
+      remark:
+        example: 评审节点使用
+        type: string
+      status:
+        example: "0"
+        type: string
+      targetField:
+        example: story_status
+        type: string
+      targetFieldLabel:
+        example: 需求状态
+        type: string
+      targetValue:
+        example: "10"
+        type: string
+      updateDate:
+        example: "2026-09-03 10:00:00"
+        type: string
+    type: object
   models.BatchUpdateStoryNextRequest:
     properties:
       changeRichText:
@@ -178,45 +246,6 @@ definitions:
         example: UUID
         type: string
     type: object
-  models.BusinessHookRegistryItem:
-    properties:
-      businessType:
-        description: 业务类型:流程定义声明的业务归属标识
-        example: story
-        type: string
-      label:
-        description: 业务类型中文名:设计器下拉展示
-        example: 需求
-        type: string
-      nodeKeys:
-        description: 该业务类型支持的节点业务键列表
-        items:
-          $ref: '#/definitions/models.BusinessNodeKeyDef'
-        type: array
-    type: object
-  models.BusinessHookRegistryResponse:
-    properties:
-      items:
-        description: 全部已注册业务类型及其节点键
-        items:
-          $ref: '#/definitions/models.BusinessHookRegistryItem'
-        type: array
-    type: object
-  models.BusinessNodeKeyDef:
-    properties:
-      description:
-        description: 说明:设计器下拉提示
-        example: 节点通过后需求状态改为已评审
-        type: string
-      label:
-        description: 中文名:设计器下拉展示
-        example: 评审通过
-        type: string
-      nodeKey:
-        description: 节点业务键:流程节点上配置的稳定语义标识
-        example: review
-        type: string
-    type: object
   models.ChangeHistoryResponse:
     properties:
       businessId:
@@ -359,6 +388,38 @@ definitions:
         type: string
     required:
     - bugConfirmStatus
+    type: object
+  models.CreateAutomationRequest:
+    properties:
+      actionConfig:
+        allOf:
+        - $ref: '#/definitions/models.AutomationActionConfig'
+        description: 动作参数
+      actionType:
+        description: 动作类型
+        example: update_field
+        type: string
+      automationName:
+        description: 动作名称
+        example: 需求评审通过
+        type: string
+      businessType:
+        description: 业务类型,字典BUSINESS_TYPE的值
+        example: "0"
+        type: string
+      remark:
+        description: 备注
+        example: 评审节点使用
+        type: string
+      status:
+        description: 状态:0启用 1停用,默认启用
+        example: 0
+        type: integer
+    required:
+    - actionConfig
+    - actionType
+    - automationName
+    - businessType
     type: object
   models.CreateBugRequest:
     properties:
@@ -1168,8 +1229,8 @@ definitions:
   models.CreateWorkflowDefinitionRequest:
     properties:
       businessType:
-        description: 业务归属类型:story/bug/task
-        example: story
+        description: 业务类型,字典BUSINESS_TYPE的值
+        example: "0"
         type: string
       category:
         description: 流程分类
@@ -1183,11 +1244,20 @@ definitions:
         description: LogicFlow画布JSON
         example: '{"nodes":[],"edges":[]}'
         type: string
+      isDefault:
+        description: 默认流程标志,仅被动触发流程可设,同业务类型唯一
+        example: true
+        type: boolean
       remark:
         description: 备注
         example: 流程说明
         type: string
+      startType:
+        description: 启动类型:0手动发起(默认) 1被动触发
+        example: 1
+        type: integer
     required:
+    - businessType
     - definitionName
     type: object
   models.DeleteErpWarehouseLocationRequest:
@@ -7464,6 +7534,31 @@ definitions:
         example: UUID
         type: string
     type: object
+  models.UpdateAutomationRequest:
+    properties:
+      actionConfig:
+        $ref: '#/definitions/models.AutomationActionConfig'
+      actionType:
+        example: update_field
+        type: string
+      automationName:
+        example: 需求评审通过
+        type: string
+      businessType:
+        example: "0"
+        type: string
+      remark:
+        example: 评审节点使用
+        type: string
+      status:
+        example: 0
+        type: integer
+    required:
+    - actionConfig
+    - actionType
+    - automationName
+    - businessType
+    type: object
   models.UpdateBugFieldRequest:
     properties:
       key:
@@ -8305,8 +8400,8 @@ definitions:
   models.UpdateWorkflowDefinitionRequest:
     properties:
       businessType:
-        description: 业务归属类型:story/bug/task
-        example: story
+        description: 业务类型,字典BUSINESS_TYPE的值
+        example: "0"
         type: string
       category:
         description: 流程分类
@@ -8320,11 +8415,20 @@ definitions:
         description: LogicFlow画布JSON
         example: '{"nodes":[],"edges":[]}'
         type: string
+      isDefault:
+        description: 默认流程标志,仅被动触发流程可设,同业务类型唯一
+        example: true
+        type: boolean
       remark:
         description: 备注
         example: 流程说明
         type: string
+      startType:
+        description: 启动类型:0手动发起(默认) 1被动触发
+        example: 1
+        type: integer
     required:
+    - businessType
     - definitionName
     type: object
   models.UpdateWorkflowFormSchemaRequest:
@@ -8510,24 +8614,24 @@ definitions:
   models.WorkflowBusinessSummaryResponse:
     properties:
       businessId:
-        description: 业务对象主键
+        description: 业务对象ID
         example: UUID
         type: string
       businessLabel:
-        description: 业务类型中文名:详情页展示
+        description: 业务类型中文名
         example: 需求
         type: string
       businessTitle:
-        description: 业务对象标题:详情页展示
-        example: 网站首页改版
+        description: 业务对象标题
+        example: 增加导出功能
         type: string
       businessType:
-        description: 业务类型:流程定义声明的业务归属标识
-        example: story
+        description: 业务类型,字典BUSINESS_TYPE的值
+        example: "0"
         type: string
       detailPath:
-        description: 前端详情页路径:点击跳转
-        example: /dev/story/detail/42
+        description: 前端详情页路径,无独立路由的业务为空
+        example: /dev/story/detail/45
         type: string
     type: object
   models.WorkflowCopyResponse:
@@ -8584,8 +8688,8 @@ definitions:
   models.WorkflowDefinitionResponse:
     properties:
       businessType:
-        description: 业务归属类型:story/bug/task
-        example: story
+        description: 业务类型,字典BUSINESS_TYPE的值
+        example: "0"
         type: string
       category:
         description: 流程分类
@@ -8623,10 +8727,18 @@ definitions:
         description: 关联表单Schema ID
         example: UUID
         type: string
+      isDefault:
+        description: 默认流程标志(同业务类型唯一,仅被动触发流程可设)
+        example: false
+        type: boolean
       remark:
         description: 备注
         example: 流程说明
         type: string
+      startType:
+        description: 启动类型:0手动发起流程 1被动触发流程
+        example: 0
+        type: integer
       status:
         description: 流程状态：0草稿 1已发布 2已停用
         example: "0"
@@ -9027,8 +9139,8 @@ definitions:
         example: UUID
         type: string
       businessType:
-        description: 业务类型
-        example: story
+        description: 业务类型,字典BUSINESS_TYPE的值(0需求/10任务/20缺陷/30版本)
+        example: "0"
         type: string
       createDate:
         description: 关联建立时间
@@ -23313,9 +23425,67 @@ paths:
       summary: 获取所有用户
       tags:
       - 系统管理/用户管理
-  /workflow/business-hooks:
+  /workflow/automations:
+    delete:
+      consumes:
+      - application/json
+      description: 软删除自动化动作。已挂载到流程画布的快照不受影响,继续按快照执行。数据权限:全局主数据,删除配置不区分归属人,维护入口由接口权限控制。
+      parameters:
+      - description: 自动化动作ID数组
+        in: body
+        name: automationIds
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 批量删除自动化动作
+      tags:
+      - 工作流/自动化动作
     get:
-      description: 返回所有已注册业务状态钩子的元数据,供流程设计器加载业务类型和节点业务键下拉选项。数据权限:公开接口(登录后可访问),不使用记录级数据权限,返回的是钩子元数据不涉及业务记录,不按创建人过滤。
+      description: 按名称、业务类型、状态分页查询自动化动作库。数据权限:全局主数据,动作库是全系统共享的流程联动配置,不按创建人过滤,维护入口由接口权限控制。
+      parameters:
+      - description: 页码,默认1
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量,默认10
+        in: query
+        name: pageSize
+        type: integer
+      - description: 动作名称,模糊匹配
+        in: query
+        name: automationName
+        type: string
+      - description: 业务类型,字典BUSINESS_TYPE的值
+        in: query
+        name: businessType
+        type: string
+      - description: 状态:0启用 1停用
+        in: query
+        name: status
+        type: integer
       produces:
       - application/json
       responses:
@@ -23326,18 +23496,164 @@ paths:
             - $ref: '#/definitions/models.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.BusinessHookRegistryResponse'
+                  $ref: '#/definitions/utils.PaginationResponse'
               type: object
         "401":
-          description: 未授权
+          description: 未登录
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
-      summary: 查询业务状态钩子注册表
+      summary: 分页查询自动化动作
       tags:
-      - 流程管理/业务绑定
+      - 工作流/自动化动作
+    post:
+      consumes:
+      - application/json
+      description: 创建可复用的自动化动作。校验业务类型已注册、动作类型受支持、目标字段在业务类型可写字段白名单内、目标值为对应字典合法值。数据权限:全局主数据,新增配置不区分归属人,维护入口由接口权限控制。
+      parameters:
+      - description: 自动化动作参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateAutomationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数或校验错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建自动化动作
+      tags:
+      - 工作流/自动化动作
+  /workflow/automations/{automationId}:
+    put:
+      consumes:
+      - application/json
+      description: 更新自动化动作配置。已挂载到流程画布的快照不受影响,重新挂载或重新发布对应流程才使用新配置。数据权限:全局主数据,更新配置不区分归属人,维护入口由接口权限控制。
+      parameters:
+      - description: 自动化动作ID
+        in: path
+        name: automationId
+        required: true
+        type: string
+      - description: 自动化动作参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateAutomationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数或校验错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新自动化动作
+      tags:
+      - 工作流/自动化动作
+  /workflow/automations/fields:
+    get:
+      description: 返回指定业务类型允许修改的字段清单(版本1仅状态字段)及字段值字典类型,供动作库新建/编辑表单联动。数据权限:全局主数据,字段元数据来源于后端业务类型注册表。
+      parameters:
+      - description: 业务类型,字典BUSINESS_TYPE的值
+        in: query
+        name: businessType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.AutomationFieldMeta'
+                  type: array
+              type: object
+        "400":
+          description: 业务类型未注册
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 自动化动作可写字段
+      tags:
+      - 工作流/自动化动作
+  /workflow/automations/options:
+    get:
+      description: 返回指定业务类型下启用的自动化动作列表,供流程设计器节点挂载动作时选择。数据权限:全局主数据,选项为动作库元数据,不涉及业务记录。
+      parameters:
+      - description: 业务类型,字典BUSINESS_TYPE的值;为空时返回全部业务类型
+        in: query
+        name: businessType
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.AutomationResponse'
+                  type: array
+              type: object
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 自动化动作选项
+      tags:
+      - 工作流/自动化动作
   /workflow/copies:
     get:
       parameters:

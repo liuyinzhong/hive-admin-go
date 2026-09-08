@@ -30,6 +30,12 @@ func GetWorkflowDefinitions(page, pageSize int, params map[string]interface{}) (
 	if statuses, ok := params["statuses"].([]int); ok && len(statuses) > 0 {
 		db = db.Where("status IN ?", statuses)
 	}
+	if businessType, ok := params["businessType"].(string); ok && businessType != "" {
+		db = db.Where("business_type = ?", businessType)
+	}
+	if startType, ok := params["startType"].(int); ok && startType >= 0 {
+		db = db.Where("start_type = ?", startType)
+	}
 
 	sorts := params["sorts"].(string)
 	order := utils.BuildOrderBy(sorts, map[string]string{
@@ -62,6 +68,12 @@ func GetAllWorkflowDefinitions(params map[string]interface{}) ([]models.Workflow
 	if status, ok := params["status"].(int); ok && status >= 0 {
 		db = db.Where("status = ?", status)
 	}
+	if businessType, ok := params["businessType"].(string); ok && businessType != "" {
+		db = db.Where("business_type = ?", businessType)
+	}
+	if startType, ok := params["startType"].(int); ok && startType >= 0 {
+		db = db.Where("start_type = ?", startType)
+	}
 
 	var definitions []models.WfProcessDefinition
 	err := db.Order("create_date DESC").Find(&definitions).Error
@@ -87,6 +99,8 @@ func GetWorkflowDefinition(definitionID string) (*models.WorkflowDefinitionRespo
 }
 
 // CreateWorkflowDefinition 创建流程定义。DefinitionKey 通过公共编码流水 WORKFLOW_DEFINITION 域自动生成，保证全局唯一且递增。
+// BusinessType 必填且须为已注册业务类型;StartType 默认手动发起;
+// IsDefault 仅被动触发流程可设为 true,同业务类型唯一,创建事务内自动顶掉该类型原默认。
 func CreateWorkflowDefinition(req *models.CreateWorkflowDefinitionRequest, creatorID string) error {
 	flowData := normalizeWorkflowFlowData(req.FlowData)
 	if req.FlowData != nil && strings.TrimSpace(*req.FlowData) != "" {
@@ -94,13 +108,27 @@ func CreateWorkflowDefinition(req *models.CreateWorkflowDefinitionRequest, creat
 			return err
 		}
 	}
+	businessType, err := validateWorkflowBusinessType(req.BusinessType)
+	if err != nil {
+		return err
+	}
+	startType, err := normalizeWorkflowStartType(req.StartType)
+	if err != nil {
+		return err
+	}
+	isDefault, err := normalizeWorkflowIsDefault(req.IsDefault, startType)
+	if err != nil {
+		return err
+	}
 
 	now := time.Now()
 	definition := models.WfProcessDefinition{
 		DefinitionID:   uuid.New().String(),
 		DefinitionName: strings.TrimSpace(req.DefinitionName),
 		Category:       req.Category,
-		BusinessType:   normalizeWorkflowBusinessType(req.BusinessType),
+		BusinessType:   &businessType,
+		StartType:      startType,
+		IsDefault:      isDefault,
 		Status:         0,
 		Version:        0,
 		FlowData:       &flowData,
@@ -117,11 +145,18 @@ func CreateWorkflowDefinition(req *models.CreateWorkflowDefinitionRequest, creat
 			return err
 		}
 		definition.DefinitionKey = key
-		return tx.Create(&definition).Error
+		if err := tx.Create(&definition).Error; err != nil {
+			return err
+		}
+		if isDefault == 1 {
+			return clearWorkflowBusinessTypeDefault(tx, businessType, definition.DefinitionID)
+		}
+		return nil
 	})
 }
 
 // UpdateWorkflowDefinition 更新流程定义。DefinitionKey 由后端自动生成且不可修改，更新时不接受前端传入的 DefinitionKey。
+// 默认流程标志随表单提交维护:设为默认时在同事务内顶掉同业务类型原默认;改为手动发起时自动清空。
 func UpdateWorkflowDefinition(definitionID string, req *models.UpdateWorkflowDefinitionRequest) error {
 	var definition models.WfProcessDefinition
 	err := database.DB.Where("definition_id = ? AND del_flag = ?", definitionID, 0).First(&definition).Error
@@ -131,18 +166,33 @@ func UpdateWorkflowDefinition(definitionID string, req *models.UpdateWorkflowDef
 		}
 		return err
 	}
+	businessType, err := validateWorkflowBusinessType(req.BusinessType)
+	if err != nil {
+		return err
+	}
+	startType, err := normalizeWorkflowStartType(req.StartType)
+	if err != nil {
+		return err
+	}
+	isDefault, err := normalizeWorkflowIsDefault(req.IsDefault, startType)
+	if err != nil {
+		return err
+	}
 
 	updates := map[string]interface{}{
 		"definition_name": strings.TrimSpace(req.DefinitionName),
 		"category":        req.Category,
+		"business_type":   businessType,
+		"start_type":      startType,
 		"remark":          req.Remark,
 		"update_date":     time.Now(),
 	}
-	// business_type 支持清空(nil → NULL)和赋值,GORM 对 map 中 nil 值会跳过更新,故显式用 Expr 处理清空
-	if businessType := normalizeWorkflowBusinessType(req.BusinessType); businessType == nil {
-		updates["business_type"] = gorm.Expr("NULL")
+	if startType == models.WorkflowStartTypeManual {
+		updates["is_default"] = 0
 	} else {
-		updates["business_type"] = *businessType
+		updates["is_default"] = isDefault
+		// 改为被动触发时自动解绑表单:被动触发流程由业务对象自动发起,没有发起人填表单环节
+		updates["form_schema_id"] = gorm.Expr("NULL")
 	}
 	if req.FlowData != nil && strings.TrimSpace(*req.FlowData) != "" {
 		flowData := normalizeWorkflowFlowData(req.FlowData)
@@ -152,7 +202,34 @@ func UpdateWorkflowDefinition(definitionID string, req *models.UpdateWorkflowDef
 		updates["flow_data"] = flowData
 		updates["status"] = 0
 	}
-	return database.DB.Model(&definition).Updates(updates).Error
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&definition).Updates(updates).Error; err != nil {
+			return err
+		}
+		if isDefault == 1 {
+			return clearWorkflowBusinessTypeDefault(tx, businessType, definition.DefinitionID)
+		}
+		return nil
+	})
+}
+
+// normalizeWorkflowIsDefault 规范化默认流程标志:仅被动触发流程可设为默认。
+func normalizeWorkflowIsDefault(value *bool, startType int) (int, error) {
+	if value == nil || !*value {
+		return 0, nil
+	}
+	if startType != models.WorkflowStartTypePassive {
+		return 0, fmt.Errorf("只有被动触发流程可以设为默认流程")
+	}
+	return 1, nil
+}
+
+// clearWorkflowBusinessTypeDefault 顶掉同业务类型下除当前定义外的原默认流程,保证同类型唯一。
+// 先清后设在同一事务内串行执行,并发设默认时后提交者胜出,最终状态仍然唯一。
+func clearWorkflowBusinessTypeDefault(tx *gorm.DB, businessType, excludeDefinitionID string) error {
+	return tx.Model(&models.WfProcessDefinition{}).
+		Where("business_type = ? AND is_default = 1 AND definition_id <> ? AND del_flag = 0", businessType, excludeDefinitionID).
+		Updates(map[string]interface{}{"is_default": 0, "update_date": time.Now()}).Error
 }
 
 func UpdateWorkflowCanvas(definitionID string, flowData string) error {
@@ -216,7 +293,10 @@ func PublishWorkflowDefinition(definitionID string) error {
 	if err := validateWorkflowConditionFields(graph, formFields); err != nil {
 		return err
 	}
-	if err := validateWorkflowStoryLandingConfig(&definition, graph, formFields); err != nil {
+	if err := validateWorkflowBusinessTypeRequired(&definition); err != nil {
+		return err
+	}
+	if err := validateWorkflowAutomationMounts(&definition, graph); err != nil {
 		return err
 	}
 
@@ -232,34 +312,58 @@ func PublishWorkflowDefinition(definitionID string) error {
 	}).Error
 }
 
-// validateWorkflowStoryLandingConfig 校验结束后动作(流程通过后落地创建需求)的发布前置条件。
-// 开启 createStoryOnFinish 的定义必须与 business_type 互斥:business_type 表示流程服务于已有业务对象
-// (状态同步事件回写状态、自动发起流程按其匹配),与"结束后创建新需求"并存会导致自动发起误匹配和状态回写错乱。
-// 落地创建按表单同名字段映射写需求,story_title 为需求表非空字段,未绑定表单或缺少该字段时发布拦截。
-func validateWorkflowStoryLandingConfig(definition *models.WfProcessDefinition, graph *workflowGraph, formFields []models.FormSchemaField) error {
-	createStoryOnFinish := false
-	for index := range graph.Nodes {
-		node := &graph.Nodes[index]
-		if node.Properties.NodeType == "end" && node.Properties.CreateStoryOnFinish {
-			createStoryOnFinish = true
-			break
-		}
+// validateWorkflowBusinessTypeRequired 校验发布定义的业务类型必填且已注册。
+func validateWorkflowBusinessTypeRequired(definition *models.WfProcessDefinition) error {
+	if definition.BusinessType == nil || strings.TrimSpace(*definition.BusinessType) == "" {
+		return fmt.Errorf("流程定义必须声明业务类型后才能发布")
 	}
-	if !createStoryOnFinish {
+	if _, exists := getBusinessTypeDef(strings.TrimSpace(*definition.BusinessType)); !exists {
+		return fmt.Errorf("流程定义的业务类型 %s 未注册,无法发布", *definition.BusinessType)
+	}
+	// 被动触发流程由业务对象自动发起,表单的发起填写环节不存在,不允许携带表单发布(直接改库绕过绑定接口的兜底)
+	if definition.StartType == models.WorkflowStartTypePassive &&
+		definition.FormSchemaID != nil && strings.TrimSpace(*definition.FormSchemaID) != "" {
+		return fmt.Errorf("被动触发流程由业务对象自动发起,不能关联表单,请先解除表单绑定")
+	}
+	return nil
+}
+
+// validateWorkflowAutomationMounts 校验画布节点挂载的自动化动作快照。
+// 1. 手动发起流程(startType=0)不绑定业务对象,修改字段值动作执行时必然找不到目标,发布阶段拦截;
+// 2. 快照动作类型受支持、目标字段在该业务类型可写字段白名单内、目标值非空,防止损坏快照进入运行期。
+func validateWorkflowAutomationMounts(definition *models.WfProcessDefinition, graph *workflowGraph) error {
+	if definition.BusinessType == nil || strings.TrimSpace(*definition.BusinessType) == "" {
 		return nil
 	}
-	if definition.BusinessType != nil && strings.TrimSpace(*definition.BusinessType) != "" {
-		return fmt.Errorf("开启结束后创建需求的流程不能声明业务归属类型:业务归属表示流程服务于已有业务对象,与结束后创建新需求互斥")
+	def, exists := getBusinessTypeDef(strings.TrimSpace(*definition.BusinessType))
+	if !exists {
+		return nil
 	}
-	hasStoryTitle := false
-	for _, field := range formFields {
-		if field.FieldName == workflowStoryLandingTitleField {
-			hasStoryTitle = true
-			break
+	for index := range graph.Nodes {
+		node := &graph.Nodes[index]
+		for _, mount := range node.Properties.Automations {
+			if definition.StartType == models.WorkflowStartTypeManual {
+				return fmt.Errorf("节点「%s」挂载了自动化动作「%s」:手动发起流程不绑定业务对象,不能挂载自动化动作,请将启动类型改为被动触发",
+					workflowNodeName(node), mount.AutomationName)
+			}
+			if mount.ActionType != automationActionTypeUpdateField {
+				return fmt.Errorf("节点「%s」的自动化动作「%s」动作类型 %s 不受支持", workflowNodeName(node), mount.AutomationName, mount.ActionType)
+			}
+			fieldValid := false
+			for _, field := range def.StatusFields {
+				if field.Field == mount.TargetField {
+					fieldValid = true
+					break
+				}
+			}
+			if !fieldValid {
+				return fmt.Errorf("节点「%s」的自动化动作「%s」目标字段 %s 不在业务类型[%s]的可写字段白名单内",
+					workflowNodeName(node), mount.AutomationName, mount.TargetField, def.Label)
+			}
+			if strings.TrimSpace(mount.TargetValue) == "" {
+				return fmt.Errorf("节点「%s」的自动化动作「%s」目标值为空", workflowNodeName(node), mount.AutomationName)
+			}
 		}
-	}
-	if !hasStoryTitle {
-		return fmt.Errorf("开启结束后创建需求的流程必须绑定包含 %s 字段的表单,供同名映射写入需求名称", workflowStoryLandingTitleField)
 	}
 	return nil
 }
@@ -328,6 +432,8 @@ func buildWorkflowDefinitionResponses(definitions []models.WfProcessDefinition) 
 			DefinitionName: definition.DefinitionName,
 			Category:       definition.Category,
 			BusinessType:   definition.BusinessType,
+			StartType:      definition.StartType,
+			IsDefault:      definition.IsDefault == 1,
 			Status:         fmt.Sprintf("%d", definition.Status),
 			Version:        definition.Version,
 			FlowData:       definition.FlowData,
@@ -343,17 +449,27 @@ func buildWorkflowDefinitionResponses(definitions []models.WfProcessDefinition) 
 	return responses
 }
 
-// normalizeWorkflowBusinessType 规范化业务归属类型:去空白后转 nil,允许空值(纯流程不绑定业务)。
-// 当前不限制枚举,业务模块自定义键名(如 story/bug/task),需与 RegisterBusinessHook 注册键一致。
-func normalizeWorkflowBusinessType(value *string) *string {
-	if value == nil {
-		return nil
-	}
-	trimmed := strings.TrimSpace(*value)
+// validateWorkflowBusinessType 校验业务类型必填且已注册(值为 BUSINESS_TYPE 字典值,与业务类型注册表一致)。
+func validateWorkflowBusinessType(value string) (string, error) {
+	trimmed := strings.TrimSpace(value)
 	if trimmed == "" {
-		return nil
+		return "", fmt.Errorf("业务类型不能为空")
 	}
-	return &trimmed
+	if _, exists := getBusinessTypeDef(trimmed); !exists {
+		return "", fmt.Errorf("业务类型 %s 未注册", trimmed)
+	}
+	return trimmed, nil
+}
+
+// normalizeWorkflowStartType 规范化启动类型,未传时默认手动发起。
+func normalizeWorkflowStartType(value *int) (int, error) {
+	if value == nil {
+		return models.WorkflowStartTypeManual, nil
+	}
+	if *value != models.WorkflowStartTypeManual && *value != models.WorkflowStartTypePassive {
+		return 0, fmt.Errorf("启动类型只能是 0(手动发起)或 1(被动触发)")
+	}
+	return *value, nil
 }
 
 func normalizeWorkflowFlowData(flowData *string) string {

@@ -23060,21 +23060,53 @@ const docTemplate = `{
                 }
             }
         },
-        "/workflow/business-hooks": {
+        "/workflow/automations": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "返回所有已注册业务状态钩子的元数据,供流程设计器加载业务类型和节点业务键下拉选项。数据权限:公开接口(登录后可访问),不使用记录级数据权限,返回的是钩子元数据不涉及业务记录,不按创建人过滤。",
+                "description": "按名称、业务类型、状态分页查询自动化动作库。数据权限:全局主数据,动作库是全系统共享的流程联动配置,不按创建人过滤,维护入口由接口权限控制。",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "流程管理/业务绑定"
+                    "工作流/自动化动作"
                 ],
-                "summary": "查询业务状态钩子注册表",
+                "summary": "分页查询自动化动作",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码,默认1",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量,默认10",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "动作名称,模糊匹配",
+                        "name": "automationName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "业务类型,字典BUSINESS_TYPE的值",
+                        "name": "businessType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态:0启用 1停用",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "获取成功",
@@ -23087,7 +23119,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.BusinessHookRegistryResponse"
+                                            "$ref": "#/definitions/utils.PaginationResponse"
                                         }
                                     }
                                 }
@@ -23095,10 +23127,307 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "未授权",
+                        "description": "未登录",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "创建可复用的自动化动作。校验业务类型已注册、动作类型受支持、目标字段在业务类型可写字段白名单内、目标值为对应字典合法值。数据权限:全局主数据,新增配置不区分归属人,维护入口由接口权限控制。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工作流/自动化动作"
+                ],
+                "summary": "创建自动化动作",
+                "parameters": [
+                    {
+                        "description": "自动化动作参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateAutomationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数或校验错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "软删除自动化动作。已挂载到流程画布的快照不受影响,继续按快照执行。数据权限:全局主数据,删除配置不区分归属人,维护入口由接口权限控制。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工作流/自动化动作"
+                ],
+                "summary": "批量删除自动化动作",
+                "parameters": [
+                    {
+                        "description": "自动化动作ID数组",
+                        "name": "automationIds",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/automations/fields": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "返回指定业务类型允许修改的字段清单(版本1仅状态字段)及字段值字典类型,供动作库新建/编辑表单联动。数据权限:全局主数据,字段元数据来源于后端业务类型注册表。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工作流/自动化动作"
+                ],
+                "summary": "自动化动作可写字段",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "业务类型,字典BUSINESS_TYPE的值",
+                        "name": "businessType",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.AutomationFieldMeta"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "业务类型未注册",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/automations/options": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "返回指定业务类型下启用的自动化动作列表,供流程设计器节点挂载动作时选择。数据权限:全局主数据,选项为动作库元数据,不涉及业务记录。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工作流/自动化动作"
+                ],
+                "summary": "自动化动作选项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "业务类型,字典BUSINESS_TYPE的值;为空时返回全部业务类型",
+                        "name": "businessType",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.AutomationResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflow/automations/{automationId}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "更新自动化动作配置。已挂载到流程画布的快照不受影响,重新挂载或重新发布对应流程才使用新配置。数据权限:全局主数据,更新配置不区分归属人,维护入口由接口权限控制。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工作流/自动化动作"
+                ],
+                "summary": "更新自动化动作",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "自动化动作ID",
+                        "name": "automationId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "自动化动作参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateAutomationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数或校验错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -24585,6 +24914,99 @@ const docTemplate = `{
                 }
             }
         },
+        "models.AutomationActionConfig": {
+            "type": "object",
+            "properties": {
+                "targetField": {
+                    "description": "目标字段,须在业务类型可写字段白名单内",
+                    "type": "string",
+                    "example": "story_status"
+                },
+                "targetValue": {
+                    "description": "目标值,字典字段须为对应字典的合法值",
+                    "type": "string",
+                    "example": "10"
+                }
+            }
+        },
+        "models.AutomationFieldMeta": {
+            "type": "object",
+            "properties": {
+                "dictType": {
+                    "type": "string",
+                    "example": "STORY_STATUS"
+                },
+                "field": {
+                    "type": "string",
+                    "example": "story_status"
+                },
+                "label": {
+                    "type": "string",
+                    "example": "需求状态"
+                }
+            }
+        },
+        "models.AutomationResponse": {
+            "type": "object",
+            "properties": {
+                "actionType": {
+                    "type": "string",
+                    "example": "update_field"
+                },
+                "automationId": {
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "automationName": {
+                    "type": "string",
+                    "example": "需求评审通过"
+                },
+                "businessType": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "createDate": {
+                    "type": "string",
+                    "example": "2026-09-03 10:00:00"
+                },
+                "creatorId": {
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "creatorName": {
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "dictType": {
+                    "type": "string",
+                    "example": "STORY_STATUS"
+                },
+                "remark": {
+                    "type": "string",
+                    "example": "评审节点使用"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "targetField": {
+                    "type": "string",
+                    "example": "story_status"
+                },
+                "targetFieldLabel": {
+                    "type": "string",
+                    "example": "需求状态"
+                },
+                "targetValue": {
+                    "type": "string",
+                    "example": "10"
+                },
+                "updateDate": {
+                    "type": "string",
+                    "example": "2026-09-03 10:00:00"
+                }
+            }
+        },
         "models.BatchUpdateStoryNextRequest": {
             "type": "object",
             "required": [
@@ -24804,60 +25226,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.BusinessHookRegistryItem": {
-            "type": "object",
-            "properties": {
-                "businessType": {
-                    "description": "业务类型:流程定义声明的业务归属标识",
-                    "type": "string",
-                    "example": "story"
-                },
-                "label": {
-                    "description": "业务类型中文名:设计器下拉展示",
-                    "type": "string",
-                    "example": "需求"
-                },
-                "nodeKeys": {
-                    "description": "该业务类型支持的节点业务键列表",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.BusinessNodeKeyDef"
-                    }
-                }
-            }
-        },
-        "models.BusinessHookRegistryResponse": {
-            "type": "object",
-            "properties": {
-                "items": {
-                    "description": "全部已注册业务类型及其节点键",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.BusinessHookRegistryItem"
-                    }
-                }
-            }
-        },
-        "models.BusinessNodeKeyDef": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "description": "说明:设计器下拉提示",
-                    "type": "string",
-                    "example": "节点通过后需求状态改为已评审"
-                },
-                "label": {
-                    "description": "中文名:设计器下拉展示",
-                    "type": "string",
-                    "example": "评审通过"
-                },
-                "nodeKey": {
-                    "description": "节点业务键:流程节点上配置的稳定语义标识",
-                    "type": "string",
-                    "example": "review"
-                }
-            }
-        },
         "models.ChangeHistoryResponse": {
             "type": "object",
             "properties": {
@@ -25040,6 +25408,50 @@ const docTemplate = `{
                     "description": "确认说明(富文本)",
                     "type": "string",
                     "example": "\u003cp\u003e确认说明\u003c/p\u003e"
+                }
+            }
+        },
+        "models.CreateAutomationRequest": {
+            "type": "object",
+            "required": [
+                "actionConfig",
+                "actionType",
+                "automationName",
+                "businessType"
+            ],
+            "properties": {
+                "actionConfig": {
+                    "description": "动作参数",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.AutomationActionConfig"
+                        }
+                    ]
+                },
+                "actionType": {
+                    "description": "动作类型",
+                    "type": "string",
+                    "example": "update_field"
+                },
+                "automationName": {
+                    "description": "动作名称",
+                    "type": "string",
+                    "example": "需求评审通过"
+                },
+                "businessType": {
+                    "description": "业务类型,字典BUSINESS_TYPE的值",
+                    "type": "string",
+                    "example": "0"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "评审节点使用"
+                },
+                "status": {
+                    "description": "状态:0启用 1停用,默认启用",
+                    "type": "integer",
+                    "example": 0
                 }
             }
         },
@@ -26117,13 +26529,14 @@ const docTemplate = `{
         "models.CreateWorkflowDefinitionRequest": {
             "type": "object",
             "required": [
+                "businessType",
                 "definitionName"
             ],
             "properties": {
                 "businessType": {
-                    "description": "业务归属类型:story/bug/task",
+                    "description": "业务类型,字典BUSINESS_TYPE的值",
                     "type": "string",
-                    "example": "story"
+                    "example": "0"
                 },
                 "category": {
                     "description": "流程分类",
@@ -26140,10 +26553,20 @@ const docTemplate = `{
                     "type": "string",
                     "example": "{\"nodes\":[],\"edges\":[]}"
                 },
+                "isDefault": {
+                    "description": "默认流程标志,仅被动触发流程可设,同业务类型唯一",
+                    "type": "boolean",
+                    "example": true
+                },
                 "remark": {
                     "description": "备注",
                     "type": "string",
                     "example": "流程说明"
+                },
+                "startType": {
+                    "description": "启动类型:0手动发起(默认) 1被动触发",
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -34551,6 +34974,40 @@ const docTemplate = `{
                 }
             }
         },
+        "models.UpdateAutomationRequest": {
+            "type": "object",
+            "required": [
+                "actionConfig",
+                "actionType",
+                "automationName",
+                "businessType"
+            ],
+            "properties": {
+                "actionConfig": {
+                    "$ref": "#/definitions/models.AutomationActionConfig"
+                },
+                "actionType": {
+                    "type": "string",
+                    "example": "update_field"
+                },
+                "automationName": {
+                    "type": "string",
+                    "example": "需求评审通过"
+                },
+                "businessType": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "remark": {
+                    "type": "string",
+                    "example": "评审节点使用"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 0
+                }
+            }
+        },
         "models.UpdateBugFieldRequest": {
             "type": "object",
             "required": [
@@ -35679,13 +36136,14 @@ const docTemplate = `{
         "models.UpdateWorkflowDefinitionRequest": {
             "type": "object",
             "required": [
+                "businessType",
                 "definitionName"
             ],
             "properties": {
                 "businessType": {
-                    "description": "业务归属类型:story/bug/task",
+                    "description": "业务类型,字典BUSINESS_TYPE的值",
                     "type": "string",
-                    "example": "story"
+                    "example": "0"
                 },
                 "category": {
                     "description": "流程分类",
@@ -35702,10 +36160,20 @@ const docTemplate = `{
                     "type": "string",
                     "example": "{\"nodes\":[],\"edges\":[]}"
                 },
+                "isDefault": {
+                    "description": "默认流程标志,仅被动触发流程可设,同业务类型唯一",
+                    "type": "boolean",
+                    "example": true
+                },
                 "remark": {
                     "description": "备注",
                     "type": "string",
                     "example": "流程说明"
+                },
+                "startType": {
+                    "description": "启动类型:0手动发起(默认) 1被动触发",
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -35949,29 +36417,29 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "businessId": {
-                    "description": "业务对象主键",
+                    "description": "业务对象ID",
                     "type": "string",
                     "example": "UUID"
                 },
                 "businessLabel": {
-                    "description": "业务类型中文名:详情页展示",
+                    "description": "业务类型中文名",
                     "type": "string",
                     "example": "需求"
                 },
                 "businessTitle": {
-                    "description": "业务对象标题:详情页展示",
+                    "description": "业务对象标题",
                     "type": "string",
-                    "example": "网站首页改版"
+                    "example": "增加导出功能"
                 },
                 "businessType": {
-                    "description": "业务类型:流程定义声明的业务归属标识",
+                    "description": "业务类型,字典BUSINESS_TYPE的值",
                     "type": "string",
-                    "example": "story"
+                    "example": "0"
                 },
                 "detailPath": {
-                    "description": "前端详情页路径:点击跳转",
+                    "description": "前端详情页路径,无独立路由的业务为空",
                     "type": "string",
-                    "example": "/dev/story/detail/42"
+                    "example": "/dev/story/detail/45"
                 }
             }
         },
@@ -36044,9 +36512,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "businessType": {
-                    "description": "业务归属类型:story/bug/task",
+                    "description": "业务类型,字典BUSINESS_TYPE的值",
                     "type": "string",
-                    "example": "story"
+                    "example": "0"
                 },
                 "category": {
                     "description": "流程分类",
@@ -36093,10 +36561,20 @@ const docTemplate = `{
                     "type": "string",
                     "example": "UUID"
                 },
+                "isDefault": {
+                    "description": "默认流程标志(同业务类型唯一,仅被动触发流程可设)",
+                    "type": "boolean",
+                    "example": false
+                },
                 "remark": {
                     "description": "备注",
                     "type": "string",
                     "example": "流程说明"
+                },
+                "startType": {
+                    "description": "启动类型:0手动发起流程 1被动触发流程",
+                    "type": "integer",
+                    "example": 0
                 },
                 "status": {
                     "description": "流程状态：0草稿 1已发布 2已停用",
@@ -36631,9 +37109,9 @@ const docTemplate = `{
                     "example": "UUID"
                 },
                 "businessType": {
-                    "description": "业务类型",
+                    "description": "业务类型,字典BUSINESS_TYPE的值(0需求/10任务/20缺陷/30版本)",
                     "type": "string",
-                    "example": "story"
+                    "example": "0"
                 },
                 "createDate": {
                     "description": "关联建立时间",

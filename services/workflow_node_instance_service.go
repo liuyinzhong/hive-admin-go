@@ -186,6 +186,8 @@ func validateWorkflowGraphApprovers(tx *gorm.DB, graph *workflowGraph, instance 
 }
 
 // activateWorkflowNode 激活节点；自动节点在同一事务内继续推进。
+// 自动节点(开始/抄送/条件)经过即视为完成,完成后执行节点挂载的自动化动作快照;
+// 结束节点在实例写入已通过终态后执行动作。所有动作与流程流转同事务,失败整体回滚。
 func activateWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeInstance *models.WfProcessNodeInstance) error {
 	now := time.Now()
 	if err := tx.Model(nodeInstance).Updates(map[string]interface{}{
@@ -200,11 +202,17 @@ func activateWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeIn
 		if err := createWorkflowRecord(tx, context.instance, nil, nodeInstance, "start", &context.instance.StarterID, &context.instance.StarterName, nil); err != nil {
 			return err
 		}
+		if err := runNodeAutomations(tx, context, nodeInstance, context.instance.StarterID); err != nil {
+			return err
+		}
 		return completeAndAdvanceWorkflowNode(tx, context, nodeInstance)
 	case "approve":
 		return createWorkflowApprovalTasks(tx, context, nodeInstance)
 	case "copy":
 		if err := createWorkflowCopies(tx, context.instance, nodeInstance); err != nil {
+			return err
+		}
+		if err := runNodeAutomations(tx, context, nodeInstance, context.instance.StarterID); err != nil {
 			return err
 		}
 		return completeAndAdvanceWorkflowNode(tx, context, nodeInstance)
@@ -215,6 +223,9 @@ func activateWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeIn
 		if err := createWorkflowRecord(tx, context.instance, nil, nodeInstance, "branch", nil, nil, nodeInstance.BranchEdgeID); err != nil {
 			return err
 		}
+		if err := runNodeAutomations(tx, context, nodeInstance, context.instance.StarterID); err != nil {
+			return err
+		}
 		return completeAndAdvanceWorkflowNode(tx, context, nodeInstance)
 	case "end":
 		if err := completeWorkflowNode(tx, nodeInstance); err != nil {
@@ -223,19 +234,20 @@ func activateWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeIn
 		if err := finishWorkflowInstance(tx, context.instance, models.WorkflowInstanceStatusCompleted); err != nil {
 			return err
 		}
-		// 结束后动作:结束节点开启落地创建时,实例写入"已通过"终态后,在同一事务创建规划中需求。
-		// 创建失败返回错误,整个审批操作回滚;新需求 ID 暂存到上下文,待事务提交成功后链式自动发起需求流程。
-		if endNode := findWorkflowNode(context.graph, nodeInstance.NodeID); endNode != nil && endNode.Properties.CreateStoryOnFinish {
-			storyID, err := landStoryFromWorkflow(tx, context.instance)
-			if err != nil {
-				return err
-			}
-			context.pendingAutoStartStories = append(context.pendingAutoStartStories, storyID)
-		}
-		return nil
+		return runNodeAutomations(tx, context, nodeInstance, context.instance.StarterID)
 	default:
 		return fmt.Errorf("不支持的流程节点类型：%s", nodeInstance.NodeType)
 	}
+}
+
+// runNodeAutomations 执行指定节点在画布快照中挂载的自动化动作。
+// 未挂载动作时静默跳过;自动节点无审批人,操作人取流程发起人写入业务变更记录。
+func runNodeAutomations(tx *gorm.DB, context *workflowExecutionContext, nodeInstance *models.WfProcessNodeInstance, operatorID string) error {
+	node := findWorkflowNode(context.graph, nodeInstance.NodeID)
+	if node == nil || len(node.Properties.Automations) == 0 {
+		return nil
+	}
+	return executeWorkflowAutomations(tx, context.instance, node.Properties.Automations, operatorID, nodeInstance.NodeName)
 }
 
 func completeAndAdvanceWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeInstance *models.WfProcessNodeInstance) error {

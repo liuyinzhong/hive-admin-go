@@ -518,19 +518,21 @@ func CreateStory(req *models.CreateStoryRequest, creatorID string, permission da
 	return nil
 }
 
-// autoStartStoryWorkflow 需求创建后自动匹配并发起流程。
-// 查找 business_type=story 且已发布的最新流程定义,找到则发起流程绑定到该需求;
-// 未找到已发布流程定义时不报错,需求保持已创建状态(不绑流程);
-// 发起失败时记日志不抛错,需求创建不受影响,可后续手动发起。
+// autoStartStoryWorkflow 需求创建后按默认流程被动匹配发起。
+// 匹配规则:启动类型=被动触发 + 默认流程标志 + 业务类型=需求(字典值0) + 已发布,管理员在流程定义列表显式指定默认,不做最新发布猜测;
+// 未指定默认流程时不报错,需求保持已创建状态(不绑流程,可手动流转推进状态);
+// 发起失败时记日志不抛错,需求创建不受影响。
 func autoStartStoryWorkflow(storyID, creatorID string) {
 	var definition models.WfProcessDefinition
-	err := database.DB.Where("business_type = ? AND status = ? AND del_flag = ?", "story", 1, 0).
-		Order("update_date DESC").First(&definition).Error
+	err := database.DB.Where(
+		"start_type = ? AND is_default = 1 AND business_type = ? AND status = 1 AND del_flag = 0",
+		models.WorkflowStartTypePassive, "0",
+	).Order("update_date DESC").First(&definition).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return // 未配置已发布的 story 流程定义,不绑流程
+			return // 未指定默认的需求流程定义,不绑流程
 		}
-		log.Printf("[workflow] 自动匹配需求流程失败: storyID=%s, err=%v", storyID, err)
+		log.Printf("[workflow] 匹配默认需求流程失败: storyID=%s, err=%v", storyID, err)
 		return
 	}
 	businessID := storyID
@@ -637,8 +639,8 @@ func CreateStorys(reqs []models.CreateStoryRequest, creatorID string, permission
 
 // StartStoryWorkflow 为需求发起流程,自动把 businessId 绑定为 storyId。
 // 前端在创建需求后调用,传入已发布的流程定义ID和流程变量。
-// 流程定义声明的 BusinessType 必须为 "story",否则 StartWorkflowInstance 会拒绝绑定,
-// 这样防止需求误绑定到 bug/task 等其它业务流程。返回创建好的流程实例。
+// 目标定义必须是被动触发流程(startType=1)且业务类型为需求(字典值0),
+// 手动发起流程不承载业务联动,防止纯审批流程误绑定需求。返回创建好的流程实例。
 func StartStoryWorkflow(storyID, definitionID, creatorID string, variables map[string]interface{}) (*models.WorkflowInstanceResponse, error) {
 	var story models.DevStory
 	if err := database.DB.Where("story_id = ? AND del_flag = 0", storyID).First(&story).Error; err != nil {
@@ -646,6 +648,20 @@ func StartStoryWorkflow(storyID, definitionID, creatorID string, variables map[s
 			return nil, fmt.Errorf("需求不存在")
 		}
 		return nil, err
+	}
+	var definition models.WfProcessDefinition
+	if err := database.DB.Select("definition_id", "start_type", "business_type").
+		Where("definition_id = ? AND del_flag = 0", definitionID).First(&definition).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("流程定义不存在")
+		}
+		return nil, err
+	}
+	if definition.StartType != models.WorkflowStartTypePassive {
+		return nil, fmt.Errorf("只有被动触发流程可以绑定需求发起")
+	}
+	if definition.BusinessType == nil || strings.TrimSpace(*definition.BusinessType) != "0" {
+		return nil, fmt.Errorf("流程定义的业务类型不是需求,无法绑定需求发起")
 	}
 	businessID := storyID
 	req := &models.StartWorkflowInstanceRequest{
@@ -657,10 +673,11 @@ func StartStoryWorkflow(storyID, definitionID, creatorID string, variables map[s
 }
 
 // GetStoryWorkflowBindings 查询需求关联的全部流程实例,用于需求详情页展示关联流程列表。
-// 包含自动发起的需求流程和结束后动作落地创建的来源审批实例,按绑定时间倒序;
+// 包含自动发起的需求流程等全部绑定,按绑定时间倒序;
+// 业务类型为需求的字典值"0",与绑定写入侧(流程定义声明的业务类型)保持同一值域;
 // 需求未关联流程时返回空列表,调用方据此决定是否显示"发起流程"按钮。
 func GetStoryWorkflowBindings(storyID string) ([]WorkflowBusinessInstanceResponse, error) {
-	return GetWorkflowBusinessInstanceList("story", storyID)
+	return GetWorkflowBusinessInstanceList("0", storyID)
 }
 
 func UpdateStory(storyID string, req *models.UpdateStoryRequest, creatorID string, permission datapermission.Permission) error {

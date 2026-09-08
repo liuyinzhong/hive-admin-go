@@ -28,6 +28,10 @@ func UpdateWorkflowFormSchema(definitionID, formSchemaID string) error {
 		}
 		return err
 	}
+	// 被动触发流程由业务对象自动发起,没有发起人填表单环节,表单校验必然以空变量执行,不允许关联表单
+	if definition.StartType == models.WorkflowStartTypePassive {
+		return fmt.Errorf("被动触发流程由业务对象自动发起,不能关联表单")
+	}
 	if _, _, _, err := loadWorkflowFormSchema(database.DB, &formSchemaID, true); err != nil {
 		return err
 	}

@@ -15,8 +15,9 @@
 
 | 模块 | 规则正文 | 后端入口 |
 |---|---|---|
-| 定义、画布、表单绑定、发布 | [definition.md](./definition.md) | workflow_definition_controller.go、workflow_definition_service.go |
-| 实例、待办、抄送、审批操作 | [runtime.md](./runtime.md) | workflow_runtime_controller.go、workflow_runtime_service.go |
+| 定义、画布、表单绑定、发布、启动类型、默认流程 | [definition.md](./definition.md) | workflow_definition_controller.go、workflow_definition_service.go |
+| 自动化动作库 | [definition.md](./definition.md) 自动化动作章节 | workflow_automation_controller.go、workflow_automation_service.go、business_type_registry.go |
+| 实例、待办、抄送、审批操作、自动化动作执行 | [runtime.md](./runtime.md) | workflow_runtime_controller.go、workflow_runtime_service.go、workflow_automation_executor.go |
 
 ## 规则编号
 

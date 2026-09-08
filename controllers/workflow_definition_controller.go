@@ -70,11 +70,20 @@ func (wc *WorkflowController) GetAllWorkflowDefinitions(c *gin.Context) {
 	if statusStr := c.Query("status"); statusStr != "" {
 		status, _ = strconv.Atoi(statusStr)
 	}
+	// startType 可选:发起申请入口传0只列手动发起流程,业务对象发起传1只列被动触发流程,不传列全部
+	startType := -1
+	if startTypeStr := c.Query("startType"); startTypeStr != "" {
+		if parsed, err := strconv.Atoi(startTypeStr); err == nil {
+			startType = parsed
+		}
+	}
 
 	params := map[string]interface{}{
 		"definitionName": c.Query("definitionName"),
 		"category":       c.Query("category"),
+		"businessType":   c.Query("businessType"),
 		"status":         status,
+		"startType":      startType,
 	}
 
 	definitions, err := services.GetAllWorkflowDefinitions(params)

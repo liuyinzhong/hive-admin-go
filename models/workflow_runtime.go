@@ -278,6 +278,16 @@ type WorkflowNodeInstanceResponse struct {
 	DurationSeconds  *int64                      `json:"durationSeconds" example:"4500"`                                // 耗时秒数
 }
 
+// WorkflowBusinessSummaryResponse 流程实例关联业务摘要。
+// 按绑定业务类型从业务类型注册表组装;业务类型未注册或对象已删除时降级为仅展示类型和ID。
+type WorkflowBusinessSummaryResponse struct {
+	BusinessType  string `json:"businessType" example:"0"`                  // 业务类型,字典BUSINESS_TYPE的值
+	BusinessID    string `json:"businessId" example:"UUID"`                 // 业务对象ID
+	BusinessLabel string `json:"businessLabel" example:"需求"`                // 业务类型中文名
+	BusinessTitle string `json:"businessTitle" example:"增加导出功能"`            // 业务对象标题
+	DetailPath    string `json:"detailPath" example:"/dev/story/detail/45"` // 前端详情页路径,无独立路由的业务为空
+}
+
 // WorkflowInstanceDetailResponse 聚合实例和按流转顺序排列的节点实例。
 type WorkflowInstanceDetailResponse struct {
 	Instance WorkflowInstanceResponse         `json:"instance"` // 流程实例信息

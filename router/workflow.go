@@ -14,8 +14,16 @@ func registerWorkflowRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 
 	workflow := api.Group("/workflow", middleware.AuthMiddleware(), deps.DataPermissionMiddleware)
 	{
-		// 业务状态钩子注册表:返回钩子元数据,登录后即可访问,无需数据权限校验
-		workflow.GET("/business-hooks", workflowController.ListBusinessHooks)
+		automations := workflow.Group("/automations")
+		{
+			// 动作选项与字段元数据面向设计器和动作库表单,登录后即可访问
+			automations.GET("/options", workflowController.GetWorkflowAutomationOptions)
+			automations.GET("/fields", workflowController.GetWorkflowAutomationFields)
+			automations.GET("", permissionGuard.Require("workflow:automation:list"), workflowController.GetWorkflowAutomations)
+			automations.POST("", permissionGuard.Require("workflow:automation:create"), workflowController.CreateWorkflowAutomation)
+			automations.PUT("/:automationId", permissionGuard.Require("workflow:automation:update"), workflowController.UpdateWorkflowAutomation)
+			automations.DELETE("", permissionGuard.Require("workflow:automation:delete"), workflowController.DeleteWorkflowAutomations)
+		}
 		definitions := workflow.Group("/definitions")
 		{
 			definitions.GET("", permissionGuard.Require("workflow:definition:list"), workflowController.GetWorkflowDefinitions)

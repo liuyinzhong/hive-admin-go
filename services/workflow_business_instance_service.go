@@ -68,7 +68,7 @@ func getWorkflowBusinessInstanceByBusiness(tx *gorm.DB, businessType, businessID
 // GetWorkflowBusinessInstanceDetailResponse 业务关联详情响应(供前端展示)。
 type WorkflowBusinessInstanceResponse struct {
 	BindingID      string  `json:"bindingId" example:"UUID"`                 // 关联ID
-	BusinessType   string  `json:"businessType" example:"story"`             // 业务类型
+	BusinessType   string  `json:"businessType" example:"0"`                 // 业务类型,字典BUSINESS_TYPE的值(0需求/10任务/20缺陷/30版本)
 	BusinessID     string  `json:"businessId" example:"UUID"`                // 业务对象ID
 	InstanceID     string  `json:"instanceId" example:"UUID"`                // 流程实例ID
 	InstanceNo     string  `json:"instanceNo" example:"WI000001"`            // 流程编号
