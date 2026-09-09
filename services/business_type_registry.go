@@ -110,8 +110,8 @@ var businessTypeRegistry = map[string]businessTypeDef{
 		},
 		InsertFields: []businessTypeFieldDef{
 			{Field: "bug_title", Label: "缺陷名称", Required: true},
-			{Field: "project_id", Label: "所属项目", Required: true},
 			{Field: "bug_rich_text", Label: "缺陷描述"},
+			{Field: "bug_env", Label: "缺陷环境", DictType: "BUG_ENV"},
 			{Field: "bug_status", Label: "缺陷状态", DictType: "BUG_STATUS"},
 			{Field: "bug_confirm_status", Label: "缺陷确认状态", DictType: "BUG_CONFIRM_STATUS"},
 			{Field: "bug_level", Label: "缺陷优先级", DictType: "BUG_LEVEL"},
