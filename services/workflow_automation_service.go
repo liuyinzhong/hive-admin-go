@@ -13,22 +13,13 @@ import (
 	"hive-admin-go/utils"
 )
 
-// automationActionTypeUpdateField 修改当前关联业务的状态字段为固定值(版本1唯一动作类型)。
-const automationActionTypeUpdateField = "update_field"
-
 // CreateAutomation 创建自动化动作。
-// 校验业务类型已注册、动作类型受支持、目标字段在该业务类型可写字段白名单内、目标值为合法字典值。
+// 按动作类型反序列化并校验参数:修改字段值校验状态字段白名单与字典值;
+// 插入记录校验目标业务类型、可插字段目录、必填映射与固定值合法性(表单字段名为弱引用,不做存在性校验)。
 func CreateAutomation(req *models.CreateAutomationRequest, creatorID string) error {
-	fieldDef, err := validateAutomationConfig(req.BusinessType, req.ActionType, req.ActionConfig)
+	configJSON, err := validateAndEncodeAutomationConfig(req.BusinessType, req.ActionType, req.ActionConfig)
 	if err != nil {
 		return err
-	}
-	if err := validateAutomationDictValue(fieldDef.DictType, req.ActionConfig.TargetValue); err != nil {
-		return err
-	}
-	configJSON, err := json.Marshal(req.ActionConfig)
-	if err != nil {
-		return fmt.Errorf("动作参数序列化失败")
 	}
 	status := 0
 	if req.Status != nil {
@@ -62,16 +53,9 @@ func UpdateAutomation(automationID string, req *models.UpdateAutomationRequest) 
 		}
 		return err
 	}
-	fieldDef, err := validateAutomationConfig(req.BusinessType, req.ActionType, req.ActionConfig)
+	configJSON, err := validateAndEncodeAutomationConfig(req.BusinessType, req.ActionType, req.ActionConfig)
 	if err != nil {
 		return err
-	}
-	if err := validateAutomationDictValue(fieldDef.DictType, req.ActionConfig.TargetValue); err != nil {
-		return err
-	}
-	configJSON, err := json.Marshal(req.ActionConfig)
-	if err != nil {
-		return fmt.Errorf("动作参数序列化失败")
 	}
 	status := automation.Status
 	if req.Status != nil {
@@ -165,28 +149,120 @@ func GetAutomationOptions(businessType string) ([]models.AutomationResponse, err
 	return responses, nil
 }
 
-// validateAutomationConfig 校验动作配置的业务类型、动作类型与目标字段白名单。
-func validateAutomationConfig(businessType, actionType string, config models.AutomationActionConfig) (businessTypeFieldDef, error) {
-	def, exists := getBusinessTypeDef(businessType)
-	if !exists {
-		return businessTypeFieldDef{}, fmt.Errorf("业务类型未注册: %s", businessType)
+// validateAndEncodeAutomationConfig 按动作类型反序列化、校验并重新序列化动作参数。
+func validateAndEncodeAutomationConfig(businessType, actionType string, raw json.RawMessage) (json.RawMessage, error) {
+	switch actionType {
+	case models.ActionTypeUpdateField:
+		var config models.UpdateFieldConfig
+		if err := json.Unmarshal(raw, &config); err != nil {
+			return nil, fmt.Errorf("动作参数格式错误")
+		}
+		if err := validateUpdateFieldConfig(config); err != nil {
+			return nil, err
+		}
+		return json.Marshal(config)
+	case models.ActionTypeInsertRecord:
+		var config models.InsertRecordConfig
+		if err := json.Unmarshal(raw, &config); err != nil {
+			return nil, fmt.Errorf("动作参数格式错误")
+		}
+		if err := validateInsertRecordConfig(businessType, config); err != nil {
+			return nil, err
+		}
+		return json.Marshal(config)
+	default:
+		return nil, fmt.Errorf("不支持的动作类型: %s", actionType)
 	}
-	if actionType != automationActionTypeUpdateField {
-		return businessTypeFieldDef{}, fmt.Errorf("不支持的动作类型: %s", actionType)
-	}
+}
+
+// validateUpdateFieldConfig 校验修改字段值参数:业务类型已注册、目标字段在状态字段白名单内、目标值为合法字典值。
+func validateUpdateFieldConfig(config models.UpdateFieldConfig) error {
 	targetField := strings.TrimSpace(config.TargetField)
 	if targetField == "" {
-		return businessTypeFieldDef{}, fmt.Errorf("目标字段不能为空")
+		return fmt.Errorf("目标字段不能为空")
 	}
-	for _, field := range def.StatusFields {
-		if field.Field == targetField {
-			if strings.TrimSpace(config.TargetValue) == "" {
-				return businessTypeFieldDef{}, fmt.Errorf("目标值不能为空")
+	if strings.TrimSpace(config.TargetValue) == "" {
+		return fmt.Errorf("目标值不能为空")
+	}
+	// 目标字段可能属于任一业务类型的状态白名单,遍历注册表定位
+	for _, def := range businessTypeRegistry {
+		for _, field := range def.StatusFields {
+			if field.Field != targetField {
+				continue
 			}
-			return field, nil
+			return validateAutomationDictValue(field.DictType, config.TargetValue)
 		}
 	}
-	return businessTypeFieldDef{}, fmt.Errorf("目标字段 %s 不在业务类型[%s]的可写字段白名单内", targetField, def.Label)
+	return fmt.Errorf("目标字段 %s 不在任何业务类型的可写字段白名单内", targetField)
+}
+
+// validateInsertRecordConfig 校验插入记录参数:映射字段在动作业务类型的可插目录内、
+// 必填字段映射齐全、值来源合法;固定值的字典与引用字段做配置期存在性校验,表单字段名为弱引用不校验存在性。
+// 插入目标即动作自身的业务类型,不单独配置目标业务类型。
+func validateInsertRecordConfig(businessType string, config models.InsertRecordConfig) error {
+	def, exists := getBusinessTypeDef(businessType)
+	if !exists {
+		return fmt.Errorf("业务类型 %s 未注册", businessType)
+	}
+	if len(config.Mappings) == 0 {
+		return fmt.Errorf("插入记录至少需要配置一条字段映射")
+	}
+	insertFieldMap := make(map[string]businessTypeFieldDef, len(def.InsertFields))
+	for _, field := range def.InsertFields {
+		insertFieldMap[field.Field] = field
+	}
+	mappedFields := make(map[string]bool, len(config.Mappings))
+	for index, mapping := range config.Mappings {
+		field, ok := insertFieldMap[strings.TrimSpace(mapping.Field)]
+		if !ok {
+			return fmt.Errorf("第%d条映射的目标字段 %s 不在业务类型[%s]的可插字段目录内", index+1, mapping.Field, def.Label)
+		}
+		if mappedFields[field.Field] {
+			return fmt.Errorf("目标字段 %s 重复配置映射", field.Field)
+		}
+		mappedFields[field.Field] = true
+		switch mapping.SourceType {
+		case models.InsertSourceFixed:
+			if strings.TrimSpace(mapping.Value) == "" {
+				return fmt.Errorf("目标字段 %s 的固定值不能为空", field.Label)
+			}
+			if field.DictType != "" {
+				if err := validateAutomationDictValue(field.DictType, mapping.Value); err != nil {
+					return fmt.Errorf("目标字段 %s: %w", field.Label, err)
+				}
+			}
+			if ref, isRef := insertRefValidators[field.Field]; isRef {
+				if err := validateInsertRefExists(database.DB, field.Field, mapping.Value, ref); err != nil {
+					return fmt.Errorf("目标字段 %s: %w", field.Label, err)
+				}
+			}
+		case models.InsertSourceForm:
+			if strings.TrimSpace(mapping.FormField) == "" {
+				return fmt.Errorf("目标字段 %s 的表单字段名不能为空", field.Label)
+			}
+		default:
+			return fmt.Errorf("目标字段 %s 的值来源不合法,只支持固定值或表单字段", field.Label)
+		}
+	}
+	for _, field := range def.InsertFields {
+		if field.Required && !mappedFields[field.Field] {
+			return fmt.Errorf("业务类型[%s]的必填字段 %s 未配置映射", def.Label, field.Label)
+		}
+	}
+	return nil
+}
+
+// validateInsertRefExists 校验引用字段指向的记录存在且未删除。
+func validateInsertRefExists(tx *gorm.DB, field, value string, ref insertRefDef) error {
+	var count int64
+	if err := tx.Model(ref.Model).
+		Where(field+" = ? AND del_flag = 0", value).Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		return fmt.Errorf("引用的%s(%s)不存在或已删除", ref.Label, value)
+	}
+	return nil
 }
 
 // validateAutomationDictValue 校验目标值是对应字典的合法值,防止配出无效状态。
@@ -203,38 +279,69 @@ func validateAutomationDictValue(dictType, value string) error {
 	return nil
 }
 
-// buildAutomationResponse 组装动作响应,附带字段元数据供前端渲染摘要与字典翻译。
+// buildAutomationResponse 组装动作响应,按动作类型附带参数与目录元数据供前端渲染摘要。
 func buildAutomationResponse(item models.WfAutomation, creatorNames map[string]string) models.AutomationResponse {
-	var config models.AutomationActionConfig
-	_ = json.Unmarshal([]byte(item.ActionConfig), &config)
-	fieldLabel, dictType := "", ""
-	if def, exists := getBusinessTypeDef(item.BusinessType); exists {
-		for _, field := range def.StatusFields {
-			if field.Field == config.TargetField {
-				fieldLabel = field.Label
-				dictType = field.DictType
-				break
+	response := models.AutomationResponse{
+		AutomationID:   &item.AutomationID,
+		AutomationName: item.AutomationName,
+		BusinessType:   item.BusinessType,
+		ActionType:     item.ActionType,
+		Status:         fmt.Sprintf("%d", item.Status),
+		Remark:         item.Remark,
+		CreatorID:      item.CreatorID,
+		CreateDate:     models.TimeToStringPtr(item.CreateDate),
+		UpdateDate:     models.TimeToStringPtr(item.UpdateDate),
+	}
+	if item.CreatorID != nil {
+		creatorName := creatorNames[*item.CreatorID]
+		response.CreatorName = &creatorName
+	}
+	switch item.ActionType {
+	case models.ActionTypeUpdateField:
+		var config models.UpdateFieldConfig
+		_ = json.Unmarshal([]byte(item.ActionConfig), &config)
+		updateField := &models.AutomationUpdateFieldResponse{
+			TargetField: config.TargetField,
+			TargetValue: config.TargetValue,
+		}
+		if def, exists := getBusinessTypeDef(item.BusinessType); exists {
+			for _, field := range def.StatusFields {
+				if field.Field == config.TargetField {
+					updateField.TargetFieldLabel = field.Label
+					updateField.DictType = field.DictType
+					break
+				}
 			}
 		}
+		response.UpdateField = updateField
+	case models.ActionTypeInsertRecord:
+		var config models.InsertRecordConfig
+		_ = json.Unmarshal([]byte(item.ActionConfig), &config)
+		insertRecord := &models.AutomationInsertRecordResponse{
+			Mappings: make([]models.AutomationInsertFieldResponse, 0, len(config.Mappings)),
+		}
+		insertFieldMap := make(map[string]businessTypeFieldDef)
+		if targetDef, exists := getBusinessTypeDef(item.BusinessType); exists {
+			for _, field := range targetDef.InsertFields {
+				insertFieldMap[field.Field] = field
+			}
+		}
+		for _, mapping := range config.Mappings {
+			row := models.AutomationInsertFieldResponse{
+				Field:      mapping.Field,
+				SourceType: mapping.SourceType,
+				Value:      mapping.Value,
+				FormField:  mapping.FormField,
+			}
+			if field, exists := insertFieldMap[mapping.Field]; exists {
+				row.FieldLabel = field.Label
+				row.Required = field.Required
+				row.DictType = field.DictType
+			}
+			_, row.IsRefField = insertRefValidators[mapping.Field]
+			insertRecord.Mappings = append(insertRecord.Mappings, row)
+		}
+		response.InsertRecord = insertRecord
 	}
-	creatorName := ""
-	if item.CreatorID != nil {
-		creatorName = creatorNames[*item.CreatorID]
-	}
-	return models.AutomationResponse{
-		AutomationID:     &item.AutomationID,
-		AutomationName:   item.AutomationName,
-		BusinessType:     item.BusinessType,
-		ActionType:       item.ActionType,
-		TargetField:      config.TargetField,
-		TargetValue:      config.TargetValue,
-		TargetFieldLabel: fieldLabel,
-		DictType:         dictType,
-		Status:           fmt.Sprintf("%d", item.Status),
-		Remark:           item.Remark,
-		CreatorID:        item.CreatorID,
-		CreatorName:      &creatorName,
-		CreateDate:       models.TimeToStringPtr(item.CreateDate),
-		UpdateDate:       models.TimeToStringPtr(item.UpdateDate),
-	}
+	return response
 }

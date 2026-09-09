@@ -62,19 +62,26 @@ func (wc *WorkflowController) GetWorkflowAutomationOptions(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
 }
 
-// GetWorkflowAutomationFields 返回业务类型的可写字段元数据,供动作库表单目标字段下拉。
-// @Summary 自动化动作可写字段
-// @Description 返回指定业务类型允许修改的字段清单(版本1仅状态字段)及字段值字典类型,供动作库新建/编辑表单联动。数据权限:全局主数据,字段元数据来源于后端业务类型注册表。
+// GetWorkflowAutomationFields 返回业务类型的字段元数据,供动作库表单下拉。
+// @Summary 自动化动作字段元数据
+// @Description 返回指定业务类型的字段元数据:purpose=update(默认)返回修改字段值动作的状态字段白名单;purpose=insert 返回插入记录动作的可插字段目录(含必填标记 required 与字典映射)。数据权限:全局主数据,字段元数据来源于后端业务类型注册表。
 // @Tags 工作流/自动化动作
 // @Produce json
 // @Security ApiKeyAuth
 // @Param businessType query string true "业务类型,字典BUSINESS_TYPE的值"
+// @Param purpose query string false "用途:update(默认)状态字段白名单;insert可插字段目录"
 // @Success 200 {object} models.Response{data=[]models.AutomationFieldMeta} "获取成功"
 // @Failure 400 {object} models.Response "业务类型未注册"
 // @Failure 401 {object} models.Response "未登录"
 // @Router /workflow/automations/fields [get]
 func (wc *WorkflowController) GetWorkflowAutomationFields(c *gin.Context) {
-	result, err := services.GetBusinessTypeFieldMetas(c.Query("businessType"))
+	var result []models.AutomationFieldMeta
+	var err error
+	if c.Query("purpose") == "insert" {
+		result, err = services.GetBusinessTypeInsertFieldMetas(c.Query("businessType"))
+	} else {
+		result, err = services.GetBusinessTypeFieldMetas(c.Query("businessType"))
+	}
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
 		return

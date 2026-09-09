@@ -13,17 +13,6 @@ definitions:
     - effectiveDate
     - feeAmount
     type: object
-  models.AutomationActionConfig:
-    properties:
-      targetField:
-        description: 目标字段,须在业务类型可写字段白名单内
-        example: story_status
-        type: string
-      targetValue:
-        description: 目标值,字典字段须为对应字典的合法值
-        example: "10"
-        type: string
-    type: object
   models.AutomationFieldMeta:
     properties:
       dictType:
@@ -35,6 +24,43 @@ definitions:
       label:
         example: 需求状态
         type: string
+      required:
+        example: false
+        type: boolean
+    type: object
+  models.AutomationInsertFieldResponse:
+    properties:
+      dictType:
+        example: STORY_STATUS
+        type: string
+      field:
+        example: story_title
+        type: string
+      fieldLabel:
+        example: 需求名称
+        type: string
+      formField:
+        example: story_title
+        type: string
+      isRefField:
+        example: false
+        type: boolean
+      required:
+        example: true
+        type: boolean
+      sourceType:
+        example: form
+        type: string
+      value:
+        example: "0"
+        type: string
+    type: object
+  models.AutomationInsertRecordResponse:
+    properties:
+      mappings:
+        items:
+          $ref: '#/definitions/models.AutomationInsertFieldResponse'
+        type: array
     type: object
   models.AutomationResponse:
     properties:
@@ -59,14 +85,24 @@ definitions:
       creatorName:
         example: 管理员
         type: string
-      dictType:
-        example: STORY_STATUS
-        type: string
+      insertRecord:
+        $ref: '#/definitions/models.AutomationInsertRecordResponse'
       remark:
         example: 评审节点使用
         type: string
       status:
         example: "0"
+        type: string
+      updateDate:
+        example: "2026-09-03 10:00:00"
+        type: string
+      updateField:
+        $ref: '#/definitions/models.AutomationUpdateFieldResponse'
+    type: object
+  models.AutomationUpdateFieldResponse:
+    properties:
+      dictType:
+        example: STORY_STATUS
         type: string
       targetField:
         example: story_status
@@ -76,9 +112,6 @@ definitions:
         type: string
       targetValue:
         example: "10"
-        type: string
-      updateDate:
-        example: "2026-09-03 10:00:00"
         type: string
     type: object
   models.BatchUpdateStoryNextRequest:
@@ -390,36 +423,6 @@ definitions:
     - bugConfirmStatus
     type: object
   models.CreateAutomationRequest:
-    properties:
-      actionConfig:
-        allOf:
-        - $ref: '#/definitions/models.AutomationActionConfig'
-        description: 动作参数
-      actionType:
-        description: 动作类型
-        example: update_field
-        type: string
-      automationName:
-        description: 动作名称
-        example: 需求评审通过
-        type: string
-      businessType:
-        description: 业务类型,字典BUSINESS_TYPE的值
-        example: "0"
-        type: string
-      remark:
-        description: 备注
-        example: 评审节点使用
-        type: string
-      status:
-        description: 状态:0启用 1停用,默认启用
-        example: 0
-        type: integer
-    required:
-    - actionConfig
-    - actionType
-    - automationName
-    - businessType
     type: object
   models.CreateBugRequest:
     properties:
@@ -7535,29 +7538,6 @@ definitions:
         type: string
     type: object
   models.UpdateAutomationRequest:
-    properties:
-      actionConfig:
-        $ref: '#/definitions/models.AutomationActionConfig'
-      actionType:
-        example: update_field
-        type: string
-      automationName:
-        example: 需求评审通过
-        type: string
-      businessType:
-        example: "0"
-        type: string
-      remark:
-        example: 评审节点使用
-        type: string
-      status:
-        example: 0
-        type: integer
-    required:
-    - actionConfig
-    - actionType
-    - automationName
-    - businessType
     type: object
   models.UpdateBugFieldRequest:
     properties:
@@ -23589,12 +23569,17 @@ paths:
       - 工作流/自动化动作
   /workflow/automations/fields:
     get:
-      description: 返回指定业务类型允许修改的字段清单(版本1仅状态字段)及字段值字典类型,供动作库新建/编辑表单联动。数据权限:全局主数据,字段元数据来源于后端业务类型注册表。
+      description: 返回指定业务类型的字段元数据:purpose=update(默认)返回修改字段值动作的状态字段白名单;purpose=insert
+        返回插入记录动作的可插字段目录(含必填标记 required 与字典映射)。数据权限:全局主数据,字段元数据来源于后端业务类型注册表。
       parameters:
       - description: 业务类型,字典BUSINESS_TYPE的值
         in: query
         name: businessType
         required: true
+        type: string
+      - description: 用途:update(默认)状态字段白名单;insert可插字段目录
+        in: query
+        name: purpose
         type: string
       produces:
       - application/json
@@ -23620,7 +23605,7 @@ paths:
             $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
-      summary: 自动化动作可写字段
+      summary: 自动化动作字段元数据
       tags:
       - 工作流/自动化动作
   /workflow/automations/options:

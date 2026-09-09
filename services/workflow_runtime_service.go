@@ -40,13 +40,24 @@ type workflowElementText struct {
 // 设计器从动作库选择动作时固化配置到画布;发布后实例按快照执行,不回查动作库,
 // 动作库后续修改/删除不影响已挂载内容。Condition 为执行条件留位,版本1恒为空(始终执行)。
 type workflowAutomationMount struct {
-	AutomationID   string  `json:"automationId"`
-	AutomationName string  `json:"automationName"`
-	BusinessType   string  `json:"businessType"`
-	ActionType     string  `json:"actionType"`
-	TargetField    string  `json:"targetField"`
-	TargetValue    string  `json:"targetValue"`
-	Condition      *string `json:"condition,omitempty"`
+	AutomationID   string `json:"automationId"`
+	AutomationName string `json:"automationName"`
+	BusinessType   string `json:"businessType"`
+	ActionType     string `json:"actionType"`
+	// 修改字段值参数
+	TargetField string `json:"targetField,omitempty"`
+	TargetValue string `json:"targetValue,omitempty"`
+	// 插入记录参数(插入目标即动作业务类型,无独立目标字段)
+	Mappings  []workflowInsertMapping `json:"mappings,omitempty"`
+	Condition *string                 `json:"condition,omitempty"`
+}
+
+// workflowInsertMapping 插入记录动作的字段映射快照。
+type workflowInsertMapping struct {
+	Field      string `json:"field"`
+	SourceType string `json:"sourceType"`
+	Value      string `json:"value"`
+	FormField  string `json:"formField"`
 }
 
 type workflowNodeProperties struct {
@@ -86,11 +97,28 @@ type workflowExecutionContext struct {
 	instance  *models.WfProcessInstance
 	variables map[string]interface{}
 	steps     int
+	// pendingAutoStartStoryIDs 插入记录动作在同事务新建的需求 ID。
+	// 插入与流程流转同事务,链式自动发起需求流程必须在事务提交成功后执行,故先暂存。
+	pendingAutoStartStoryIDs []string
+}
+
+// flushWorkflowPendingAutoStart 在流程事务提交成功后,为插入记录动作新建的需求链式自动发起需求流程。
+// 复用 autoStartStoryWorkflow 的宽松语义:未匹配到默认流程或发起失败时仅记日志,不影响已完成的流程。
+func flushWorkflowPendingAutoStart(context *workflowExecutionContext) {
+	if context == nil || len(context.pendingAutoStartStoryIDs) == 0 {
+		return
+	}
+	starterID := context.instance.StarterID
+	for _, storyID := range context.pendingAutoStartStoryIDs {
+		autoStartStoryWorkflow(storyID, starterID)
+	}
 }
 
 // StartWorkflowInstance 创建实例快照并推进到第一个人工节点。
 func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID string) (*models.WorkflowInstanceResponse, error) {
 	var response *models.WorkflowInstanceResponse
+	// 执行上下文提至事务外:发起事务提交成功后,为插入记录动作新建的需求链式自动发起需求流程。
+	var pendingContext *workflowExecutionContext
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		var definition models.WfProcessDefinition
 		if err := tx.Where("definition_id = ? AND status = 1 AND del_flag = 0", req.DefinitionID).
@@ -196,8 +224,8 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 		if startNode == nil {
 			return fmt.Errorf("流程缺少开始节点")
 		}
-		context := &workflowExecutionContext{graph: graph, instance: &instance, variables: variables}
-		if err := initializeWorkflowRoute(tx, context, startNode.ID); err != nil {
+		pendingContext = &workflowExecutionContext{graph: graph, instance: &instance, variables: variables}
+		if err := initializeWorkflowRoute(tx, pendingContext, startNode.ID); err != nil {
 			return err
 		}
 
@@ -208,7 +236,11 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 		response = &result
 		return nil
 	})
-	return response, err
+	if err != nil {
+		return response, err
+	}
+	flushWorkflowPendingAutoStart(pendingContext)
+	return response, nil
 }
 
 // GetWorkflowInstances 分页获取当前用户发起的流程实例。
@@ -767,7 +799,9 @@ func workflowOperationComment(summary string, comment *string) *string {
 
 // handleWorkflowTask 在事务内处理审批并推进或终止实例。
 func handleWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionRequest, approved bool) error {
-	return database.DB.Transaction(func(tx *gorm.DB) error {
+	// 链式发起暂存提至事务外:审批事务提交成功后,为插入记录动作新建的需求自动发起需求流程。
+	var pendingStoryIDs []string
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		var task models.WfProcessTask
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
 			Where("task_id = ? AND del_flag = 0", taskID).First(&task).Error; err != nil {
@@ -862,13 +896,22 @@ func handleWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionReq
 		// 审批节点全员通过后执行节点挂载的自动化动作快照。
 		// 共享 tx 保证动作的业务写入与流程流转原子性;未挂载动作时静默跳过。
 		if completedNode := findWorkflowNode(graph, nodeInstance.NodeID); completedNode != nil && len(completedNode.Properties.Automations) > 0 {
-			if err := executeWorkflowAutomations(tx, &instance, completedNode.Properties.Automations, userID, nodeInstance.NodeName); err != nil {
+			storyIDs, err := executeWorkflowAutomations(tx, &instance, completedNode.Properties.Automations, variables, userID, nodeInstance.NodeName)
+			if err != nil {
 				return err
 			}
+			pendingStoryIDs = append(pendingStoryIDs, storyIDs...)
 		}
 		context := &workflowExecutionContext{graph: graph, instance: &instance, variables: variables}
 		return rebuildWorkflowRouteAfterNode(tx, context, nodeInstance)
 	})
+	if err != nil {
+		return err
+	}
+	for _, storyID := range pendingStoryIDs {
+		autoStartStoryWorkflow(storyID, userID)
+	}
+	return nil
 }
 
 // resolveWorkflowActors 按用户、角色、发起人直属上级、流程发起人或审批参与人解析启用用户。

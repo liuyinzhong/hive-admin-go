@@ -296,7 +296,7 @@ func PublishWorkflowDefinition(definitionID string) error {
 	if err := validateWorkflowBusinessTypeRequired(&definition); err != nil {
 		return err
 	}
-	if err := validateWorkflowAutomationMounts(&definition, graph); err != nil {
+	if err := validateWorkflowAutomationMounts(&definition, graph, formFields); err != nil {
 		return err
 	}
 
@@ -328,41 +328,111 @@ func validateWorkflowBusinessTypeRequired(definition *models.WfProcessDefinition
 	return nil
 }
 
-// validateWorkflowAutomationMounts 校验画布节点挂载的自动化动作快照。
-// 1. 手动发起流程(startType=0)不绑定业务对象,修改字段值动作执行时必然找不到目标,发布阶段拦截;
-// 2. 快照动作类型受支持、目标字段在该业务类型可写字段白名单内、目标值非空,防止损坏快照进入运行期。
-func validateWorkflowAutomationMounts(definition *models.WfProcessDefinition, graph *workflowGraph) error {
-	if definition.BusinessType == nil || strings.TrimSpace(*definition.BusinessType) == "" {
+// validateWorkflowAutomationMounts 校验画布节点挂载的自动化动作快照(动作类型×启动类型矩阵):
+// 1. 修改字段值依赖业务流程绑定,仅被动触发流程可挂;插入记录依赖表单变量,仅手动发起流程可挂;
+// 2. 修改字段值快照:目标字段在该业务类型状态字段白名单内、目标值非空;
+// 3. 插入记录快照:目标业务类型已注册、必填字段映射齐全、值来源合法、表单字段名存在于当前流程绑定表单。
+func validateWorkflowAutomationMounts(definition *models.WfProcessDefinition, graph *workflowGraph, formFields []models.FormSchemaField) error {
+	for index := range graph.Nodes {
+		node := &graph.Nodes[index]
+		for _, mount := range node.Properties.Automations {
+			nodeName := workflowNodeName(node)
+			switch mount.ActionType {
+			case models.ActionTypeUpdateField:
+				if definition.StartType == models.WorkflowStartTypeManual {
+					return fmt.Errorf("节点「%s」挂载了自动化动作「%s」:修改字段值需要业务对象,手动发起流程不能挂载,请将启动类型改为被动触发",
+						nodeName, mount.AutomationName)
+				}
+				if err := validateUpdateFieldSnapshot(definition, mount, nodeName); err != nil {
+					return err
+				}
+			case models.ActionTypeInsertRecord:
+				if definition.StartType == models.WorkflowStartTypePassive {
+					return fmt.Errorf("节点「%s」挂载了自动化动作「%s」:插入记录的值来源依赖表单字段,被动触发流程不能挂载,请将启动类型改为手动发起",
+						nodeName, mount.AutomationName)
+				}
+				if err := validateInsertRecordSnapshot(definition, mount, formFields, nodeName); err != nil {
+					return err
+				}
+			default:
+				return fmt.Errorf("节点「%s」的自动化动作「%s」动作类型 %s 不受支持", nodeName, mount.AutomationName, mount.ActionType)
+			}
+		}
+	}
+	return nil
+}
+
+// validateUpdateFieldSnapshot 校验修改字段值快照:目标字段在该业务类型状态字段白名单内、目标值非空。
+func validateUpdateFieldSnapshot(definition *models.WfProcessDefinition, mount workflowAutomationMount, nodeName string) error {
+	if definition.BusinessType == nil {
 		return nil
 	}
 	def, exists := getBusinessTypeDef(strings.TrimSpace(*definition.BusinessType))
 	if !exists {
 		return nil
 	}
-	for index := range graph.Nodes {
-		node := &graph.Nodes[index]
-		for _, mount := range node.Properties.Automations {
-			if definition.StartType == models.WorkflowStartTypeManual {
-				return fmt.Errorf("节点「%s」挂载了自动化动作「%s」:手动发起流程不绑定业务对象,不能挂载自动化动作,请将启动类型改为被动触发",
-					workflowNodeName(node), mount.AutomationName)
-			}
-			if mount.ActionType != automationActionTypeUpdateField {
-				return fmt.Errorf("节点「%s」的自动化动作「%s」动作类型 %s 不受支持", workflowNodeName(node), mount.AutomationName, mount.ActionType)
-			}
-			fieldValid := false
-			for _, field := range def.StatusFields {
-				if field.Field == mount.TargetField {
-					fieldValid = true
-					break
-				}
-			}
-			if !fieldValid {
-				return fmt.Errorf("节点「%s」的自动化动作「%s」目标字段 %s 不在业务类型[%s]的可写字段白名单内",
-					workflowNodeName(node), mount.AutomationName, mount.TargetField, def.Label)
-			}
+	for _, field := range def.StatusFields {
+		if field.Field == mount.TargetField {
 			if strings.TrimSpace(mount.TargetValue) == "" {
-				return fmt.Errorf("节点「%s」的自动化动作「%s」目标值为空", workflowNodeName(node), mount.AutomationName)
+				return fmt.Errorf("节点「%s」的自动化动作「%s」目标值为空", nodeName, mount.AutomationName)
 			}
+			return nil
+		}
+	}
+	return fmt.Errorf("节点「%s」的自动化动作「%s」目标字段 %s 不在业务类型[%s]的可写字段白名单内",
+		nodeName, mount.AutomationName, mount.TargetField, def.Label)
+}
+
+// validateInsertRecordSnapshot 校验插入记录快照:映射字段在动作业务类型的可插目录内、
+// 必填字段映射齐全、值来源合法;表单字段名按当前流程绑定的表单字段强校验(弱引用的发布期拦截点)。
+func validateInsertRecordSnapshot(definition *models.WfProcessDefinition, mount workflowAutomationMount, formFields []models.FormSchemaField, nodeName string) error {
+	targetDef, exists := getBusinessTypeDef(mount.BusinessType)
+	if !exists {
+		return fmt.Errorf("节点「%s」的自动化动作「%s」业务类型 %s 未注册", nodeName, mount.AutomationName, mount.BusinessType)
+	}
+	if len(mount.Mappings) == 0 {
+		return fmt.Errorf("节点「%s」的自动化动作「%s」没有字段映射", nodeName, mount.AutomationName)
+	}
+	insertFieldMap := make(map[string]businessTypeFieldDef, len(targetDef.InsertFields))
+	for _, field := range targetDef.InsertFields {
+		insertFieldMap[field.Field] = field
+	}
+	formFieldSet := make(map[string]bool, len(formFields))
+	for _, field := range formFields {
+		formFieldSet[field.FieldName] = true
+	}
+	mappedFields := make(map[string]bool, len(mount.Mappings))
+	for _, mapping := range mount.Mappings {
+		field, ok := insertFieldMap[mapping.Field]
+		if !ok {
+			return fmt.Errorf("节点「%s」的自动化动作「%s」目标字段 %s 不在业务类型[%s]的可插字段目录内",
+				nodeName, mount.AutomationName, mapping.Field, targetDef.Label)
+		}
+		if mappedFields[field.Field] {
+			return fmt.Errorf("节点「%s」的自动化动作「%s」目标字段 %s 重复映射", nodeName, mount.AutomationName, field.Field)
+		}
+		mappedFields[field.Field] = true
+		switch mapping.SourceType {
+		case models.InsertSourceFixed:
+			if strings.TrimSpace(mapping.Value) == "" {
+				return fmt.Errorf("节点「%s」的自动化动作「%s」目标字段 %s 的固定值为空", nodeName, mount.AutomationName, field.Label)
+			}
+		case models.InsertSourceForm:
+			if strings.TrimSpace(mapping.FormField) == "" {
+				return fmt.Errorf("节点「%s」的自动化动作「%s」目标字段 %s 的表单字段名为空", nodeName, mount.AutomationName, field.Label)
+			}
+			if !formFieldSet[mapping.FormField] {
+				return fmt.Errorf("节点「%s」的自动化动作「%s」引用的表单字段 %s 不在流程绑定表单中,无法发布",
+					nodeName, mount.AutomationName, mapping.FormField)
+			}
+		default:
+			return fmt.Errorf("节点「%s」的自动化动作「%s」目标字段 %s 的值来源不合法", nodeName, mount.AutomationName, field.Field)
+		}
+	}
+	for _, field := range targetDef.InsertFields {
+		if field.Required && !mappedFields[field.Field] {
+			return fmt.Errorf("节点「%s」的自动化动作「%s」缺少业务类型[%s]必填字段 %s 的映射",
+				nodeName, mount.AutomationName, targetDef.Label, field.Label)
 		}
 	}
 	return nil

@@ -23261,14 +23261,14 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "返回指定业务类型允许修改的字段清单(版本1仅状态字段)及字段值字典类型,供动作库新建/编辑表单联动。数据权限:全局主数据,字段元数据来源于后端业务类型注册表。",
+                "description": "返回指定业务类型的字段元数据:purpose=update(默认)返回修改字段值动作的状态字段白名单;purpose=insert 返回插入记录动作的可插字段目录(含必填标记 required 与字典映射)。数据权限:全局主数据,字段元数据来源于后端业务类型注册表。",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "工作流/自动化动作"
                 ],
-                "summary": "自动化动作可写字段",
+                "summary": "自动化动作字段元数据",
                 "parameters": [
                     {
                         "type": "string",
@@ -23276,6 +23276,12 @@ const docTemplate = `{
                         "name": "businessType",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "用途:update(默认)状态字段白名单;insert可插字段目录",
+                        "name": "purpose",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -24914,21 +24920,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.AutomationActionConfig": {
-            "type": "object",
-            "properties": {
-                "targetField": {
-                    "description": "目标字段,须在业务类型可写字段白名单内",
-                    "type": "string",
-                    "example": "story_status"
-                },
-                "targetValue": {
-                    "description": "目标值,字典字段须为对应字典的合法值",
-                    "type": "string",
-                    "example": "10"
-                }
-            }
-        },
         "models.AutomationFieldMeta": {
             "type": "object",
             "properties": {
@@ -24943,6 +24934,58 @@ const docTemplate = `{
                 "label": {
                     "type": "string",
                     "example": "需求状态"
+                },
+                "required": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "models.AutomationInsertFieldResponse": {
+            "type": "object",
+            "properties": {
+                "dictType": {
+                    "type": "string",
+                    "example": "STORY_STATUS"
+                },
+                "field": {
+                    "type": "string",
+                    "example": "story_title"
+                },
+                "fieldLabel": {
+                    "type": "string",
+                    "example": "需求名称"
+                },
+                "formField": {
+                    "type": "string",
+                    "example": "story_title"
+                },
+                "isRefField": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "required": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "sourceType": {
+                    "type": "string",
+                    "example": "form"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "models.AutomationInsertRecordResponse": {
+            "type": "object",
+            "properties": {
+                "mappings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.AutomationInsertFieldResponse"
+                    }
                 }
             }
         },
@@ -24977,9 +25020,8 @@ const docTemplate = `{
                     "type": "string",
                     "example": "管理员"
                 },
-                "dictType": {
-                    "type": "string",
-                    "example": "STORY_STATUS"
+                "insertRecord": {
+                    "$ref": "#/definitions/models.AutomationInsertRecordResponse"
                 },
                 "remark": {
                     "type": "string",
@@ -24988,6 +25030,22 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "example": "0"
+                },
+                "updateDate": {
+                    "type": "string",
+                    "example": "2026-09-03 10:00:00"
+                },
+                "updateField": {
+                    "$ref": "#/definitions/models.AutomationUpdateFieldResponse"
+                }
+            }
+        },
+        "models.AutomationUpdateFieldResponse": {
+            "type": "object",
+            "properties": {
+                "dictType": {
+                    "type": "string",
+                    "example": "STORY_STATUS"
                 },
                 "targetField": {
                     "type": "string",
@@ -25000,10 +25058,6 @@ const docTemplate = `{
                 "targetValue": {
                     "type": "string",
                     "example": "10"
-                },
-                "updateDate": {
-                    "type": "string",
-                    "example": "2026-09-03 10:00:00"
                 }
             }
         },
@@ -25412,48 +25466,7 @@ const docTemplate = `{
             }
         },
         "models.CreateAutomationRequest": {
-            "type": "object",
-            "required": [
-                "actionConfig",
-                "actionType",
-                "automationName",
-                "businessType"
-            ],
-            "properties": {
-                "actionConfig": {
-                    "description": "动作参数",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.AutomationActionConfig"
-                        }
-                    ]
-                },
-                "actionType": {
-                    "description": "动作类型",
-                    "type": "string",
-                    "example": "update_field"
-                },
-                "automationName": {
-                    "description": "动作名称",
-                    "type": "string",
-                    "example": "需求评审通过"
-                },
-                "businessType": {
-                    "description": "业务类型,字典BUSINESS_TYPE的值",
-                    "type": "string",
-                    "example": "0"
-                },
-                "remark": {
-                    "description": "备注",
-                    "type": "string",
-                    "example": "评审节点使用"
-                },
-                "status": {
-                    "description": "状态:0启用 1停用,默认启用",
-                    "type": "integer",
-                    "example": 0
-                }
-            }
+            "type": "object"
         },
         "models.CreateBugRequest": {
             "type": "object",
@@ -34975,38 +34988,7 @@ const docTemplate = `{
             }
         },
         "models.UpdateAutomationRequest": {
-            "type": "object",
-            "required": [
-                "actionConfig",
-                "actionType",
-                "automationName",
-                "businessType"
-            ],
-            "properties": {
-                "actionConfig": {
-                    "$ref": "#/definitions/models.AutomationActionConfig"
-                },
-                "actionType": {
-                    "type": "string",
-                    "example": "update_field"
-                },
-                "automationName": {
-                    "type": "string",
-                    "example": "需求评审通过"
-                },
-                "businessType": {
-                    "type": "string",
-                    "example": "0"
-                },
-                "remark": {
-                    "type": "string",
-                    "example": "评审节点使用"
-                },
-                "status": {
-                    "type": "integer",
-                    "example": 0
-                }
-            }
+            "type": "object"
         },
         "models.UpdateBugFieldRequest": {
             "type": "object",

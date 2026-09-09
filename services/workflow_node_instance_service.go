@@ -242,12 +242,18 @@ func activateWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeIn
 
 // runNodeAutomations 执行指定节点在画布快照中挂载的自动化动作。
 // 未挂载动作时静默跳过;自动节点无审批人,操作人取流程发起人写入业务变更记录。
+// 插入记录动作新建的需求 ID 暂存到上下文,由事务提交方链式自动发起需求流程。
 func runNodeAutomations(tx *gorm.DB, context *workflowExecutionContext, nodeInstance *models.WfProcessNodeInstance, operatorID string) error {
 	node := findWorkflowNode(context.graph, nodeInstance.NodeID)
 	if node == nil || len(node.Properties.Automations) == 0 {
 		return nil
 	}
-	return executeWorkflowAutomations(tx, context.instance, node.Properties.Automations, operatorID, nodeInstance.NodeName)
+	storyIDs, err := executeWorkflowAutomations(tx, context.instance, node.Properties.Automations, context.variables, operatorID, nodeInstance.NodeName)
+	if err != nil {
+		return err
+	}
+	context.pendingAutoStartStoryIDs = append(context.pendingAutoStartStoryIDs, storyIDs...)
+	return nil
 }
 
 func completeAndAdvanceWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeInstance *models.WfProcessNodeInstance) error {
