@@ -3170,6 +3170,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "关键字，模糊匹配需求编号或需求标题",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "项目ID",
                         "name": "projectId",
                         "in": "query"

@@ -22,6 +22,7 @@ import (
 // @Param pageSize query int false "每页大小"
 // @Param storyNum query int false "需求编号"
 // @Param storyTitle query string false "需求标题"
+// @Param keyword query string false "关键字，模糊匹配需求编号或需求标题"
 // @Param projectId query string false "项目ID"
 // @Param versionId query string false "版本ID"
 // @Param moduleId query string false "模块ID"
@@ -58,6 +59,7 @@ func (dc *DevController) GetStorys(c *gin.Context) {
 	params := map[string]interface{}{
 		"storyNum":      storyNum,
 		"storyTitle":    c.Query("storyTitle"),
+		"keyword":       c.Query("keyword"),
 		"projectId":     c.Query("projectId"),
 		"versionId":     c.Query("versionId"),
 		"moduleId":      c.Query("moduleId"),

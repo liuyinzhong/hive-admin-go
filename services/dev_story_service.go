@@ -37,6 +37,11 @@ func GetStorys(page, pageSize int, params map[string]interface{}, permission dat
 	if storyTitle, ok := params["storyTitle"].(string); ok && storyTitle != "" {
 		db = db.Where("story_title LIKE ?", "%"+storyTitle+"%")
 	}
+	// keyword 关键字模糊匹配需求标题或需求编号,括号保证不破坏外层数据权限的 AND 语义
+	if keyword, ok := params["keyword"].(string); ok && strings.TrimSpace(keyword) != "" {
+		kw := "%" + strings.TrimSpace(keyword) + "%"
+		db = db.Where("(story_title LIKE ? OR CAST(story_num AS CHAR) LIKE ?)", kw, kw)
+	}
 	if projectID, ok := params["projectId"].(string); ok && projectID != "" {
 		db = db.Where("project_id = ?", projectID)
 	}
