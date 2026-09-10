@@ -3604,6 +3604,25 @@ definitions:
         example: "2026-01-15 09:00:00"
         type: string
     type: object
+  models.MenuMessageItem:
+    properties:
+      content:
+        type: string
+      createDate:
+        type: string
+      id:
+        type: string
+      menuId:
+        type: string
+      menuName:
+        type: string
+      menuPath:
+        type: string
+      readAt:
+        type: string
+      title:
+        type: string
+    type: object
   models.MenuMessageUnreadSummary:
     properties:
       menuId:
@@ -21933,6 +21952,70 @@ paths:
       summary: 检查菜单路径是否存在
       tags:
       - 系统管理/菜单管理
+  /system/messages:
+    get:
+      description: 获取当前登录用户最近的消息列表(含已读),按创建时间倒序,最多返回100条。数据权限:当前用户归属,仅按登录用户 user_id
+        过滤,不使用角色数据范围
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.MenuMessageItem'
+                  type: array
+              type: object
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 获取失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取通知中心消息列表
+      tags:
+      - 系统管理/消息推送
+  /system/messages/{messageId}/read:
+    put:
+      description: 将当前登录用户的一条菜单消息标记为已读。数据权限:当前用户归属,仅能操作本人消息
+      parameters:
+      - description: 消息ID
+        in: path
+        name: messageId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 消息不存在或已读
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 操作失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 逐条标记消息已读
+      tags:
+      - 系统管理/消息推送
   /system/messages/demo:
     post:
       consumes:
@@ -22007,6 +22090,29 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 标记菜单消息已读
+      tags:
+      - 系统管理/消息推送
+  /system/messages/readAll:
+    put:
+      description: 将当前登录用户的全部未读菜单消息一次性标记为已读。数据权限:当前用户归属,仅操作本人消息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: 操作失败
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 全部标记已读
       tags:
       - 系统管理/消息推送
   /system/messages/stream:

@@ -130,6 +130,85 @@ func (ctrl *MenuMessageController) StreamUnreadSummary(c *gin.Context) {
 	}
 }
 
+// GetRecentMessages 获取当前用户最近的消息列表。
+// @Summary 获取通知中心消息列表
+// @Description 获取当前登录用户最近的消息列表(含已读),按创建时间倒序,最多返回100条。数据权限:当前用户归属,仅按登录用户 user_id 过滤,不使用角色数据范围
+// @Tags 系统管理/消息推送
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} models.Response{data=[]models.MenuMessageItem} "获取成功"
+// @Failure 401 {object} models.Response "未登录"
+// @Failure 500 {object} models.Response "获取失败"
+// @Router /system/messages [get]
+func (ctrl *MenuMessageController) GetRecentMessages(c *gin.Context) {
+	userID, ok := currentUserID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, models.NewErrorResponse(nil, "用户未登录"))
+		return
+	}
+
+	result, err := ctrl.service.GetRecentMessages(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, "获取消息列表失败"))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
+// ReadMessage 将当前用户的一条菜单消息标记为已读。
+// @Summary 逐条标记消息已读
+// @Description 将当前登录用户的一条菜单消息标记为已读。数据权限:当前用户归属,仅能操作本人消息
+// @Tags 系统管理/消息推送
+// @Produce json
+// @Security ApiKeyAuth
+// @Param messageId path string true "消息ID"
+// @Success 200 {object} models.Response "操作成功"
+// @Failure 400 {object} models.Response "消息不存在或已读"
+// @Failure 401 {object} models.Response "未登录"
+// @Failure 500 {object} models.Response "操作失败"
+// @Router /system/messages/{messageId}/read [put]
+func (ctrl *MenuMessageController) ReadMessage(c *gin.Context) {
+	userID, ok := currentUserID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, models.NewErrorResponse(nil, "用户未登录"))
+		return
+	}
+
+	if err := ctrl.service.ReadMessage(userID, c.Param("messageId")); err != nil {
+		if errors.Is(err, services.ErrMenuMessageNotFound) {
+			c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, "标记已读失败"))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+}
+
+// ReadAllMessages 将当前用户的全部未读消息标记为已读。
+// @Summary 全部标记已读
+// @Description 将当前登录用户的全部未读菜单消息一次性标记为已读。数据权限:当前用户归属,仅操作本人消息
+// @Tags 系统管理/消息推送
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} models.Response "操作成功"
+// @Failure 401 {object} models.Response "未登录"
+// @Failure 500 {object} models.Response "操作失败"
+// @Router /system/messages/readAll [put]
+func (ctrl *MenuMessageController) ReadAllMessages(c *gin.Context) {
+	userID, ok := currentUserID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, models.NewErrorResponse(nil, "用户未登录"))
+		return
+	}
+
+	if err := ctrl.service.ReadAllMessages(userID); err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, "标记已读失败"))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+}
+
 func currentUserID(c *gin.Context) (string, bool) {
 	value, exists := c.Get("userId")
 	if !exists {

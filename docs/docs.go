@@ -20632,6 +20632,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/system/messages": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取当前登录用户最近的消息列表(含已读),按创建时间倒序,最多返回100条。数据权限:当前用户归属,仅按登录用户 user_id 过滤,不使用角色数据范围",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/消息推送"
+                ],
+                "summary": "获取通知中心消息列表",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.MenuMessageItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "获取失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/system/messages/demo": {
             "post": {
                 "security": [
@@ -20752,6 +20804,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/system/messages/readAll": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "将当前登录用户的全部未读菜单消息一次性标记为已读。数据权限:当前用户归属,仅操作本人消息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/消息推送"
+                ],
+                "summary": "全部标记已读",
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "操作失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/system/messages/stream": {
             "get": {
                 "security": [
@@ -20834,6 +20923,58 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "获取失败",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/messages/{messageId}/read": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "将当前登录用户的一条菜单消息标记为已读。数据权限:当前用户归属,仅能操作本人消息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/消息推送"
+                ],
+                "summary": "逐条标记消息已读",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "消息ID",
+                        "name": "messageId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "消息不存在或已读",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "操作失败",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -30019,6 +30160,35 @@ const docTemplate = `{
                     "description": "更新时间",
                     "type": "string",
                     "example": "2026-01-15 09:00:00"
+                }
+            }
+        },
+        "models.MenuMessageItem": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "createDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "menuId": {
+                    "type": "string"
+                },
+                "menuName": {
+                    "type": "string"
+                },
+                "menuPath": {
+                    "type": "string"
+                },
+                "readAt": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },

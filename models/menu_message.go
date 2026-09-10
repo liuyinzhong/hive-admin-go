@@ -24,6 +24,18 @@ type MenuMessageUnreadSummary struct {
 	UnreadCount int64  `json:"unreadCount"`
 }
 
+// MenuMessageItem 是通知中心列表项,包含归属菜单的名称与跳转路径。
+type MenuMessageItem struct {
+	ID         string     `json:"id"`
+	MenuID     string     `json:"menuId"`
+	MenuName   string     `json:"menuName"`
+	MenuPath   string     `json:"menuPath"`
+	Title      string     `json:"title"`
+	Content    string     `json:"content"`
+	ReadAt     *time.Time `json:"readAt"`
+	CreateDate *time.Time `json:"createDate"`
+}
+
 // CreateMenuMessageRequest 是 Demo 页面批量创建消息的请求参数。
 type CreateMenuMessageRequest struct {
 	UserIDs []string `json:"userIds" binding:"required,min=1" example:"[\"UUID\"]"`

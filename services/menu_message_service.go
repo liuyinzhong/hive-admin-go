@@ -20,6 +20,7 @@ import (
 var (
 	ErrMenuMessageInvalidMenu  = errors.New("只能选择启用的叶子页面菜单")
 	ErrMenuMessageInvalidUsers = errors.New("存在无效或不可用的目标用户")
+	ErrMenuMessageNotFound     = errors.New("消息不存在或已读")
 )
 
 const (
@@ -140,6 +141,89 @@ func (s *MenuMessageService) MarkRead(userID, menuID string) error {
 	now := time.Now()
 	if err := database.DB.Model(&models.SysMenuMessage{}).
 		Where("user_id = ? AND menu_id = ? AND read_at IS NULL", userID, menuID).
+		Updates(map[string]interface{}{"read_at": &now}).Error; err != nil {
+		return err
+	}
+
+	s.notifyUnreadSummary(userID)
+	return nil
+}
+
+// recentMenuMessageLimit 通知中心列表返回的最近消息数量上限。
+const recentMenuMessageLimit = 100
+
+// GetRecentMessages 返回当前用户最近的消息列表(含已读),按创建时间倒序。
+func (s *MenuMessageService) GetRecentMessages(userID string) ([]models.MenuMessageItem, error) {
+	var messages []models.SysMenuMessage
+	if err := database.DB.Where("user_id = ?", userID).
+		Order("create_date DESC").
+		Limit(recentMenuMessageLimit).
+		Find(&messages).Error; err != nil {
+		return nil, err
+	}
+
+	items := make([]models.MenuMessageItem, 0, len(messages))
+	if len(messages) == 0 {
+		return items, nil
+	}
+
+	menuIDs := make([]string, 0, len(messages))
+	for _, message := range messages {
+		menuIDs = append(menuIDs, message.MenuID)
+	}
+	var menus []models.SysMenu
+	if err := database.DB.Where("id IN ?", menuIDs).Find(&menus).Error; err != nil {
+		return nil, err
+	}
+	menuByID := make(map[string]models.SysMenu, len(menus))
+	for _, menu := range menus {
+		menuByID[menu.ID] = menu
+	}
+
+	for _, message := range messages {
+		item := models.MenuMessageItem{
+			ID:         message.ID,
+			MenuID:     message.MenuID,
+			Title:      message.Title,
+			Content:    message.Content,
+			ReadAt:     message.ReadAt,
+			CreateDate: message.CreateDate,
+		}
+		if menu, ok := menuByID[message.MenuID]; ok {
+			item.MenuName = menu.Title
+			// 跳转路径与未读汇总保持一致:外链地址优先,否则使用菜单路径。
+			item.MenuPath = utils.StringValue(menu.Link)
+			if item.MenuPath == "" {
+				item.MenuPath = utils.StringValue(menu.Path)
+			}
+		}
+		items = append(items, item)
+	}
+	return items, nil
+}
+
+// ReadMessage 将当前用户的一条菜单消息标记为已读。
+func (s *MenuMessageService) ReadMessage(userID, messageID string) error {
+	now := time.Now()
+	result := database.DB.Model(&models.SysMenuMessage{}).
+		Where("user_id = ? AND id = ? AND read_at IS NULL", userID, messageID).
+		Updates(map[string]interface{}{"read_at": &now})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return ErrMenuMessageNotFound
+	}
+
+	s.notifyUnreadSummary(userID)
+	return nil
+}
+
+// ReadAllMessages 将当前用户全部未读消息一次性标记为已读。
+func (s *MenuMessageService) ReadAllMessages(userID string) error {
+	now := time.Now()
+	if err := database.DB.Model(&models.SysMenuMessage{}).
+		Where("user_id = ? AND read_at IS NULL", userID).
 		Updates(map[string]interface{}{"read_at": &now}).Error; err != nil {
 		return err
 	}

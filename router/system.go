@@ -47,9 +47,12 @@ func registerSystemRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 
 		messages := system.Group("/messages")
 		{
+			messages.GET("", menuMessageController.GetRecentMessages)
 			messages.GET("/unreadSummary", menuMessageController.GetUnreadSummary)
 			messages.GET("/stream", menuMessageController.StreamUnreadSummary)
 			messages.POST("/read", menuMessageController.MarkRead)
+			messages.PUT("/readAll", menuMessageController.ReadAllMessages)
+			messages.PUT("/:messageId/read", menuMessageController.ReadMessage)
 			messages.POST("/demo", permissionGuard.Require("system:messageDemo:create"), menuMessageController.CreateDemoMessages)
 		}
 
