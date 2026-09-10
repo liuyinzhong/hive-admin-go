@@ -22044,7 +22044,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "分页获取全局角色配置，响应包含 dataScope；记录范围不用于过滤角色配置",
+                "description": "分页获取全局角色配置，响应包含 dataScope 和 userCount（角色下有效用户数量）；记录范围不用于过滤角色配置",
                 "consumes": [
                     "application/json"
                 ],
@@ -22193,7 +22193,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "批量软删除角色并清理菜单、自定义部门关联；仅全部数据权限操作者可执行",
+                "description": "批量软删除角色并清理菜单、自定义部门、角色用户关联；仅全部数据权限操作者可执行",
                 "consumes": [
                     "application/json"
                 ],
@@ -22475,6 +22475,266 @@
                         "description": "更新成功",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/roles/{roleId}/users": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "分页获取指定角色下的用户（角色用户），支持按用户名/真实姓名模糊搜索和用户状态过滤；数据权限：全局授权配置，不按创建人过滤，仅要求角色详情原子权限码，不使用记录级数据权限",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/角色管理"
+                ],
+                "summary": "获取角色用户列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "角色ID",
+                        "name": "roleId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户名或真实姓名，模糊搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用户状态 0=禁用 1=启用",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.RoleUserItem"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "批量把已有用户加入指定角色，已存在的关联幂等跳过，返回实际新增数量；数据权限：全局授权配置，不按创建人过滤，仅全部数据权限操作者可执行，列表与写入采用同一边界",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/角色管理"
+                ],
+                "summary": "添加角色用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "角色ID",
+                        "name": "roleId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用户ID列表",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.RoleUserIdsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "添加成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.RoleUserChangeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "批量把用户移出指定角色（物理删除关联），不存在的关联幂等跳过，返回实际移除数量；数据权限：全局授权配置，不按创建人过滤，仅全部数据权限操作者可执行，列表与写入采用同一边界",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/角色管理"
+                ],
+                "summary": "移除角色用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "角色ID",
+                        "name": "roleId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用户ID列表",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.RoleUserIdsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "移除成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.RoleUserChangeResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -32647,6 +32907,79 @@
                     "description": "状态 0=禁用 1=启用",
                     "type": "integer",
                     "example": 1
+                },
+                "userCount": {
+                    "description": "角色用户数量（仅角色分页列表填充，全量接口恒为 0）",
+                    "type": "integer",
+                    "example": 10
+                }
+            }
+        },
+        "models.RoleUserChangeResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "实际变更数量",
+                    "type": "integer",
+                    "example": 3
+                }
+            }
+        },
+        "models.RoleUserIdsRequest": {
+            "type": "object",
+            "required": [
+                "userIds"
+            ],
+            "properties": {
+                "userIds": {
+                    "description": "用户ID数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
+                }
+            }
+        },
+        "models.RoleUserItem": {
+            "type": "object",
+            "properties": {
+                "deptTitles": {
+                    "description": "部门名称",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"内科\"]"
+                    ]
+                },
+                "joinDate": {
+                    "description": "加入时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "realName": {
+                    "description": "真实姓名",
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "status": {
+                    "description": "状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "username": {
+                    "description": "用户名",
+                    "type": "string",
+                    "example": "admin"
                 }
             }
         },

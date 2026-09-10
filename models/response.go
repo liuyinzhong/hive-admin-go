@@ -214,6 +214,31 @@ type RoleSimpleResponse struct {
 	Remark    *string `json:"remark" example:"超级管理员"`         // 备注
 	DataScope string  `json:"dataScope" example:"all"`        // 数据范围
 	Status    int     `json:"status" example:"1"`             // 状态 0=禁用 1=启用
+	UserCount int     `json:"userCount" example:"10"`         // 角色用户数量（仅角色分页列表填充，全量接口恒为 0）
+}
+
+type RoleUserListRequest struct {
+	Page     int    `form:"page" example:"1"`      // 页码
+	PageSize int    `form:"pageSize" example:"20"` // 每页大小
+	Keyword  string `form:"keyword" example:"张三"`  // 用户名/真实姓名，模糊搜索
+	Status   *int   `form:"status" example:"1"`    // 用户状态 0=禁用 1=启用
+}
+
+type RoleUserIdsRequest struct {
+	UserIds []string `json:"userIds" binding:"required" example:"[\"UUID\"]"` // 用户ID数组
+}
+
+type RoleUserItem struct {
+	UserId     string   `json:"userId" example:"UUID"`                  // 用户ID
+	Username   string   `json:"username" example:"admin"`               // 用户名
+	RealName   string   `json:"realName" example:"管理员"`                 // 真实姓名
+	Status     int      `json:"status" example:"1"`                     // 状态 0=禁用 1=启用
+	DeptTitles []string `json:"deptTitles" example:"[\"内科\"]"`          // 部门名称
+	JoinDate   *string  `json:"joinDate" example:"2024-01-01 12:00:00"` // 加入时间
+}
+
+type RoleUserChangeResponse struct {
+	Count int `json:"count" example:"3"` // 实际变更数量
 }
 
 type UpdateStatusRequest struct {

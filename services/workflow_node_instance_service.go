@@ -209,7 +209,7 @@ func activateWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeIn
 	case "approve":
 		return createWorkflowApprovalTasks(tx, context, nodeInstance)
 	case "copy":
-		if err := createWorkflowCopies(tx, context.instance, nodeInstance); err != nil {
+		if err := createWorkflowCopies(tx, context, nodeInstance); err != nil {
 			return err
 		}
 		if err := runNodeAutomations(tx, context, nodeInstance, context.instance.StarterID); err != nil {
@@ -362,6 +362,12 @@ func createWorkflowApprovalTasks(tx *gorm.DB, context *workflowExecutionContext,
 	if err := tx.Create(&tasks).Error; err != nil {
 		return err
 	}
+	// 每条保持待办状态的新任务对应一条待办提醒;自动通过与或签取消的任务不发,事务提交后统一发送。
+	for index := range tasks {
+		if tasks[index].Status == models.WorkflowTaskStatusPending {
+			context.pendingNotifications = append(context.pendingNotifications, newWorkflowTodoNotice(context.instance.Title, tasks[index].NodeName, tasks[index].AssigneeID))
+		}
+	}
 	for index := range tasks {
 		task := &tasks[index]
 		if !autoApprovedActorSet[task.AssigneeID] {
@@ -419,7 +425,7 @@ func adjacentWorkflowAutoApprovedActorIDs(approvalMode string, actorIDs, previou
 	return autoApprovedActorIDs
 }
 
-func createWorkflowCopies(tx *gorm.DB, instance *models.WfProcessInstance, nodeInstance *models.WfProcessNodeInstance) error {
+func createWorkflowCopies(tx *gorm.DB, context *workflowExecutionContext, nodeInstance *models.WfProcessNodeInstance) error {
 	actorIDs, actorNames, err := workflowNodeActors(nodeInstance)
 	if err != nil {
 		return err
@@ -427,7 +433,7 @@ func createWorkflowCopies(tx *gorm.DB, instance *models.WfProcessInstance, nodeI
 	now := time.Now()
 	for index, actorID := range actorIDs {
 		copyItem := models.WfProcessCopy{
-			CopyID: utils.GenerateUUID(), NodeInstanceID: nodeInstance.NodeInstanceID, InstanceID: instance.InstanceID,
+			CopyID: utils.GenerateUUID(), NodeInstanceID: nodeInstance.NodeInstanceID, InstanceID: context.instance.InstanceID,
 			NodeID: nodeInstance.NodeID, NodeName: nodeInstance.NodeName,
 			ReceiverID: actorID, ReceiverName: actorNames[index], Status: models.WorkflowCopyStatusUnread,
 			CreateDate: &now,
@@ -435,6 +441,8 @@ func createWorkflowCopies(tx *gorm.DB, instance *models.WfProcessInstance, nodeI
 		if err := tx.Create(&copyItem).Error; err != nil {
 			return err
 		}
+		// 每条新抄送记录对应一条抄送提醒,事务提交后统一发送。
+		context.pendingNotifications = append(context.pendingNotifications, newWorkflowCopyNotice(context.instance.Title, nodeInstance.NodeName, actorID))
 	}
 	return nil
 }

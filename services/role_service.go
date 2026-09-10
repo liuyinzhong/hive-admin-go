@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -43,7 +44,62 @@ func (s *RoleService) GetRoleList(req models.RoleListRequest) (*utils.PageResult
 	query = utils.ApplySorting(query, sorts, "create_date desc")
 
 	var roles []models.SysRole
-	return utils.Paginate(query, req.Page, req.PageSize, &roles)
+	pageResult, err := utils.Paginate(query, req.Page, req.PageSize, &roles)
+	if err != nil {
+		return nil, err
+	}
+
+	roleIDs := make([]string, 0, len(roles))
+	for _, role := range roles {
+		roleIDs = append(roleIDs, role.RoleID)
+	}
+	userCounts, err := getRoleUserCounts(roleIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]*models.RoleSimpleResponse, 0, len(roles))
+	for _, role := range roles {
+		roleTitle := ""
+		if role.RoleTitle != nil {
+			roleTitle = *role.RoleTitle
+		}
+		items = append(items, &models.RoleSimpleResponse{
+			RoleId:    role.RoleID,
+			RoleTitle: roleTitle,
+			Remark:    role.Remark,
+			DataScope: role.DataScope,
+			Status:    role.Status,
+			UserCount: userCounts[role.RoleID],
+		})
+	}
+	pageResult.Items = items
+	return pageResult, nil
+}
+
+func getRoleUserCounts(roleIDs []string) (map[string]int, error) {
+	result := make(map[string]int)
+	if len(roleIDs) == 0 {
+		return result, nil
+	}
+
+	var counts []struct {
+		RoleID string `gorm:"column:role_id"`
+		Count  int    `gorm:"column:count"`
+	}
+	err := database.DB.Table("sys_user_role AS user_role").
+		Select("user_role.role_id", "COUNT(*) AS count").
+		Joins("JOIN sys_user ON sys_user.user_id = user_role.user_id AND sys_user.del_flag = 0").
+		Where("user_role.del_flag = 0 AND user_role.role_id IN ?", roleIDs).
+		Group("user_role.role_id").
+		Scan(&counts).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range counts {
+		result[item.RoleID] = item.Count
+	}
+	return result, nil
 }
 
 func (s *RoleService) GetAllRoles() ([]*models.RoleSimpleResponse, error) {
@@ -216,6 +272,9 @@ func (s *RoleService) DeleteRoles(roleIDs []string) error {
 			if err := tx.Where("role_id = ?", roleID).Delete(&models.SysRoleDept{}).Error; err != nil {
 				return err
 			}
+			if err := tx.Where("role_id = ?", roleID).Delete(&models.SysUserRole{}).Error; err != nil {
+				return err
+			}
 			if err := tx.Model(&role).Updates(map[string]interface{}{
 				"del_flag":    1,
 				"update_date": time.Now(),
@@ -330,4 +389,179 @@ func getRoleDepartments(tx *gorm.DB, roleID string) ([]string, error) {
 		Order("create_date ASC").
 		Pluck("dept_id", &departmentIDs).Error
 	return departmentIDs, err
+}
+
+type roleUserRow struct {
+	UserID   string     `gorm:"column:user_id"`
+	Username *string    `gorm:"column:username"`
+	RealName *string    `gorm:"column:real_name"`
+	Status   int        `gorm:"column:status"`
+	JoinDate *time.Time `gorm:"column:join_date"`
+}
+
+func (s *RoleService) GetRoleUsers(roleID string, req models.RoleUserListRequest) (*utils.PageResult, error) {
+	var role models.SysRole
+	if err := database.DB.Where("role_id = ? AND del_flag = 0", roleID).First(&role).Error; err != nil {
+		return nil, errors.New("角色不存在")
+	}
+
+	query := database.DB.Model(&models.SysUserRole{}).
+		Select("sys_user_role.user_id", "sys_user_role.create_date AS join_date", "sys_user.username", "sys_user.real_name", "sys_user.status").
+		Joins("JOIN sys_user ON sys_user.user_id = sys_user_role.user_id AND sys_user.del_flag = 0").
+		Where("sys_user_role.role_id = ? AND sys_user_role.del_flag = 0", roleID)
+
+	if keyword := strings.TrimSpace(req.Keyword); keyword != "" {
+		like := "%" + keyword + "%"
+		query = query.Where("sys_user.username LIKE ? OR sys_user.real_name LIKE ?", like, like)
+	}
+	if req.Status != nil {
+		query = query.Where("sys_user.status = ?", *req.Status)
+	}
+	query = query.Order("sys_user_role.create_date DESC")
+
+	var rows []roleUserRow
+	pageResult, err := utils.Paginate(query, req.Page, req.PageSize, &rows)
+	if err != nil {
+		return nil, err
+	}
+
+	userIDs := make([]string, 0, len(rows))
+	for _, row := range rows {
+		userIDs = append(userIDs, row.UserID)
+	}
+	deptTitles, err := getRoleUserDeptTitles(userIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]*models.RoleUserItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, &models.RoleUserItem{
+			UserId:     row.UserID,
+			Username:   utils.StringValue(row.Username),
+			RealName:   utils.StringValue(row.RealName),
+			Status:     row.Status,
+			DeptTitles: deptTitles[row.UserID],
+			JoinDate:   models.TimeToStringPtr(row.JoinDate),
+		})
+	}
+	pageResult.Items = items
+	return pageResult, nil
+}
+
+func getRoleUserDeptTitles(userIDs []string) (map[string][]string, error) {
+	result := make(map[string][]string)
+	if len(userIDs) == 0 {
+		return result, nil
+	}
+
+	var userDepts []models.SysUserDept
+	if err := database.DB.Where("user_id IN ? AND del_flag = 0", userIDs).Find(&userDepts).Error; err != nil {
+		return nil, err
+	}
+	if len(userDepts) == 0 {
+		return result, nil
+	}
+
+	deptIDs := make([]string, 0, len(userDepts))
+	for _, userDept := range userDepts {
+		deptIDs = append(deptIDs, userDept.DeptID)
+	}
+	var depts []models.SysDept
+	if err := database.DB.Where("dept_id IN ? AND del_flag = 0", deptIDs).Find(&depts).Error; err != nil {
+		return nil, err
+	}
+	deptTitleByID := make(map[string]string, len(depts))
+	for _, dept := range depts {
+		deptTitleByID[dept.DeptID] = utils.StringValue(dept.DeptTitle)
+	}
+	for _, userDept := range userDepts {
+		if title, ok := deptTitleByID[userDept.DeptID]; ok {
+			result[userDept.UserID] = append(result[userDept.UserID], title)
+		}
+	}
+	return result, nil
+}
+
+func (s *RoleService) AddRoleUsers(roleID string, userIDs []string) (int, error) {
+	ids := uniqueNonEmptyStrings(userIDs)
+	if len(ids) == 0 {
+		return 0, errors.New("用户ID列表不能为空")
+	}
+	for _, userID := range ids {
+		if _, err := uuid.Parse(userID); err != nil {
+			return 0, fmt.Errorf("用户ID格式错误")
+		}
+	}
+
+	added := 0
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		var role models.SysRole
+		if err := tx.Where("role_id = ? AND del_flag = 0", roleID).First(&role).Error; err != nil {
+			return errors.New("角色不存在")
+		}
+
+		var count int64
+		if err := tx.Model(&models.SysUser{}).
+			Where("user_id IN ? AND del_flag = 0", ids).
+			Count(&count).Error; err != nil {
+			return err
+		}
+		if count != int64(len(ids)) {
+			return errors.New("包含不存在或已删除的用户")
+		}
+
+		var existing []string
+		if err := tx.Model(&models.SysUserRole{}).
+			Where("role_id = ? AND user_id IN ? AND del_flag = 0", roleID, ids).
+			Pluck("user_id", &existing).Error; err != nil {
+			return err
+		}
+		existingSet := make(map[string]struct{}, len(existing))
+		for _, userID := range existing {
+			existingSet[userID] = struct{}{}
+		}
+
+		now := time.Now()
+		for _, userID := range ids {
+			if _, ok := existingSet[userID]; ok {
+				continue
+			}
+			userRole := models.SysUserRole{
+				ID:         utils.GenerateUUID(),
+				UserID:     userID,
+				RoleID:     roleID,
+				CreateDate: &now,
+				UpdateDate: &now,
+				DelFlag:    0,
+			}
+			if err := tx.Create(&userRole).Error; err != nil {
+				return err
+			}
+			added++
+		}
+		return nil
+	})
+	if err != nil {
+		return 0, err
+	}
+	return added, nil
+}
+
+func (s *RoleService) RemoveRoleUsers(roleID string, userIDs []string) (int, error) {
+	ids := uniqueNonEmptyStrings(userIDs)
+	if len(ids) == 0 {
+		return 0, errors.New("用户ID列表不能为空")
+	}
+
+	var role models.SysRole
+	if err := database.DB.Where("role_id = ? AND del_flag = 0", roleID).First(&role).Error; err != nil {
+		return 0, errors.New("角色不存在")
+	}
+
+	result := database.DB.Where("role_id = ? AND user_id IN ?", roleID, ids).Delete(&models.SysUserRole{})
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return int(result.RowsAffected), nil
 }

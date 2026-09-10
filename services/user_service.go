@@ -345,9 +345,7 @@ func (s *UserService) DeleteUsers(userIds []string, currentUserId string, permis
 
 		now := time.Now()
 		for _, user := range users {
-			if err := tx.Model(&models.SysUserRole{}).
-				Where("user_id = ? AND del_flag = 0", user.UserID).
-				Updates(map[string]interface{}{"del_flag": 1, "update_date": now}).Error; err != nil {
+			if err := tx.Where("user_id = ?", user.UserID).Delete(&models.SysUserRole{}).Error; err != nil {
 				return err
 			}
 			if err := tx.Model(&models.SysUserDept{}).

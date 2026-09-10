@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
 	"sort"
 	"strconv"
@@ -100,6 +101,9 @@ type workflowExecutionContext struct {
 	// pendingAutoStartStoryIDs 插入记录动作在同事务新建的需求 ID。
 	// 插入与流程流转同事务,链式自动发起需求流程必须在事务提交成功后执行,故先暂存。
 	pendingAutoStartStoryIDs []string
+	// pendingNotifications 为新生成的待办任务/抄送记录暂存的菜单提醒。
+	// 提醒写库与 SSE 推送同样只能在事务提交成功后执行,失败仅记日志,不影响流程事务。
+	pendingNotifications []workflowPendingNotification
 }
 
 // flushWorkflowPendingAutoStart 在流程事务提交成功后,为插入记录动作新建的需求链式自动发起需求流程。
@@ -111,6 +115,65 @@ func flushWorkflowPendingAutoStart(context *workflowExecutionContext) {
 	starterID := context.instance.StarterID
 	for _, storyID := range context.pendingAutoStartStoryIDs {
 		autoStartStoryWorkflow(storyID, starterID)
+	}
+}
+
+// 流程待办/抄送提醒的绑定菜单与标题,触发规则见 business-docs/workflow/runtime.md(WF-RUN-060)。
+const (
+	workflowTodoNoticeMenuName = "WorkflowTaskList"
+	workflowCopyNoticeMenuName = "WorkflowCopyList"
+	workflowTodoNoticeTitle    = "流程待办通知"
+	workflowCopyNoticeTitle    = "流程抄送通知"
+)
+
+// workflowPendingNotification 流转为新生成的待办任务或抄送记录暂存的菜单提醒。
+type workflowPendingNotification struct {
+	userID   string
+	menuName string
+	title    string
+	content  string
+}
+
+// newWorkflowTodoNotice 构造待办提醒,提示办理人流程已流转至指定节点。
+func newWorkflowTodoNotice(instanceTitle, nodeName, assigneeID string) workflowPendingNotification {
+	return workflowPendingNotification{
+		userID:   assigneeID,
+		menuName: workflowTodoNoticeMenuName,
+		title:    workflowTodoNoticeTitle,
+		content:  fmt.Sprintf("流程「%s」已流转至「%s」，请及时处理", instanceTitle, nodeName),
+	}
+}
+
+// newWorkflowCopyNotice 构造抄送提醒,提示接收人流程已抄送至指定节点。
+func newWorkflowCopyNotice(instanceTitle, nodeName, receiverID string) workflowPendingNotification {
+	return workflowPendingNotification{
+		userID:   receiverID,
+		menuName: workflowCopyNoticeMenuName,
+		title:    workflowCopyNoticeTitle,
+		content:  fmt.Sprintf("流程「%s」已抄送至「%s」，请知悉", instanceTitle, nodeName),
+	}
+}
+
+// flushWorkflowPendingNotifications 在流程事务提交成功后发送暂存的待办/抄送提醒。
+func flushWorkflowPendingNotifications(context *workflowExecutionContext) {
+	if context == nil || len(context.pendingNotifications) == 0 {
+		return
+	}
+	sendWorkflowNotifications(context.pendingNotifications)
+}
+
+// sendWorkflowNotifications 逐条写入菜单消息并推送未读汇总;
+// 提醒失败仅记日志,不回滚已提交的流程流转。
+func sendWorkflowNotifications(notifications []workflowPendingNotification) {
+	if len(notifications) == 0 {
+		return
+	}
+	messageService := NewMenuMessageService()
+	for _, notice := range notifications {
+		if err := messageService.CreateMenuMessageForMenuName(notice.userID, notice.menuName, notice.title, notice.content); err != nil {
+			log.Printf("[workflow] 流程提醒推送失败: menu=%s, title=%s, userID=%s, err=%v",
+				notice.menuName, notice.title, notice.userID, err)
+		}
 	}
 }
 
@@ -240,6 +303,7 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 		return response, err
 	}
 	flushWorkflowPendingAutoStart(pendingContext)
+	flushWorkflowPendingNotifications(pendingContext)
 	return response, nil
 }
 
@@ -394,7 +458,9 @@ func RejectWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionReq
 
 // TransferWorkflowTask 将当前用户的待办转交给另一名启用用户。
 func TransferWorkflowTask(taskID, userID string, req *models.WorkflowTaskTransferRequest) error {
-	return database.DB.Transaction(func(tx *gorm.DB) error {
+	// 转办提醒暂存至事务外:转办事务提交成功后再写入菜单消息,失败仅记日志。
+	var pendingNotices []workflowPendingNotification
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		task, instance, operator, err := loadPendingWorkflowTask(tx, taskID, userID)
 		if err != nil {
 			return err
@@ -424,14 +490,25 @@ func TransferWorkflowTask(taskID, userID string, req *models.WorkflowTaskTransfe
 		}).Error; err != nil {
 			return err
 		}
+		pendingNotices = append(pendingNotices, newWorkflowTodoNotice(instance.Title, task.NodeName, task.AssigneeID))
 		comment := workflowOperationComment(fmt.Sprintf("%s 转交给 %s", originalName, task.AssigneeName), req.Comment)
-		return createWorkflowRecord(tx, instance, task, nil, "transfer", &userID, stringPtr(workflowUserName(*operator)), comment)
+		if err := createWorkflowRecord(tx, instance, task, nil, "transfer", &userID, stringPtr(workflowUserName(*operator)), comment); err != nil {
+			return err
+		}
+		return nil
 	})
+	if err != nil {
+		return err
+	}
+	sendWorkflowNotifications(pendingNotices)
+	return nil
 }
 
 // AddWorkflowTaskSign 向当前审批组增加并行审批任务。
 func AddWorkflowTaskSign(taskID, userID string, req *models.WorkflowTaskAddSignRequest) error {
-	return database.DB.Transaction(func(tx *gorm.DB) error {
+	// 加签提醒暂存至事务外:加签事务提交成功后再写入菜单消息,失败仅记日志。
+	var pendingNotices []workflowPendingNotification
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		task, instance, operator, err := loadPendingWorkflowTask(tx, taskID, userID)
 		if err != nil {
 			return err
@@ -475,10 +552,19 @@ func AddWorkflowTaskSign(taskID, userID string, req *models.WorkflowTaskAddSignR
 			if err := tx.Create(&newTask).Error; err != nil {
 				return err
 			}
+			pendingNotices = append(pendingNotices, newWorkflowTodoNotice(instance.Title, newTask.NodeName, newTask.AssigneeID))
 		}
 		comment := workflowOperationComment("加签："+strings.Join(names, "、"), req.Comment)
-		return createWorkflowRecord(tx, instance, task, nil, "addSign", &userID, stringPtr(workflowUserName(*operator)), comment)
+		if err := createWorkflowRecord(tx, instance, task, nil, "addSign", &userID, stringPtr(workflowUserName(*operator)), comment); err != nil {
+			return err
+		}
+		return nil
 	})
+	if err != nil {
+		return err
+	}
+	sendWorkflowNotifications(pendingNotices)
+	return nil
 }
 
 // RemoveWorkflowTaskSign 取消当前审批组中指定的未处理任务。
@@ -538,7 +624,9 @@ func GetWorkflowTaskReturnTargets(taskID, userID string) ([]models.WorkflowRetur
 
 // ReturnWorkflowTask 将当前审批组退回到指定的历史审批节点。
 func ReturnWorkflowTask(taskID, userID string, req *models.WorkflowTaskReturnRequest) error {
-	return database.DB.Transaction(func(tx *gorm.DB) error {
+	// 退回重建路径的提醒暂存于事务外上下文:事务提交成功后再发送,失败仅记日志。
+	var flowContext *workflowExecutionContext
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		task, instance, operator, err := loadPendingWorkflowTask(tx, taskID, userID)
 		if err != nil {
 			return err
@@ -592,9 +680,14 @@ func ReturnWorkflowTask(taskID, userID string, req *models.WorkflowTaskReturnReq
 		if err := json.Unmarshal([]byte(instance.Variables), &variables); err != nil {
 			return fmt.Errorf("流程变量解析失败")
 		}
-		context := &workflowExecutionContext{graph: graph, instance: instance, variables: variables}
-		return restartWorkflowRouteAtNode(tx, context, targetNode.ID)
+		flowContext = &workflowExecutionContext{graph: graph, instance: instance, variables: variables}
+		return restartWorkflowRouteAtNode(tx, flowContext, targetNode.ID)
 	})
+	if err != nil {
+		return err
+	}
+	flushWorkflowPendingNotifications(flowContext)
+	return nil
 }
 
 // CancelWorkflowInstance 允许发起人撤销仍在运行的实例。
@@ -799,8 +892,9 @@ func workflowOperationComment(summary string, comment *string) *string {
 
 // handleWorkflowTask 在事务内处理审批并推进或终止实例。
 func handleWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionRequest, approved bool) error {
-	// 链式发起暂存提至事务外:审批事务提交成功后,为插入记录动作新建的需求自动发起需求流程。
+	// 链式发起与流转提醒暂存提至事务外:审批事务提交成功后,为插入记录动作新建的需求自动发起需求流程,并发送待办/抄送提醒。
 	var pendingStoryIDs []string
+	var flowContext *workflowExecutionContext
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		var task models.WfProcessTask
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
@@ -902,8 +996,8 @@ func handleWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionReq
 			}
 			pendingStoryIDs = append(pendingStoryIDs, storyIDs...)
 		}
-		context := &workflowExecutionContext{graph: graph, instance: &instance, variables: variables}
-		return rebuildWorkflowRouteAfterNode(tx, context, nodeInstance)
+		flowContext = &workflowExecutionContext{graph: graph, instance: &instance, variables: variables}
+		return rebuildWorkflowRouteAfterNode(tx, flowContext, nodeInstance)
 	})
 	if err != nil {
 		return err
@@ -911,6 +1005,7 @@ func handleWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionReq
 	for _, storyID := range pendingStoryIDs {
 		autoStartStoryWorkflow(storyID, userID)
 	}
+	flushWorkflowPendingNotifications(flowContext)
 	return nil
 }
 

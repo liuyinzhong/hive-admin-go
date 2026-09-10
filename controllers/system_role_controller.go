@@ -10,7 +10,7 @@ import (
 
 // GetRoleList 获取角色列表
 // @Summary 获取角色列表
-// @Description 分页获取全局角色配置，响应包含 dataScope；记录范围不用于过滤角色配置
+// @Description 分页获取全局角色配置，响应包含 dataScope 和 userCount（角色下有效用户数量）；记录范围不用于过滤角色配置
 // @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
@@ -197,7 +197,7 @@ func (ctrl *SystemController) UpdateRoleStatus(c *gin.Context) {
 
 // DeleteRoles 删除角色
 // @Summary 删除角色
-// @Description 批量软删除角色并清理菜单、自定义部门关联；仅全部数据权限操作者可执行
+// @Description 批量软删除角色并清理菜单、自定义部门、角色用户关联；仅全部数据权限操作者可执行
 // @Tags 系统管理/角色管理
 // @Accept json
 // @Produce json
@@ -224,4 +224,121 @@ func (ctrl *SystemController) DeleteRoles(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+}
+
+// GetRoleUsers 获取角色用户列表
+// @Summary 获取角色用户列表
+// @Description 分页获取指定角色下的用户（角色用户），支持按用户名/真实姓名模糊搜索和用户状态过滤；数据权限：全局授权配置，不按创建人过滤，仅要求角色详情原子权限码，不使用记录级数据权限
+// @Tags 系统管理/角色管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param roleId path string true "角色ID"
+// @Param page query int false "页码"
+// @Param pageSize query int false "每页大小"
+// @Param keyword query string false "用户名或真实姓名，模糊搜索"
+// @Param status query int false "用户状态 0=禁用 1=启用"
+// @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.RoleUserItem}} "获取成功"
+// @Failure 400 {object} map[string]interface{} "参数错误"
+// @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /system/roles/{roleId}/users [get]
+func (ctrl *SystemController) GetRoleUsers(c *gin.Context) {
+	roleId := c.Param("roleId")
+	if roleId == "" {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "角色ID不能为空"))
+		return
+	}
+
+	var req models.RoleUserListRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
+		return
+	}
+
+	result, err := ctrl.roleService.GetRoleUsers(roleId, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
+// AddRoleUsers 添加角色用户
+// @Summary 添加角色用户
+// @Description 批量把已有用户加入指定角色，已存在的关联幂等跳过，返回实际新增数量；数据权限：全局授权配置，不按创建人过滤，仅全部数据权限操作者可执行，列表与写入采用同一边界
+// @Tags 系统管理/角色管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param roleId path string true "角色ID"
+// @Param request body models.RoleUserIdsRequest true "用户ID列表"
+// @Success 200 {object} models.Response{data=models.RoleUserChangeResponse} "添加成功"
+// @Failure 400 {object} map[string]interface{} "参数错误"
+// @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /system/roles/{roleId}/users [post]
+func (ctrl *SystemController) AddRoleUsers(c *gin.Context) {
+	if !requireAllDataPermission(c) {
+		return
+	}
+	roleId := c.Param("roleId")
+	if roleId == "" {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "角色ID不能为空"))
+		return
+	}
+
+	var req models.RoleUserIdsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
+		return
+	}
+
+	count, err := ctrl.roleService.AddRoleUsers(roleId, req.UserIds)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NewSuccessResponse(models.RoleUserChangeResponse{Count: count}))
+}
+
+// RemoveRoleUsers 移除角色用户
+// @Summary 移除角色用户
+// @Description 批量把用户移出指定角色（物理删除关联），不存在的关联幂等跳过，返回实际移除数量；数据权限：全局授权配置，不按创建人过滤，仅全部数据权限操作者可执行，列表与写入采用同一边界
+// @Tags 系统管理/角色管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param roleId path string true "角色ID"
+// @Param request body models.RoleUserIdsRequest true "用户ID列表"
+// @Success 200 {object} models.Response{data=models.RoleUserChangeResponse} "移除成功"
+// @Failure 400 {object} map[string]interface{} "参数错误"
+// @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /system/roles/{roleId}/users [delete]
+func (ctrl *SystemController) RemoveRoleUsers(c *gin.Context) {
+	if !requireAllDataPermission(c) {
+		return
+	}
+	roleId := c.Param("roleId")
+	if roleId == "" {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "角色ID不能为空"))
+		return
+	}
+
+	var req models.RoleUserIdsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
+		return
+	}
+
+	count, err := ctrl.roleService.RemoveRoleUsers(roleId, req.UserIds)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NewSuccessResponse(models.RoleUserChangeResponse{Count: count}))
 }

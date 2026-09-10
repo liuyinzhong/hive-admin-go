@@ -97,6 +97,9 @@ func registerSystemRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 			roles.GET("/:roleId", permissionGuard.Require("system:role:detail"), systemController.GetRoleDetail)
 			roles.PUT("/:roleId", permissionGuard.Require("system:role:update"), systemController.UpdateRole)
 			roles.PUT("/:roleId/status", permissionGuard.Require("system:role:status"), systemController.UpdateRoleStatus)
+			roles.GET("/:roleId/users", permissionGuard.Require("system:role:detail"), systemController.GetRoleUsers)
+			roles.POST("/:roleId/users", permissionGuard.Require("system:role:user"), systemController.AddRoleUsers)
+			roles.DELETE("/:roleId/users", permissionGuard.Require("system:role:user"), systemController.RemoveRoleUsers)
 			roles.DELETE("", permissionGuard.Require("system:role:delete"), systemController.DeleteRoles)
 		}
 

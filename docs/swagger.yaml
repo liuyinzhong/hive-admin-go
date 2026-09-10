@@ -5765,6 +5765,59 @@ definitions:
         description: 状态 0=禁用 1=启用
         example: 1
         type: integer
+      userCount:
+        description: 角色用户数量（仅角色分页列表填充，全量接口恒为 0）
+        example: 10
+        type: integer
+    type: object
+  models.RoleUserChangeResponse:
+    properties:
+      count:
+        description: 实际变更数量
+        example: 3
+        type: integer
+    type: object
+  models.RoleUserIdsRequest:
+    properties:
+      userIds:
+        description: 用户ID数组
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
+    required:
+    - userIds
+    type: object
+  models.RoleUserItem:
+    properties:
+      deptTitles:
+        description: 部门名称
+        example:
+        - '["内科"]'
+        items:
+          type: string
+        type: array
+      joinDate:
+        description: 加入时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      realName:
+        description: 真实姓名
+        example: 管理员
+        type: string
+      status:
+        description: 状态 0=禁用 1=启用
+        example: 1
+        type: integer
+      userId:
+        description: 用户ID
+        example: UUID
+        type: string
+      username:
+        description: 用户名
+        example: admin
+        type: string
     type: object
   models.SaveClassificationNodeRequest:
     properties:
@@ -22772,7 +22825,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 批量软删除角色并清理菜单、自定义部门关联；仅全部数据权限操作者可执行
+      description: 批量软删除角色并清理菜单、自定义部门、角色用户关联；仅全部数据权限操作者可执行
       parameters:
       - description: 角色ID列表
         in: body
@@ -22811,7 +22864,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 分页获取全局角色配置，响应包含 dataScope；记录范围不用于过滤角色配置
+      description: 分页获取全局角色配置，响应包含 dataScope 和 userCount（角色下有效用户数量）；记录范围不用于过滤角色配置
       parameters:
       - description: 页码
         in: query
@@ -23026,6 +23079,165 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 更新角色状态
+      tags:
+      - 系统管理/角色管理
+  /system/roles/{roleId}/users:
+    delete:
+      consumes:
+      - application/json
+      description: 批量把用户移出指定角色（物理删除关联），不存在的关联幂等跳过，返回实际移除数量；数据权限：全局授权配置，不按创建人过滤，仅全部数据权限操作者可执行，列表与写入采用同一边界
+      parameters:
+      - description: 角色ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      - description: 用户ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RoleUserIdsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 移除成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RoleUserChangeResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 移除角色用户
+      tags:
+      - 系统管理/角色管理
+    get:
+      consumes:
+      - application/json
+      description: 分页获取指定角色下的用户（角色用户），支持按用户名/真实姓名模糊搜索和用户状态过滤；数据权限：全局授权配置，不按创建人过滤，仅要求角色详情原子权限码，不使用记录级数据权限
+      parameters:
+      - description: 角色ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 用户名或真实姓名，模糊搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 用户状态 0=禁用 1=启用
+        in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.RoleUserItem'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取角色用户列表
+      tags:
+      - 系统管理/角色管理
+    post:
+      consumes:
+      - application/json
+      description: 批量把已有用户加入指定角色，已存在的关联幂等跳过，返回实际新增数量；数据权限：全局授权配置，不按创建人过滤，仅全部数据权限操作者可执行，列表与写入采用同一边界
+      parameters:
+      - description: 角色ID
+        in: path
+        name: roleId
+        required: true
+        type: string
+      - description: 用户ID列表
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RoleUserIdsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 添加成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.RoleUserChangeResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 添加角色用户
       tags:
       - 系统管理/角色管理
   /system/roles/all:
