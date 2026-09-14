@@ -23,7 +23,7 @@ func NewPrintTemplateController() *PrintTemplateController {
 
 // GetPrintTemplateList 获取打印模板列表
 // @Summary 获取打印模板列表
-// @Description 查询打印管理中的模板；一个单据类型只允许一条逻辑模板记录
+// @Description 查询打印管理中的模板；一个单据类型只允许一条逻辑模板记录。数据权限：全局主数据，不按创建人过滤（PRINT-TPL-022）
 // @Tags 打印管理/打印模板
 // @Produce json
 // @Security ApiKeyAuth
@@ -54,7 +54,7 @@ func (ctrl *PrintTemplateController) GetPrintTemplateList(c *gin.Context) {
 
 // GetPrintTemplateMetadata 获取打印字段注册表
 // @Summary 获取打印字段注册表
-// @Description 返回可绑定的系统定义单据类型和打印字段，设计器不得使用未注册字段
+// @Description 返回可绑定的系统定义单据类型和打印字段，设计器不得使用未注册字段。数据权限：全局主数据，不按创建人过滤
 // @Tags 打印管理/打印模板
 // @Produce json
 // @Security ApiKeyAuth
@@ -68,7 +68,7 @@ func (ctrl *PrintTemplateController) GetPrintTemplateMetadata(c *gin.Context) {
 
 // CreatePrintTemplate 创建打印模板
 // @Summary 创建打印模板
-// @Description 创建指定单据类型的唯一打印模板，初始保存为草稿
+// @Description 创建指定单据类型的唯一打印模板，初始保存为草稿。draftLayout 为 worm-vue3-print TemplateData 版式 JSON，后端做边界校验（结构合法、表达式字段必须命中注册表）。数据权限：全局主数据，不按创建人过滤
 // @Tags 打印管理/打印模板
 // @Accept json
 // @Produce json
@@ -97,7 +97,7 @@ func (ctrl *PrintTemplateController) CreatePrintTemplate(c *gin.Context) {
 
 // GetPrintTemplateDetail 获取打印模板详情
 // @Summary 获取打印模板详情
-// @Description 获取当前草稿和当前已发布内容，不返回历史版本
+// @Description 获取当前草稿和当前已发布内容（worm-vue3-print TemplateData 版式 JSON），不返回历史版本。数据权限：全局主数据，不按创建人过滤
 // @Tags 打印管理/打印模板
 // @Produce json
 // @Security ApiKeyAuth
@@ -119,7 +119,7 @@ func (ctrl *PrintTemplateController) GetPrintTemplateDetail(c *gin.Context) {
 
 // UpdatePrintTemplate 更新打印模板草稿
 // @Summary 更新打印模板草稿
-// @Description 只更新当前草稿；已发布内容保持不变，发布前草稿不影响业务打印
+// @Description 只更新当前草稿（worm-vue3-print TemplateData 版式 JSON，边界校验从宽），已发布内容保持不变，发布前草稿不影响业务打印。数据权限：全局主数据，不按创建人过滤
 // @Tags 打印管理/打印模板
 // @Accept json
 // @Produce json
@@ -149,7 +149,7 @@ func (ctrl *PrintTemplateController) UpdatePrintTemplate(c *gin.Context) {
 
 // PublishPrintTemplate 发布打印模板
 // @Summary 发布打印模板
-// @Description 校验当前草稿后覆盖当前已发布内容；不生成历史版本
+// @Description 校验当前草稿（从严：至少一个元素、元素 ID 唯一、明细表格数据源必须是注册明细集合）后覆盖当前已发布内容；不生成历史版本。数据权限：全局主数据，不按创建人过滤
 // @Tags 打印管理/打印模板
 // @Accept json
 // @Produce json
@@ -179,7 +179,7 @@ func (ctrl *PrintTemplateController) PublishPrintTemplate(c *gin.Context) {
 
 // DeletePrintTemplate 删除打印模板
 // @Summary 删除打印模板
-// @Description 删除当前单据类型的逻辑模板；删除后业务打印将明确提示未配置模板
+// @Description 删除当前单据类型的逻辑模板；删除后业务打印将明确提示未配置模板。数据权限：全局主数据，不按创建人过滤
 // @Tags 打印管理/打印模板
 // @Produce json
 // @Security ApiKeyAuth

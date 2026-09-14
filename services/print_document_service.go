@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"time"
 
 	"hive-admin-go/datapermission"
 	"hive-admin-go/models"
@@ -74,6 +75,9 @@ func (s *PrintDocumentService) getPurchaseInboundPrintDocument(inboundID string,
 		Summary: map[string]interface{}{
 			"lineCount":   detail.LineCount,
 			"totalAmount": detail.TotalAmount,
+		},
+		System: map[string]interface{}{
+			"printTime": time.Now().Format("2006-01-02 15:04:05"),
 		},
 	}, nil
 }

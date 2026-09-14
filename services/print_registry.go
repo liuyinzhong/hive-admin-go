@@ -29,6 +29,7 @@ func printFieldGroups() []models.PrintFieldGroup {
 			Code: "item",
 			Name: "明细行",
 			Fields: []models.PrintFieldDefinition{
+				{Path: "items", Label: "明细列表", DataType: "list", Scope: "item", Example: ""},
 				{Path: "items.lineNo", Label: "行号", DataType: "number", Scope: "item", Example: "1"},
 				{Path: "items.skuCode", Label: "SKU编码", DataType: "string", Scope: "item", Example: "SKU000001"},
 				{Path: "items.productName", Label: "产品名称", DataType: "string", Scope: "item", Example: "阿莫西林胶囊"},
@@ -57,8 +58,6 @@ func printFieldGroups() []models.PrintFieldGroup {
 			Code: "system",
 			Name: "系统字段",
 			Fields: []models.PrintFieldDefinition{
-				{Path: "system.pageNumber", Label: "当前页码", DataType: "number", Scope: "system", Example: "1"},
-				{Path: "system.totalPages", Label: "总页数", DataType: "number", Scope: "system", Example: "2"},
 				{Path: "system.printTime", Label: "打印时间", DataType: "datetime", Scope: "system", Example: "2026-08-03 10:00:00"},
 			},
 		},

@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 const (
 	PrintDocumentTypePurchaseInbound = "PURCHASE_INBOUND"
@@ -37,15 +40,15 @@ type PrintTemplateListRequest struct {
 }
 
 type CreatePrintTemplateRequest struct {
-	DocumentType string      `json:"documentType" binding:"required" example:"PURCHASE_INBOUND"`
-	TemplateName string      `json:"templateName" binding:"required,max=128" example:"采购入库单默认模板"`
-	DraftLayout  PrintLayout `json:"draftLayout" binding:"required"`
+	DocumentType string          `json:"documentType" binding:"required" example:"PURCHASE_INBOUND"`
+	TemplateName string          `json:"templateName" binding:"required,max=128" example:"采购入库单默认模板"`
+	DraftLayout  json.RawMessage `json:"draftLayout" binding:"required" swaggertype:"object"`
 }
 
 type UpdatePrintTemplateRequest struct {
-	TemplateName string      `json:"templateName" binding:"required,max=128" example:"采购入库单默认模板"`
-	DraftLayout  PrintLayout `json:"draftLayout" binding:"required"`
-	RowVersion   int         `json:"rowVersion" binding:"required,min=1" example:"3"`
+	TemplateName string          `json:"templateName" binding:"required,max=128" example:"采购入库单默认模板"`
+	DraftLayout  json.RawMessage `json:"draftLayout" binding:"required" swaggertype:"object"`
+	RowVersion   int             `json:"rowVersion" binding:"required,min=1" example:"3"`
 }
 
 type PublishPrintTemplateRequest struct {
@@ -65,15 +68,15 @@ type PrintTemplateListResponse struct {
 }
 
 type PrintTemplateResponse struct {
-	TemplateID      string       `json:"templateId" example:"550e8400-e29b-41d4-a716-446655440000"`
-	DocumentType    string       `json:"documentType" example:"PURCHASE_INBOUND"`
-	TemplateName    string       `json:"templateName" example:"采购入库单默认模板"`
-	Status          string       `json:"status" example:"PUBLISHED"`
-	DraftLayout     PrintLayout  `json:"draftLayout"`
-	PublishedLayout *PrintLayout `json:"publishedLayout"`
-	RowVersion      int          `json:"rowVersion" example:"3"`
-	CreateDate      *string      `json:"createDate" example:"2026-08-03 10:00:00"`
-	UpdateDate      *string      `json:"updateDate" example:"2026-08-03 10:00:00"`
+	TemplateID      string           `json:"templateId" example:"550e8400-e29b-41d4-a716-446655440000"`
+	DocumentType    string           `json:"documentType" example:"PURCHASE_INBOUND"`
+	TemplateName    string           `json:"templateName" example:"采购入库单默认模板"`
+	Status          string           `json:"status" example:"PUBLISHED"`
+	DraftLayout     json.RawMessage  `json:"draftLayout" swaggertype:"object"`
+	PublishedLayout *json.RawMessage `json:"publishedLayout" swaggertype:"object"`
+	RowVersion      int              `json:"rowVersion" example:"3"`
+	CreateDate      *string          `json:"createDate" example:"2026-08-03 10:00:00"`
+	UpdateDate      *string          `json:"updateDate" example:"2026-08-03 10:00:00"`
 }
 
 type PrintFieldGroup struct {
@@ -100,90 +103,16 @@ type PrintDocumentTypeDefinition struct {
 	Name string `json:"name" example:"采购入库单"`
 }
 
-// PrintLayout 是前后端共用的模板布局协议。
-// 位置和尺寸统一使用 mm，前端负责编辑和浏览器打印渲染。
-type PrintLayout struct {
-	Version  int                 `json:"version"`
-	Page     PrintPageSettings   `json:"page"`
-	Sections PrintLayoutSections `json:"sections"`
-}
-
-type PrintPageSettings struct {
-	Size        string           `json:"size"`
-	Orientation string           `json:"orientation"`
-	Margin      PrintPageMargins `json:"margin"`
-}
-
-type PrintPageMargins struct {
-	Top    float64 `json:"top"`
-	Right  float64 `json:"right"`
-	Bottom float64 `json:"bottom"`
-	Left   float64 `json:"left"`
-}
-
-type PrintLayoutSections struct {
-	PageHeader     PrintSection     `json:"pageHeader"`
-	DocumentHeader PrintSection     `json:"documentHeader"`
-	Body           PrintBodySection `json:"body"`
-	DocumentFooter PrintSection     `json:"documentFooter"`
-	PageFooter     PrintSection     `json:"pageFooter"`
-}
-
-type PrintSection struct {
-	Height   float64              `json:"height"`
-	Elements []PrintLayoutElement `json:"elements"`
-}
-
-type PrintBodySection struct {
-	Height float64           `json:"height"`
-	Table  *PrintDetailTable `json:"table"`
-}
-
-type PrintLayoutElement struct {
-	ID        string            `json:"id"`
-	Kind      string            `json:"kind"`
-	X         float64           `json:"x"`
-	Y         float64           `json:"y"`
-	Width     float64           `json:"width"`
-	Height    float64           `json:"height"`
-	Text      string            `json:"text"`
-	FieldPath string            `json:"fieldPath"`
-	ImageURL  string            `json:"imageUrl"`
-	Style     PrintElementStyle `json:"style"`
-}
-
-type PrintElementStyle struct {
-	FontSize   float64 `json:"fontSize"`
-	FontWeight string  `json:"fontWeight"`
-	TextAlign  string  `json:"textAlign"`
-	Color      string  `json:"color"`
-	Border     string  `json:"border"`
-	LineHeight float64 `json:"lineHeight"`
-}
-
-type PrintDetailTable struct {
-	ID      string             `json:"id"`
-	X       float64            `json:"x"`
-	Y       float64            `json:"y"`
-	Width   float64            `json:"width"`
-	Height  float64            `json:"height"`
-	Columns []PrintTableColumn `json:"columns"`
-}
-
-type PrintTableColumn struct {
-	ID        string  `json:"id"`
-	FieldPath string  `json:"fieldPath"`
-	Title     string  `json:"title"`
-	Width     float64 `json:"width"`
-	Format    string  `json:"format"`
-}
-
+// PrintDocumentResponse 是统一打印数据协议。
+// header/summary 为对象，items 为明细数组，system 为打印时刻等系统注入字段；
+// 与 worm-vue3-print 表达式上下文（{header.inboundNo} 等）的取值路径一致。
 type PrintDocumentResponse struct {
 	DocumentType  string                   `json:"documentType" example:"PURCHASE_INBOUND"`
 	SchemaVersion int                      `json:"schemaVersion" example:"1"`
 	Header        map[string]interface{}   `json:"header"`
 	Items         []map[string]interface{} `json:"items"`
 	Summary       map[string]interface{}   `json:"summary"`
+	System        map[string]interface{}   `json:"system"`
 }
 
 type PrintDocumentBundleResponse struct {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -21,6 +22,11 @@ var (
 	ErrPrintTemplateConflict     = errors.New("打印模板数据冲突")
 	ErrPrintTemplateUnavailable  = errors.New("未配置可用打印模板")
 )
+
+// printSupportedPaperSizes 与 worm-vue3-print PaperSize 枚举保持一致。
+var printSupportedPaperSizes = map[string]struct{}{
+	"A4": {}, "A3": {}, "A5": {}, "Letter": {}, "Legal": {}, "CUSTOM": {},
+}
 
 type PrintTemplateService struct{}
 
@@ -115,10 +121,7 @@ func (s *PrintTemplateService) CreatePrintTemplate(req models.CreatePrintTemplat
 	if templateName == "" {
 		return nil, fmt.Errorf("%w: 模板名称不能为空", ErrPrintTemplateInvalidInput)
 	}
-	draftLayout, err := json.Marshal(req.DraftLayout)
-	if err != nil {
-		return nil, fmt.Errorf("%w: 模板布局格式错误", ErrPrintTemplateInvalidInput)
-	}
+	draftLayout := []byte(req.DraftLayout)
 	if err := validatePrintLayout(draftLayout, false); err != nil {
 		return nil, err
 	}
@@ -161,10 +164,7 @@ func (s *PrintTemplateService) UpdatePrintTemplate(templateID string, req models
 	if templateName == "" {
 		return nil, fmt.Errorf("%w: 模板名称不能为空", ErrPrintTemplateInvalidInput)
 	}
-	draftLayout, err := json.Marshal(req.DraftLayout)
-	if err != nil {
-		return nil, fmt.Errorf("%w: 模板布局格式错误", ErrPrintTemplateInvalidInput)
-	}
+	draftLayout := []byte(req.DraftLayout)
 	if err := validatePrintLayout(draftLayout, false); err != nil {
 		return nil, err
 	}
@@ -288,54 +288,218 @@ func validatePrintTemplateID(templateID string) error {
 	return nil
 }
 
+// worm-vue3-print TemplateData 边界校验。
+// Go 侧不复刻渲染管线，只校验数据边界：页面结构合法、字段表达式全部命中注册表、
+// 表达式标识符全部来自渲染引擎白名单，渲染级排版检查由设计器与浏览器预览负责。
+
+// printTemplatePayload 只提取 worm TemplateData 中后端关心的结构性字段，
+// 其余内容（元素样式、水印样式等）原样存储，不做结构化解释。
+type printTemplatePayload struct {
+	PaperSize    string           `json:"paperSize"`
+	Orientation  string           `json:"orientation"`
+	Unit         string           `json:"unit"`
+	CustomWidth  float64          `json:"customWidth"`
+	CustomHeight float64          `json:"customHeight"`
+	Margins      printPageMargins `json:"margins"`
+	Header       struct {
+		Elements []json.RawMessage `json:"elements"`
+	} `json:"header"`
+	Footer struct {
+		Elements []json.RawMessage `json:"elements"`
+	} `json:"footer"`
+	FirstPageOverlay struct {
+		Elements []json.RawMessage `json:"elements"`
+	} `json:"firstPageOverlay"`
+	Elements  []json.RawMessage `json:"elements"`
+	Watermark json.RawMessage   `json:"watermark"`
+}
+
+// printPageMargins 是 worm TemplateData 的页边距结构（mm）。
+type printPageMargins struct {
+	Top    float64 `json:"top"`
+	Right  float64 `json:"right"`
+	Bottom float64 `json:"bottom"`
+	Left   float64 `json:"left"`
+}
+
+// printExpressionFunctions 是 worm 渲染管线注册的表达式函数白名单
+// （见 worm-vue3-print print-core src/render/expression-eval.ts）。
+var printExpressionFunctions = map[string]struct{}{
+	"MONEY": {}, "DATE": {}, "UPPER": {}, "IF": {},
+	"CONCAT": {}, "IFEMPTY": {}, "ROUND": {}, "LEN": {},
+	"SUM": {}, "AVG": {}, "COUNT": {}, "MIN": {}, "MAX": {},
+}
+
+// printExpressionGlobals 是 worm 表达式求值器暴露的安全全局标识
+// （见 worm-vue3-print print-core src/evaluator.ts SAFE_GLOBALS）。
+var printExpressionGlobals = map[string]struct{}{
+	"Math": {}, "Number": {}, "String": {}, "Boolean": {},
+	"parseInt": {}, "parseFloat": {}, "isNaN": {},
+	"true": {}, "false": {}, "null": {}, "undefined": {},
+}
+
+// printExpressionSystemVars 是渲染端注入的系统变量（页码/打印时间）。
+var printExpressionSystemVars = map[string]struct{}{
+	"pageIndex": {}, "totalPages": {}, "printDate": {}, "printTime": {},
+}
+
 func validatePrintLayout(layout []byte, requirePublished bool) error {
 	if len(layout) == 0 || !json.Valid(layout) {
 		return fmt.Errorf("%w: 模板布局必须是合法JSON", ErrPrintTemplateInvalidInput)
 	}
-	var payload models.PrintLayout
+	var payload printTemplatePayload
 	if err := json.Unmarshal(layout, &payload); err != nil {
-		return fmt.Errorf("%w: 模板布局格式错误", ErrPrintTemplateInvalidInput)
+		return fmt.Errorf("%w: 模板布局必须是对象结构", ErrPrintTemplateInvalidInput)
 	}
-	if payload.Version != 1 {
-		return fmt.Errorf("%w: 不支持的模板布局版本", ErrPrintTemplateInvalidInput)
+	if _, ok := printSupportedPaperSizes[payload.PaperSize]; !ok {
+		return fmt.Errorf("%w: 不支持的打印纸张规格", ErrPrintTemplateInvalidInput)
 	}
-	if payload.Page.Size != "A4" {
-		return fmt.Errorf("%w: 打印纸张只能为A4", ErrPrintTemplateInvalidInput)
+	if payload.PaperSize == "CUSTOM" && (payload.CustomWidth <= 0 || payload.CustomHeight <= 0) {
+		return fmt.Errorf("%w: 自定义纸张必须提供有效宽高", ErrPrintTemplateInvalidInput)
 	}
-	if payload.Page.Orientation != "portrait" && payload.Page.Orientation != "landscape" {
+	if payload.Orientation != "portrait" && payload.Orientation != "landscape" {
 		return fmt.Errorf("%w: 打印方向只能为portrait或landscape", ErrPrintTemplateInvalidInput)
 	}
-	if err := validatePrintMargins(payload.Page.Margin); err != nil {
+	if payload.Unit != "" && payload.Unit != "mm" {
+		return fmt.Errorf("%w: 模板坐标单位只支持mm", ErrPrintTemplateInvalidInput)
+	}
+	if err := validatePrintMargins(payload.Margins); err != nil {
 		return err
 	}
 
-	if requirePublished {
-		if payload.Sections.Body.Table == nil || len(payload.Sections.Body.Table.Columns) == 0 {
-			return fmt.Errorf("%w: 模板必须包含明细表格和至少一列", ErrPrintTemplateInvalidInput)
-		}
+	elements := make([]json.RawMessage, 0, len(payload.Elements)+
+		len(payload.Header.Elements)+len(payload.Footer.Elements)+len(payload.FirstPageOverlay.Elements))
+	elements = append(elements, payload.Elements...)
+	elements = append(elements, payload.Header.Elements...)
+	elements = append(elements, payload.Footer.Elements...)
+	elements = append(elements, payload.FirstPageOverlay.Elements...)
+
+	if requirePublished && len(elements) == 0 {
+		return fmt.Errorf("%w: 模板必须包含至少一个元素", ErrPrintTemplateInvalidInput)
 	}
 
 	fieldMap := printFieldDefinitionMap()
 	seenIDs := make(map[string]struct{})
-	for _, section := range []models.PrintSection{
-		payload.Sections.PageHeader,
-		payload.Sections.DocumentHeader,
-		payload.Sections.DocumentFooter,
-		payload.Sections.PageFooter,
-	} {
-		if err := validatePrintSection(section, payload.Page, fieldMap, seenIDs, requirePublished); err != nil {
+	for _, raw := range elements {
+		if err := validatePrintElement(raw, fieldMap, seenIDs, requirePublished); err != nil {
 			return err
 		}
 	}
-	if payload.Sections.Body.Table != nil {
-		if err := validatePrintTable(*payload.Sections.Body.Table, payload.Page, fieldMap, requirePublished); err != nil {
+	if len(payload.Watermark) > 0 && !json.Valid(payload.Watermark) {
+		return fmt.Errorf("%w: 水印配置必须是合法JSON", ErrPrintTemplateInvalidInput)
+	}
+	if err := validatePrintWatermark(payload.Watermark, fieldMap); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validatePrintElement(raw json.RawMessage, fieldMap map[string]models.PrintFieldDefinition, seenIDs map[string]struct{}, requirePublished bool) error {
+	var element struct {
+		ID          string                 `json:"id"`
+		Type        string                 `json:"type"`
+		Options     map[string]interface{} `json:"options"`
+		ElementType struct {
+			Type string `json:"type"`
+		} `json:"printElementType"`
+	}
+	if err := json.Unmarshal(raw, &element); err != nil {
+		return fmt.Errorf("%w: 模板元素必须是对象结构", ErrPrintTemplateInvalidInput)
+	}
+	if requirePublished {
+		if element.ID == "" {
+			return fmt.Errorf("%w: 模板元素缺少ID", ErrPrintTemplateInvalidInput)
+		}
+		if _, exists := seenIDs[element.ID]; exists {
+			return fmt.Errorf("%w: 模板元素ID重复: %s", ErrPrintTemplateInvalidInput, element.ID)
+		}
+		seenIDs[element.ID] = struct{}{}
+	}
+	// 字段边界：只扫描渲染引擎会求值的表达式载体（元素 formatter、表格单元格 formatter），
+	// 不扫 HTML 内容、测试值等非求值字段，避免内联 CSS 花括号被误判为表达式。
+	for _, text := range printExpressionTexts(element.Options) {
+		if err := validatePrintExpressionText(text, fieldMap); err != nil {
 			return err
+		}
+	}
+	// 明细表格：发布时数据源必须是注册的明细集合根
+	if isPrintTableElement(element.Type, element.ElementType.Type, element.Options) && requirePublished {
+		dataSource, _ := element.Options["dataSource"].(string)
+		if strings.TrimSpace(dataSource) == "" {
+			return fmt.Errorf("%w: 明细表格未配置数据源", ErrPrintTemplateInvalidInput)
+		}
+		field, ok := fieldMap[strings.TrimSpace(dataSource)]
+		if !ok || field.DataType != "list" {
+			return fmt.Errorf("%w: 明细表格数据源 %s 不是注册的明细集合", ErrPrintTemplateInvalidInput, dataSource)
 		}
 	}
 	return nil
 }
 
-func validatePrintMargins(margin models.PrintPageMargins) error {
+// printExpressionTexts 收集元素 options 中参与表达式求值的文本：
+// 元素级 formatter 和表格行单元格 formatter。
+func printExpressionTexts(options map[string]interface{}) []string {
+	texts := []string{}
+	if formatter, ok := options["formatter"].(string); ok {
+		texts = append(texts, formatter)
+	}
+	rows, ok := options["tableRows"].([]interface{})
+	if !ok {
+		return texts
+	}
+	for _, row := range rows {
+		rowMap, ok := row.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		cells, ok := rowMap["cells"].([]interface{})
+		if !ok {
+			continue
+		}
+		for _, cell := range cells {
+			cellMap, ok := cell.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			if formatter, ok := cellMap["formatter"].(string); ok {
+				texts = append(texts, formatter)
+			}
+		}
+	}
+	return texts
+}
+
+// isPrintTableElement 依据顶层 type、printElementType.type 或 tableRows 判断表格元素；
+// worm 序列化时顶层 type 可选，三种来源任一命中即视为表格。
+func isPrintTableElement(typeField, metaType string, options map[string]interface{}) bool {
+	if typeField == "table" || metaType == "table" {
+		return true
+	}
+	return hasPrintTableRows(options)
+}
+
+func validatePrintWatermark(raw json.RawMessage, fieldMap map[string]models.PrintFieldDefinition) error {
+	if len(raw) == 0 {
+		return nil
+	}
+	var watermark map[string]interface{}
+	if err := json.Unmarshal(raw, &watermark); err != nil {
+		return fmt.Errorf("%w: 水印配置必须是对象结构", ErrPrintTemplateInvalidInput)
+	}
+	if content, ok := watermark["content"].(string); ok {
+		if err := validatePrintExpressionText(content, fieldMap); err != nil {
+			return err
+		}
+	}
+	if binding, _ := watermark["binding"].(string); strings.TrimSpace(binding) != "" {
+		if _, ok := fieldMap[strings.TrimSpace(binding)]; !ok {
+			return fmt.Errorf("%w: 水印绑定了未注册字段 %s", ErrPrintTemplateInvalidInput, binding)
+		}
+	}
+	return nil
+}
+
+func validatePrintMargins(margin printPageMargins) error {
 	for _, value := range []float64{margin.Top, margin.Right, margin.Bottom, margin.Left} {
 		if value < 0 || value > 40 {
 			return fmt.Errorf("%w: 页边距必须在0到40mm之间", ErrPrintTemplateInvalidInput)
@@ -344,72 +508,104 @@ func validatePrintMargins(margin models.PrintPageMargins) error {
 	return nil
 }
 
-func validatePrintSection(section models.PrintSection, page models.PrintPageSettings, fieldMap map[string]models.PrintFieldDefinition, seenIDs map[string]struct{}, requirePublished bool) error {
-	if requirePublished && (section.Height <= 0 || section.Height > 260) {
-		return fmt.Errorf("%w: 模板分区高度无效", ErrPrintTemplateInvalidInput)
-	}
-	for _, element := range section.Elements {
-		if requirePublished {
-			if element.ID == "" || element.Width <= 0 || element.Height <= 0 {
-				return fmt.Errorf("%w: 模板元素尺寸或ID无效", ErrPrintTemplateInvalidInput)
-			}
-			if element.X < 0 || element.Y < 0 {
-				return fmt.Errorf("%w: 模板元素位置无效", ErrPrintTemplateInvalidInput)
-			}
-			pageWidth, pageHeight := printPageSize(page)
-			if element.X+element.Width > pageWidth || element.Y+element.Height > pageHeight {
-				return fmt.Errorf("%w: 模板元素超出A4页面范围", ErrPrintTemplateInvalidInput)
-			}
-			if _, exists := seenIDs[element.ID]; exists {
-				return fmt.Errorf("%w: 模板元素ID重复", ErrPrintTemplateInvalidInput)
-			}
-			seenIDs[element.ID] = struct{}{}
+// validatePrintExpressionText 校验一段模板文本中的 {表达式}：
+// 点分路径必须命中字段注册表，其余标识符必须命中函数/全局/系统变量白名单。
+func validatePrintExpressionText(text string, fieldMap map[string]models.PrintFieldDefinition) error {
+	for _, expr := range extractPrintExpressions(text) {
+		identifiers, err := extractPrintIdentifiers(expr)
+		if err != nil {
+			return fmt.Errorf("%w: 表达式 {%s} 解析失败", ErrPrintTemplateInvalidInput, expr)
 		}
-		if element.Kind != "text" && element.Kind != "field" && element.Kind != "image" && element.Kind != "line" && element.Kind != "signature" {
-			return fmt.Errorf("%w: 不支持的模板元素类型", ErrPrintTemplateInvalidInput)
-		}
-		if requirePublished && element.Kind == "field" {
-			field, ok := fieldMap[element.FieldPath]
-			if !ok || field.Scope == "item" {
-				return fmt.Errorf("%w: 模板绑定了未注册字段 %s", ErrPrintTemplateInvalidInput, element.FieldPath)
+		for _, identifier := range identifiers {
+			if strings.Contains(identifier, ".") {
+				if _, ok := fieldMap[identifier]; !ok {
+					return fmt.Errorf("%w: 模板绑定了未注册字段 %s", ErrPrintTemplateInvalidInput, identifier)
+				}
+				continue
 			}
+			if _, ok := printExpressionFunctions[identifier]; ok {
+				continue
+			}
+			if _, ok := printExpressionGlobals[identifier]; ok {
+				continue
+			}
+			if _, ok := printExpressionSystemVars[identifier]; ok {
+				continue
+			}
+			return fmt.Errorf("%w: 表达式使用了未授权的标识符 %s", ErrPrintTemplateInvalidInput, identifier)
 		}
 	}
 	return nil
 }
 
-func validatePrintTable(table models.PrintDetailTable, page models.PrintPageSettings, fieldMap map[string]models.PrintFieldDefinition, requirePublished bool) error {
-	if requirePublished {
-		if table.ID == "" || table.Width <= 0 || table.Height <= 0 || len(table.Columns) == 0 {
-			return fmt.Errorf("%w: 明细表格尺寸或列配置无效", ErrPrintTemplateInvalidInput)
-		}
-		pageWidth, pageHeight := printPageSize(page)
-		if table.X < 0 || table.Y < 0 || table.X+table.Width > pageWidth || table.Y+table.Height > pageHeight {
-			return fmt.Errorf("%w: 明细表格超出A4页面范围", ErrPrintTemplateInvalidInput)
+// extractPrintExpressions 抽取文本中成对花括号包裹的表达式（支持嵌套）。
+func extractPrintExpressions(text string) []string {
+	expressions := []string{}
+	depth := 0
+	start := -1
+	for i, r := range text {
+		switch r {
+		case '{':
+			if depth == 0 {
+				start = i
+			}
+			depth++
+		case '}':
+			if depth == 0 {
+				continue
+			}
+			depth--
+			if depth == 0 && start >= 0 {
+				if expr := strings.TrimSpace(text[start+1 : i]); expr != "" {
+					expressions = append(expressions, expr)
+				}
+				start = -1
+			}
 		}
 	}
-	for _, column := range table.Columns {
-		if requirePublished {
-			if column.ID == "" || column.Title == "" || column.Width <= 0 {
-				return fmt.Errorf("%w: 明细表格列配置无效", ErrPrintTemplateInvalidInput)
-			}
-			field, ok := fieldMap[column.FieldPath]
-			if !ok || field.Scope != "item" {
-				return fmt.Errorf("%w: 明细表格绑定了未注册明细字段 %s", ErrPrintTemplateInvalidInput, column.FieldPath)
-			}
-			if column.Format != "text" && column.Format != "number" && column.Format != "currency" {
-				return fmt.Errorf("%w: 明细表列显示格式无效", ErrPrintTemplateInvalidInput)
-			}
-		}
-	}
-	return nil
+	return expressions
 }
 
-func printPageSize(page models.PrintPageSettings) (float64, float64) {
-	if page.Orientation == "landscape" {
-		return 297, 210
+// extractPrintIdentifiers 抽取表达式中的标识符；先剔除字符串字面量，
+// 避免 DATE(header.inboundDate,'YYYY-MM-DD') 中的格式串被误判为字段。
+func extractPrintIdentifiers(expr string) ([]string, error) {
+	stripped := strings.Builder{}
+	for i := 0; i < len(expr); {
+		r := expr[i]
+		if r == '\'' || r == '"' {
+			quote := r
+			i++
+			for i < len(expr) && expr[i] != quote {
+				if expr[i] == '\\' {
+					i++
+				}
+				i++
+			}
+			if i >= len(expr) {
+				return nil, errors.New("字符串字面量未闭合")
+			}
+			i++
+			continue
+		}
+		stripped.WriteByte(r)
+		i++
 	}
-	return 210, 297
+	matches := printIdentifierPattern.FindAllString(stripped.String(), -1)
+	return matches, nil
+}
+
+// printIdentifierPattern 提取标识符；点号属于标识符的一部分，
+// 使 header.inboundNo 整体命中注册表路径而非被拆成两段裸标识符。
+var printIdentifierPattern = regexp.MustCompile(`[A-Za-z_$][A-Za-z0-9_$.]*`)
+
+// hasPrintTableRows 判断元素 options 是否带有表格行（兼容顶层 type 缺失的序列化形态）。
+func hasPrintTableRows(options map[string]interface{}) bool {
+	rows, exists := options["tableRows"]
+	if !exists || rows == nil {
+		return false
+	}
+	_, isArray := rows.([]interface{})
+	return isArray
 }
 
 func normalizePrintTemplatePage(page, pageSize int) (int, int) {
@@ -448,9 +644,9 @@ func printTemplateToListResponse(template models.PrintTemplate) models.PrintTemp
 }
 
 func printTemplateToResponse(template models.PrintTemplate) (*models.PrintTemplateResponse, error) {
-	var draftLayout models.PrintLayout
-	if err := json.Unmarshal([]byte(template.DraftLayout), &draftLayout); err != nil {
-		return nil, fmt.Errorf("打印模板草稿布局数据损坏: %w", err)
+	draftLayout := json.RawMessage(template.DraftLayout)
+	if !json.Valid(draftLayout) {
+		return nil, errors.New("打印模板草稿布局数据损坏")
 	}
 	response := &models.PrintTemplateResponse{
 		TemplateID:   template.TemplateID,
@@ -463,9 +659,9 @@ func printTemplateToResponse(template models.PrintTemplate) (*models.PrintTempla
 		UpdateDate:   models.TimeToStringPtr(template.UpdateDate),
 	}
 	if template.PublishedLayout != nil {
-		var publishedLayout models.PrintLayout
-		if err := json.Unmarshal([]byte(*template.PublishedLayout), &publishedLayout); err != nil {
-			return nil, fmt.Errorf("打印模板已发布布局数据损坏: %w", err)
+		publishedLayout := json.RawMessage(*template.PublishedLayout)
+		if !json.Valid(publishedLayout) {
+			return nil, errors.New("打印模板已发布布局数据损坏")
 		}
 		response.PublishedLayout = &publishedLayout
 	}

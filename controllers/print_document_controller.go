@@ -25,7 +25,7 @@ func NewPrintDocumentController() *PrintDocumentController {
 
 // GetPurchaseInboundPrintDocument 获取采购入库单打印数据和当前已发布模板
 // @Summary 获取采购入库单打印数据
-// @Description 校验采购入库单当前数据范围后，返回统一打印数据协议和已发布模板；动态字段不保存打印快照
+// @Description 校验采购入库单当前数据范围后，返回统一打印数据协议（header/items/summary/system）和已发布模板（worm-vue3-print TemplateData）；动态字段不保存打印快照。数据权限：来源对象继承，列表、预览与正式打印同以来源采购入库单数据范围为边界
 // @Tags 打印管理/打印数据
 // @Produce json
 // @Security ApiKeyAuth
@@ -57,7 +57,7 @@ func (ctrl *PrintDocumentController) GetPurchaseInboundPrintDocument(c *gin.Cont
 
 // GetPurchaseInboundPrintData 获取采购入库单打印预览数据
 // @Summary 获取采购入库单打印预览数据
-// @Description 校验采购入库单当前数据范围后返回真实业务单据的统一打印数据，供模板设计器实时预览
+// @Description 校验采购入库单当前数据范围后返回真实业务单据的统一打印数据（header/items/summary/system），供模板设计器实时预览。数据权限：来源对象继承，模板预览与正式打印同以来源采购入库单数据范围为边界
 // @Tags 打印管理/打印数据
 // @Produce json
 // @Security ApiKeyAuth

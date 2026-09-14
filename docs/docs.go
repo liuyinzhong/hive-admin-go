@@ -14775,7 +14775,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "校验采购入库单当前数据范围后，返回统一打印数据协议和已发布模板；动态字段不保存打印快照",
+                "description": "校验采购入库单当前数据范围后，返回统一打印数据协议（header/items/summary/system）和已发布模板（worm-vue3-print TemplateData）；动态字段不保存打印快照。数据权限：来源对象继承，列表、预览与正式打印同以来源采购入库单数据范围为边界",
                 "produces": [
                     "application/json"
                 ],
@@ -14857,7 +14857,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "校验采购入库单当前数据范围后返回真实业务单据的统一打印数据，供模板设计器实时预览",
+                "description": "校验采购入库单当前数据范围后返回真实业务单据的统一打印数据（header/items/summary/system），供模板设计器实时预览。数据权限：来源对象继承，模板预览与正式打印同以来源采购入库单数据范围为边界",
                 "produces": [
                     "application/json"
                 ],
@@ -14933,7 +14933,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "查询打印管理中的模板；一个单据类型只允许一条逻辑模板记录",
+                "description": "查询打印管理中的模板；一个单据类型只允许一条逻辑模板记录。数据权限：全局主数据，不按创建人过滤（PRINT-TPL-022）",
                 "produces": [
                     "application/json"
                 ],
@@ -15039,7 +15039,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "创建指定单据类型的唯一打印模板，初始保存为草稿",
+                "description": "创建指定单据类型的唯一打印模板，初始保存为草稿。draftLayout 为 worm-vue3-print TemplateData 版式 JSON，后端做边界校验（结构合法、表达式字段必须命中注册表）。数据权限：全局主数据，不按创建人过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -15120,7 +15120,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "返回可绑定的系统定义单据类型和打印字段，设计器不得使用未注册字段",
+                "description": "返回可绑定的系统定义单据类型和打印字段，设计器不得使用未注册字段。数据权限：全局主数据，不按创建人过滤",
                 "produces": [
                     "application/json"
                 ],
@@ -15169,7 +15169,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "获取当前草稿和当前已发布内容，不返回历史版本",
+                "description": "获取当前草稿和当前已发布内容（worm-vue3-print TemplateData 版式 JSON），不返回历史版本。数据权限：全局主数据，不按创建人过滤",
                 "produces": [
                     "application/json"
                 ],
@@ -15237,7 +15237,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "只更新当前草稿；已发布内容保持不变，发布前草稿不影响业务打印",
+                "description": "只更新当前草稿（worm-vue3-print TemplateData 版式 JSON，边界校验从宽），已发布内容保持不变，发布前草稿不影响业务打印。数据权限：全局主数据，不按创建人过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -15323,7 +15323,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "删除当前单据类型的逻辑模板；删除后业务打印将明确提示未配置模板",
+                "description": "删除当前单据类型的逻辑模板；删除后业务打印将明确提示未配置模板。数据权限：全局主数据，不按创建人过滤",
                 "produces": [
                     "application/json"
                 ],
@@ -15381,7 +15381,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "校验当前草稿后覆盖当前已发布内容；不生成历史版本",
+                "description": "校验当前草稿（从严：至少一个元素、元素 ID 唯一、明细表格数据源必须是注册明细集合）后覆盖当前已发布内容；不生成历史版本。数据权限：全局主数据，不按创建人过滤",
                 "consumes": [
                     "application/json"
                 ],
@@ -26495,7 +26495,7 @@ const docTemplate = `{
                     "example": "PURCHASE_INBOUND"
                 },
                 "draftLayout": {
-                    "$ref": "#/definitions/models.PrintLayout"
+                    "type": "object"
                 },
                 "templateName": {
                     "type": "string",
@@ -31057,43 +31057,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.PrintBodySection": {
-            "type": "object",
-            "properties": {
-                "height": {
-                    "type": "number"
-                },
-                "table": {
-                    "$ref": "#/definitions/models.PrintDetailTable"
-                }
-            }
-        },
-        "models.PrintDetailTable": {
-            "type": "object",
-            "properties": {
-                "columns": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.PrintTableColumn"
-                    }
-                },
-                "height": {
-                    "type": "number"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "width": {
-                    "type": "number"
-                },
-                "x": {
-                    "type": "number"
-                },
-                "y": {
-                    "type": "number"
-                }
-            }
-        },
         "models.PrintDocumentBundleResponse": {
             "type": "object",
             "properties": {
@@ -31130,6 +31093,10 @@ const docTemplate = `{
                 "summary": {
                     "type": "object",
                     "additionalProperties": true
+                },
+                "system": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
             }
         },
@@ -31143,29 +31110,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "采购入库单"
-                }
-            }
-        },
-        "models.PrintElementStyle": {
-            "type": "object",
-            "properties": {
-                "border": {
-                    "type": "string"
-                },
-                "color": {
-                    "type": "string"
-                },
-                "fontSize": {
-                    "type": "number"
-                },
-                "fontWeight": {
-                    "type": "string"
-                },
-                "lineHeight": {
-                    "type": "number"
-                },
-                "textAlign": {
-                    "type": "string"
                 }
             }
         },
@@ -31210,140 +31154,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "单据头"
-                }
-            }
-        },
-        "models.PrintLayout": {
-            "type": "object",
-            "properties": {
-                "page": {
-                    "$ref": "#/definitions/models.PrintPageSettings"
-                },
-                "sections": {
-                    "$ref": "#/definitions/models.PrintLayoutSections"
-                },
-                "version": {
-                    "type": "integer"
-                }
-            }
-        },
-        "models.PrintLayoutElement": {
-            "type": "object",
-            "properties": {
-                "fieldPath": {
-                    "type": "string"
-                },
-                "height": {
-                    "type": "number"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "imageUrl": {
-                    "type": "string"
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "style": {
-                    "$ref": "#/definitions/models.PrintElementStyle"
-                },
-                "text": {
-                    "type": "string"
-                },
-                "width": {
-                    "type": "number"
-                },
-                "x": {
-                    "type": "number"
-                },
-                "y": {
-                    "type": "number"
-                }
-            }
-        },
-        "models.PrintLayoutSections": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/models.PrintBodySection"
-                },
-                "documentFooter": {
-                    "$ref": "#/definitions/models.PrintSection"
-                },
-                "documentHeader": {
-                    "$ref": "#/definitions/models.PrintSection"
-                },
-                "pageFooter": {
-                    "$ref": "#/definitions/models.PrintSection"
-                },
-                "pageHeader": {
-                    "$ref": "#/definitions/models.PrintSection"
-                }
-            }
-        },
-        "models.PrintPageMargins": {
-            "type": "object",
-            "properties": {
-                "bottom": {
-                    "type": "number"
-                },
-                "left": {
-                    "type": "number"
-                },
-                "right": {
-                    "type": "number"
-                },
-                "top": {
-                    "type": "number"
-                }
-            }
-        },
-        "models.PrintPageSettings": {
-            "type": "object",
-            "properties": {
-                "margin": {
-                    "$ref": "#/definitions/models.PrintPageMargins"
-                },
-                "orientation": {
-                    "type": "string"
-                },
-                "size": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.PrintSection": {
-            "type": "object",
-            "properties": {
-                "elements": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.PrintLayoutElement"
-                    }
-                },
-                "height": {
-                    "type": "number"
-                }
-            }
-        },
-        "models.PrintTableColumn": {
-            "type": "object",
-            "properties": {
-                "fieldPath": {
-                    "type": "string"
-                },
-                "format": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "width": {
-                    "type": "number"
                 }
             }
         },
@@ -31417,10 +31227,10 @@ const docTemplate = `{
                     "example": "PURCHASE_INBOUND"
                 },
                 "draftLayout": {
-                    "$ref": "#/definitions/models.PrintLayout"
+                    "type": "object"
                 },
                 "publishedLayout": {
-                    "$ref": "#/definitions/models.PrintLayout"
+                    "type": "object"
                 },
                 "rowVersion": {
                     "type": "integer",
@@ -36040,7 +35850,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "draftLayout": {
-                    "$ref": "#/definitions/models.PrintLayout"
+                    "type": "object"
                 },
                 "rowVersion": {
                     "type": "integer",
