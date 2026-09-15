@@ -15,14 +15,18 @@ func InitJWT() {
 }
 
 type Claims struct {
-	UserID string `json:"userId"`
+	UserID     string `json:"userId"`
+	PwdVersion int    `json:"pwdVersion"`
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(userID string) (string, error) {
-	expireTime := time.Now().Add(time.Duration(config.AppConfig.JWT.Expire) * time.Hour)
+// GenerateToken 签发登录 token，有效期 expireHours 小时，携带签发时刻的密码版本号，
+// 供认证中间件在口令变更后立即判定旧世代凭证失效。
+func GenerateToken(userID string, pwdVersion, expireHours int) (string, error) {
+	expireTime := time.Now().Add(time.Duration(expireHours) * time.Hour)
 	claims := Claims{
-		UserID: userID,
+		UserID:     userID,
+		PwdVersion: pwdVersion,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expireTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

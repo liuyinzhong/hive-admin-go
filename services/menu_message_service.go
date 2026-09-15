@@ -33,6 +33,7 @@ type menuMessageEventName string
 const (
 	menuMessageEventNameUnreadSummary       menuMessageEventName = "unreadSummary"
 	menuMessageEventNameDownloadTaskChanged menuMessageEventName = "downloadTaskChanged"
+	menuMessageEventNameForceLogout         menuMessageEventName = "forceLogout"
 )
 
 // MenuMessageService 负责菜单消息的持久化、汇总和实时推送。
@@ -261,6 +262,12 @@ func (s *MenuMessageService) CreateMenuMessageForMenuName(userID, menuName, titl
 // PublishDownloadTaskChanged 将下载任务进度作为瞬时事件推送给当前用户。
 func (s *MenuMessageService) PublishDownloadTaskChanged(userID string, event models.DownloadTaskChangedEvent) {
 	s.hub.publish(userID, menuMessageEvent{name: menuMessageEventNameDownloadTaskChanged, data: event})
+}
+
+// PublishForceLogout 向目标用户全部在线页签推送强制退出事件；体验层动作，
+// 会话凭证的服务端失效由密码版本号比对保证。
+func (s *MenuMessageService) PublishForceLogout(userID string) {
+	s.hub.publish(userID, menuMessageEvent{name: menuMessageEventNameForceLogout, data: struct{}{}})
 }
 
 // StreamUnreadSummary 将当前用户的汇总以 SSE 推送，直到客户端断开。

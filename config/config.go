@@ -30,7 +30,6 @@ type DatabaseConfig struct {
 
 type JWTConfig struct {
 	Secret string `json:"secret"`
-	Expire int    `json:"expire"`
 }
 
 type AuditLogConfig struct {

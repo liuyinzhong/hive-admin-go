@@ -14,6 +14,7 @@ type SysUser struct {
 	Phone        *string    `gorm:"column:phone;type:varchar(20)" json:"phone"`
 	Signature    *string    `gorm:"column:signature;type:varchar(256)" json:"signature"`
 	Password     *string    `gorm:"column:password;type:varchar(512)" json:"-"`
+	PwdVersion   int        `gorm:"column:pwd_version;type:int;default:0" json:"-"`
 	HomePath     *string    `gorm:"column:home_path;type:varchar(128)" json:"homePath"`
 	LeaderUserID *string    `gorm:"column:leader_user_id;type:char(36)" json:"leaderUserId"`
 	Status       int        `gorm:"column:status;type:tinyint;default:1" json:"status"`

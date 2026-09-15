@@ -8,6 +8,8 @@ import (
 	"net/mail"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type AuthService struct {
@@ -17,6 +19,14 @@ type AuthService struct {
 func NewAuthService() *AuthService {
 	return &AuthService{permissionService: NewPermissionService()}
 }
+
+// 登录有效期系统参数与兜底值（小时）：参数缺失、类型不符或越界时使用默认值
+const (
+	loginValidityPeriodParamKey = "SYS_LOGIN_VALIDITY_PERIOD"
+	loginValidityPeriodDefault  = 24
+	loginValidityPeriodMin      = 1
+	loginValidityPeriodMax      = 8760
+)
 
 func (s *AuthService) Login(username, password string) (string, error) {
 	var user models.SysUser
@@ -29,16 +39,59 @@ func (s *AuthService) Login(username, password string) (string, error) {
 		return "", errors.New("该账号已被禁用")
 	}
 
-	if user.Password == nil || *user.Password != password {
+	if user.Password == nil || !utils.VerifyPassword(password, *user.Password) {
 		return "", errors.New("账号密码有误")
 	}
 
-	token, err := utils.GenerateToken(user.UserID)
+	token, err := utils.GenerateToken(user.UserID, user.PwdVersion, loginValidityPeriod())
 	if err != nil {
 		return "", err
 	}
 
 	return token, nil
+}
+
+// loginValidityPeriod 读取登录有效期参数（小时），缺失或非法时回退默认值。
+func loginValidityPeriod() int {
+	return NewSystemParamService().GetInt(loginValidityPeriodParamKey, loginValidityPeriodDefault, loginValidityPeriodMin, loginValidityPeriodMax)
+}
+
+// ChangePassword 当前用户验证旧密码后更换新密码。成功后将 pwd_version 递增，
+// 使该用户全部旧世代会话凭证立即失效，并推送强制退出事件让在线页签返回登录页。
+func (s *AuthService) ChangePassword(userID string, req models.ChangePasswordRequest) error {
+	var user models.SysUser
+	if err := database.DB.Where("user_id = ? AND del_flag = 0", userID).First(&user).Error; err != nil {
+		return errors.New("用户不存在")
+	}
+
+	if user.Password == nil || !utils.VerifyPassword(req.OldPassword, *user.Password) {
+		return errors.New("旧密码不正确")
+	}
+
+	if req.NewPassword == req.OldPassword {
+		return errors.New("新密码不能与旧密码相同")
+	}
+	if err := utils.ValidatePassword(req.NewPassword); err != nil {
+		return err
+	}
+
+	hash, err := utils.HashPassword(req.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	if err := database.DB.Model(&models.SysUser{}).
+		Where("user_id = ?", user.UserID).
+		Updates(map[string]interface{}{
+			"password":    hash,
+			"pwd_version": gorm.Expr("pwd_version + 1"),
+			"update_date": time.Now(),
+		}).Error; err != nil {
+		return err
+	}
+
+	NewMenuMessageService().PublishForceLogout(user.UserID)
+	return nil
 }
 
 func (s *AuthService) GetProfile(userID string) (*models.ProfileResponse, error) {

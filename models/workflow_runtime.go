@@ -107,6 +107,7 @@ type WfProcessRecord struct {
 	OperatorID     *string    `gorm:"column:operator_id;type:char(36)" json:"operatorId"`
 	OperatorName   *string    `gorm:"column:operator_name;type:varchar(36)" json:"operatorName"`
 	Comment        *string    `gorm:"column:comment;type:varchar(512)" json:"comment"`
+	Signature      *string    `gorm:"column:signature;type:varchar(256)" json:"signature"`
 	CreateDate     *time.Time `gorm:"column:create_date;index" json:"createDate"`
 }
 
@@ -247,6 +248,7 @@ type WorkflowRecordResponse struct {
 	OperatorID     *string `json:"operatorId" example:"550e8400-e29b-41d4-a716-446655440000"`     // 操作人ID
 	OperatorName   *string `json:"operatorName" example:"张三"`                                     // 操作人姓名
 	Comment        *string `json:"comment" example:"同意通过"`                                        // 操作意见
+	Signature      *string `json:"signature" example:"/uploads/workflow-sign/xxx/task.png"`       // 签署人签名快照URL，仅签署动作记录有值
 	CreateDate     *string `json:"createDate" example:"2026-01-15 09:00:00"`                      // 操作时间
 }
 

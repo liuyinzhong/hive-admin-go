@@ -199,7 +199,7 @@ func activateWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeIn
 	nodeInstance.StartDate = &now
 	switch nodeInstance.NodeType {
 	case "start":
-		if err := createWorkflowRecord(tx, context.instance, nil, nodeInstance, "start", &context.instance.StarterID, &context.instance.StarterName, nil); err != nil {
+		if err := createWorkflowRecord(tx, context.instance, nil, nodeInstance, "start", &context.instance.StarterID, &context.instance.StarterName, nil, nil); err != nil {
 			return err
 		}
 		if err := runNodeAutomations(tx, context, nodeInstance, context.instance.StarterID); err != nil {
@@ -220,7 +220,7 @@ func activateWorkflowNode(tx *gorm.DB, context *workflowExecutionContext, nodeIn
 		if nodeInstance.BranchEdgeID == nil {
 			return fmt.Errorf("条件节点 %s 未保存命中分支", nodeInstance.NodeName)
 		}
-		if err := createWorkflowRecord(tx, context.instance, nil, nodeInstance, "branch", nil, nil, nodeInstance.BranchEdgeID); err != nil {
+		if err := createWorkflowRecord(tx, context.instance, nil, nodeInstance, "branch", nil, nil, nodeInstance.BranchEdgeID, nil); err != nil {
 			return err
 		}
 		if err := runNodeAutomations(tx, context, nodeInstance, context.instance.StarterID); err != nil {
@@ -373,7 +373,7 @@ func createWorkflowApprovalTasks(tx *gorm.DB, context *workflowExecutionContext,
 		if !autoApprovedActorSet[task.AssigneeID] {
 			continue
 		}
-		if err := createWorkflowRecord(tx, context.instance, task, nil, "autoApprove", &task.AssigneeID, &task.AssigneeName, task.Comment); err != nil {
+		if err := createWorkflowRecord(tx, context.instance, task, nil, "autoApprove", &task.AssigneeID, &task.AssigneeName, task.Comment, nil); err != nil {
 			return err
 		}
 	}

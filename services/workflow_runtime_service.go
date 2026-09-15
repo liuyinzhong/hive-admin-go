@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"strconv"
@@ -492,7 +494,7 @@ func TransferWorkflowTask(taskID, userID string, req *models.WorkflowTaskTransfe
 		}
 		pendingNotices = append(pendingNotices, newWorkflowTodoNotice(instance.Title, task.NodeName, task.AssigneeID))
 		comment := workflowOperationComment(fmt.Sprintf("%s 转交给 %s", originalName, task.AssigneeName), req.Comment)
-		if err := createWorkflowRecord(tx, instance, task, nil, "transfer", &userID, stringPtr(workflowUserName(*operator)), comment); err != nil {
+		if err := createWorkflowRecord(tx, instance, task, nil, "transfer", &userID, stringPtr(workflowUserName(*operator)), comment, nil); err != nil {
 			return err
 		}
 		return nil
@@ -555,7 +557,7 @@ func AddWorkflowTaskSign(taskID, userID string, req *models.WorkflowTaskAddSignR
 			pendingNotices = append(pendingNotices, newWorkflowTodoNotice(instance.Title, newTask.NodeName, newTask.AssigneeID))
 		}
 		comment := workflowOperationComment("加签："+strings.Join(names, "、"), req.Comment)
-		if err := createWorkflowRecord(tx, instance, task, nil, "addSign", &userID, stringPtr(workflowUserName(*operator)), comment); err != nil {
+		if err := createWorkflowRecord(tx, instance, task, nil, "addSign", &userID, stringPtr(workflowUserName(*operator)), comment, nil); err != nil {
 			return err
 		}
 		return nil
@@ -603,7 +605,7 @@ func RemoveWorkflowTaskSign(taskID, userID string, req *models.WorkflowTaskRemov
 			names = append(names, removeTask.AssigneeName)
 		}
 		comment := workflowOperationComment("减签："+strings.Join(names, "、"), req.Comment)
-		return createWorkflowRecord(tx, instance, task, nil, "removeSign", &userID, stringPtr(workflowUserName(*operator)), comment)
+		return createWorkflowRecord(tx, instance, task, nil, "removeSign", &userID, stringPtr(workflowUserName(*operator)), comment, nil)
 	})
 }
 
@@ -673,7 +675,12 @@ func ReturnWorkflowTask(taskID, userID string, req *models.WorkflowTaskReturnReq
 			return err
 		}
 		comment := workflowOperationComment("退回至："+workflowNodeName(targetNode), req.Comment)
-		if err := createWorkflowRecord(tx, instance, task, nil, "return", &userID, stringPtr(workflowUserName(*operator)), comment); err != nil {
+		// 退回属于签署动作：把办理人当前个人签名固化为快照，失败则本次退回回滚。
+		signSnapshot, err := snapshotWorkflowSignature(instance.InstanceID, task.TaskID, operator.Signature)
+		if err != nil {
+			return err
+		}
+		if err := createWorkflowRecord(tx, instance, task, nil, "return", &userID, stringPtr(workflowUserName(*operator)), comment, signSnapshot); err != nil {
 			return err
 		}
 		variables := make(map[string]interface{})
@@ -731,7 +738,7 @@ func CancelWorkflowInstance(instanceID, userID string) error {
 		if err := supersedePlannedWorkflowNodes(tx, instanceID); err != nil {
 			return err
 		}
-		return createWorkflowRecord(tx, &instance, nil, &activeNode, "cancel", &userID, stringPtr(workflowUserName(operator)), nil)
+		return createWorkflowRecord(tx, &instance, nil, &activeNode, "cancel", &userID, stringPtr(workflowUserName(operator)), nil, nil)
 	})
 }
 
@@ -938,12 +945,17 @@ func handleWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionReq
 			taskStatus = models.WorkflowTaskStatusApproved
 			action = "approve"
 		}
+		// 同意与拒绝属于签署动作：把办理人当前个人签名固化为快照，失败则本次审批回滚。
+		signSnapshot, err := snapshotWorkflowSignature(instance.InstanceID, task.TaskID, operator.Signature)
+		if err != nil {
+			return err
+		}
 		if err := tx.Model(&task).Updates(map[string]interface{}{
 			"status": taskStatus, "comment": normalizeOptionalString(req.Comment), "finish_date": now, "update_date": now,
 		}).Error; err != nil {
 			return err
 		}
-		if err := createWorkflowRecord(tx, &instance, &task, nil, action, &userID, stringPtr(workflowUserName(operator)), normalizeOptionalString(req.Comment)); err != nil {
+		if err := createWorkflowRecord(tx, &instance, &task, nil, action, &userID, stringPtr(workflowUserName(operator)), normalizeOptionalString(req.Comment), signSnapshot); err != nil {
 			return err
 		}
 
@@ -1318,12 +1330,39 @@ func finishWorkflowInstance(tx *gorm.DB, instance *models.WfProcessInstance, sta
 	return nil
 }
 
-// createWorkflowRecord 创建一条流程审计记录。
-func createWorkflowRecord(tx *gorm.DB, instance *models.WfProcessInstance, task *models.WfProcessTask, nodeInstance *models.WfProcessNodeInstance, action string, operatorID, operatorName, comment *string) error {
+// snapshotWorkflowSignature 把签署人当前个人签名复制为流程私有快照，返回快照 URL。
+// 个人签名为空时返回 nil 不生成快照；源文件缺失或地址无效时报错，由本次签署操作回滚。
+// 快照不登记 sys_file：它是流程证据而非可管理文件，不进入文件管理列表和孤儿清理。
+func snapshotWorkflowSignature(instanceID, taskID string, signature *string) (*string, error) {
+	if signature == nil || strings.TrimSpace(*signature) == "" {
+		return nil, nil
+	}
+	sourceName := ""
+	if idx := strings.LastIndex(*signature, "/uploads/"); idx >= 0 {
+		sourceName = (*signature)[idx+len("/uploads/"):]
+	}
+	if sourceName == "" || strings.Contains(sourceName, "/") || strings.Contains(sourceName, "..") {
+		return nil, fmt.Errorf("个人签名文件地址无效")
+	}
+	snapshotDir := filepath.Join("static", "uploads", "workflow-sign", instanceID)
+	if err := os.MkdirAll(snapshotDir, 0o755); err != nil {
+		return nil, fmt.Errorf("签名快照目录创建失败")
+	}
+	sourcePath := filepath.Join("static", "uploads", filepath.FromSlash(sourceName))
+	snapshotName := strings.ReplaceAll(taskID, "-", "") + filepath.Ext(sourceName)
+	if err := copyFile(sourcePath, filepath.Join(snapshotDir, snapshotName)); err != nil {
+		return nil, fmt.Errorf("签名快照生成失败，请确认个人中心签名文件仍有效")
+	}
+	url := "/uploads/workflow-sign/" + instanceID + "/" + snapshotName
+	return &url, nil
+}
+
+// createWorkflowRecord 创建一条流程审计记录。signature 仅签署动作（同意、拒绝、退回）传入。
+func createWorkflowRecord(tx *gorm.DB, instance *models.WfProcessInstance, task *models.WfProcessTask, nodeInstance *models.WfProcessNodeInstance, action string, operatorID, operatorName, comment, signature *string) error {
 	now := time.Now()
 	record := models.WfProcessRecord{
 		RecordID: utils.GenerateUUID(), InstanceID: instance.InstanceID, Action: action,
-		OperatorID: operatorID, OperatorName: operatorName, Comment: comment, CreateDate: &now,
+		OperatorID: operatorID, OperatorName: operatorName, Comment: comment, Signature: signature, CreateDate: &now,
 	}
 	if task != nil {
 		record.NodeInstanceID = task.NodeInstanceID
@@ -1520,7 +1559,7 @@ func buildWorkflowRecordResponse(record models.WfProcessRecord) models.WorkflowR
 	response := models.WorkflowRecordResponse{
 		RecordID: record.RecordID, NodeInstanceID: record.NodeInstanceID, TaskID: record.TaskID,
 		Action: record.Action, OperatorID: record.OperatorID, OperatorName: record.OperatorName,
-		Comment: record.Comment, CreateDate: models.TimeToStringPtr(record.CreateDate),
+		Comment: record.Comment, Signature: record.Signature, CreateDate: models.TimeToStringPtr(record.CreateDate),
 	}
 	if record.NodeID != nil {
 		response.NodeID = record.NodeID

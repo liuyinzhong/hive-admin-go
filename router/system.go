@@ -31,6 +31,7 @@ func registerSystemRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 		auth.POST("/login", authController.Login)
 		auth.GET("/profile", middleware.AuthMiddleware(), authController.GetProfile)
 		auth.PUT("/profile", middleware.AuthMiddleware(), authController.UpdateProfile)
+		auth.PUT("/password", middleware.AuthMiddleware(), authController.ChangePassword)
 		auth.GET("/menus", middleware.AuthMiddleware(), authController.GetMenus)
 		auth.GET("/codes", middleware.AuthMiddleware(), authController.GetAuthCodes)
 		auth.POST("/logout", middleware.AuthMiddleware(), authController.Logout)
@@ -66,6 +67,7 @@ func registerSystemRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 			users.POST("", permissionGuard.Require("system:user:create"), systemController.CreateUser)
 			users.GET("/:userId", permissionGuard.Require("system:user:detail"), systemController.GetUserDetail)
 			users.PUT("/:userId", permissionGuard.Require("system:user:update"), systemController.UpdateUser)
+			users.PUT("/:userId/password", permissionGuard.Require("system:user:resetPassword"), systemController.ResetUserPassword)
 			users.PUT("/:userId/status", permissionGuard.Require("system:user:status"), systemController.UpdateUserStatus)
 			users.DELETE("", permissionGuard.Require("system:user:delete"), systemController.DeleteUsers)
 		}

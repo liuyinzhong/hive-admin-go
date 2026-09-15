@@ -16,7 +16,6 @@
     "charset": "utf8mb4"
   },
   "jwt": {
-    "secret": "hive-admin-secret-key-2026",
-    "expire": 720
+    "secret": "hive-admin-secret-key-2026"
   }
 }

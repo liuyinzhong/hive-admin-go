@@ -106,6 +106,39 @@ func (ctrl *AuthController) UpdateProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(profile))
 }
 
+// ChangePassword 当前用户修改密码
+// @Summary 修改密码
+// @Description 当前用户验证旧密码后设置新密码；成功后密码版本号递增使全部既有会话凭证立即失效，并推送强制退出事件。数据权限：当前用户归属，只操作当前 Token 对应用户，不经过角色数据范围
+// @Tags 认证管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param request body models.ChangePasswordRequest true "修改密码请求参数"
+// @Success 200 {object} models.Response "修改成功，需使用新密码重新登录"
+// @Failure 400 {object} map[string]interface{} "参数错误、旧密码不正确或新密码不满足强度策略"
+// @Failure 401 {object} map[string]interface{} "用户未登录"
+// @Router /auth/password [put]
+func (ctrl *AuthController) ChangePassword(c *gin.Context) {
+	userID, exists := c.Get("userId")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.NewErrorResponse(nil, "用户未登录"))
+		return
+	}
+
+	var req models.ChangePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "请求参数错误"))
+		return
+	}
+
+	if err := ctrl.authService.ChangePassword(userID.(string), req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+}
+
 // GetMenus 获取用户菜单
 // @Summary 获取用户菜单
 // @Description 获取当前登录用户的菜单权限

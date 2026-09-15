@@ -19,7 +19,7 @@
 - `database`：数据库初始化和连接。
 - `middleware`：认证等中间件。
 - `utils`：项目公共工具。
-- `docs`：Swagger 自动生成文件。
+- `docs`：Swagger 注释生成的文件（`docs/adr/` 为手写架构决策记录）。
 
 ## 开发前
 
@@ -348,9 +348,9 @@ Middleware -> 认证及基础设施
 - Swagger 数据权限说明必须与 `business-docs/system/data-permission.md`、`router/router.go` 和 Service 实际行为一致，不能仅根据路由中间件名称或前端按钮推断；新增路由交付前逐条核对分类矩阵。
 - DTO 字段应提供有业务意义的 `example` 示例值；示例不得使用真实身份证号、手机号、Token、密钥、生产连接串或其他敏感数据。业务编码、UUID、时间、枚举和金额等字段示例必须符合实际格式。
 - 当接口存在枚举、状态值、排序字段、分页上限、公共接口无权限等边界时，应在 Swagger 注释或 DTO 注释中写明，避免前端和外部调用方靠猜。
-- 使用项目既有方式生成并核对 `docs/docs.go`、`docs/swagger.json`、`docs/swagger.yaml`。
+- Swagger 文档由 Controller 中的 Swagger 注释提取生成（swaggo `swag init`），注释是接口文档的唯一事实来源；修改接口文档必须回到对应注释修改，再使用项目既有方式重新生成并核对 `docs/docs.go`、`docs/swagger.json`、`docs/swagger.yaml`。
 
-`docs` 下文件是生成文件，不手工编辑。不要执行会通过 `@latest` 隐式升级 Swagger 工具的命令，除非用户明确同意。
+`docs/docs.go`、`docs/swagger.json`、`docs/swagger.yaml` 是生成产物，禁止直接手工编辑来调整文档内容；发现生成文件与注释不一致时，以注释为准重新生成，不得反向手改生成文件迁就现状。`docs/adr/` 是手写架构决策记录，不属于生成文件。不要执行会通过 `@latest` 隐式升级 Swagger 工具的命令，除非用户明确同意。
 
 启动程序会尝试生成 Swagger，并向 Apifox 发起外部同步请求。因此未经明确授权，不执行 `go run .`、启动服务或其他会触发 Apifox 同步的操作。
 

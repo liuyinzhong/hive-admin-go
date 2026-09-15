@@ -12,8 +12,19 @@ type Response struct {
 }
 
 type LoginRequest struct {
-	Username string `json:"username" binding:"required" example:"admin"`  // 登录用户名
-	Password string `json:"password" binding:"required" example:"123456"` // 登录密码
+	Username string `json:"username" binding:"required" example:"admin"`    // 登录用户名
+	Password string `json:"password" binding:"required" example:"Abcdef12"` // 登录密码
+}
+
+// ChangePasswordRequest 当前用户修改密码请求：验证旧密码后设置新密码，新密码须满足强度策略
+type ChangePasswordRequest struct {
+	OldPassword string `json:"oldPassword" binding:"required" example:"Abcdef12"`              // 旧密码
+	NewPassword string `json:"newPassword" binding:"required,min=8,max=72" example:"Xy9876ab"` // 新密码，至少 8 位且含字母、数字、特殊字符中的两类
+}
+
+// ResetPasswordRequest 管理员重置密码请求：为目标用户直接设置新密码，不验证旧密码
+type ResetPasswordRequest struct {
+	NewPassword string `json:"newPassword" binding:"required,min=8,max=72" example:"Xy9876ab"` // 新密码，至少 8 位且含字母、数字、特殊字符中的两类
 }
 
 type LoginResponse struct {
@@ -114,14 +125,14 @@ type FileListRequest struct {
 }
 
 type CreateUserRequest struct {
-	Username     string   `json:"username" binding:"required" example:"newuser"` // 登录用户名
-	RealName     string   `json:"realName" binding:"required" example:"新用户"`     // 真实姓名
-	Password     string   `json:"password" binding:"required" example:"123456"`  // 密码
-	Phone        *string  `json:"phone" example:"13800138000"`                   // 手机号
-	Desc         *string  `json:"desc" example:"普通用户"`                           // 描述
-	DeptIds      []string `json:"deptIds" example:"[\"UUID\"]"`                  // 部门id数组
-	RoleIds      []string `json:"roleIds" example:"[\"UUID\"]"`                  // 角色id数组
-	LeaderUserId *string  `json:"leaderUserId" example:"UUID"`                   // 直属上级用户ID
+	Username     string   `json:"username" binding:"required" example:"newuser"`               // 登录用户名
+	RealName     string   `json:"realName" binding:"required" example:"新用户"`                   // 真实姓名
+	Password     string   `json:"password" binding:"required,min=8,max=72" example:"Xy9876ab"` // 密码，至少 8 位且含字母、数字、特殊字符中的两类
+	Phone        *string  `json:"phone" example:"13800138000"`                                 // 手机号
+	Desc         *string  `json:"desc" example:"普通用户"`                                         // 描述
+	DeptIds      []string `json:"deptIds" example:"[\"UUID\"]"`                                // 部门id数组
+	RoleIds      []string `json:"roleIds" example:"[\"UUID\"]"`                                // 角色id数组
+	LeaderUserId *string  `json:"leaderUserId" example:"UUID"`                                 // 直属上级用户ID
 }
 
 type UpdateUserRequest struct {

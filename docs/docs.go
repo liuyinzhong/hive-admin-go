@@ -203,6 +203,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/password": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "当前用户验证旧密码后设置新密码；成功后密码版本号递增使全部既有会话凭证立即失效，并推送强制退出事件。数据权限：当前用户归属，只操作当前 Token 对应用户，不经过角色数据范围",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证管理"
+                ],
+                "summary": "修改密码",
+                "parameters": [
+                    {
+                        "description": "修改密码请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "修改成功，需使用新密码重新登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误、旧密码不正确或新密码不满足强度策略",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "用户未登录",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/auth/profile": {
             "get": {
                 "security": [
@@ -23398,6 +23451,72 @@ const docTemplate = `{
                 }
             }
         },
+        "/system/users/{userId}/password": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "按当前角色数据范围为目标用户直接设置新密码，不验证旧密码；系统内置用户不能重置。成功后目标用户密码版本号递增，其全部既有会话凭证立即失效，并推送强制退出事件和站内消息。数据权限：角色数据范围，写前在同一查询中校验目标用户可见性",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/用户管理"
+                ],
+                "summary": "重置用户密码",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "重置密码请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ResetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "重置成功，目标用户需使用新密码重新登录",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误、用户不存在或新密码不满足强度策略",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/system/users/{userId}/status": {
             "put": {
                 "security": [
@@ -25742,6 +25861,27 @@ const docTemplate = `{
                 }
             }
         },
+        "models.ChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "newPassword",
+                "oldPassword"
+            ],
+            "properties": {
+                "newPassword": {
+                    "description": "新密码，至少 8 位且含字母、数字、特殊字符中的两类",
+                    "type": "string",
+                    "maxLength": 72,
+                    "minLength": 8,
+                    "example": "Xy9876ab"
+                },
+                "oldPassword": {
+                    "description": "旧密码",
+                    "type": "string",
+                    "example": "Abcdef12"
+                }
+            }
+        },
         "models.ClassificationNodeTreeResponse": {
             "type": "object",
             "properties": {
@@ -26875,9 +27015,11 @@ const docTemplate = `{
                     "example": "UUID"
                 },
                 "password": {
-                    "description": "密码",
+                    "description": "密码，至少 8 位且含字母、数字、特殊字符中的两类",
                     "type": "string",
-                    "example": "123456"
+                    "maxLength": 72,
+                    "minLength": 8,
+                    "example": "Xy9876ab"
                 },
                 "phone": {
                     "description": "手机号",
@@ -29854,7 +29996,7 @@ const docTemplate = `{
                 "password": {
                     "description": "登录密码",
                     "type": "string",
-                    "example": "123456"
+                    "example": "Abcdef12"
                 },
                 "username": {
                     "description": "登录用户名",
@@ -32773,6 +32915,21 @@ const docTemplate = `{
                 },
                 "updateDate": {
                     "type": "string"
+                }
+            }
+        },
+        "models.ResetPasswordRequest": {
+            "type": "object",
+            "required": [
+                "newPassword"
+            ],
+            "properties": {
+                "newPassword": {
+                    "description": "新密码，至少 8 位且含字母、数字、特殊字符中的两类",
+                    "type": "string",
+                    "maxLength": 72,
+                    "minLength": 8,
+                    "example": "Xy9876ab"
                 }
             }
         },
@@ -37176,6 +37333,11 @@ const docTemplate = `{
                     "description": "记录ID",
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "signature": {
+                    "description": "签署人签名快照URL，仅签署动作记录有值",
+                    "type": "string",
+                    "example": "/uploads/workflow-sign/xxx/task.png"
                 },
                 "taskId": {
                     "description": "任务ID",

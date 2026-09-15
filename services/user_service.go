@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"gorm.io/gorm"
@@ -17,6 +18,47 @@ type UserService struct{}
 
 func NewUserService() *UserService {
 	return &UserService{}
+}
+
+// userManagementMenuName 用户管理页面菜单的 name，用于重置密码站内消息归属
+const userManagementMenuName = "systemUser"
+
+// ResetUserPassword 管理员在当前角色数据范围内为目标用户直接设置新密码，不验证旧密码。
+// 成功后将 pwd_version 递增，使目标用户全部旧世代会话凭证立即失效，
+// 并推送强制退出事件和站内消息；推送失败仅记日志，不影响重置结果。
+func (s *UserService) ResetUserPassword(userId string, req models.ResetPasswordRequest, permission datapermission.Permission) error {
+	var user models.SysUser
+	query := database.DB.Model(&models.SysUser{}).Where("user_id = ? AND del_flag = 0 AND is_sys = 0", userId)
+	if err := permission.Apply(query, "sys_user.user_id").First(&user).Error; err != nil {
+		return errors.New("用户不存在")
+	}
+
+	if err := utils.ValidatePassword(req.NewPassword); err != nil {
+		return err
+	}
+
+	hash, err := utils.HashPassword(req.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	if err := database.DB.Model(&models.SysUser{}).
+		Where("user_id = ?", user.UserID).
+		Updates(map[string]interface{}{
+			"password":    hash,
+			"pwd_version": gorm.Expr("pwd_version + 1"),
+			"update_date": time.Now(),
+		}).Error; err != nil {
+		return err
+	}
+
+	messageService := NewMenuMessageService()
+	if err := messageService.CreateMenuMessageForMenuName(user.UserID, userManagementMenuName,
+		"密码已重置", "你的登录密码已被管理员重置，请使用新密码重新登录"); err != nil {
+		log.Printf("[user] 重置密码站内消息推送失败: userId=%s, err=%v", user.UserID, err)
+	}
+	messageService.PublishForceLogout(user.UserID)
+	return nil
 }
 
 func (s *UserService) GetUserList(req models.UserListRequest, permission datapermission.Permission) (*utils.PageResult, error) {
@@ -163,6 +205,15 @@ func (s *UserService) GetAllUsers(realName string, permission datapermission.Per
 }
 
 func (s *UserService) CreateUser(req models.CreateUserRequest, permission datapermission.Permission) error {
+	if err := utils.ValidatePassword(req.Password); err != nil {
+		return err
+	}
+
+	hash, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return err
+	}
+
 	return database.DB.Transaction(func(tx *gorm.DB) error {
 		if err := validateManagedDepartments(tx, req.DeptIds, permission); err != nil {
 			return err
@@ -192,7 +243,7 @@ func (s *UserService) CreateUser(req models.CreateUserRequest, permission datape
 			Username:     &req.Username,
 			RealName:     &req.RealName,
 			Phone:        req.Phone,
-			Password:     &req.Password,
+			Password:     &hash,
 			Desc:         req.Desc,
 			LeaderUserID: req.LeaderUserId,
 			Status:       1,

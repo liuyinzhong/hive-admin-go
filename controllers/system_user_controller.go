@@ -158,6 +158,41 @@ func (ctrl *SystemController) UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
 }
 
+// ResetUserPassword 重置用户密码
+// @Summary 重置用户密码
+// @Description 按当前角色数据范围为目标用户直接设置新密码，不验证旧密码；系统内置用户不能重置。成功后目标用户密码版本号递增，其全部既有会话凭证立即失效，并推送强制退出事件和站内消息。数据权限：角色数据范围，写前在同一查询中校验目标用户可见性
+// @Tags 系统管理/用户管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param userId path string true "用户ID"
+// @Param request body models.ResetPasswordRequest true "重置密码请求参数"
+// @Success 200 {object} models.Response "重置成功，目标用户需使用新密码重新登录"
+// @Failure 400 {object} map[string]interface{} "参数错误、用户不存在或新密码不满足强度策略"
+// @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /system/users/{userId}/password [put]
+func (ctrl *SystemController) ResetUserPassword(c *gin.Context) {
+	userId := c.Param("userId")
+	if userId == "" {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "用户ID不能为空"))
+		return
+	}
+
+	var req models.ResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
+		return
+	}
+
+	if err := ctrl.userService.ResetUserPassword(userId, req, currentDataPermission(c)); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
+}
+
 // UpdateUserStatus 更新用户状态
 // @Summary 更新用户状态
 // @Description 按当前角色数据范围更新用户启用/禁用状态；目标用户全部启用部门均须可管理
