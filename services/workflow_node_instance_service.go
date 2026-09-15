@@ -464,9 +464,14 @@ func workflowNodeActors(nodeInstance *models.WfProcessNodeInstance) ([]string, [
 
 // buildWorkflowNodeResponses 将批量查询结果按节点实例聚合。
 func buildWorkflowNodeResponses(nodeInstances []models.WfProcessNodeInstance, tasks []models.WfProcessTask, copies []models.WfProcessCopy, records []models.WfProcessRecord, instance models.WfProcessInstance, responseTime time.Time) ([]models.WorkflowNodeInstanceResponse, error) {
+	// 按实例画布快照解析一次各节点操作集,详情内全部任务共用
+	nodeOperations, err := resolveWorkflowInstanceNodeOperations(instance)
+	if err != nil {
+		return nil, err
+	}
 	taskMap := make(map[string][]models.WorkflowTaskResponse)
 	for _, task := range tasks {
-		taskMap[task.NodeInstanceID] = append(taskMap[task.NodeInstanceID], buildWorkflowTaskResponse(task, instance))
+		taskMap[task.NodeInstanceID] = append(taskMap[task.NodeInstanceID], buildWorkflowTaskResponse(task, instance, nodeOperations))
 	}
 	copyMap := make(map[string][]models.WorkflowCopyResponse)
 	for _, copyItem := range copies {

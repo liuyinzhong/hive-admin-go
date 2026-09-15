@@ -73,6 +73,7 @@ type workflowNodeProperties struct {
 	BranchMode       string                    `json:"branchMode"`
 	FieldPermissions map[string]string         `json:"fieldPermissions"`
 	Automations      []workflowAutomationMount `json:"automations"` // 自动化动作挂载快照,任意节点类型可配多个,按顺序同事务执行
+	Operations       []string                  `json:"operations"`  // 节点操作集:审批节点办理人可用动作,缺失或为空按操作缺省集
 }
 
 type workflowEdge struct {
@@ -356,9 +357,18 @@ func GetWorkflowTasks(page, pageSize int, userID string, statuses []int) (*utils
 	if err != nil {
 		return nil, err
 	}
+	// 按实例解析一次画布快照中的各节点操作集,供本页任务填充任务可用操作
+	instanceNodeOperations := make(map[string]map[string][]string, len(instances))
+	for _, instance := range instances {
+		nodeOperations, err := resolveWorkflowInstanceNodeOperations(instance)
+		if err != nil {
+			return nil, err
+		}
+		instanceNodeOperations[instance.InstanceID] = nodeOperations
+	}
 	responses := make([]models.WorkflowTaskResponse, 0, len(items))
 	for _, item := range items {
-		responses = append(responses, buildWorkflowTaskResponse(item, instances[item.InstanceID]))
+		responses = append(responses, buildWorkflowTaskResponse(item, instances[item.InstanceID], instanceNodeOperations[item.InstanceID]))
 	}
 	return &utils.PaginationResponse{Items: responses, Total: total}, nil
 }
@@ -467,6 +477,9 @@ func TransferWorkflowTask(taskID, userID string, req *models.WorkflowTaskTransfe
 		if err != nil {
 			return err
 		}
+		if err := guardWorkflowNodeOperation(instance, task.NodeID, "transfer"); err != nil {
+			return err
+		}
 		target, err := getActiveWorkflowUser(tx, strings.TrimSpace(req.TargetUserID))
 		if err != nil {
 			return fmt.Errorf("转交用户不存在或已停用")
@@ -513,6 +526,9 @@ func AddWorkflowTaskSign(taskID, userID string, req *models.WorkflowTaskAddSignR
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		task, instance, operator, err := loadPendingWorkflowTask(tx, taskID, userID)
 		if err != nil {
+			return err
+		}
+		if err := guardWorkflowNodeOperation(instance, task.NodeID, "addSign"); err != nil {
 			return err
 		}
 		userIDs := uniqueStrings(req.UserIDs)
@@ -576,6 +592,9 @@ func RemoveWorkflowTaskSign(taskID, userID string, req *models.WorkflowTaskRemov
 		if err != nil {
 			return err
 		}
+		if err := guardWorkflowNodeOperation(instance, task.NodeID, "removeSign"); err != nil {
+			return err
+		}
 		taskIDs := uniqueStrings(req.TaskIDs)
 		if len(taskIDs) == 0 || len(taskIDs) > 20 {
 			return fmt.Errorf("减签任务数量必须在1到20个之间")
@@ -631,6 +650,14 @@ func ReturnWorkflowTask(taskID, userID string, req *models.WorkflowTaskReturnReq
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		task, instance, operator, err := loadPendingWorkflowTask(tx, taskID, userID)
 		if err != nil {
+			return err
+		}
+		// 退回上一步与退回指定节点是节点操作集中两个独立动作:是否显式选择目标决定门禁取值
+		returnAction := "returnPrevious"
+		if req.TargetNodeID != nil && strings.TrimSpace(*req.TargetNodeID) != "" {
+			returnAction = "returnNode"
+		}
+		if err := guardWorkflowNodeOperation(instance, task.NodeID, returnAction); err != nil {
 			return err
 		}
 		targets, err := loadWorkflowReturnTargets(tx, task, instance)
@@ -944,6 +971,9 @@ func handleWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionReq
 		if approved {
 			taskStatus = models.WorkflowTaskStatusApproved
 			action = "approve"
+		}
+		if err := guardWorkflowNodeOperation(&instance, task.NodeID, action); err != nil {
+			return err
 		}
 		// 同意与拒绝属于签署动作：把办理人当前个人签名固化为快照，失败则本次审批回滚。
 		signSnapshot, err := snapshotWorkflowSignature(instance.InstanceID, task.TaskID, operator.Signature)
@@ -1388,6 +1418,76 @@ func getActiveWorkflowUser(tx *gorm.DB, userID string) (models.SysUser, error) {
 	return user, err
 }
 
+// workflowNodeOperationEnum 节点操作集可配置动作全集。
+var workflowNodeOperationEnum = []string{"approve", "reject", "transfer", "addSign", "removeSign", "returnPrevious", "returnNode"}
+
+// workflowNodeOperationDefault 操作缺省集:operations 缺失或为空时按同意+拒绝处理。
+var workflowNodeOperationDefault = []string{"approve", "reject"}
+
+// resolveWorkflowNodeOperations 解析节点操作集:过滤非法值与重复值,防御性保证同意可用。
+func resolveWorkflowNodeOperations(properties workflowNodeProperties) []string {
+	if len(properties.Operations) == 0 {
+		return workflowNodeOperationDefault
+	}
+	allowed := make([]string, 0, len(properties.Operations)+1)
+	seen := make(map[string]bool, len(properties.Operations)+1)
+	for _, operation := range properties.Operations {
+		if seen[operation] || !workflowNodeOperationSupported(operation) {
+			continue
+		}
+		seen[operation] = true
+		allowed = append(allowed, operation)
+	}
+	if !seen["approve"] {
+		allowed = append(allowed, "approve")
+	}
+	return allowed
+}
+
+// workflowNodeOperationSupported 判断动作代码是否在节点操作集枚举内。
+func workflowNodeOperationSupported(operation string) bool {
+	for _, item := range workflowNodeOperationEnum {
+		if item == operation {
+			return true
+		}
+	}
+	return false
+}
+
+// guardWorkflowNodeOperation 节点操作门禁:按实例画布快照校验动作是否在该节点操作集内。
+func guardWorkflowNodeOperation(instance *models.WfProcessInstance, nodeID, action string) error {
+	graph, err := parseWorkflowGraph(instance.FlowSnapshot)
+	if err != nil {
+		return err
+	}
+	node := findWorkflowNode(graph, nodeID)
+	if node == nil {
+		return fmt.Errorf("流程节点不存在")
+	}
+	for _, allowed := range resolveWorkflowNodeOperations(node.Properties) {
+		if allowed == action {
+			return nil
+		}
+	}
+	return fmt.Errorf("该节点不允许此操作")
+}
+
+// resolveWorkflowInstanceNodeOperations 按实例画布快照一次性解析各审批节点的操作集。
+func resolveWorkflowInstanceNodeOperations(instance models.WfProcessInstance) (map[string][]string, error) {
+	graph, err := parseWorkflowGraph(instance.FlowSnapshot)
+	if err != nil {
+		return nil, err
+	}
+	nodeOperations := make(map[string][]string, len(graph.Nodes))
+	for _, node := range graph.Nodes {
+		if node.Properties.NodeType != "approve" {
+			continue
+		}
+		nodeOperations[node.ID] = resolveWorkflowNodeOperations(node.Properties)
+	}
+	return nodeOperations, nil
+}
+
 // workflowOutgoingEdges 获取指定节点全部出线。
 func workflowOutgoingEdges(graph *workflowGraph, nodeID string) []workflowEdge {
 	edges := make([]workflowEdge, 0)
@@ -1533,13 +1633,18 @@ func workflowInstanceTitle(definitionName, starterName string) string {
 }
 
 // buildWorkflowTaskResponse 组合任务及实例摘要。
-func buildWorkflowTaskResponse(task models.WfProcessTask, instance models.WfProcessInstance) models.WorkflowTaskResponse {
+func buildWorkflowTaskResponse(task models.WfProcessTask, instance models.WfProcessInstance, nodeOperations map[string][]string) models.WorkflowTaskResponse {
+	allowedActions := nodeOperations[task.NodeID]
+	if allowedActions == nil {
+		allowedActions = workflowNodeOperationDefault
+	}
 	return models.WorkflowTaskResponse{
 		TaskID: task.TaskID, TaskGroupID: task.TaskGroupID, NodeInstanceID: task.NodeInstanceID, InstanceID: task.InstanceID, InstanceTitle: instance.Title,
 		NodeID: task.NodeID, NodeName: task.NodeName, AssigneeID: task.AssigneeID,
 		AssigneeName: task.AssigneeName, ApprovalMode: task.ApprovalMode,
 		Status: strconv.Itoa(task.Status), Comment: task.Comment, StarterName: instance.StarterName,
-		CreateDate: models.TimeToStringPtr(task.CreateDate), FinishDate: models.TimeToStringPtr(task.FinishDate),
+		AllowedActions: allowedActions,
+		CreateDate:     models.TimeToStringPtr(task.CreateDate), FinishDate: models.TimeToStringPtr(task.FinishDate),
 	}
 }
 

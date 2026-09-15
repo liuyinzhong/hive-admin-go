@@ -37480,6 +37480,17 @@ const docTemplate = `{
         "models.WorkflowTaskResponse": {
             "type": "object",
             "properties": {
+                "allowedActions": {
+                    "description": "节点操作集投影：该任务办理人可用的动作代码列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "approve",
+                        "reject"
+                    ]
+                },
                 "approvalMode": {
                     "description": "审批模式",
                     "type": "string",

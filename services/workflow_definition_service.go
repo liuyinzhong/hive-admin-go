@@ -296,6 +296,9 @@ func PublishWorkflowDefinition(definitionID string) error {
 	if err := validateWorkflowBusinessTypeRequired(&definition); err != nil {
 		return err
 	}
+	if err := validateWorkflowNodeOperations(graph); err != nil {
+		return err
+	}
 	if err := validateWorkflowAutomationMounts(&definition, graph, formFields); err != nil {
 		return err
 	}
@@ -310,6 +313,33 @@ func PublishWorkflowDefinition(definitionID string) error {
 		"version":     version,
 		"update_date": time.Now(),
 	}).Error
+}
+
+// validateWorkflowNodeOperations 发布校验节点操作集:仅审批节点可配置,必须包含同意,取值限于枚举且不重复。
+func validateWorkflowNodeOperations(graph *workflowGraph) error {
+	for index := range graph.Nodes {
+		node := &graph.Nodes[index]
+		if node.Properties.NodeType != "approve" {
+			if len(node.Properties.Operations) > 0 {
+				return fmt.Errorf("节点 %s 不是审批节点,不允许配置操作集", workflowNodeName(node))
+			}
+			continue
+		}
+		seen := make(map[string]bool, len(node.Properties.Operations))
+		for _, operation := range node.Properties.Operations {
+			if !workflowNodeOperationSupported(operation) {
+				return fmt.Errorf("节点 %s 配置了未知操作 %s", workflowNodeName(node), operation)
+			}
+			if seen[operation] {
+				return fmt.Errorf("节点 %s 的操作 %s 重复配置", workflowNodeName(node), operation)
+			}
+			seen[operation] = true
+		}
+		if !seen["approve"] {
+			return fmt.Errorf("节点 %s 的操作集必须包含同意", workflowNodeName(node))
+		}
+	}
+	return nil
 }
 
 // validateWorkflowBusinessTypeRequired 校验发布定义的业务类型必填且已注册。

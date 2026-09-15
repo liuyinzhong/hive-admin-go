@@ -204,21 +204,22 @@ type WorkflowInstanceResponse struct {
 
 // WorkflowTaskResponse 是用户待办和已办任务数据。
 type WorkflowTaskResponse struct {
-	TaskID         string  `json:"taskId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 任务ID
-	TaskGroupID    string  `json:"taskGroupId" example:"550e8400-e29b-41d4-a716-446655440000"`    // 任务组ID
-	NodeInstanceID string  `json:"nodeInstanceId" example:"550e8400-e29b-41d4-a716-446655440000"` // 节点实例ID
-	InstanceID     string  `json:"instanceId" example:"550e8400-e29b-41d4-a716-446655440000"`     // 流程实例ID
-	InstanceTitle  string  `json:"instanceTitle" example:"XX功能需求审批"`                              // 流程标题
-	NodeID         string  `json:"nodeId" example:"approve_manager"`                              // 节点ID
-	NodeName       string  `json:"nodeName" example:"部门主管审批"`                                     // 节点名称
-	AssigneeID     string  `json:"assigneeId" example:"550e8400-e29b-41d4-a716-446655440000"`     // 审批人ID
-	AssigneeName   string  `json:"assigneeName" example:"李四"`                                     // 审批人姓名
-	ApprovalMode   string  `json:"approvalMode" example:"or"`                                     // 审批模式
-	Status         string  `json:"status" example:"0"`                                            // 任务状态：0待办 1已审批 2已拒绝 3已取消
-	Comment        *string `json:"comment" example:"同意通过"`                                        // 审批意见
-	StarterName    string  `json:"starterName" example:"张三"`                                      // 发起人姓名
-	CreateDate     *string `json:"createDate" example:"2026-01-15 09:00:00"`                      // 创建时间
-	FinishDate     *string `json:"finishDate" example:"2026-01-15 18:00:00"`                      // 完成时间
+	TaskID         string   `json:"taskId" example:"550e8400-e29b-41d4-a716-446655440000"`         // 任务ID
+	TaskGroupID    string   `json:"taskGroupId" example:"550e8400-e29b-41d4-a716-446655440000"`    // 任务组ID
+	NodeInstanceID string   `json:"nodeInstanceId" example:"550e8400-e29b-41d4-a716-446655440000"` // 节点实例ID
+	InstanceID     string   `json:"instanceId" example:"550e8400-e29b-41d4-a716-446655440000"`     // 流程实例ID
+	InstanceTitle  string   `json:"instanceTitle" example:"XX功能需求审批"`                              // 流程标题
+	NodeID         string   `json:"nodeId" example:"approve_manager"`                              // 节点ID
+	NodeName       string   `json:"nodeName" example:"部门主管审批"`                                     // 节点名称
+	AssigneeID     string   `json:"assigneeId" example:"550e8400-e29b-41d4-a716-446655440000"`     // 审批人ID
+	AssigneeName   string   `json:"assigneeName" example:"李四"`                                     // 审批人姓名
+	ApprovalMode   string   `json:"approvalMode" example:"or"`                                     // 审批模式
+	Status         string   `json:"status" example:"0"`                                            // 任务状态：0待办 1已审批 2已拒绝 3已取消
+	AllowedActions []string `json:"allowedActions" example:"approve,reject"`                       // 节点操作集投影：该任务办理人可用的动作代码列表
+	Comment        *string  `json:"comment" example:"同意通过"`                                        // 审批意见
+	StarterName    string   `json:"starterName" example:"张三"`                                      // 发起人姓名
+	CreateDate     *string  `json:"createDate" example:"2026-01-15 09:00:00"`                      // 创建时间
+	FinishDate     *string  `json:"finishDate" example:"2026-01-15 18:00:00"`                      // 完成时间
 }
 
 // WorkflowCopyResponse 是用户抄送列表数据。
