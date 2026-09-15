@@ -16,6 +16,10 @@
     "charset": "utf8mb4"
   },
   "jwt": {
-    "secret": "hive-admin-secret-key-2026"
+    "secret": "d6a8bd8f42e9d82fa6342a5f5cce298ea3c86919284456b7fbcfa6f356de45c8"
+  },
+  "apifox": {
+    "token": "",
+    "projectUrl": "https://api.apifox.com/v1/projects/8280529/import-openapi?locale=zh-CN"
   }
 }

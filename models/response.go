@@ -12,8 +12,14 @@ type Response struct {
 }
 
 type LoginRequest struct {
-	Username string `json:"username" binding:"required" example:"admin"`    // 登录用户名
-	Password string `json:"password" binding:"required" example:"Abcdef12"` // 登录密码
+	Username  string `json:"username" binding:"required" example:"admin"`    // 登录用户名
+	Password  string `json:"password" binding:"required" example:"Abcdef12"` // 登录密码
+	CaptchaID string `json:"captchaId" example:"UUID"`                       // 滑块挑战票据ID；该用户名失败达到阈值后必填，其余情况忽略
+}
+
+// CaptchaIssueResponse 滑块挑战票据签发结果
+type CaptchaIssueResponse struct {
+	CaptchaID string `json:"captchaId" example:"UUID"` // 一次性挑战票据ID，登录时携带，消费即失效
 }
 
 // ChangePasswordRequest 当前用户修改密码请求：验证旧密码后设置新密码，新密码须满足强度策略

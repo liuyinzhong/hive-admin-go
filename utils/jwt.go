@@ -2,31 +2,44 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"hive-admin-go/config"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// minJWTSecretLength JWT 签名密钥最小长度（字节）；不足时拒绝启动，避免弱密钥签发凭证
+const minJWTSecretLength = 32
+
 var jwtSecret []byte
 
-func InitJWT() {
-	jwtSecret = []byte(config.AppConfig.JWT.Secret)
+// InitJWT 校验并加载 JWT 签名密钥；密钥过短返回错误，由启动流程终止服务。
+func InitJWT() error {
+	secret := config.AppConfig.JWT.Secret
+	if len(secret) < minJWTSecretLength {
+		return fmt.Errorf("jwt secret 长度不足 %d 字节，拒绝启动", minJWTSecretLength)
+	}
+	jwtSecret = []byte(secret)
+	return nil
 }
 
 type Claims struct {
 	UserID     string `json:"userId"`
 	PwdVersion int    `json:"pwdVersion"`
+	JTI        string `json:"jti"`
 	jwt.RegisteredClaims
 }
 
 // GenerateToken 签发登录 token，有效期 expireHours 小时，携带签发时刻的密码版本号，
-// 供认证中间件在口令变更后立即判定旧世代凭证失效。
+// 供认证中间件在口令变更后立即判定旧世代凭证失效；jti 是本枚凭证的唯一标识，
+// 供登出撤销写入黑名单。
 func GenerateToken(userID string, pwdVersion, expireHours int) (string, error) {
 	expireTime := time.Now().Add(time.Duration(expireHours) * time.Hour)
 	claims := Claims{
 		UserID:     userID,
 		PwdVersion: pwdVersion,
+		JTI:        GenerateUUID(),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expireTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -51,22 +64,6 @@ func ParseToken(tokenString string) (*Claims, error) {
 	}
 
 	return nil, errors.New("invalid token")
-}
-
-func IsTokenBlacklisted(tokenString string) bool {
-	return false
-}
-
-func AddTokenToBlacklist(tokenString string) {
-}
-
-func ValidateToken(tokenString string) bool {
-	if IsTokenBlacklisted(tokenString) {
-		return false
-	}
-
-	_, err := ParseToken(tokenString)
-	return err == nil
 }
 
 // SignShortLivedToken 签发短时 JWT token，复用项目 JWT 密钥，供需要"短期凭证 + 无状态校验"的场景使用。

@@ -197,7 +197,11 @@ func (s *AuditLogService) CleanupExpiredLogs(retentionDays int, now time.Time) e
 		if err := tx.Where("create_date < ?", cutoff).Delete(&models.SysOperationLog{}).Error; err != nil {
 			return err
 		}
-		return tx.Where("create_date < ?", cutoff).Delete(&models.SysLoginLog{}).Error
+		if err := tx.Where("create_date < ?", cutoff).Delete(&models.SysLoginLog{}).Error; err != nil {
+			return err
+		}
+		// 已撤销凭证黑名单随同清理：凭证到期后拦截行不再有意义
+		return tx.Where("expires_at < ?", now.In(auditLogLocation)).Delete(&models.SysTokenBlacklist{}).Error
 	})
 }
 

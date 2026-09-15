@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type AuthService struct {
@@ -28,9 +29,29 @@ const (
 	loginValidityPeriodMax      = 8760
 )
 
-func (s *AuthService) Login(username, password string) (string, error) {
+// 登录防爆破：失败计数窗口与滑块触发阈值参数
+const (
+	loginFailureWindow          = 15 * time.Minute
+	loginFailureCaptchaParamKey = "SYS_LOGIN_FAILURE_CAPTCHA_THRESHOLD"
+	loginFailureCaptchaDefault  = 3
+	loginFailureCaptchaMin      = 1
+	loginFailureCaptchaMax      = 100
+)
+
+func (s *AuthService) Login(req models.LoginRequest) (string, error) {
+	// 防爆破：滚动窗口内该用户名登录失败达到阈值后，必须携带有效的一次性滑块挑战；
+	// 阈值以下忽略挑战参数，正常用户无感。失败计数来自登录日志（审计中间件对每次尝试落库）。
+	threshold := NewSystemParamService().GetInt(loginFailureCaptchaParamKey, loginFailureCaptchaDefault, loginFailureCaptchaMin, loginFailureCaptchaMax)
+	if failures, err := countRecentLoginFailures(req.Username, time.Now()); err != nil {
+		return "", err
+	} else if failures >= int64(threshold) {
+		if err := NewCaptchaService().Consume(req.CaptchaID); err != nil {
+			return "", err
+		}
+	}
+
 	var user models.SysUser
-	result := database.DB.Where("username = ? AND del_flag = 0", username).First(&user)
+	result := database.DB.Where("username = ? AND del_flag = 0", req.Username).First(&user)
 	if result.Error != nil {
 		return "", errors.New("账号密码有误")
 	}
@@ -39,7 +60,7 @@ func (s *AuthService) Login(username, password string) (string, error) {
 		return "", errors.New("该账号已被禁用")
 	}
 
-	if user.Password == nil || !utils.VerifyPassword(password, *user.Password) {
+	if user.Password == nil || !utils.VerifyPassword(req.Password, *user.Password) {
 		return "", errors.New("账号密码有误")
 	}
 
@@ -49,6 +70,34 @@ func (s *AuthService) Login(username, password string) (string, error) {
 	}
 
 	return token, nil
+}
+
+// countRecentLoginFailures 统计 15 分钟窗口内自最近一次成功登录以来的连续失败次数；
+// 成功登录即清零计数，登出后重新登录不会延续触发滑块验证。
+// 当前尝试的日志由审计中间件在请求结束后写入，此处只统计此前已完成的历史尝试。
+func countRecentLoginFailures(username string, now time.Time) (int64, error) {
+	windowStart := now.In(auditLogLocation).Add(-loginFailureWindow)
+
+	var lastSuccess models.SysLoginLog
+	err := database.DB.Where("username = ? AND event_type = ? AND status = ? AND create_date >= ?",
+		username, models.LoginLogTypeLogin, models.AuditLogStatusSuccess, windowStart).
+		Order("create_date DESC").First(&lastSuccess).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return 0, err
+	}
+
+	// 窗口内无成功登录时从窗口起点统计，有则从成功登录时刻起统计
+	since := windowStart
+	if err == nil {
+		since = lastSuccess.CreateDate
+	}
+
+	var count int64
+	err = database.DB.Model(&models.SysLoginLog{}).
+		Where("username = ? AND event_type = ? AND status = ? AND create_date >= ?",
+			username, models.LoginLogTypeLogin, models.AuditLogStatusFailed, since).
+		Count(&count).Error
+	return count, err
 }
 
 // loginValidityPeriod 读取登录有效期参数（小时），缺失或非法时回退默认值。
@@ -259,9 +308,20 @@ func (s *AuthService) GetAuthCodes(userID string) ([]string, error) {
 	return s.permissionService.GetUserCodes(userID)
 }
 
+// Logout 撤销当前凭证：将其唯一标识与原过期时刻写入黑名单，仅失效这一枚凭证，
+// 同一用户的其它会话不受影响。token 已无法解析（过期或篡改）时无需撤销，直接成功。
 func (s *AuthService) Logout(token string) error {
-	utils.AddTokenToBlacklist(token)
-	return nil
+	claims, err := utils.ParseToken(token)
+	if err != nil || claims.JTI == "" {
+		return nil
+	}
+
+	entry := models.SysTokenBlacklist{
+		JTI:        claims.JTI,
+		ExpiresAt:  claims.ExpiresAt.Time,
+		CreateDate: time.Now(),
+	}
+	return database.DB.Clauses(clause.OnConflict{DoNothing: true}).Create(&entry).Error
 }
 
 func buildMenuTree(menus []models.SysMenu) []*models.MenuTreeResponse {

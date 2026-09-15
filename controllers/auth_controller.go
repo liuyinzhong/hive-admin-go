@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"hive-admin-go/models"
 	"hive-admin-go/services"
 	"net/http"
@@ -20,13 +21,14 @@ func NewAuthController() *AuthController {
 
 // Login 用户登录
 // @Summary 用户登录
-// @Description 用户通过用户名和密码登录
+// @Description 用户通过用户名和密码登录。该用户名在失败窗口内失败达到阈值时要求滑块验证：未携带有效挑战票据返回 428，携带后正常校验。数据权限：公开接口，不经过认证和角色数据范围
 // @Tags 认证管理
 // @Accept json
 // @Produce json
 // @Param request body models.LoginRequest true "登录请求参数"
 // @Success 200 {object} models.Response{data=models.LoginResponse} "登录成功"
-// @Failure 401 {object} map[string]interface{} "用户名或密码错误"
+// @Failure 400 {object} map[string]interface{} "账号密码有误或账号被禁用"
+// @Failure 428 {object} map[string]interface{} "失败达到阈值，需完成滑块验证后重试"
 // @Router /auth/login [post]
 func (ctrl *AuthController) Login(c *gin.Context) {
 	var req models.LoginRequest
@@ -35,14 +37,39 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := ctrl.authService.Login(req.Username, req.Password)
+	token, err := ctrl.authService.Login(req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		// 需要滑块验证用 428 与普通密码错误区分，前端据此展示滑块
+		status := http.StatusBadRequest
+		if errors.Is(err, services.ErrCaptchaRequired) {
+			status = http.StatusPreconditionRequired
+		}
+		c.JSON(status, models.NewErrorResponse(nil, err.Error()))
 		return
 	}
 
 	c.JSON(http.StatusOK, models.NewSuccessResponse(models.LoginResponse{
 		AccessToken: token,
+	}))
+}
+
+// IssueCaptcha 签发滑块挑战票据
+// @Summary 签发滑块挑战票据
+// @Description 为登录页滑块验证签发一次性挑战票据，登录时携带并由服务端消费；同一 IP 每分钟最多签发 10 次。数据权限：公开接口，不经过认证和角色数据范围，票据不含任何用户数据
+// @Tags 认证管理
+// @Produce json
+// @Success 200 {object} models.Response{data=models.CaptchaIssueResponse} "签发成功"
+// @Failure 429 {object} map[string]interface{} "同一 IP 签发过于频繁"
+// @Router /public/captcha [post]
+func (ctrl *AuthController) IssueCaptcha(c *gin.Context) {
+	captchaID, err := services.NewCaptchaService().Issue(c.ClientIP())
+	if err != nil {
+		c.JSON(http.StatusTooManyRequests, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NewSuccessResponse(models.CaptchaIssueResponse{
+		CaptchaID: captchaID,
 	}))
 }
 

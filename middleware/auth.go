@@ -28,17 +28,23 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		tokenString := parts[1]
 
-		if utils.IsTokenBlacklisted(tokenString) {
-			c.JSON(http.StatusUnauthorized, models.NewErrorResponse(nil, "token has been invalidated"))
-			c.Abort()
-			return
-		}
-
 		claims, err := utils.ParseToken(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, models.NewErrorResponse(nil, "invalid or expired token"))
 			c.Abort()
 			return
+		}
+
+		// 令牌撤销：登出后的凭证按 jti 拦截到其原过期时刻为止；查询出错按已失效处理
+		if claims.JTI != "" {
+			var revokedCount int64
+			if err := database.DB.Model(&models.SysTokenBlacklist{}).
+				Where("jti = ?", claims.JTI).
+				Count(&revokedCount).Error; err != nil || revokedCount > 0 {
+				c.JSON(http.StatusUnauthorized, models.NewErrorResponse(nil, "token has been invalidated"))
+				c.Abort()
+				return
+			}
 		}
 
 		var user models.SysUser

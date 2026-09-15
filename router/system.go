@@ -22,6 +22,7 @@ func registerSystemRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 	{
 		public.GET("/externalPages/:name", externalPageController.GetPublicExternalPage)
 		public.GET("/downloads/preview/:token", downloadTaskController.PreviewFile)
+		public.POST("/captcha", authController.IssueCaptcha)
 		public.POST("/feedback", publicFeedbackController.CreateFeedback)
 		public.POST("/upload", publicFeedbackController.UploadFile)
 	}

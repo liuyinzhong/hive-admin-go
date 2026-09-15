@@ -37,7 +37,11 @@ import (
 //go:generate go install github.com/swaggo/swag/cmd/swag@latest
 
 func main() {
-	// 自动生成 Swagger 文档（如果需要）
+	if err := config.LoadConfig("config.json"); err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
+	// 自动生成 Swagger 文档（如果需要）；同步 Apifox 依赖配置，须在加载配置后执行
 	autoGenerateSwagger()
 
 	// 启动服务
@@ -45,11 +49,9 @@ func main() {
 }
 
 func startServer() {
-	if err := config.LoadConfig("config.json"); err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+	if err := utils.InitJWT(); err != nil {
+		log.Fatalf("Failed to initialize JWT: %v", err)
 	}
-
-	utils.InitJWT()
 
 	if err := database.InitDB(); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
@@ -99,8 +101,14 @@ func startServer() {
 	}
 }
 
-// syncToApify 同步接口文档到 Apifox
+// syncToApify 同步接口文档到 Apifox；token 或 projectUrl 未配置时跳过，不向外部发送数据
 func syncToApify() {
+	apifox := config.AppConfig.Apifox
+	if apifox.Token == "" || apifox.ProjectURL == "" {
+		log.Println("ℹ️ 未配置 apifox token 或 projectUrl，跳过接口文档同步")
+		return
+	}
+
 	swaggerDoc, err := loadLatestSwaggerDoc()
 	if err != nil {
 		log.Printf("❌ 读取 Swagger 文档失败: %v", err)
@@ -126,7 +134,7 @@ func syncToApify() {
 		return
 	}
 
-	url := "https://api.apifox.com/v1/projects/8280529/import-openapi?locale=zh-CN"
+	url := apifox.ProjectURL
 	method := "POST"
 
 	client := &http.Client{}
@@ -137,7 +145,7 @@ func syncToApify() {
 	}
 
 	req.Header.Add("X-Apifox-Api-Version", "2024-03-28")
-	req.Header.Add("Authorization", "Bearer afxp_1bf9abbkG6NB0mOwxgkxQRKoYiFvMPpbnC9A")
+	req.Header.Add("Authorization", "Bearer "+apifox.Token)
 	req.Header.Add("Content-Type", "application/json")
 
 	res, err := client.Do(req)

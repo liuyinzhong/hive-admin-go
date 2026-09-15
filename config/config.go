@@ -12,6 +12,7 @@ type Config struct {
 	Database DatabaseConfig `json:"database"`
 	JWT      JWTConfig      `json:"jwt"`
 	AuditLog AuditLogConfig `json:"auditLog"`
+	Apifox   ApifoxConfig   `json:"apifox"`
 }
 
 type ServerConfig struct {
@@ -35,6 +36,12 @@ type JWTConfig struct {
 type AuditLogConfig struct {
 	RetentionDays int `json:"retentionDays"`
 	CleanupHour   int `json:"cleanupHour"`
+}
+
+// ApifoxConfig 接口文档同步配置；token 或 projectUrl 为空时启动跳过同步，不向外部发送数据
+type ApifoxConfig struct {
+	Token      string `json:"token"`
+	ProjectURL string `json:"projectUrl"`
 }
 
 func LoadConfig(path string) error {
