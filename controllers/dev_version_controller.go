@@ -245,6 +245,33 @@ func (dc *DevController) UpdateVersionNext(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
 }
 
+// GetVersionStatistics 获取版本统计数据
+// @Summary 获取版本统计数据
+// @Description 数据权限：角色数据范围。先按版本创建人校验版本可见，再按各工作项自身归属聚合——需求按创建人或参与人、任务按创建人或执行人、缺陷按创建人或修复人，与对应列表接口同一边界。
+// @Tags 开发管理/版本管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param versionId query string true "版本ID"
+// @Success 200 {object} models.Response{data=models.VersionStatisticsResponse} "获取成功"
+// @Failure 400 {object} map[string]interface{} "参数错误"
+// @Failure 401 {object} map[string]interface{} "未授权"
+// @Router /dev/versions/statistics [get]
+func (dc *DevController) GetVersionStatistics(c *gin.Context) {
+	versionID := c.Query("versionId")
+	if versionID == "" {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "versionId不能为空"))
+		return
+	}
+
+	result, err := services.GetVersionStatistics(versionID, currentDataPermission(c))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
 // DeleteVersions 删除版本
 // @Summary 删除版本
 // @Description 按当前数据范围批量删除版本；任一记录不存在或越界时整批失败

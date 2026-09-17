@@ -141,6 +141,20 @@ func (SysRoleMenu) TableName() string {
 	return "sys_role_menu"
 }
 
+type SysUserMenu struct {
+	ID         string     `gorm:"column:id;type:char(36);primaryKey" json:"id"`
+	UserID     string     `gorm:"column:user_id;type:char(36)" json:"userId"`
+	MenuID     string     `gorm:"column:menu_id;type:char(36)" json:"menuId"`
+	GrantType  string     `gorm:"column:grant_type;type:varchar(16)" json:"grantType"` // grant=个人额外授权 deny=个人禁止
+	CreateDate *time.Time `gorm:"column:create_date" json:"createDate"`
+	UpdateDate *time.Time `gorm:"column:update_date" json:"updateDate"`
+	DelFlag    int        `gorm:"column:del_flag;type:int;default:0" json:"delFlag"`
+}
+
+func (SysUserMenu) TableName() string {
+	return "sys_user_menu"
+}
+
 type SysRoleDept struct {
 	ID         string     `gorm:"column:id;type:char(36);primaryKey" json:"id"`
 	RoleID     string     `gorm:"column:role_id;type:char(36)" json:"roleId"`

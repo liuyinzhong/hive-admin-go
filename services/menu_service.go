@@ -349,6 +349,10 @@ func (s *MenuService) DeleteMenus(ids []string) error {
 		}
 
 		database.DB.Where("menu_id = ?", id).Delete(&models.SysRoleMenu{})
+		// 菜单删除后个人额外授权和禁止一并清理，避免悬挂的个人权限调整
+		if err := database.DB.Where("menu_id = ?", id).Delete(&models.SysUserMenu{}).Error; err != nil {
+			return err
+		}
 
 		now := time.Now()
 		menu.DelFlag = 1
@@ -356,6 +360,111 @@ func (s *MenuService) DeleteMenus(ids []string) error {
 		database.DB.Save(&menu)
 	}
 
+	return nil
+}
+
+// GetMenuGrantedRoles 菜单受众的角色分组：所有收录了该菜单的未删除角色，配置事实口径，含停用角色并携带状态。
+func (s *MenuService) GetMenuGrantedRoles(menuID string) ([]*models.MenuGrantedRoleItem, error) {
+	if err := s.ensureMenuExists(menuID); err != nil {
+		return nil, err
+	}
+
+	type grantedRoleRow struct {
+		models.SysRole
+		GrantDate *time.Time `gorm:"column:grant_date"`
+	}
+	var rows []grantedRoleRow
+	err := database.DB.Table("sys_role AS role").
+		Select("role.*", "role_menu.create_date AS grant_date").
+		Joins("JOIN sys_role_menu AS role_menu ON role_menu.role_id = role.role_id AND role_menu.del_flag = 0 AND role_menu.menu_id = ?", menuID).
+		Where("role.del_flag = 0").
+		Order("role_menu.create_date ASC").
+		Find(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]*models.MenuGrantedRoleItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, &models.MenuGrantedRoleItem{
+			RoleId:    row.RoleID,
+			RoleTitle: utils.StringValue(row.RoleTitle),
+			Status:    row.Status,
+			DataScope: row.DataScope,
+			Remark:    row.Remark,
+			GrantDate: models.TimeToStringPtr(row.GrantDate),
+		})
+	}
+	return items, nil
+}
+
+// GetMenuGrantedUsers 菜单受众的用户分组：被直接额外授权（grant）或禁止（deny）该菜单的用户，分页返回。
+func (s *MenuService) GetMenuGrantedUsers(menuID string, req models.MenuGrantedUserListRequest) (*utils.PageResult, error) {
+	if err := s.ensureMenuExists(menuID); err != nil {
+		return nil, err
+	}
+
+	query := database.DB.Table("sys_user_menu AS user_menu").
+		Select("user_menu.user_id", "user_menu.create_date AS grant_date", "sys_user.username", "sys_user.real_name", "sys_user.status").
+		Joins("JOIN sys_user ON sys_user.user_id = user_menu.user_id AND sys_user.del_flag = 0 AND sys_user.is_sys = 0").
+		Where("user_menu.menu_id = ? AND user_menu.grant_type = ? AND user_menu.del_flag = 0", menuID, req.GrantType)
+
+	if keyword := strings.TrimSpace(req.Keyword); keyword != "" {
+		like := "%" + keyword + "%"
+		query = query.Where("sys_user.username LIKE ? OR sys_user.real_name LIKE ?", like, like)
+	}
+	if req.Status != nil {
+		query = query.Where("sys_user.status = ?", *req.Status)
+	}
+	query = query.Order("user_menu.create_date ASC")
+
+	type grantedUserRow struct {
+		UserID    string     `gorm:"column:user_id"`
+		Username  *string    `gorm:"column:username"`
+		RealName  *string    `gorm:"column:real_name"`
+		Status    int        `gorm:"column:status"`
+		GrantDate *time.Time `gorm:"column:grant_date"`
+	}
+	var rows []grantedUserRow
+	pageResult, err := utils.Paginate(query, req.Page, req.PageSize, &rows)
+	if err != nil {
+		return nil, err
+	}
+
+	userIDs := make([]string, 0, len(rows))
+	for _, row := range rows {
+		userIDs = append(userIDs, row.UserID)
+	}
+	deptTitles, err := getRoleUserDeptTitles(userIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]*models.MenuGrantedUserItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, &models.MenuGrantedUserItem{
+			UserId:     row.UserID,
+			Username:   utils.StringValue(row.Username),
+			RealName:   utils.StringValue(row.RealName),
+			Status:     row.Status,
+			DeptTitles: deptTitles[row.UserID],
+			GrantDate:  models.TimeToStringPtr(row.GrantDate),
+		})
+	}
+	pageResult.Items = items
+	return pageResult, nil
+}
+
+func (s *MenuService) ensureMenuExists(menuID string) error {
+	var count int64
+	if err := database.DB.Model(&models.SysMenu{}).
+		Where("id = ? AND del_flag = 0 AND type != ?", menuID, externalPageType).
+		Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		return errors.New("菜单不存在")
+	}
 	return nil
 }
 

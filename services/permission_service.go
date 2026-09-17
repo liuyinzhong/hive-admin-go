@@ -128,13 +128,19 @@ func (databasePermissionSource) LoadUserPermissionBundles(userID string) (bool, 
 		return true, bundles, err
 	}
 
-	err := database.DB.Table("sys_user_role AS user_role").
-		Distinct("menu.auth_code").
-		Joins("JOIN sys_role AS role ON role.role_id = user_role.role_id AND role.status = 1 AND role.del_flag = 0").
-		Joins("JOIN sys_role_menu AS role_menu ON role_menu.role_id = role.role_id AND role_menu.del_flag = 0").
-		Joins("JOIN sys_menu AS menu ON menu.id = role_menu.menu_id AND menu.status = 1 AND menu.del_flag = 0").
-		Where("user_role.user_id = ? AND user_role.del_flag = 0", userID).
-		Where("menu.auth_code IS NOT NULL AND menu.auth_code != ''").
-		Pluck("menu.auth_code", &bundles).Error
+	// 生效口径（三元合并）与动态菜单同源：有效角色授权 ∪ 个人额外授权 − 个人禁止，仅取启用菜单的按钮权限码
+	menuIDSet, err := effectiveMenuIDSet(userID)
+	if err != nil {
+		return false, nil, err
+	}
+	menuIDs := menuIDSetToSlice(menuIDSet)
+	if len(menuIDs) == 0 {
+		return false, []string{}, nil
+	}
+
+	err = database.DB.Model(&models.SysMenu{}).
+		Distinct("auth_code").
+		Where("id IN ? AND status = 1 AND del_flag = 0 AND auth_code IS NOT NULL AND auth_code != ''", menuIDs).
+		Pluck("auth_code", &bundles).Error
 	return false, bundles, err
 }

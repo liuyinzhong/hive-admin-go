@@ -262,39 +262,14 @@ func (s *AuthService) GetMenus(userID string) ([]*models.MenuTreeResponse, error
 	if user.IsSys == 1 {
 		database.DB.Where("del_flag = 0 AND status = 1 AND type IN ?", []string{"menu", "catalog", "embedded", "link"}).Find(&menus)
 	} else {
-		var userRoles []models.SysUserRole
-		database.DB.Where("user_id = ? AND del_flag = 0", userID).Find(&userRoles)
-
-		if len(userRoles) == 0 {
+		// 生效口径（三元合并）：有效角色授权 ∪ 个人额外授权 − 个人禁止，仅启用菜单进入
+		menuIDSet, err := effectiveMenuIDSet(userID)
+		if err != nil {
+			return nil, err
+		}
+		menuIDs := menuIDSetToSlice(menuIDSet)
+		if len(menuIDs) == 0 {
 			return []*models.MenuTreeResponse{}, nil
-		}
-
-		var roleIDs []string
-		for _, ur := range userRoles {
-			var role models.SysRole
-			if err := database.DB.Where("role_id = ? AND del_flag = 0 AND status = 1", ur.RoleID).First(&role).Error; err == nil {
-				roleIDs = append(roleIDs, ur.RoleID)
-			}
-		}
-
-		if len(roleIDs) == 0 {
-			return []*models.MenuTreeResponse{}, nil
-		}
-
-		var roleMenus []models.SysRoleMenu
-		database.DB.Where("role_id IN ? AND del_flag = 0", roleIDs).Find(&roleMenus)
-
-		if len(roleMenus) == 0 {
-			return []*models.MenuTreeResponse{}, nil
-		}
-
-		var menuIDs []string
-		menuIDSet := make(map[string]bool)
-		for _, rm := range roleMenus {
-			menuIDSet[rm.MenuID] = true
-		}
-		for id := range menuIDSet {
-			menuIDs = append(menuIDs, id)
 		}
 
 		database.DB.Where("id IN ? AND del_flag = 0 AND status = 1 AND type IN ?", menuIDs, []string{"menu", "catalog", "embedded", "link"}).Find(&menus)

@@ -4,6 +4,7 @@ import "hive-admin-go/services"
 
 type SystemController struct {
 	userService       *services.UserService
+	userMenuService   *services.UserMenuService
 	menuService       *services.MenuService
 	roleService       *services.RoleService
 	deptService       *services.DeptService
@@ -17,6 +18,7 @@ type SystemController struct {
 func NewSystemController() *SystemController {
 	return &SystemController{
 		userService:       services.NewUserService(),
+		userMenuService:   services.NewUserMenuService(),
 		menuService:       services.NewMenuService(),
 		roleService:       services.NewRoleService(),
 		deptService:       services.NewDeptService(),

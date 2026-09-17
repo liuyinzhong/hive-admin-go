@@ -65,6 +65,89 @@ type UpdateProfileRequest struct {
 	Signature *string `json:"signature" binding:"omitempty,max=512" example:"https://xxx/sign.png"` // 签名图片URL，空字符串表示清空
 }
 
+// UserPermissionResponse 用户权限明细：一次聚合返回目标用户全部关联角色及各自菜单授权明细
+type UserPermissionResponse struct {
+	UserId   string                  `json:"userId" example:"UUID"` // 用户ID
+	RealName string                  `json:"realName" example:"张三"` // 真实姓名
+	Roles    []UserPermissionRole    `json:"roles"`                 // 角色分组
+	Personal *UserPermissionPersonal `json:"personal"`              // 个人权限分组，未配置个人权限时为 null
+}
+
+// UserPermissionPersonal 用户权限明细中的个人权限分组：额外授权树与禁止树，均按菜单树层级嵌套
+type UserPermissionPersonal struct {
+	Grant      []UserPermissionItem `json:"grant"`      // 个人额外授权明细树
+	GrantCount int                  `json:"grantCount"` // 个人额外授权菜单节点数
+	Deny       []UserPermissionItem `json:"deny"`       // 个人禁止明细树，合并时绝对优先
+	DenyCount  int                  `json:"denyCount"`  // 个人禁止菜单节点数
+}
+
+// UserPermissionRole 用户权限明细中的角色分组，携带该角色当前配置的全部菜单授权明细
+type UserPermissionRole struct {
+	RoleId          string               `json:"roleId" example:"UUID"`        // 角色ID
+	RoleTitle       string               `json:"roleTitle" example:"管理员"`      // 角色名称
+	Status          int                  `json:"status" example:"1"`           // 角色状态 0=停用 1=启用
+	DataScope       string               `json:"dataScope" example:"all"`      // 数据范围
+	Remark          *string              `json:"remark" example:"超级管理员"`       // 备注
+	PermissionCount int                  `json:"permissionCount" example:"32"` // 角色被授权的菜单节点总数
+	Permissions     []UserPermissionItem `json:"permissions"`                  // 菜单授权明细树
+}
+
+// UserPermissionItem 权限明细树节点：按菜单树层级嵌套（目录→页面→按钮），目录作为层级节点保留其下被授权的后代
+type UserPermissionItem struct {
+	MenuId   string               `json:"menuId" example:"UUID"`               // 菜单节点ID
+	Title    string               `json:"title" example:"system.user.name"`    // 菜单标题国际化key
+	Type     string               `json:"type" example:"menu"`                 // 菜单类型 catalog=目录 menu=页面 embedded=内嵌页 link=链接 button=按钮
+	Path     *string              `json:"path" example:"/system/user"`         // 路由路径，目录和按钮节点为空
+	AuthCode *string              `json:"authCode" example:"system:user:list"` // 原子权限码，仅按钮节点
+	Status   int                  `json:"status" example:"1"`                  // 菜单状态 0=停用 1=启用
+	Children []UserPermissionItem `json:"children"`                            // 下级授权节点
+}
+
+// UserPersonalPermissionResponse 用户个人权限：额外授权与禁止两个菜单ID集合（数据范围不受影响）；
+// 同时返回供勾选的启用菜单树，避免维护个人权限还要求菜单管理列表权限
+type UserPersonalPermissionResponse struct {
+	UserId       string              `json:"userId" example:"UUID"`             // 用户ID
+	RealName     string              `json:"realName" example:"张三"`             // 真实姓名
+	GrantMenuIds []string            `json:"grantMenuIds" example:"[\"UUID\"]"` // 个人额外授权菜单ID集合
+	DenyMenuIds  []string            `json:"denyMenuIds" example:"[\"UUID\"]"`  // 个人禁止菜单ID集合，合并时绝对优先
+	MenuTree     []*MenuTreeResponse `json:"menuTree"`                          // 可勾选的启用菜单树（含按钮）
+}
+
+// SaveUserPersonalPermissionRequest 保存用户个人权限请求：两个集合均按提交内容完整替换
+type SaveUserPersonalPermissionRequest struct {
+	GrantMenuIds []string `json:"grantMenuIds" binding:"dive,omitempty" example:"[\"UUID\"]"` // 个人额外授权菜单ID集合，空数组表示清空
+	DenyMenuIds  []string `json:"denyMenuIds" binding:"dive,omitempty" example:"[\"UUID\"]"`  // 个人禁止菜单ID集合，空数组表示清空
+}
+
+// MenuGrantedRoleItem 菜单收录角色项：收录了该菜单的角色（配置事实，含停用角色并携带状态）
+type MenuGrantedRoleItem struct {
+	RoleId    string  `json:"roleId" example:"UUID"`                   // 角色ID
+	RoleTitle string  `json:"roleTitle" example:"管理员"`                 // 角色名称
+	Status    int     `json:"status" example:"1"`                      // 角色状态 0=停用 1=启用
+	DataScope string  `json:"dataScope" example:"all"`                 // 数据范围
+	Remark    *string `json:"remark" example:"超级管理员"`                  // 备注
+	GrantDate *string `json:"grantDate" example:"2024-01-01 12:00:00"` // 角色收录该菜单的时间
+}
+
+// MenuGrantedUserItem 菜单收录用户项：被直接额外授权或禁止该菜单的用户
+type MenuGrantedUserItem struct {
+	UserId     string   `json:"userId" example:"UUID"`                   // 用户ID
+	Username   string   `json:"username" example:"admin"`                // 登录名
+	RealName   string   `json:"realName" example:"张三"`                   // 真实姓名
+	Status     int      `json:"status" example:"1"`                      // 用户状态 0=停用 1=启用
+	DeptTitles []string `json:"deptTitles"`                              // 部门名称数组
+	GrantDate  *string  `json:"grantDate" example:"2024-01-01 12:00:00"` // 个人权限写入时间
+}
+
+// MenuGrantedUserListRequest 菜单收录用户列表查询参数
+type MenuGrantedUserListRequest struct {
+	GrantType string `form:"grantType" binding:"required,oneof=grant deny"` // 个人权限类型 grant=额外授权 deny=禁止
+	Keyword   string `form:"keyword"`                                       // 登录名或真实姓名关键字
+	Status    *int   `form:"status"`                                        // 用户状态
+	Page      int    `form:"page"`                                          // 页码
+	PageSize  int    `form:"pageSize"`                                      // 每页大小
+}
+
 type MenuMeta struct {
 	ActiveIcon               *string `json:"activeIcon" example:"lucide:home"`         // 激活图标
 	ActivePath               *string `json:"activePath" example:"/dashboard"`          // 激活路径

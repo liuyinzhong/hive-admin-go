@@ -3633,6 +3633,61 @@ definitions:
         example: "2026-01-15 09:00:00"
         type: string
     type: object
+  models.MenuGrantedRoleItem:
+    properties:
+      dataScope:
+        description: 数据范围
+        example: all
+        type: string
+      grantDate:
+        description: 角色收录该菜单的时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      remark:
+        description: 备注
+        example: 超级管理员
+        type: string
+      roleId:
+        description: 角色ID
+        example: UUID
+        type: string
+      roleTitle:
+        description: 角色名称
+        example: 管理员
+        type: string
+      status:
+        description: 角色状态 0=停用 1=启用
+        example: 1
+        type: integer
+    type: object
+  models.MenuGrantedUserItem:
+    properties:
+      deptTitles:
+        description: 部门名称数组
+        items:
+          type: string
+        type: array
+      grantDate:
+        description: 个人权限写入时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      realName:
+        description: 真实姓名
+        example: 张三
+        type: string
+      status:
+        description: 用户状态 0=停用 1=启用
+        example: 1
+        type: integer
+      userId:
+        description: 用户ID
+        example: UUID
+        type: string
+      username:
+        description: 登录名
+        example: admin
+        type: string
+    type: object
   models.MenuMessageItem:
     properties:
       content:
@@ -6919,6 +6974,23 @@ definitions:
     - templateName
     - weekdays
     type: object
+  models.SaveUserPersonalPermissionRequest:
+    properties:
+      denyMenuIds:
+        description: 个人禁止菜单ID集合，空数组表示清空
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
+      grantMenuIds:
+        description: 个人额外授权菜单ID集合，空数组表示清空
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
+    type: object
   models.ScheduleAutoTaskFailure:
     properties:
       doctorId:
@@ -8443,6 +8515,164 @@ definitions:
     - schema
     - schemaName
     type: object
+  models.UserPermissionItem:
+    properties:
+      authCode:
+        description: 原子权限码，仅按钮节点
+        example: system:user:list
+        type: string
+      children:
+        description: 下级授权节点
+        items:
+          $ref: '#/definitions/models.UserPermissionItem'
+        type: array
+      menuId:
+        description: 菜单节点ID
+        example: UUID
+        type: string
+      path:
+        description: 路由路径，目录和按钮节点为空
+        example: /system/user
+        type: string
+      status:
+        description: 菜单状态 0=停用 1=启用
+        example: 1
+        type: integer
+      title:
+        description: 菜单标题国际化key
+        example: system.user.name
+        type: string
+      type:
+        description: 菜单类型 catalog=目录 menu=页面 embedded=内嵌页 link=链接 button=按钮
+        example: menu
+        type: string
+    type: object
+  models.UserPermissionPersonal:
+    properties:
+      deny:
+        description: 个人禁止明细树，合并时绝对优先
+        items:
+          $ref: '#/definitions/models.UserPermissionItem'
+        type: array
+      denyCount:
+        description: 个人禁止菜单节点数
+        type: integer
+      grant:
+        description: 个人额外授权明细树
+        items:
+          $ref: '#/definitions/models.UserPermissionItem'
+        type: array
+      grantCount:
+        description: 个人额外授权菜单节点数
+        type: integer
+    type: object
+  models.UserPermissionResponse:
+    properties:
+      personal:
+        allOf:
+        - $ref: '#/definitions/models.UserPermissionPersonal'
+        description: 个人权限分组，未配置个人权限时为 null
+      realName:
+        description: 真实姓名
+        example: 张三
+        type: string
+      roles:
+        description: 角色分组
+        items:
+          $ref: '#/definitions/models.UserPermissionRole'
+        type: array
+      userId:
+        description: 用户ID
+        example: UUID
+        type: string
+    type: object
+  models.UserPermissionRole:
+    properties:
+      dataScope:
+        description: 数据范围
+        example: all
+        type: string
+      permissionCount:
+        description: 角色被授权的菜单节点总数
+        example: 32
+        type: integer
+      permissions:
+        description: 菜单授权明细树
+        items:
+          $ref: '#/definitions/models.UserPermissionItem'
+        type: array
+      remark:
+        description: 备注
+        example: 超级管理员
+        type: string
+      roleId:
+        description: 角色ID
+        example: UUID
+        type: string
+      roleTitle:
+        description: 角色名称
+        example: 管理员
+        type: string
+      status:
+        description: 角色状态 0=停用 1=启用
+        example: 1
+        type: integer
+    type: object
+  models.UserPersonalPermissionResponse:
+    properties:
+      denyMenuIds:
+        description: 个人禁止菜单ID集合，合并时绝对优先
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
+      grantMenuIds:
+        description: 个人额外授权菜单ID集合
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
+      menuTree:
+        description: 可勾选的启用菜单树（含按钮）
+        items:
+          $ref: '#/definitions/models.MenuTreeResponse'
+        type: array
+      realName:
+        description: 真实姓名
+        example: 张三
+        type: string
+      userId:
+        description: 用户ID
+        example: UUID
+        type: string
+    type: object
+  models.VersionDistItem:
+    properties:
+      name:
+        type: string
+      value:
+        type: number
+    type: object
+  models.VersionProgressTrend:
+    properties:
+      bugFixed:
+        description: 当日修复缺陷数
+        items:
+          type: integer
+        type: array
+      dates:
+        description: 日期，格式 YYYY-MM-DD
+        items:
+          type: string
+        type: array
+      taskDone:
+        description: 当日完成任务数
+        items:
+          type: integer
+        type: array
+    type: object
   models.VersionResponse:
     properties:
       changeLog:
@@ -8505,6 +8735,116 @@ definitions:
         description: 版本类型
         example: "0"
         type: string
+    type: object
+  models.VersionStatisticsResponse:
+    properties:
+      bugFixerDist:
+        description: Bug修复人分布
+        items:
+          $ref: '#/definitions/models.VersionDistItem'
+        type: array
+      bugLevelDist:
+        description: Bug级别分布
+        items:
+          $ref: '#/definitions/models.VersionDistItem'
+        type: array
+      bugSourceDist:
+        description: Bug来源分布
+        items:
+          $ref: '#/definitions/models.VersionDistItem'
+        type: array
+      bugTypeDist:
+        description: Bug类型分布
+        items:
+          $ref: '#/definitions/models.VersionDistItem'
+        type: array
+      moduleDist:
+        description: 模块任务占比(按任务所属模块)
+        items:
+          $ref: '#/definitions/models.VersionDistItem'
+        type: array
+      personHoursDist:
+        description: 人员工时占比(按执行人实际工时)
+        items:
+          $ref: '#/definitions/models.VersionDistItem'
+        type: array
+      personStoryDist:
+        description: 人员需求参与(按需求参与人)
+        items:
+          $ref: '#/definitions/models.VersionDistItem'
+        type: array
+      personTaskDist:
+        description: 人员任务占比(按执行人)
+        items:
+          $ref: '#/definitions/models.VersionDistItem'
+        type: array
+      progressTrend:
+        $ref: '#/definitions/models.VersionProgressTrend'
+      storySourceDist:
+        description: 需求来源分布
+        items:
+          $ref: '#/definitions/models.VersionDistItem'
+        type: array
+      storyStatusFunnel:
+        description: 需求状态漏斗
+        items:
+          $ref: '#/definitions/models.VersionDistItem'
+        type: array
+      storyTypeDist:
+        description: 需求类型分布
+        items:
+          $ref: '#/definitions/models.VersionDistItem'
+        type: array
+      summary:
+        $ref: '#/definitions/models.VersionStatisticsSummary'
+      taskTypeDist:
+        description: 任务类型分布
+        items:
+          $ref: '#/definitions/models.VersionDistItem'
+        type: array
+      taskWorkload:
+        allOf:
+        - $ref: '#/definitions/models.VersionTaskWorkload'
+        description: 任务计划/实际工时对比
+    type: object
+  models.VersionStatisticsSummary:
+    properties:
+      bugFixed:
+        description: 已修复缺陷数(bug_status=20)
+        type: integer
+      bugTotal:
+        description: 缺陷总数
+        type: integer
+      storyDone:
+        description: 已关闭需求数(story_status=99)
+        type: integer
+      storyTotal:
+        description: 需求总数
+        type: integer
+      taskDone:
+        description: 已完成任务数(task_status=99)
+        type: integer
+      taskTotal:
+        description: 任务总数
+        type: integer
+    type: object
+  models.VersionTaskWorkload:
+    properties:
+      actualHours:
+        description: 实际工时合计
+        items:
+          type: number
+        type: array
+      categories:
+        description: 执行人姓名
+        items:
+          type: string
+        type: array
+      planHours:
+        description: 计划工时合计
+        items:
+          type: number
+        type: array
     type: object
   models.VisitQueueListItemResponse:
     properties:
@@ -12489,6 +12829,44 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 获取最新版本号
+      tags:
+      - 开发管理/版本管理
+  /dev/versions/statistics:
+    get:
+      consumes:
+      - application/json
+      description: 数据权限：角色数据范围。先按版本创建人校验版本可见，再按各工作项自身归属聚合——需求按创建人或参与人、任务按创建人或执行人、缺陷按创建人或修复人，与对应列表接口同一边界。
+      parameters:
+      - description: 版本ID
+        in: query
+        name: versionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.VersionStatisticsResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取版本统计数据
       tags:
       - 开发管理/版本管理
   /erp/inventory/balances:
@@ -21819,6 +22197,50 @@ paths:
       summary: 更新菜单
       tags:
       - 系统管理/菜单管理
+  /system/menus/{id}/roles:
+    get:
+      consumes:
+      - application/json
+      description: 获取收录了该菜单的全部未删除角色，配置事实口径，含停用角色并携带状态。数据权限：全局授权配置，不做记录级数据范围过滤（菜单与角色授权是全系统共享配置）
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.MenuGrantedRoleItem'
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取菜单收录角色
+      tags:
+      - 系统管理/菜单管理
   /system/menus/{id}/status:
     put:
       consumes:
@@ -21860,6 +22282,76 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 更新菜单状态
+      tags:
+      - 系统管理/菜单管理
+  /system/menus/{id}/users:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取被直接额外授权（grantType=grant）或禁止（grantType=deny）该菜单的普通用户，支持关键字和状态筛选。数据权限：全局授权配置，不做记录级数据范围过滤（个人权限是全系统授权配置的一部分）
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 个人权限类型 grant=额外授权 deny=禁止
+        in: query
+        name: grantType
+        required: true
+        type: string
+      - description: 登录名或真实姓名关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 用户状态
+        in: query
+        name: status
+        type: integer
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/utils.PageResult'
+                  - properties:
+                      items:
+                        items:
+                          $ref: '#/definitions/models.MenuGrantedUserItem'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取菜单收录用户
       tags:
       - 系统管理/菜单管理
   /system/menus/nameExists:
@@ -23683,6 +24175,132 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 重置用户密码
+      tags:
+      - 系统管理/用户管理
+  /system/users/{userId}/permissions:
+    get:
+      consumes:
+      - application/json
+      description: 按用户维度一次返回其全部关联角色及各自菜单授权明细。数据权限：角色数据范围，与用户详情同边界，目标用户任一启用部门在操作者范围内即可查看。明细按配置事实返回：停用角色与停用菜单照常返回并携带状态；目录节点仅作路径前缀不单独成行；多角色重复授权的权限在各角色分组内分别出现，不去重
+      parameters:
+      - description: 用户ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.UserPermissionResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户权限明细
+      tags:
+      - 系统管理/用户管理
+  /system/users/{userId}/personalPermissions:
+    get:
+      consumes:
+      - application/json
+      description: 获取目标用户的个人权限（个人额外授权与个人禁止两个菜单ID集合，只影响功能权限，不影响数据范围）。数据权限：角色数据范围，与用户详情同边界，目标用户任一启用部门在操作者范围内即可查看
+      parameters:
+      - description: 用户ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.UserPersonalPermissionResponse'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户个人权限
+      tags:
+      - 系统管理/用户管理
+    put:
+      consumes:
+      - application/json
+      description: 按提交集合完整替换目标用户的个人额外授权与个人禁止（空数组表示清空对应集合，两集合不允许交叉）。数据权限：角色数据范围，与用户详情同边界；授予和禁止都要求菜单有效且在操作者生效权限内，全部数据范围操作者豁免（防提升，镜像角色分配约束）；系统内置用户不能配置个人权限
+      parameters:
+      - description: 用户ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: 个人权限集合
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveUserPersonalPermissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 保存用户个人权限
       tags:
       - 系统管理/用户管理
   /system/users/{userId}/status:

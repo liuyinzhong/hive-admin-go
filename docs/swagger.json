@@ -5129,6 +5129,69 @@
                 }
             }
         },
+        "/dev/versions/statistics": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "数据权限：角色数据范围。先按版本创建人校验版本可见，再按各工作项自身归属聚合——需求按创建人或参与人、任务按创建人或执行人、缺陷按创建人或修复人，与对应列表接口同一边界。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "开发管理/版本管理"
+                ],
+                "summary": "获取版本统计数据",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "版本ID",
+                        "name": "versionId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.VersionStatisticsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/dev/versions/{versionId}": {
             "get": {
                 "security": [
@@ -20663,6 +20726,78 @@
                 }
             }
         },
+        "/system/menus/{id}/roles": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取收录了该菜单的全部未删除角色，配置事实口径，含停用角色并携带状态。数据权限：全局授权配置，不做记录级数据范围过滤（菜单与角色授权是全系统共享配置）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/菜单管理"
+                ],
+                "summary": "获取菜单收录角色",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "菜单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.MenuGrantedRoleItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/system/menus/{id}/status": {
             "put": {
                 "security": [
@@ -20704,6 +20839,121 @@
                         "description": "更新成功",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/menus/{id}/users": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "分页获取被直接额外授权（grantType=grant）或禁止（grantType=deny）该菜单的普通用户，支持关键字和状态筛选。数据权限：全局授权配置，不做记录级数据范围过滤（个人权限是全系统授权配置的一部分）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/菜单管理"
+                ],
+                "summary": "获取菜单收录用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "菜单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "个人权限类型 grant=额外授权 deny=禁止",
+                        "name": "grantType",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "登录名或真实姓名关键字",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用户状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/utils.PageResult"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/models.MenuGrantedUserItem"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -23540,6 +23790,208 @@
                     },
                     "400": {
                         "description": "参数错误、用户不存在或新密码不满足强度策略",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/users/{userId}/permissions": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "按用户维度一次返回其全部关联角色及各自菜单授权明细。数据权限：角色数据范围，与用户详情同边界，目标用户任一启用部门在操作者范围内即可查看。明细按配置事实返回：停用角色与停用菜单照常返回并携带状态；目录节点仅作路径前缀不单独成行；多角色重复授权的权限在各角色分组内分别出现，不去重",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/用户管理"
+                ],
+                "summary": "获取用户权限明细",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.UserPermissionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/users/{userId}/personalPermissions": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取目标用户的个人权限（个人额外授权与个人禁止两个菜单ID集合，只影响功能权限，不影响数据范围）。数据权限：角色数据范围，与用户详情同边界，目标用户任一启用部门在操作者范围内即可查看",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/用户管理"
+                ],
+                "summary": "获取用户个人权限",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.UserPersonalPermissionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "按提交集合完整替换目标用户的个人额外授权与个人禁止（空数组表示清空对应集合，两集合不允许交叉）。数据权限：角色数据范围，与用户详情同边界；授予和禁止都要求菜单有效且在操作者生效权限内，全部数据范围操作者豁免（防提升，镜像角色分配约束）；系统内置用户不能配置个人权限",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/用户管理"
+                ],
+                "summary": "保存用户个人权限",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "个人权限集合",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveUserPersonalPermissionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -30364,6 +30816,78 @@
                 }
             }
         },
+        "models.MenuGrantedRoleItem": {
+            "type": "object",
+            "properties": {
+                "dataScope": {
+                    "description": "数据范围",
+                    "type": "string",
+                    "example": "all"
+                },
+                "grantDate": {
+                    "description": "角色收录该菜单的时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "超级管理员"
+                },
+                "roleId": {
+                    "description": "角色ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "roleTitle": {
+                    "description": "角色名称",
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "status": {
+                    "description": "角色状态 0=停用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "models.MenuGrantedUserItem": {
+            "type": "object",
+            "properties": {
+                "deptTitles": {
+                    "description": "部门名称数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "grantDate": {
+                    "description": "个人权限写入时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "realName": {
+                    "description": "真实姓名",
+                    "type": "string",
+                    "example": "张三"
+                },
+                "status": {
+                    "description": "用户状态 0=停用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "username": {
+                    "description": "登录名",
+                    "type": "string",
+                    "example": "admin"
+                }
+            }
+        },
         "models.MenuMessageItem": {
             "type": "object",
             "properties": {
@@ -34732,6 +35256,31 @@
                 }
             }
         },
+        "models.SaveUserPersonalPermissionRequest": {
+            "type": "object",
+            "properties": {
+                "denyMenuIds": {
+                    "description": "个人禁止菜单ID集合，空数组表示清空",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
+                },
+                "grantMenuIds": {
+                    "description": "个人额外授权菜单ID集合，空数组表示清空",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
+                }
+            }
+        },
         "models.ScheduleAutoTaskFailure": {
             "type": "object",
             "properties": {
@@ -36755,6 +37304,226 @@
                 }
             }
         },
+        "models.UserPermissionItem": {
+            "type": "object",
+            "properties": {
+                "authCode": {
+                    "description": "原子权限码，仅按钮节点",
+                    "type": "string",
+                    "example": "system:user:list"
+                },
+                "children": {
+                    "description": "下级授权节点",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.UserPermissionItem"
+                    }
+                },
+                "menuId": {
+                    "description": "菜单节点ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "path": {
+                    "description": "路由路径，目录和按钮节点为空",
+                    "type": "string",
+                    "example": "/system/user"
+                },
+                "status": {
+                    "description": "菜单状态 0=停用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                },
+                "title": {
+                    "description": "菜单标题国际化key",
+                    "type": "string",
+                    "example": "system.user.name"
+                },
+                "type": {
+                    "description": "菜单类型 catalog=目录 menu=页面 embedded=内嵌页 link=链接 button=按钮",
+                    "type": "string",
+                    "example": "menu"
+                }
+            }
+        },
+        "models.UserPermissionPersonal": {
+            "type": "object",
+            "properties": {
+                "deny": {
+                    "description": "个人禁止明细树，合并时绝对优先",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.UserPermissionItem"
+                    }
+                },
+                "denyCount": {
+                    "description": "个人禁止菜单节点数",
+                    "type": "integer"
+                },
+                "grant": {
+                    "description": "个人额外授权明细树",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.UserPermissionItem"
+                    }
+                },
+                "grantCount": {
+                    "description": "个人额外授权菜单节点数",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.UserPermissionResponse": {
+            "type": "object",
+            "properties": {
+                "personal": {
+                    "description": "个人权限分组，未配置个人权限时为 null",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.UserPermissionPersonal"
+                        }
+                    ]
+                },
+                "realName": {
+                    "description": "真实姓名",
+                    "type": "string",
+                    "example": "张三"
+                },
+                "roles": {
+                    "description": "角色分组",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.UserPermissionRole"
+                    }
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                }
+            }
+        },
+        "models.UserPermissionRole": {
+            "type": "object",
+            "properties": {
+                "dataScope": {
+                    "description": "数据范围",
+                    "type": "string",
+                    "example": "all"
+                },
+                "permissionCount": {
+                    "description": "角色被授权的菜单节点总数",
+                    "type": "integer",
+                    "example": 32
+                },
+                "permissions": {
+                    "description": "菜单授权明细树",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.UserPermissionItem"
+                    }
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string",
+                    "example": "超级管理员"
+                },
+                "roleId": {
+                    "description": "角色ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "roleTitle": {
+                    "description": "角色名称",
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "status": {
+                    "description": "角色状态 0=停用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "models.UserPersonalPermissionResponse": {
+            "type": "object",
+            "properties": {
+                "denyMenuIds": {
+                    "description": "个人禁止菜单ID集合，合并时绝对优先",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
+                },
+                "grantMenuIds": {
+                    "description": "个人额外授权菜单ID集合",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
+                },
+                "menuTree": {
+                    "description": "可勾选的启用菜单树（含按钮）",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MenuTreeResponse"
+                    }
+                },
+                "realName": {
+                    "description": "真实姓名",
+                    "type": "string",
+                    "example": "张三"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                }
+            }
+        },
+        "models.VersionDistItem": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.VersionProgressTrend": {
+            "type": "object",
+            "properties": {
+                "bugFixed": {
+                    "description": "当日修复缺陷数",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "dates": {
+                    "description": "日期，格式 YYYY-MM-DD",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "taskDone": {
+                    "description": "当日完成任务数",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
         "models.VersionResponse": {
             "type": "object",
             "properties": {
@@ -36832,6 +37601,164 @@
                     "description": "版本类型",
                     "type": "string",
                     "example": "0"
+                }
+            }
+        },
+        "models.VersionStatisticsResponse": {
+            "type": "object",
+            "properties": {
+                "bugFixerDist": {
+                    "description": "Bug修复人分布",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.VersionDistItem"
+                    }
+                },
+                "bugLevelDist": {
+                    "description": "Bug级别分布",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.VersionDistItem"
+                    }
+                },
+                "bugSourceDist": {
+                    "description": "Bug来源分布",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.VersionDistItem"
+                    }
+                },
+                "bugTypeDist": {
+                    "description": "Bug类型分布",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.VersionDistItem"
+                    }
+                },
+                "moduleDist": {
+                    "description": "模块任务占比(按任务所属模块)",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.VersionDistItem"
+                    }
+                },
+                "personHoursDist": {
+                    "description": "人员工时占比(按执行人实际工时)",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.VersionDistItem"
+                    }
+                },
+                "personStoryDist": {
+                    "description": "人员需求参与(按需求参与人)",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.VersionDistItem"
+                    }
+                },
+                "personTaskDist": {
+                    "description": "人员任务占比(按执行人)",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.VersionDistItem"
+                    }
+                },
+                "progressTrend": {
+                    "$ref": "#/definitions/models.VersionProgressTrend"
+                },
+                "storySourceDist": {
+                    "description": "需求来源分布",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.VersionDistItem"
+                    }
+                },
+                "storyStatusFunnel": {
+                    "description": "需求状态漏斗",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.VersionDistItem"
+                    }
+                },
+                "storyTypeDist": {
+                    "description": "需求类型分布",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.VersionDistItem"
+                    }
+                },
+                "summary": {
+                    "$ref": "#/definitions/models.VersionStatisticsSummary"
+                },
+                "taskTypeDist": {
+                    "description": "任务类型分布",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.VersionDistItem"
+                    }
+                },
+                "taskWorkload": {
+                    "description": "任务计划/实际工时对比",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.VersionTaskWorkload"
+                        }
+                    ]
+                }
+            }
+        },
+        "models.VersionStatisticsSummary": {
+            "type": "object",
+            "properties": {
+                "bugFixed": {
+                    "description": "已修复缺陷数(bug_status=20)",
+                    "type": "integer"
+                },
+                "bugTotal": {
+                    "description": "缺陷总数",
+                    "type": "integer"
+                },
+                "storyDone": {
+                    "description": "已关闭需求数(story_status=99)",
+                    "type": "integer"
+                },
+                "storyTotal": {
+                    "description": "需求总数",
+                    "type": "integer"
+                },
+                "taskDone": {
+                    "description": "已完成任务数(task_status=99)",
+                    "type": "integer"
+                },
+                "taskTotal": {
+                    "description": "任务总数",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.VersionTaskWorkload": {
+            "type": "object",
+            "properties": {
+                "actualHours": {
+                    "description": "实际工时合计",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "categories": {
+                    "description": "执行人姓名",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "planHours": {
+                    "description": "计划工时合计",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
                 }
             }
         },

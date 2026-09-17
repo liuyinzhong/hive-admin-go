@@ -158,6 +158,75 @@ func (ctrl *SystemController) GetMenuDetail(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
 }
 
+// GetMenuGrantedRoles 获取菜单收录角色
+// @Summary 获取菜单收录角色
+// @Description 获取收录了该菜单的全部未删除角色，配置事实口径，含停用角色并携带状态。数据权限：全局授权配置，不做记录级数据范围过滤（菜单与角色授权是全系统共享配置）
+// @Tags 系统管理/菜单管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "菜单ID"
+// @Success 200 {object} models.Response{data=[]models.MenuGrantedRoleItem} "获取成功"
+// @Failure 400 {object} map[string]interface{} "参数错误"
+// @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /system/menus/{id}/roles [get]
+func (ctrl *SystemController) GetMenuGrantedRoles(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "菜单ID不能为空"))
+		return
+	}
+
+	result, err := ctrl.menuService.GetMenuGrantedRoles(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
+// GetMenuGrantedUsers 获取菜单收录用户
+// @Summary 获取菜单收录用户
+// @Description 分页获取被直接额外授权（grantType=grant）或禁止（grantType=deny）该菜单的普通用户，支持关键字和状态筛选。数据权限：全局授权配置，不做记录级数据范围过滤（个人权限是全系统授权配置的一部分）
+// @Tags 系统管理/菜单管理
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "菜单ID"
+// @Param grantType query string true "个人权限类型 grant=额外授权 deny=禁止"
+// @Param keyword query string false "登录名或真实姓名关键字"
+// @Param status query int false "用户状态"
+// @Param page query int false "页码"
+// @Param pageSize query int false "每页大小"
+// @Success 200 {object} models.Response{data=utils.PageResult{items=[]models.MenuGrantedUserItem}} "获取成功"
+// @Failure 400 {object} map[string]interface{} "参数错误"
+// @Failure 401 {object} map[string]interface{} "未授权"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /system/menus/{id}/users [get]
+func (ctrl *SystemController) GetMenuGrantedUsers(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "菜单ID不能为空"))
+		return
+	}
+
+	var req models.MenuGrantedUserListRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
+		return
+	}
+
+	result, err := ctrl.menuService.GetMenuGrantedUsers(id, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
 // UpdateMenu 更新菜单
 // @Summary 更新菜单
 // @Description 更新菜单信息

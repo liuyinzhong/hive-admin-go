@@ -42,6 +42,7 @@ func registerDevRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 		{
 			versions.GET("", permissionGuard.Require("dev:version:list"), devController.GetVersions)
 			versions.GET("/all", devController.GetAllVersions)
+			versions.GET("/statistics", devController.GetVersionStatistics)
 			versions.GET("/getLastVersion", permissionGuard.Require("dev:version:latest"), devController.GetLatestVersion)
 			versions.POST("", permissionGuard.Require("dev:version:create"), devController.CreateVersion)
 			versions.PUT("/:versionId/next", permissionGuard.Require("dev:version:advance"), devController.UpdateVersionNext)

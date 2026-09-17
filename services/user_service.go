@@ -281,6 +281,165 @@ func (s *UserService) GetUserDetail(userId string, permission datapermission.Per
 	return response, nil
 }
 
+// GetUserPermissions 按用户维度一次聚合返回其全部关联角色及各自菜单授权明细。
+// 数据范围边界与用户详情一致；明细按配置事实返回，停用角色与停用菜单照常返回并携带状态；
+// 目录节点不单独成行、仅作路径前缀，多角色重复授权的权限在各角色分组内分别出现，不去重。
+func (s *UserService) GetUserPermissions(userId string, permission datapermission.Permission) (*models.UserPermissionResponse, error) {
+	var user models.SysUser
+	query := database.DB.Model(&models.SysUser{}).Where("user_id = ? AND del_flag = 0 AND is_sys = 0", userId)
+	if err := permission.Apply(query, "sys_user.user_id").First(&user).Error; err != nil {
+		return nil, errors.New("用户不存在")
+	}
+
+	var userRoles []models.SysUserRole
+	if err := database.DB.Where("user_id = ? AND del_flag = 0", userId).
+		Order("create_date ASC").Find(&userRoles).Error; err != nil {
+		return nil, err
+	}
+
+	roleIds := make([]string, 0, len(userRoles))
+	for _, ur := range userRoles {
+		roleIds = append(roleIds, ur.RoleID)
+	}
+
+	roleById := make(map[string]models.SysRole, len(roleIds))
+	roleMenuIds := make(map[string]map[string]struct{}, len(roleIds))
+	if len(roleIds) > 0 {
+		var roles []models.SysRole
+		if err := database.DB.Where("role_id IN ? AND del_flag = 0", roleIds).Find(&roles).Error; err != nil {
+			return nil, err
+		}
+		for _, role := range roles {
+			roleById[role.RoleID] = role
+		}
+
+		var roleMenus []models.SysRoleMenu
+		if err := database.DB.Where("role_id IN ? AND del_flag = 0", roleIds).
+			Order("create_date ASC").Find(&roleMenus).Error; err != nil {
+			return nil, err
+		}
+		for _, rm := range roleMenus {
+			if roleMenuIds[rm.RoleID] == nil {
+				roleMenuIds[rm.RoleID] = make(map[string]struct{})
+			}
+			roleMenuIds[rm.RoleID][rm.MenuID] = struct{}{}
+		}
+	}
+
+	orderedItems, err := buildMenuNodeTree()
+	if err != nil {
+		return nil, err
+	}
+
+	granted, denied, err := loadUserMenuIDs(database.DB, user.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	result := &models.UserPermissionResponse{
+		UserId:   user.UserID,
+		RealName: utils.StringValue(user.RealName),
+		Roles:    make([]models.UserPermissionRole, 0, len(userRoles)),
+	}
+	for _, ur := range userRoles {
+		role, exists := roleById[ur.RoleID]
+		if !exists {
+			continue
+		}
+		menuIds := roleMenuIds[ur.RoleID]
+		result.Roles = append(result.Roles, models.UserPermissionRole{
+			RoleId:          role.RoleID,
+			RoleTitle:       utils.StringValue(role.RoleTitle),
+			Status:          role.Status,
+			DataScope:       role.DataScope,
+			Remark:          role.Remark,
+			PermissionCount: len(menuIds),
+			Permissions:     pruneGrantedItems(orderedItems, menuIds),
+		})
+	}
+
+	if len(granted) > 0 || len(denied) > 0 {
+		grantSet := make(map[string]struct{}, len(granted))
+		for _, id := range granted {
+			grantSet[id] = struct{}{}
+		}
+		denySet := make(map[string]struct{}, len(denied))
+		for _, id := range denied {
+			denySet[id] = struct{}{}
+		}
+		result.Personal = &models.UserPermissionPersonal{
+			Grant:      pruneGrantedItems(orderedItems, grantSet),
+			GrantCount: len(granted),
+			Deny:       pruneGrantedItems(orderedItems, denySet),
+			DenyCount:  len(denied),
+		}
+	}
+
+	return result, nil
+}
+
+// menuNode 全量菜单树节点，供按角色裁剪授权子树使用
+type menuNode struct {
+	children []menuNode
+	menu     models.SysMenu
+}
+
+// buildMenuNodeTree 按菜单树先序顺序构建全量菜单树；排序与菜单管理一致（order asc, create_date desc）。
+func buildMenuNodeTree() ([]menuNode, error) {
+	var menus []models.SysMenu
+	if err := database.DB.Where("del_flag = 0 AND type != ?", externalPageType).
+		Order("`order` asc, create_date desc").Find(&menus).Error; err != nil {
+		return nil, err
+	}
+
+	childrenByParent := make(map[string][]models.SysMenu)
+	roots := make([]models.SysMenu, 0)
+	for _, menu := range menus {
+		if menu.Pid == nil || *menu.Pid == "" {
+			roots = append(roots, menu)
+		} else {
+			childrenByParent[*menu.Pid] = append(childrenByParent[*menu.Pid], menu)
+		}
+	}
+
+	var attach func(menu models.SysMenu) menuNode
+	attach = func(menu models.SysMenu) menuNode {
+		node := menuNode{menu: menu}
+		for _, child := range childrenByParent[menu.ID] {
+			node.children = append(node.children, attach(child))
+		}
+		return node
+	}
+
+	nodes := make([]menuNode, 0, len(roots))
+	for _, root := range roots {
+		nodes = append(nodes, attach(root))
+	}
+	return nodes, nil
+}
+
+// pruneGrantedItems 裁剪出授权子树：节点自身被授权，或其下存在被授权的后代时保留；
+// 目录节点自身未被授权时仅作为层级结构节点出现。同一权限被多个角色授予时在各角色树内分别出现，不去重。
+func pruneGrantedItems(nodes []menuNode, granted map[string]struct{}) []models.UserPermissionItem {
+	items := make([]models.UserPermissionItem, 0)
+	for _, node := range nodes {
+		children := pruneGrantedItems(node.children, granted)
+		if _, selfGranted := granted[node.menu.ID]; !selfGranted && len(children) == 0 {
+			continue
+		}
+		items = append(items, models.UserPermissionItem{
+			MenuId:   node.menu.ID,
+			Title:    node.menu.Title,
+			Type:     node.menu.Type,
+			Path:     node.menu.Path,
+			AuthCode: node.menu.AuthCode,
+			Status:   node.menu.Status,
+			Children: children,
+		})
+	}
+	return items
+}
+
 func (s *UserService) UpdateUser(userId string, req models.UpdateUserRequest, permission datapermission.Permission) error {
 	return database.DB.Transaction(func(tx *gorm.DB) error {
 		if err := validateManagedDepartments(tx, req.DeptIds, permission); err != nil {
@@ -397,6 +556,10 @@ func (s *UserService) DeleteUsers(userIds []string, currentUserId string, permis
 		now := time.Now()
 		for _, user := range users {
 			if err := tx.Where("user_id = ?", user.UserID).Delete(&models.SysUserRole{}).Error; err != nil {
+				return err
+			}
+			// 个人权限随用户删除一并清理
+			if err := tx.Where("user_id = ?", user.UserID).Delete(&models.SysUserMenu{}).Error; err != nil {
 				return err
 			}
 			if err := tx.Model(&models.SysUserDept{}).
