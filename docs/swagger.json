@@ -23442,7 +23442,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "创建新用户；部门必须在当前可管理范围，受限操作者只能分配自己持有且范围不越界的角色",
+                "description": "创建新用户；部门必须在当前可管理范围，受限操作者只能分配自己持有且范围不越界的角色。可选携带个人额外授权与个人禁止两个菜单ID集合（完整写入），携带时要求操作者持有 system:user:personalPermission 权限码，防提升校验与用户更新一致",
                 "consumes": [
                     "application/json"
                 ],
@@ -23612,6 +23612,59 @@
                 }
             }
         },
+        "/system/users/personalPermissionMenuTree": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "返回可勾选的启用菜单树（含按钮），作为用户创建与编辑抽屉维护个人权限的唯一树来源；维护个人权限不要求菜单管理列表权限。数据权限：全局主数据（启用菜单树，按菜单管理配置维护），不做记录级数据权限过滤；维护资格由本接口的原子权限码约束",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/用户管理"
+                ],
+                "summary": "获取个人权限可授权菜单树",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.PersonalPermissionMenuTreeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/system/users/{userId}": {
             "get": {
                 "security": [
@@ -23619,7 +23672,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按当前角色数据范围获取用户详情；越界部门和直属领导关联不返回",
+                "description": "按当前角色数据范围获取用户详情；越界部门和直属领导关联不返回。响应在基础信息之上聚合个人额外授权与个人禁止两个菜单ID集合（不含可勾选菜单树，树由个人权限可授权菜单树接口提供），供用户编辑抽屉一次加载",
                 "consumes": [
                     "application/json"
                 ],
@@ -23651,7 +23704,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.ProfileResponse"
+                                            "$ref": "#/definitions/models.UserDetailResponse"
                                         }
                                     }
                                 }
@@ -23686,7 +23739,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "按当前角色数据范围更新用户；目标用户全部启用部门均须可管理，新的部门、角色和直属领导不得越界",
+                "description": "按当前角色数据范围更新用户；目标用户全部启用部门均须可管理，新的部门、角色和直属领导不得越界。可选携带个人额外授权与个人禁止两个菜单ID集合（nil 不修改，非 nil 按完整集合替换，两集合不允许交叉），携带时要求操作者持有 system:user:personalPermission 权限码；授予和禁止都要求菜单有效且在操作者生效权限内，全部数据范围操作者豁免（防提升）；系统内置用户不能配置个人权限",
                 "consumes": [
                     "application/json"
                 ],
@@ -23855,139 +23908,6 @@
                                     }
                                 }
                             ]
-                        }
-                    },
-                    "400": {
-                        "description": "参数错误",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "未授权",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "403": {
-                        "description": "无接口访问权限",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/system/users/{userId}/personalPermissions": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "获取目标用户的个人权限（个人额外授权与个人禁止两个菜单ID集合，只影响功能权限，不影响数据范围）。数据权限：角色数据范围，与用户详情同边界，目标用户任一启用部门在操作者范围内即可查看",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "系统管理/用户管理"
-                ],
-                "summary": "获取用户个人权限",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "用户ID",
-                        "name": "userId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "获取成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/models.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/models.UserPersonalPermissionResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "参数错误",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "未授权",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "403": {
-                        "description": "无接口访问权限",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "按提交集合完整替换目标用户的个人额外授权与个人禁止（空数组表示清空对应集合，两集合不允许交叉）。数据权限：角色数据范围，与用户详情同边界；授予和禁止都要求菜单有效且在操作者生效权限内，全部数据范围操作者豁免（防提升，镜像角色分配约束）；系统内置用户不能配置个人权限",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "系统管理/用户管理"
-                ],
-                "summary": "保存用户个人权限",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "用户ID",
-                        "name": "userId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "个人权限集合",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.SaveUserPersonalPermissionRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "保存成功",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
@@ -27500,6 +27420,16 @@
                 "username"
             ],
             "properties": {
+                "denyMenuIds": {
+                    "description": "个人禁止菜单ID集合，同上",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
+                },
                 "deptIds": {
                     "description": "部门id数组",
                     "type": "array",
@@ -27514,6 +27444,16 @@
                     "description": "描述",
                     "type": "string",
                     "example": "普通用户"
+                },
+                "grantMenuIds": {
+                    "description": "个人额外授权菜单ID集合，nil 表示不配置，非 nil 按完整集合写入（携带时要求操作者持有个人权限维护权限码）",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
                 },
                 "leaderUserId": {
                     "description": "直属上级用户ID",
@@ -31699,6 +31639,18 @@
                 }
             }
         },
+        "models.PersonalPermissionMenuTreeResponse": {
+            "type": "object",
+            "properties": {
+                "menuTree": {
+                    "description": "可勾选的启用菜单树（含按钮）",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MenuTreeResponse"
+                    }
+                }
+            }
+        },
         "models.PrescriptionResponse": {
             "type": "object",
             "properties": {
@@ -33064,6 +33016,11 @@
                     "type": "string",
                     "example": "2024-01-01 12:00:00"
                 },
+                "denyCount": {
+                    "description": "权限摘要：个人禁止菜单节点数，仅用户分页列表填充",
+                    "type": "integer",
+                    "example": 5
+                },
                 "deptIds": {
                     "description": "部门id数组",
                     "type": "array",
@@ -33087,6 +33044,11 @@
                     "description": "邮箱",
                     "type": "string",
                     "example": "admin@example.com"
+                },
+                "grantCount": {
+                    "description": "权限摘要：个人额外授权菜单节点数，仅用户分页列表填充",
+                    "type": "integer",
+                    "example": 10
                 },
                 "homePath": {
                     "description": "首页路径",
@@ -33119,6 +33081,11 @@
                     "items": {
                         "type": "string"
                     }
+                },
+                "rolePermissionCount": {
+                    "description": "权限摘要：各角色授权菜单节点数之和（多角色重复授权不去重），仅用户分页列表填充",
+                    "type": "integer",
+                    "example": 48
                 },
                 "roleTitles": {
                     "description": "角色名称数组",
@@ -33615,6 +33582,11 @@
                     "description": "数据范围",
                     "type": "string",
                     "example": "all"
+                },
+                "permissionsCount": {
+                    "description": "权限数量：角色当前配置的菜单授权节点总数（配置事实口径，不筛菜单启停）",
+                    "type": "integer",
+                    "example": 46
                 },
                 "remark": {
                     "description": "备注",
@@ -35253,31 +35225,6 @@
                     "items": {
                         "type": "integer"
                     }
-                }
-            }
-        },
-        "models.SaveUserPersonalPermissionRequest": {
-            "type": "object",
-            "properties": {
-                "denyMenuIds": {
-                    "description": "个人禁止菜单ID集合，空数组表示清空",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "[\"UUID\"]"
-                    ]
-                },
-                "grantMenuIds": {
-                    "description": "个人额外授权菜单ID集合，空数组表示清空",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "[\"UUID\"]"
-                    ]
                 }
             }
         },
@@ -37084,6 +37031,16 @@
                 "username"
             ],
             "properties": {
+                "denyMenuIds": {
+                    "description": "个人禁止菜单ID集合，同上",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
+                },
                 "deptIds": {
                     "description": "部门id数组",
                     "type": "array",
@@ -37098,6 +37055,16 @@
                     "description": "描述",
                     "type": "string",
                     "example": "普通用户"
+                },
+                "grantMenuIds": {
+                    "description": "个人额外授权菜单ID集合，nil 表示不修改，非 nil 按完整集合替换（携带时要求操作者持有个人权限维护权限码）",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
                 },
                 "leaderUserId": {
                     "description": "直属上级用户ID",
@@ -37304,6 +37271,144 @@
                 }
             }
         },
+        "models.UserDetailResponse": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "用户头像URL",
+                    "type": "string",
+                    "example": "https://xxx/avatar.jpg"
+                },
+                "createDate": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "denyCount": {
+                    "description": "权限摘要：个人禁止菜单节点数，仅用户分页列表填充",
+                    "type": "integer",
+                    "example": 5
+                },
+                "denyMenuIds": {
+                    "description": "个人禁止菜单ID集合，合并时绝对优先",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
+                },
+                "deptIds": {
+                    "description": "部门id数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "deptTitles": {
+                    "description": "部门名称数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "desc": {
+                    "description": "用户描述",
+                    "type": "string",
+                    "example": "超级管理员"
+                },
+                "email": {
+                    "description": "邮箱",
+                    "type": "string",
+                    "example": "admin@example.com"
+                },
+                "grantCount": {
+                    "description": "权限摘要：个人额外授权菜单节点数，仅用户分页列表填充",
+                    "type": "integer",
+                    "example": 10
+                },
+                "grantMenuIds": {
+                    "description": "个人额外授权菜单ID集合",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"UUID\"]"
+                    ]
+                },
+                "homePath": {
+                    "description": "首页路径",
+                    "type": "string",
+                    "example": "/dashboard/analytics"
+                },
+                "leaderUserId": {
+                    "description": "直属上级用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "leaderUserName": {
+                    "description": "直属上级用户姓名",
+                    "type": "string",
+                    "example": "张三"
+                },
+                "phone": {
+                    "description": "手机号",
+                    "type": "string",
+                    "example": "13800138000"
+                },
+                "realName": {
+                    "description": "真实姓名",
+                    "type": "string",
+                    "example": "管理员"
+                },
+                "roleIds": {
+                    "description": "角色id数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "rolePermissionCount": {
+                    "description": "权限摘要：各角色授权菜单节点数之和（多角色重复授权不去重），仅用户分页列表填充",
+                    "type": "integer",
+                    "example": 48
+                },
+                "roleTitles": {
+                    "description": "角色名称数组",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "signature": {
+                    "description": "签名图片URL",
+                    "type": "string",
+                    "example": "https://xxx/sign.png"
+                },
+                "status": {
+                    "description": "用户状态 0=禁用 1=启用",
+                    "type": "integer",
+                    "example": 1
+                },
+                "updateDate": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2024-01-01 12:00:00"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "username": {
+                    "description": "登录用户名",
+                    "type": "string",
+                    "example": "admin"
+                }
+            }
+        },
         "models.UserPermissionItem": {
             "type": "object",
             "properties": {
@@ -37442,48 +37547,6 @@
                     "description": "角色状态 0=停用 1=启用",
                     "type": "integer",
                     "example": 1
-                }
-            }
-        },
-        "models.UserPersonalPermissionResponse": {
-            "type": "object",
-            "properties": {
-                "denyMenuIds": {
-                    "description": "个人禁止菜单ID集合，合并时绝对优先",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "[\"UUID\"]"
-                    ]
-                },
-                "grantMenuIds": {
-                    "description": "个人额外授权菜单ID集合",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "[\"UUID\"]"
-                    ]
-                },
-                "menuTree": {
-                    "description": "可勾选的启用菜单树（含按钮）",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.MenuTreeResponse"
-                    }
-                },
-                "realName": {
-                    "description": "真实姓名",
-                    "type": "string",
-                    "example": "张三"
-                },
-                "userId": {
-                    "description": "用户ID",
-                    "type": "string",
-                    "example": "UUID"
                 }
             }
         },

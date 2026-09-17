@@ -68,7 +68,8 @@ Bearer Token 认证
 | `POST /api/system/messages/demo` | 角色数据范围 | 除接口权限外，每个目标用户还必须在当前用户数据范围内；整批越界则失败 |
 | `POST /api/system/upload` | 创建归属 | 元数据创建人为当前用户；实际 `/uploads/**` 访问仍是公开边界 |
 | `GET /api/system/files` | 角色数据范围 | 按文件 `creator_id` |
-| `/api/system/users/**`（含 `PUT /{userId}/password` 重置密码、`GET /{userId}/permissions` 权限明细、`GET|PUT /{userId}/personalPermissions` 个人权限） | 角色数据范围 | 按用户当前有效部门；本人范围可读取本人，管理写入另受 SYS-DATA-023/024 约束；重置密码写前在同一查询中校验目标用户可见，系统内置用户不可重置；权限明细查询与用户详情同边界，明细按配置事实返回（SYS-ACL-018）；个人权限查看与保存同详情边界，授予和禁止另要求菜单在操作者生效权限内（SYS-ACL-019） |
+| `/api/system/users/**`（含 `PUT /{userId}/password` 重置密码、`GET /{userId}/permissions` 权限明细、`GET /{userId}` 详情聚合个人权限、`POST`/`PUT /{userId}` 可选携带个人权限集合） | 角色数据范围 | 按用户当前有效部门；本人范围可读取本人，管理写入另受 SYS-DATA-023/024 约束；重置密码写前在同一查询中校验目标用户可见，系统内置用户不可重置；权限明细查询与用户详情同边界，明细按配置事实返回（SYS-ACL-018）；详情聚合与个人权限写入同详情边界，携带个人权限字段要求操作者持有 `system:user:personalPermission`，授予和禁止另要求菜单在操作者生效权限内（SYS-ACL-019） |
+| `GET /api/system/users/personalPermissionMenuTree` | 全局主数据 | 个人权限可勾选的启用菜单树，新建与编辑抽屉唯一树来源；不做记录级过滤，维护资格由 `system:user:personalPermission` 权限码约束（SYS-ACL-019） |
 | `/api/system/menus/{menuId}/roles`、`/users`（受众） | 全局授权配置 | 菜单与角色/个人授权是全系统共享配置，只读视图不做记录级过滤（SYS-ACL-028） |
 | `/api/system/operationLogs/**`、`loginLogs/**` | 角色数据范围 | 按日志 `user_id`；未认证或空用户日志仅 `all` 可见 |
 | `/api/system/roles/**` | 全局授权配置 | 列表/详情用于授权配置；角色创建、更新、启停、删除额外要求操作者为 `all` |

@@ -1178,6 +1178,13 @@ definitions:
     type: object
   models.CreateUserRequest:
     properties:
+      denyMenuIds:
+        description: 个人禁止菜单ID集合，同上
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
       deptIds:
         description: 部门id数组
         example:
@@ -1189,6 +1196,13 @@ definitions:
         description: 描述
         example: 普通用户
         type: string
+      grantMenuIds:
+        description: 个人额外授权菜单ID集合，nil 表示不配置，非 nil 按完整集合写入（携带时要求操作者持有个人权限维护权限码）
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
       leaderUserId:
         description: 直属上级用户ID
         example: UUID
@@ -4290,6 +4304,14 @@ definitions:
         example: "2026-07-31 12:00:00"
         type: string
     type: object
+  models.PersonalPermissionMenuTreeResponse:
+    properties:
+      menuTree:
+        description: 可勾选的启用菜单树（含按钮）
+        items:
+          $ref: '#/definitions/models.MenuTreeResponse'
+        type: array
+    type: object
   models.PrescriptionResponse:
     properties:
       createDate:
@@ -5340,6 +5362,10 @@ definitions:
         description: 创建时间
         example: "2024-01-01 12:00:00"
         type: string
+      denyCount:
+        description: 权限摘要：个人禁止菜单节点数，仅用户分页列表填充
+        example: 5
+        type: integer
       deptIds:
         description: 部门id数组
         items:
@@ -5358,6 +5384,10 @@ definitions:
         description: 邮箱
         example: admin@example.com
         type: string
+      grantCount:
+        description: 权限摘要：个人额外授权菜单节点数，仅用户分页列表填充
+        example: 10
+        type: integer
       homePath:
         description: 首页路径
         example: /dashboard/analytics
@@ -5383,6 +5413,10 @@ definitions:
         items:
           type: string
         type: array
+      rolePermissionCount:
+        description: 权限摘要：各角色授权菜单节点数之和（多角色重复授权不去重），仅用户分页列表填充
+        example: 48
+        type: integer
       roleTitles:
         description: 角色名称数组
         items:
@@ -5740,6 +5774,10 @@ definitions:
         description: 数据范围
         example: all
         type: string
+      permissionsCount:
+        description: 权限数量：角色当前配置的菜单授权节点总数（配置事实口径，不筛菜单启停）
+        example: 46
+        type: integer
       remark:
         description: 备注
         example: 超级管理员
@@ -6973,23 +7011,6 @@ definitions:
     - startTime
     - templateName
     - weekdays
-    type: object
-  models.SaveUserPersonalPermissionRequest:
-    properties:
-      denyMenuIds:
-        description: 个人禁止菜单ID集合，空数组表示清空
-        example:
-        - '["UUID"]'
-        items:
-          type: string
-        type: array
-      grantMenuIds:
-        description: 个人额外授权菜单ID集合，空数组表示清空
-        example:
-        - '["UUID"]'
-        items:
-          type: string
-        type: array
     type: object
   models.ScheduleAutoTaskFailure:
     properties:
@@ -8349,6 +8370,13 @@ definitions:
     type: object
   models.UpdateUserRequest:
     properties:
+      denyMenuIds:
+        description: 个人禁止菜单ID集合，同上
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
       deptIds:
         description: 部门id数组
         example:
@@ -8360,6 +8388,13 @@ definitions:
         description: 描述
         example: 普通用户
         type: string
+      grantMenuIds:
+        description: 个人额外授权菜单ID集合，nil 表示不修改，非 nil 按完整集合替换（携带时要求操作者持有个人权限维护权限码）
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
       leaderUserId:
         description: 直属上级用户ID
         example: UUID
@@ -8515,6 +8550,111 @@ definitions:
     - schema
     - schemaName
     type: object
+  models.UserDetailResponse:
+    properties:
+      avatar:
+        description: 用户头像URL
+        example: https://xxx/avatar.jpg
+        type: string
+      createDate:
+        description: 创建时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      denyCount:
+        description: 权限摘要：个人禁止菜单节点数，仅用户分页列表填充
+        example: 5
+        type: integer
+      denyMenuIds:
+        description: 个人禁止菜单ID集合，合并时绝对优先
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
+      deptIds:
+        description: 部门id数组
+        items:
+          type: string
+        type: array
+      deptTitles:
+        description: 部门名称数组
+        items:
+          type: string
+        type: array
+      desc:
+        description: 用户描述
+        example: 超级管理员
+        type: string
+      email:
+        description: 邮箱
+        example: admin@example.com
+        type: string
+      grantCount:
+        description: 权限摘要：个人额外授权菜单节点数，仅用户分页列表填充
+        example: 10
+        type: integer
+      grantMenuIds:
+        description: 个人额外授权菜单ID集合
+        example:
+        - '["UUID"]'
+        items:
+          type: string
+        type: array
+      homePath:
+        description: 首页路径
+        example: /dashboard/analytics
+        type: string
+      leaderUserId:
+        description: 直属上级用户ID
+        example: UUID
+        type: string
+      leaderUserName:
+        description: 直属上级用户姓名
+        example: 张三
+        type: string
+      phone:
+        description: 手机号
+        example: "13800138000"
+        type: string
+      realName:
+        description: 真实姓名
+        example: 管理员
+        type: string
+      roleIds:
+        description: 角色id数组
+        items:
+          type: string
+        type: array
+      rolePermissionCount:
+        description: 权限摘要：各角色授权菜单节点数之和（多角色重复授权不去重），仅用户分页列表填充
+        example: 48
+        type: integer
+      roleTitles:
+        description: 角色名称数组
+        items:
+          type: string
+        type: array
+      signature:
+        description: 签名图片URL
+        example: https://xxx/sign.png
+        type: string
+      status:
+        description: 用户状态 0=禁用 1=启用
+        example: 1
+        type: integer
+      updateDate:
+        description: 更新时间
+        example: "2024-01-01 12:00:00"
+        type: string
+      userId:
+        description: 用户ID
+        example: UUID
+        type: string
+      username:
+        description: 登录用户名
+        example: admin
+        type: string
+    type: object
   models.UserPermissionItem:
     properties:
       authCode:
@@ -8617,36 +8757,6 @@ definitions:
         description: 角色状态 0=停用 1=启用
         example: 1
         type: integer
-    type: object
-  models.UserPersonalPermissionResponse:
-    properties:
-      denyMenuIds:
-        description: 个人禁止菜单ID集合，合并时绝对优先
-        example:
-        - '["UUID"]'
-        items:
-          type: string
-        type: array
-      grantMenuIds:
-        description: 个人额外授权菜单ID集合
-        example:
-        - '["UUID"]'
-        items:
-          type: string
-        type: array
-      menuTree:
-        description: 可勾选的启用菜单树（含按钮）
-        items:
-          $ref: '#/definitions/models.MenuTreeResponse'
-        type: array
-      realName:
-        description: 真实姓名
-        example: 张三
-        type: string
-      userId:
-        description: 用户ID
-        example: UUID
-        type: string
     type: object
   models.VersionDistItem:
     properties:
@@ -24016,7 +24126,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建新用户；部门必须在当前可管理范围，受限操作者只能分配自己持有且范围不越界的角色
+      description: 创建新用户；部门必须在当前可管理范围，受限操作者只能分配自己持有且范围不越界的角色。可选携带个人额外授权与个人禁止两个菜单ID集合（完整写入），携带时要求操作者持有
+        system:user:personalPermission 权限码，防提升校验与用户更新一致
       parameters:
       - description: 用户信息
         in: body
@@ -24054,7 +24165,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 按当前角色数据范围获取用户详情；越界部门和直属领导关联不返回
+      description: 按当前角色数据范围获取用户详情；越界部门和直属领导关联不返回。响应在基础信息之上聚合个人额外授权与个人禁止两个菜单ID集合（不含可勾选菜单树，树由个人权限可授权菜单树接口提供），供用户编辑抽屉一次加载
       parameters:
       - description: 用户ID
         in: path
@@ -24071,7 +24182,7 @@ paths:
             - $ref: '#/definitions/models.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.ProfileResponse'
+                  $ref: '#/definitions/models.UserDetailResponse'
               type: object
         "400":
           description: 参数错误
@@ -24095,7 +24206,8 @@ paths:
     put:
       consumes:
       - application/json
-      description: 按当前角色数据范围更新用户；目标用户全部启用部门均须可管理，新的部门、角色和直属领导不得越界
+      description: 按当前角色数据范围更新用户；目标用户全部启用部门均须可管理，新的部门、角色和直属领导不得越界。可选携带个人额外授权与个人禁止两个菜单ID集合（nil
+        不修改，非 nil 按完整集合替换，两集合不允许交叉），携带时要求操作者持有 system:user:personalPermission 权限码；授予和禁止都要求菜单有效且在操作者生效权限内，全部数据范围操作者豁免（防提升）；系统内置用户不能配置个人权限
       parameters:
       - description: 用户ID
         in: path
@@ -24219,90 +24331,6 @@ paths:
       summary: 获取用户权限明细
       tags:
       - 系统管理/用户管理
-  /system/users/{userId}/personalPermissions:
-    get:
-      consumes:
-      - application/json
-      description: 获取目标用户的个人权限（个人额外授权与个人禁止两个菜单ID集合，只影响功能权限，不影响数据范围）。数据权限：角色数据范围，与用户详情同边界，目标用户任一启用部门在操作者范围内即可查看
-      parameters:
-      - description: 用户ID
-        in: path
-        name: userId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 获取成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/models.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.UserPersonalPermissionResponse'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 无接口访问权限
-          schema:
-            $ref: '#/definitions/models.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: 获取用户个人权限
-      tags:
-      - 系统管理/用户管理
-    put:
-      consumes:
-      - application/json
-      description: 按提交集合完整替换目标用户的个人额外授权与个人禁止（空数组表示清空对应集合，两集合不允许交叉）。数据权限：角色数据范围，与用户详情同边界；授予和禁止都要求菜单有效且在操作者生效权限内，全部数据范围操作者豁免（防提升，镜像角色分配约束）；系统内置用户不能配置个人权限
-      parameters:
-      - description: 用户ID
-        in: path
-        name: userId
-        required: true
-        type: string
-      - description: 个人权限集合
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/models.SaveUserPersonalPermissionRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 保存成功
-          schema:
-            $ref: '#/definitions/models.Response'
-        "400":
-          description: 参数错误
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: 未授权
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: 无接口访问权限
-          schema:
-            $ref: '#/definitions/models.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: 保存用户个人权限
-      tags:
-      - 系统管理/用户管理
   /system/users/{userId}/status:
     put:
       consumes:
@@ -24380,6 +24408,37 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 获取所有用户
+      tags:
+      - 系统管理/用户管理
+  /system/users/personalPermissionMenuTree:
+    get:
+      consumes:
+      - application/json
+      description: 返回可勾选的启用菜单树（含按钮），作为用户创建与编辑抽屉维护个人权限的唯一树来源；维护个人权限不要求菜单管理列表权限。数据权限：全局主数据（启用菜单树，按菜单管理配置维护），不做记录级数据权限过滤；维护资格由本接口的原子权限码约束
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.PersonalPermissionMenuTreeResponse'
+              type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取个人权限可授权菜单树
       tags:
       - 系统管理/用户管理
   /workflow/automations:

@@ -118,9 +118,72 @@ func (s *UserService) GetUserList(req models.UserListRequest, permission dataper
 		applyVisibleLeader(response, user.LeaderUserID, leaderUserNames)
 		resultItems = append(resultItems, response)
 	}
+	if err := fillPermissionSummary(resultItems); err != nil {
+		return nil, err
+	}
 
 	pageResult.Items = resultItems
 	return pageResult, nil
+}
+
+// fillPermissionSummary 为用户分页结果批量填充权限摘要计数（配置事实口径，与权限明细抽屉各分组计数一致）：
+// 角色授权节点数为各未删除角色授权数之和（多角色重复授权不去重），个人计数为额外授权与禁止的节点数。
+func fillPermissionSummary(items []*models.ProfileResponse) error {
+	userIds := make([]string, 0, len(items))
+	for _, item := range items {
+		userIds = append(userIds, item.UserId)
+	}
+	if len(userIds) == 0 {
+		return nil
+	}
+
+	var roleCounts []struct {
+		UserID string `gorm:"column:user_id"`
+		Count  int    `gorm:"column:count"`
+	}
+	if err := database.DB.Table("sys_user_role AS user_role").
+		Select("user_role.user_id, COUNT(role_menu.id) AS count").
+		Joins("JOIN sys_role AS role ON role.role_id = user_role.role_id AND role.del_flag = 0").
+		Joins("JOIN sys_role_menu AS role_menu ON role_menu.role_id = user_role.role_id AND role_menu.del_flag = 0").
+		Where("user_role.del_flag = 0 AND user_role.user_id IN ?", userIds).
+		Group("user_role.user_id").
+		Scan(&roleCounts).Error; err != nil {
+		return err
+	}
+
+	var personalCounts []struct {
+		UserID    string `gorm:"column:user_id"`
+		GrantType string `gorm:"column:grant_type"`
+		Count     int    `gorm:"column:count"`
+	}
+	if err := database.DB.Model(&models.SysUserMenu{}).
+		Select("user_id, grant_type, COUNT(*) AS count").
+		Where("user_id IN ? AND del_flag = 0", userIds).
+		Group("user_id, grant_type").
+		Scan(&personalCounts).Error; err != nil {
+		return err
+	}
+
+	rolePermissionCounts := make(map[string]int, len(roleCounts))
+	for _, item := range roleCounts {
+		rolePermissionCounts[item.UserID] = item.Count
+	}
+	grantCounts := make(map[string]int, len(personalCounts))
+	denyCounts := make(map[string]int, len(personalCounts))
+	for _, item := range personalCounts {
+		switch item.GrantType {
+		case grantTypeGrant:
+			grantCounts[item.UserID] = item.Count
+		case grantTypeDeny:
+			denyCounts[item.UserID] = item.Count
+		}
+	}
+	for _, item := range items {
+		item.RolePermissionCount = rolePermissionCounts[item.UserId]
+		item.GrantCount = grantCounts[item.UserId]
+		item.DenyCount = denyCounts[item.UserId]
+	}
+	return nil
 }
 
 func (s *UserService) getLeaderUserNames(users []models.SysUser, permission datapermission.Permission) (map[string]*string, error) {
@@ -258,11 +321,16 @@ func (s *UserService) CreateUser(req models.CreateUserRequest, permission datape
 		if err := s.saveUserRoles(tx, user.UserID, req.RoleIds); err != nil {
 			return err
 		}
-		return s.saveUserDepts(tx, user.UserID, req.DeptIds)
+		if err := s.saveUserDepts(tx, user.UserID, req.DeptIds); err != nil {
+			return err
+		}
+		return applyPersonalPermissionUpdate(tx, user.UserID, req.GrantMenuIds, req.DenyMenuIds, permission)
 	})
 }
 
-func (s *UserService) GetUserDetail(userId string, permission datapermission.Permission) (*models.ProfileResponse, error) {
+// GetUserDetail 返回用户管理详情：基础信息之上聚合个人权限两个菜单ID集合，供用户编辑抽屉一次加载；
+// 越界部门和直属领导关联不返回。
+func (s *UserService) GetUserDetail(userId string, permission datapermission.Permission) (*models.UserDetailResponse, error) {
 	var user models.SysUser
 	query := database.DB.Model(&models.SysUser{}).Where("user_id = ? AND del_flag = 0 AND is_sys = 0", userId)
 	err := permission.Apply(query, "sys_user.user_id").First(&user).Error
@@ -272,13 +340,22 @@ func (s *UserService) GetUserDetail(userId string, permission datapermission.Per
 
 	roleTitles, roleIds := s.getUserRoles(user.UserID)
 	deptTitles, deptIds := s.getUserDepts(user.UserID, permission)
-	response := models.SysUserToProfileResponse(user, roleTitles, roleIds, deptTitles, deptIds)
+	profile := models.SysUserToProfileResponse(user, roleTitles, roleIds, deptTitles, deptIds)
 	leaderUserNames, err := s.getLeaderUserNames([]models.SysUser{user}, permission)
 	if err != nil {
 		return nil, err
 	}
-	applyVisibleLeader(response, user.LeaderUserID, leaderUserNames)
-	return response, nil
+	applyVisibleLeader(profile, user.LeaderUserID, leaderUserNames)
+
+	granted, denied, err := loadUserMenuIDs(database.DB, user.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return &models.UserDetailResponse{
+		ProfileResponse: *profile,
+		GrantMenuIds:    granted,
+		DenyMenuIds:     denied,
+	}, nil
 }
 
 // GetUserPermissions 按用户维度一次聚合返回其全部关联角色及各自菜单授权明细。
@@ -486,7 +563,10 @@ func (s *UserService) UpdateUser(userId string, req models.UpdateUserRequest, pe
 		if err := s.saveUserRoles(tx, user.UserID, req.RoleIds); err != nil {
 			return err
 		}
-		return s.saveUserDepts(tx, user.UserID, req.DeptIds)
+		if err := s.saveUserDepts(tx, user.UserID, req.DeptIds); err != nil {
+			return err
+		}
+		return applyPersonalPermissionUpdate(tx, user.UserID, req.GrantMenuIds, req.DenyMenuIds, permission)
 	})
 }
 

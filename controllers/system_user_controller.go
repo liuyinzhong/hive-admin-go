@@ -68,7 +68,7 @@ func (ctrl *SystemController) GetAllUsers(c *gin.Context) {
 
 // CreateUser 创建用户
 // @Summary 创建用户
-// @Description 创建新用户；部门必须在当前可管理范围，受限操作者只能分配自己持有且范围不越界的角色
+// @Description 创建新用户；部门必须在当前可管理范围，受限操作者只能分配自己持有且范围不越界的角色。可选携带个人额外授权与个人禁止两个菜单ID集合（完整写入），携带时要求操作者持有 system:user:personalPermission 权限码，防提升校验与用户更新一致
 // @Tags 系统管理/用户管理
 // @Accept json
 // @Produce json
@@ -96,13 +96,13 @@ func (ctrl *SystemController) CreateUser(c *gin.Context) {
 
 // GetUserDetail 获取用户详情
 // @Summary 获取用户详情
-// @Description 按当前角色数据范围获取用户详情；越界部门和直属领导关联不返回
+// @Description 按当前角色数据范围获取用户详情；越界部门和直属领导关联不返回。响应在基础信息之上聚合个人额外授权与个人禁止两个菜单ID集合（不含可勾选菜单树，树由个人权限可授权菜单树接口提供），供用户编辑抽屉一次加载
 // @Tags 系统管理/用户管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param userId path string true "用户ID"
-// @Success 200 {object} models.Response{data=models.ProfileResponse} "获取成功"
+// @Success 200 {object} models.Response{data=models.UserDetailResponse} "获取成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Failure 403 {object} models.Response "无接口访问权限"
@@ -152,27 +152,19 @@ func (ctrl *SystemController) GetUserPermissions(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
 }
 
-// GetUserPersonalPermissions 获取用户个人权限
-// @Summary 获取用户个人权限
-// @Description 获取目标用户的个人权限（个人额外授权与个人禁止两个菜单ID集合，只影响功能权限，不影响数据范围）。数据权限：角色数据范围，与用户详情同边界，目标用户任一启用部门在操作者范围内即可查看
+// GetUserPersonalPermissionMenuTree 获取个人权限可授权菜单树
+// @Summary 获取个人权限可授权菜单树
+// @Description 返回可勾选的启用菜单树（含按钮），作为用户创建与编辑抽屉维护个人权限的唯一树来源；维护个人权限不要求菜单管理列表权限。数据权限：全局主数据（启用菜单树，按菜单管理配置维护），不做记录级数据权限过滤；维护资格由本接口的原子权限码约束
 // @Tags 系统管理/用户管理
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param userId path string true "用户ID"
-// @Success 200 {object} models.Response{data=models.UserPersonalPermissionResponse} "获取成功"
-// @Failure 400 {object} map[string]interface{} "参数错误"
+// @Success 200 {object} models.Response{data=models.PersonalPermissionMenuTreeResponse} "获取成功"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Failure 403 {object} models.Response "无接口访问权限"
-// @Router /system/users/{userId}/personalPermissions [get]
-func (ctrl *SystemController) GetUserPersonalPermissions(c *gin.Context) {
-	userId := c.Param("userId")
-	if userId == "" {
-		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "用户ID不能为空"))
-		return
-	}
-
-	result, err := ctrl.userMenuService.GetPersonalPermissions(userId, currentDataPermission(c))
+// @Router /system/users/personalPermissionMenuTree [get]
+func (ctrl *SystemController) GetUserPersonalPermissionMenuTree(c *gin.Context) {
+	result, err := ctrl.userMenuService.GetPersonalPermissionMenuTree()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
 		return
@@ -181,44 +173,9 @@ func (ctrl *SystemController) GetUserPersonalPermissions(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
 }
 
-// SaveUserPersonalPermissions 保存用户个人权限
-// @Summary 保存用户个人权限
-// @Description 按提交集合完整替换目标用户的个人额外授权与个人禁止（空数组表示清空对应集合，两集合不允许交叉）。数据权限：角色数据范围，与用户详情同边界；授予和禁止都要求菜单有效且在操作者生效权限内，全部数据范围操作者豁免（防提升，镜像角色分配约束）；系统内置用户不能配置个人权限
-// @Tags 系统管理/用户管理
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Param userId path string true "用户ID"
-// @Param request body models.SaveUserPersonalPermissionRequest true "个人权限集合"
-// @Success 200 {object} models.Response "保存成功"
-// @Failure 400 {object} map[string]interface{} "参数错误"
-// @Failure 401 {object} map[string]interface{} "未授权"
-// @Failure 403 {object} models.Response "无接口访问权限"
-// @Router /system/users/{userId}/personalPermissions [put]
-func (ctrl *SystemController) SaveUserPersonalPermissions(c *gin.Context) {
-	userId := c.Param("userId")
-	if userId == "" {
-		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "用户ID不能为空"))
-		return
-	}
-
-	var req models.SaveUserPersonalPermissionRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.NewErrorResponse(err, "参数错误"))
-		return
-	}
-
-	if err := ctrl.userMenuService.SavePersonalPermissions(userId, req, currentDataPermission(c)); err != nil {
-		c.JSON(http.StatusInternalServerError, models.NewErrorResponse(err, err.Error()))
-		return
-	}
-
-	c.JSON(http.StatusOK, models.NewSuccessResponse(nil))
-}
-
 // UpdateUser 更新用户
 // @Summary 更新用户
-// @Description 按当前角色数据范围更新用户；目标用户全部启用部门均须可管理，新的部门、角色和直属领导不得越界
+// @Description 按当前角色数据范围更新用户；目标用户全部启用部门均须可管理，新的部门、角色和直属领导不得越界。可选携带个人额外授权与个人禁止两个菜单ID集合（nil 不修改，非 nil 按完整集合替换，两集合不允许交叉），携带时要求操作者持有 system:user:personalPermission 权限码；授予和禁止都要求菜单有效且在操作者生效权限内，全部数据范围操作者豁免（防提升）；系统内置用户不能配置个人权限
 // @Tags 系统管理/用户管理
 // @Accept json
 // @Produce json

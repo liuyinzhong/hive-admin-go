@@ -57,6 +57,10 @@ func (s *RoleService) GetRoleList(req models.RoleListRequest) (*utils.PageResult
 	if err != nil {
 		return nil, err
 	}
+	permissionCounts, err := getRolePermissionCounts(roleIDs)
+	if err != nil {
+		return nil, err
+	}
 
 	items := make([]*models.RoleSimpleResponse, 0, len(roles))
 	for _, role := range roles {
@@ -65,12 +69,13 @@ func (s *RoleService) GetRoleList(req models.RoleListRequest) (*utils.PageResult
 			roleTitle = *role.RoleTitle
 		}
 		items = append(items, &models.RoleSimpleResponse{
-			RoleId:    role.RoleID,
-			RoleTitle: roleTitle,
-			Remark:    role.Remark,
-			DataScope: role.DataScope,
-			Status:    role.Status,
-			UserCount: userCounts[role.RoleID],
+			RoleId:           role.RoleID,
+			RoleTitle:        roleTitle,
+			Remark:           role.Remark,
+			DataScope:        role.DataScope,
+			Status:           role.Status,
+			UserCount:        userCounts[role.RoleID],
+			PermissionsCount: permissionCounts[role.RoleID],
 		})
 	}
 	pageResult.Items = items
@@ -102,9 +107,43 @@ func getRoleUserCounts(roleIDs []string) (map[string]int, error) {
 	return result, nil
 }
 
+// getRolePermissionCounts 批量统计角色的权限数量：角色当前配置的菜单授权节点总数（配置事实口径，不筛菜单启停）。
+func getRolePermissionCounts(roleIDs []string) (map[string]int, error) {
+	result := make(map[string]int)
+	if len(roleIDs) == 0 {
+		return result, nil
+	}
+
+	var counts []struct {
+		RoleID string `gorm:"column:role_id"`
+		Count  int    `gorm:"column:count"`
+	}
+	err := database.DB.Model(&models.SysRoleMenu{}).
+		Select("role_id, COUNT(*) AS count").
+		Where("role_id IN ? AND del_flag = 0", roleIDs).
+		Group("role_id").
+		Scan(&counts).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range counts {
+		result[item.RoleID] = item.Count
+	}
+	return result, nil
+}
+
 func (s *RoleService) GetAllRoles() ([]*models.RoleSimpleResponse, error) {
 	var roles []models.SysRole
 	if err := database.DB.Where("del_flag = 0 AND status = 1").Order("create_date desc").Find(&roles).Error; err != nil {
+		return nil, err
+	}
+
+	roleIDs := make([]string, 0, len(roles))
+	for _, role := range roles {
+		roleIDs = append(roleIDs, role.RoleID)
+	}
+	permissionCounts, err := getRolePermissionCounts(roleIDs)
+	if err != nil {
 		return nil, err
 	}
 
@@ -115,11 +154,12 @@ func (s *RoleService) GetAllRoles() ([]*models.RoleSimpleResponse, error) {
 			roleTitle = *role.RoleTitle
 		}
 		responses = append(responses, &models.RoleSimpleResponse{
-			RoleId:    role.RoleID,
-			RoleTitle: roleTitle,
-			Remark:    role.Remark,
-			DataScope: role.DataScope,
-			Status:    role.Status,
+			RoleId:           role.RoleID,
+			RoleTitle:        roleTitle,
+			Remark:           role.Remark,
+			DataScope:        role.DataScope,
+			Status:           role.Status,
+			PermissionsCount: permissionCounts[role.RoleID],
 		})
 	}
 

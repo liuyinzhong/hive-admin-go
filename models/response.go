@@ -38,24 +38,39 @@ type LoginResponse struct {
 }
 
 type ProfileResponse struct {
-	UserId         string   `json:"userId" example:"UUID"`                    // 用户ID
-	Avatar         *string  `json:"avatar" example:"https://xxx/avatar.jpg"`  // 用户头像URL
-	Username       string   `json:"username" example:"admin"`                 // 登录用户名
-	RealName       string   `json:"realName" example:"管理员"`                   // 真实姓名
-	Phone          *string  `json:"phone" example:"13800138000"`              // 手机号
-	RoleTitles     []string `json:"roleTitles"`                               // 角色名称数组
-	RoleIds        []string `json:"roleIds"`                                  // 角色id数组
-	Desc           *string  `json:"desc" example:"超级管理员"`                     // 用户描述
-	Email          *string  `json:"email" example:"admin@example.com"`        // 邮箱
-	Signature      *string  `json:"signature" example:"https://xxx/sign.png"` // 签名图片URL
-	HomePath       *string  `json:"homePath" example:"/dashboard/analytics"`  // 首页路径
-	LeaderUserId   *string  `json:"leaderUserId" example:"UUID"`              // 直属上级用户ID
-	LeaderUserName *string  `json:"leaderUserName" example:"张三"`              // 直属上级用户姓名
-	DeptTitles     []string `json:"deptTitles"`                               // 部门名称数组
-	DeptIds        []string `json:"deptIds"`                                  // 部门id数组
-	Status         int      `json:"status" example:"1"`                       // 用户状态 0=禁用 1=启用
-	CreateDate     *string  `json:"createDate" example:"2024-01-01 12:00:00"` // 创建时间
-	UpdateDate     *string  `json:"updateDate" example:"2024-01-01 12:00:00"` // 更新时间
+	UserId              string   `json:"userId" example:"UUID"`                    // 用户ID
+	Avatar              *string  `json:"avatar" example:"https://xxx/avatar.jpg"`  // 用户头像URL
+	Username            string   `json:"username" example:"admin"`                 // 登录用户名
+	RealName            string   `json:"realName" example:"管理员"`                   // 真实姓名
+	Phone               *string  `json:"phone" example:"13800138000"`              // 手机号
+	RoleTitles          []string `json:"roleTitles"`                               // 角色名称数组
+	RoleIds             []string `json:"roleIds"`                                  // 角色id数组
+	Desc                *string  `json:"desc" example:"超级管理员"`                     // 用户描述
+	Email               *string  `json:"email" example:"admin@example.com"`        // 邮箱
+	Signature           *string  `json:"signature" example:"https://xxx/sign.png"` // 签名图片URL
+	HomePath            *string  `json:"homePath" example:"/dashboard/analytics"`  // 首页路径
+	LeaderUserId        *string  `json:"leaderUserId" example:"UUID"`              // 直属上级用户ID
+	LeaderUserName      *string  `json:"leaderUserName" example:"张三"`              // 直属上级用户姓名
+	DeptTitles          []string `json:"deptTitles"`                               // 部门名称数组
+	DeptIds             []string `json:"deptIds"`                                  // 部门id数组
+	Status              int      `json:"status" example:"1"`                       // 用户状态 0=禁用 1=启用
+	CreateDate          *string  `json:"createDate" example:"2024-01-01 12:00:00"` // 创建时间
+	UpdateDate          *string  `json:"updateDate" example:"2024-01-01 12:00:00"` // 更新时间
+	RolePermissionCount int      `json:"rolePermissionCount" example:"48"`         // 权限摘要：各角色授权菜单节点数之和（多角色重复授权不去重），仅用户分页列表填充
+	GrantCount          int      `json:"grantCount" example:"10"`                  // 权限摘要：个人额外授权菜单节点数，仅用户分页列表填充
+	DenyCount           int      `json:"denyCount" example:"5"`                    // 权限摘要：个人禁止菜单节点数，仅用户分页列表填充
+}
+
+// UserDetailResponse 用户管理详情：在用户基础信息之上聚合个人权限两个菜单ID集合，供用户编辑抽屉一次加载
+type UserDetailResponse struct {
+	ProfileResponse
+	GrantMenuIds []string `json:"grantMenuIds" example:"[\"UUID\"]"` // 个人额外授权菜单ID集合
+	DenyMenuIds  []string `json:"denyMenuIds" example:"[\"UUID\"]"`  // 个人禁止菜单ID集合，合并时绝对优先
+}
+
+// PersonalPermissionMenuTreeResponse 个人权限可授权菜单树：用户新建与编辑抽屉共用的唯一树来源
+type PersonalPermissionMenuTreeResponse struct {
+	MenuTree []*MenuTreeResponse `json:"menuTree"` // 可勾选的启用菜单树（含按钮）
 }
 
 // UpdateProfileRequest 当前用户更新个人资料请求：字段为 nil 表示不修改，空字符串表示清空
@@ -101,22 +116,6 @@ type UserPermissionItem struct {
 	AuthCode *string              `json:"authCode" example:"system:user:list"` // 原子权限码，仅按钮节点
 	Status   int                  `json:"status" example:"1"`                  // 菜单状态 0=停用 1=启用
 	Children []UserPermissionItem `json:"children"`                            // 下级授权节点
-}
-
-// UserPersonalPermissionResponse 用户个人权限：额外授权与禁止两个菜单ID集合（数据范围不受影响）；
-// 同时返回供勾选的启用菜单树，避免维护个人权限还要求菜单管理列表权限
-type UserPersonalPermissionResponse struct {
-	UserId       string              `json:"userId" example:"UUID"`             // 用户ID
-	RealName     string              `json:"realName" example:"张三"`             // 真实姓名
-	GrantMenuIds []string            `json:"grantMenuIds" example:"[\"UUID\"]"` // 个人额外授权菜单ID集合
-	DenyMenuIds  []string            `json:"denyMenuIds" example:"[\"UUID\"]"`  // 个人禁止菜单ID集合，合并时绝对优先
-	MenuTree     []*MenuTreeResponse `json:"menuTree"`                          // 可勾选的启用菜单树（含按钮）
-}
-
-// SaveUserPersonalPermissionRequest 保存用户个人权限请求：两个集合均按提交内容完整替换
-type SaveUserPersonalPermissionRequest struct {
-	GrantMenuIds []string `json:"grantMenuIds" binding:"dive,omitempty" example:"[\"UUID\"]"` // 个人额外授权菜单ID集合，空数组表示清空
-	DenyMenuIds  []string `json:"denyMenuIds" binding:"dive,omitempty" example:"[\"UUID\"]"`  // 个人禁止菜单ID集合，空数组表示清空
 }
 
 // MenuGrantedRoleItem 菜单收录角色项：收录了该菜单的角色（配置事实，含停用角色并携带状态）
@@ -214,24 +213,28 @@ type FileListRequest struct {
 }
 
 type CreateUserRequest struct {
-	Username     string   `json:"username" binding:"required" example:"newuser"`               // 登录用户名
-	RealName     string   `json:"realName" binding:"required" example:"新用户"`                   // 真实姓名
-	Password     string   `json:"password" binding:"required,min=8,max=72" example:"Xy9876ab"` // 密码，至少 8 位且含字母、数字、特殊字符中的两类
-	Phone        *string  `json:"phone" example:"13800138000"`                                 // 手机号
-	Desc         *string  `json:"desc" example:"普通用户"`                                         // 描述
-	DeptIds      []string `json:"deptIds" example:"[\"UUID\"]"`                                // 部门id数组
-	RoleIds      []string `json:"roleIds" example:"[\"UUID\"]"`                                // 角色id数组
-	LeaderUserId *string  `json:"leaderUserId" example:"UUID"`                                 // 直属上级用户ID
+	Username     string    `json:"username" binding:"required" example:"newuser"`               // 登录用户名
+	RealName     string    `json:"realName" binding:"required" example:"新用户"`                   // 真实姓名
+	Password     string    `json:"password" binding:"required,min=8,max=72" example:"Xy9876ab"` // 密码，至少 8 位且含字母、数字、特殊字符中的两类
+	Phone        *string   `json:"phone" example:"13800138000"`                                 // 手机号
+	Desc         *string   `json:"desc" example:"普通用户"`                                         // 描述
+	DeptIds      []string  `json:"deptIds" example:"[\"UUID\"]"`                                // 部门id数组
+	RoleIds      []string  `json:"roleIds" example:"[\"UUID\"]"`                                // 角色id数组
+	LeaderUserId *string   `json:"leaderUserId" example:"UUID"`                                 // 直属上级用户ID
+	GrantMenuIds *[]string `json:"grantMenuIds" example:"[\"UUID\"]"`                           // 个人额外授权菜单ID集合，nil 表示不配置，非 nil 按完整集合写入（携带时要求操作者持有个人权限维护权限码）
+	DenyMenuIds  *[]string `json:"denyMenuIds" example:"[\"UUID\"]"`                            // 个人禁止菜单ID集合，同上
 }
 
 type UpdateUserRequest struct {
-	Username     string   `json:"username" binding:"required" example:"newuser"` // 登录用户名
-	RealName     string   `json:"realName" binding:"required" example:"新用户"`     // 真实姓名
-	Phone        *string  `json:"phone" example:"13800138000"`                   // 手机号
-	Desc         *string  `json:"desc" example:"普通用户"`                           // 描述
-	DeptIds      []string `json:"deptIds" example:"[\"UUID\"]"`                  // 部门id数组
-	RoleIds      []string `json:"roleIds" example:"[\"UUID\"]"`                  // 角色id数组
-	LeaderUserId *string  `json:"leaderUserId" example:"UUID"`                   // 直属上级用户ID
+	Username     string    `json:"username" binding:"required" example:"newuser"` // 登录用户名
+	RealName     string    `json:"realName" binding:"required" example:"新用户"`     // 真实姓名
+	Phone        *string   `json:"phone" example:"13800138000"`                   // 手机号
+	Desc         *string   `json:"desc" example:"普通用户"`                           // 描述
+	DeptIds      []string  `json:"deptIds" example:"[\"UUID\"]"`                  // 部门id数组
+	RoleIds      []string  `json:"roleIds" example:"[\"UUID\"]"`                  // 角色id数组
+	LeaderUserId *string   `json:"leaderUserId" example:"UUID"`                   // 直属上级用户ID
+	GrantMenuIds *[]string `json:"grantMenuIds" example:"[\"UUID\"]"`             // 个人额外授权菜单ID集合，nil 表示不修改，非 nil 按完整集合替换（携带时要求操作者持有个人权限维护权限码）
+	DenyMenuIds  *[]string `json:"denyMenuIds" example:"[\"UUID\"]"`              // 个人禁止菜单ID集合，同上
 }
 
 type UpdateUserStatusRequest struct {
@@ -309,12 +312,13 @@ type RoleDetailResponse struct {
 }
 
 type RoleSimpleResponse struct {
-	RoleId    string  `json:"roleId" example:"UUID"`          // 角色ID
-	RoleTitle string  `json:"roleTitle" example:"SuperAdmin"` // 角色名称
-	Remark    *string `json:"remark" example:"超级管理员"`         // 备注
-	DataScope string  `json:"dataScope" example:"all"`        // 数据范围
-	Status    int     `json:"status" example:"1"`             // 状态 0=禁用 1=启用
-	UserCount int     `json:"userCount" example:"10"`         // 角色用户数量（仅角色分页列表填充，全量接口恒为 0）
+	RoleId           string  `json:"roleId" example:"UUID"`          // 角色ID
+	RoleTitle        string  `json:"roleTitle" example:"SuperAdmin"` // 角色名称
+	Remark           *string `json:"remark" example:"超级管理员"`         // 备注
+	DataScope        string  `json:"dataScope" example:"all"`        // 数据范围
+	Status           int     `json:"status" example:"1"`             // 状态 0=禁用 1=启用
+	UserCount        int     `json:"userCount" example:"10"`         // 角色用户数量（仅角色分页列表填充，全量接口恒为 0）
+	PermissionsCount int     `json:"permissionsCount" example:"46"`  // 权限数量：角色当前配置的菜单授权节点总数（配置事实口径，不筛菜单启停）
 }
 
 type RoleUserListRequest struct {

@@ -65,11 +65,10 @@ func registerSystemRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 		{
 			users.GET("", permissionGuard.Require("system:user:list"), systemController.GetUserList)
 			users.GET("/all", systemController.GetAllUsers)
+			users.GET("/personalPermissionMenuTree", permissionGuard.Require("system:user:personalPermission"), systemController.GetUserPersonalPermissionMenuTree)
 			users.POST("", permissionGuard.Require("system:user:create"), systemController.CreateUser)
 			users.GET("/:userId", permissionGuard.Require("system:user:detail"), systemController.GetUserDetail)
 			users.GET("/:userId/permissions", permissionGuard.Require("system:user:permission"), systemController.GetUserPermissions)
-			users.GET("/:userId/personalPermissions", permissionGuard.Require("system:user:permission"), systemController.GetUserPersonalPermissions)
-			users.PUT("/:userId/personalPermissions", permissionGuard.Require("system:user:personalPermission"), systemController.SaveUserPersonalPermissions)
 			users.PUT("/:userId", permissionGuard.Require("system:user:update"), systemController.UpdateUser)
 			users.PUT("/:userId/password", permissionGuard.Require("system:user:resetPassword"), systemController.ResetUserPassword)
 			users.PUT("/:userId/status", permissionGuard.Require("system:user:status"), systemController.UpdateUserStatus)

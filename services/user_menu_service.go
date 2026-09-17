@@ -69,91 +69,83 @@ func menuIDSetToSlice(menuIDSet map[string]struct{}) []string {
 	return menuIDs
 }
 
-// GetPersonalPermissions 查询用户个人权限的两个菜单ID集合，并同时返回供勾选的启用菜单树；
-// 数据范围边界与用户详情一致。菜单树随本接口返回，维护个人权限不要求菜单管理列表权限。
-func (s *UserMenuService) GetPersonalPermissions(userId string, permission datapermission.Permission) (*models.UserPersonalPermissionResponse, error) {
-	user, err := loadManagedUser(database.DB, userId, permission)
-	if err != nil {
-		return nil, err
-	}
-
-	granted, denied, err := loadUserMenuIDs(database.DB, user.UserID)
-	if err != nil {
-		return nil, err
-	}
-
+// GetPersonalPermissionMenuTree 返回个人权限可勾选的启用菜单树（含按钮），
+// 是用户新建与编辑抽屉的唯一树来源，维护个人权限不要求菜单管理列表权限。
+func (s *UserMenuService) GetPersonalPermissionMenuTree() (*models.PersonalPermissionMenuTreeResponse, error) {
 	status := 1
 	menuTree, err := s.menuService.GetMenuTree(models.MenuListRequest{Status: &status, HasButton: 1})
 	if err != nil {
 		return nil, err
 	}
-
-	return &models.UserPersonalPermissionResponse{
-		UserId:       user.UserID,
-		RealName:     utils.StringValue(user.RealName),
-		GrantMenuIds: granted,
-		DenyMenuIds:  denied,
-		MenuTree:     menuTree,
-	}, nil
+	return &models.PersonalPermissionMenuTreeResponse{MenuTree: menuTree}, nil
 }
 
-// SavePersonalPermissions 按提交集合完整替换用户个人权限；授予和禁止都要求菜单有效且操作者持有
-// （全部数据范围操作者豁免，镜像角色分配的防提升约束）。系统内置用户不能配置个人权限。
-func (s *UserMenuService) SavePersonalPermissions(userId string, req models.SaveUserPersonalPermissionRequest, permission datapermission.Permission) error {
-	return database.DB.Transaction(func(tx *gorm.DB) error {
-		user, err := loadManagedUser(tx, userId, permission)
-		if err != nil {
-			return err
-		}
+// replaceUserPersonalPermissions 在既有事务内按提交集合完整替换用户个人权限；授予和禁止都要求
+// 菜单有效且操作者持有（全部数据范围操作者豁免，镜像角色分配的防提升约束）。
+// 调用方须先确认目标用户存在且非系统内置用户（UpdateUser 的 is_sys=0 锁定查询、CreateUser 固定 is_sys=0），
+// 并完成个人权限维护权限码校验。
+func replaceUserPersonalPermissions(tx *gorm.DB, userId string, grants, denies []string, permission datapermission.Permission) error {
+	grants = uniqueNonEmptyStrings(grants)
+	denies = uniqueNonEmptyStrings(denies)
 
-		grants := uniqueNonEmptyStrings(req.GrantMenuIds)
-		denies := uniqueNonEmptyStrings(req.DenyMenuIds)
-
-		grantSet := make(map[string]struct{}, len(grants))
-		for _, id := range grants {
-			grantSet[id] = struct{}{}
-		}
-		for _, id := range denies {
-			if _, exists := grantSet[id]; exists {
-				return errors.New("同一菜单不能同时额外授权和禁止")
-			}
-		}
-
-		menuIDs := append(append([]string{}, grants...), denies...)
-		if err := validateExistingMenus(tx, menuIDs); err != nil {
-			return err
-		}
-		if err := validateOperableMenus(tx, menuIDs, permission); err != nil {
-			return err
-		}
-
-		if err := tx.Where("user_id = ?", user.UserID).Delete(&models.SysUserMenu{}).Error; err != nil {
-			return err
-		}
-
-		now := time.Now()
-		for _, menuID := range grants {
-			if err := createUserMenu(tx, user.UserID, menuID, grantTypeGrant, now); err != nil {
-				return err
-			}
-		}
-		for _, menuID := range denies {
-			if err := createUserMenu(tx, user.UserID, menuID, grantTypeDeny, now); err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-}
-
-// loadManagedUser 按用户详情同边界加载目标用户：角色数据范围过滤且排除系统内置用户。
-func loadManagedUser(tx *gorm.DB, userId string, permission datapermission.Permission) (*models.SysUser, error) {
-	var user models.SysUser
-	query := tx.Model(&models.SysUser{}).Where("user_id = ? AND del_flag = 0 AND is_sys = 0", userId)
-	if err := permission.Apply(query, "sys_user.user_id").First(&user).Error; err != nil {
-		return nil, errors.New("用户不存在")
+	grantSet := make(map[string]struct{}, len(grants))
+	for _, id := range grants {
+		grantSet[id] = struct{}{}
 	}
-	return &user, nil
+	for _, id := range denies {
+		if _, exists := grantSet[id]; exists {
+			return errors.New("同一菜单不能同时额外授权和禁止")
+		}
+	}
+
+	menuIDs := append(append([]string{}, grants...), denies...)
+	if err := validateExistingMenus(tx, menuIDs); err != nil {
+		return err
+	}
+	if err := validateOperableMenus(tx, menuIDs, permission); err != nil {
+		return err
+	}
+
+	if err := tx.Where("user_id = ?", userId).Delete(&models.SysUserMenu{}).Error; err != nil {
+		return err
+	}
+
+	now := time.Now()
+	for _, menuID := range grants {
+		if err := createUserMenu(tx, userId, menuID, grantTypeGrant, now); err != nil {
+			return err
+		}
+	}
+	for _, menuID := range denies {
+		if err := createUserMenu(tx, userId, menuID, grantTypeDeny, now); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// applyPersonalPermissionUpdate 在创建/更新用户事务内处理个人权限字段：
+// 任一集合非 nil 即要求操作者持有 system:user:personalPermission 权限码，
+// nil 的集合保持原值不变，非 nil 的集合按完整替换语义写入。
+func applyPersonalPermissionUpdate(tx *gorm.DB, userId string, grantMenuIds, denyMenuIds *[]string, permission datapermission.Permission) error {
+	if grantMenuIds == nil && denyMenuIds == nil {
+		return nil
+	}
+	if permission.UserID == "" || !NewPermissionService().HasCode(permission.UserID, "system:user:personalPermission") {
+		return errors.New("无个人权限维护权限")
+	}
+
+	granted, denied, err := loadUserMenuIDs(tx, userId)
+	if err != nil {
+		return err
+	}
+	if grantMenuIds != nil {
+		granted = *grantMenuIds
+	}
+	if denyMenuIds != nil {
+		denied = *denyMenuIds
+	}
+	return replaceUserPersonalPermissions(tx, userId, granted, denied, permission)
 }
 
 func loadUserMenuIDs(tx *gorm.DB, userId string) (granted, denied []string, err error) {
