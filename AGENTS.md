@@ -80,44 +80,26 @@
 - 交付总结必须说明修改了哪些业务文档；若没有修改，必须说明核对结果和不需要修改的原因。
 - 业务文档未同步时，不得声称功能完整交付。
 
-### ERP 业务文档
+### 领域业务文档
 
-处理 `erp_*` Router、Controller、Service、Model/DTO、迁移或 Swagger 前，必须按以下顺序阅读：
+领域分派与阅读顺序由 `business-docs/README.md` 的「固定阅读顺序」和「业务域总览」表统一承载，`CONTEXT-MAP.md` 维护领域入口与跨领域关系，各领域 `CONTEXT.md` 只定义词汇、`README.md` 承载规则正文。改动任一领域前必须先按该顺序读取，再读当前 Router、Controller、Service、Model/DTO 与前端对应实现。
 
-1. `CONTEXT-MAP.md`。
-2. `business-docs/erp/CONTEXT.md`。
-3. `business-docs/erp/README.md`。
-4. `business-docs/erp` 下当前子模块规则。
-5. 当前 Router、Controller、Service、Model/DTO，以及前端对应 API 和页面。
-
-`business-docs/erp` 是 ERP 新任务的业务文档入口；根目录 `CONTEXT.md` 中仍有待逐步迁移的历史 ERP 内容。代码、Swagger 与业务文档不一致时，必须列出差异和影响，不得静默选择。ERP 术语、状态、业务前置条件、库存副作用或权限变化时，在同一次修改中同步对应文档；不要把实现细节继续追加到领域词汇文件。
-
-### 产品与医疗业务文档
-
-处理 `product_*` 前，按 `CONTEXT-MAP.md` → `business-docs/product/CONTEXT.md` → `business-docs/product/README.md` → 当前子模块规则 → 当前代码与前端实现的顺序阅读。
-
-处理任一医疗模块前，按 `CONTEXT-MAP.md` → `business-docs/medical/CONTEXT.md` → `business-docs/medical/README.md` → 当前模块规则 → 前端对应 UI 文档 → 当前代码的顺序阅读。
-
-产品档案，以及科室、医生、患者、诊断、挂号费、排班、挂号候诊、接诊和处方审核的术语、状态、前置条件、价格或号源副作用、权限及前端入口变化时，必须在同一次修改中同步对应业务文档。不要把新的实现细节追加到领域词汇文件。
-
-### 系统管理业务文档
-
-处理 auth、user、role、dept、menu、permission、dict、param、file、audit、external_page、pay_channel、menu_message、download_task、导出器或相关路由前，按 `CONTEXT-MAP.md` → `business-docs/system/CONTEXT.md` → `business-docs/system/README.md` → 当前模块规则 → 前端对应 UI 文档 → 当前代码的顺序阅读。
-
-系统管理各子模块不能互相套用规则。修改登录授权、动态菜单、字典参数、敏感配置、审计、消息持久化、事件类型、任务状态、导出上限、文件保留、清理规则、来源导出器或权限时，必须在同一次修改中同步系统业务文档；涉及其它来源领域时还要同步其文档。
+- ERP 新任务的入口是 `business-docs/erp`；根目录 `CONTEXT.md` 中仍有待逐步迁移的历史 ERP 内容。
+- 产品、医疗、系统管理各子模块规则互不套用，尤其登录授权、动态菜单、字典参数、敏感配置、审计、消息持久化、事件类型、任务状态、导出上限、文件保留、清理规则和来源导出器。
+- 术语、状态、业务前置条件、价格或号源副作用、库存副作用、权限及前端入口变化时，必须在同一次修改中同步对应业务文档；不要把实现细节追加到领域词汇文件。
 
 ## 技能自动调用
 
-工程技能为全局安装（见工作区根 `AGENTS.md` 的技能路由），遵循工作区根 `AGENTS.md` 的通用技能路由。任务与技能说明匹配时，无需用户点名，必须先阅读对应 `SKILL.md` 再使用。
+工程技能全局安装，通用规则见工作区根 `AGENTS.md` 的“技能调用与路由”一节；本节只列后端技术栈的定制路由。任务与技能说明匹配时无需用户点名，先阅读对应 `SKILL.md` 再使用。
 
-- 新增或修改 Router、Controller、Service、Model/DTO 时，使用 `implement`；默认不因小型功能或缺陷修复主动新增 `_test.go` 等测试文件。只有用户明确要求、已有测试文件需要同步维护，或改动高风险且已先说明必要性时，才组合使用 `tdd` 并新增或修改测试文件。
-- 接口异常、事务问题、GORM 查询错误、性能回退或偶发失败的根因不明时，使用 `diagnosing-bugs`，先建立不启动服务、不连接生产环境的最小反馈命令。
-- 设计分层、事务边界、查询接口、公共 Service 或适配器时，使用 `codebase-design`，并继续遵守 Router -> Controller -> Service/Model 的依赖方向。
-- 前后端字段、DTO、数据库模型、枚举或业务术语存在歧义时，使用 `domain-modeling`；需要集中澄清并沉淀文档时组合 `grilling` 与 `grill-with-docs`。
-- 只有纯业务状态或算法问题需要可运行实验时才使用 `prototype`；原型不得连接生产数据库、执行迁移或触发 Apifox 同步。
-- 完成有实质代码变更的实现后使用 `code-review`，重点核对分层、统一响应、参数校验、事务、权限、SQL 安全、Swagger 和前后端契约。
-- 只有用户明确要求规格、任务拆分或架构巡检时，才使用 `to-spec`、`to-tickets`、`improve-codebase-architecture`；不得自动向外部工单系统发布内容。
-- 技能不能作为修改认证授权、数据库结构、公共响应、配置加载、依赖或生成文档流程的默认授权。
+- 新增或修改 Router、Controller、Service、Model/DTO：`implement`；默认不因小型功能或缺陷修复主动新增 `_test.go`。只有用户明确要求、已有测试需同步维护，或改动高风险且已先说明必要性时，才并用 `tdd`。
+- 接口异常、事务问题、GORM 查询错误、性能回退或偶发失败且根因不明：`diagnosing-bugs`，先建立不启动服务、不连接生产环境的最小反馈命令。
+- 设计分层、事务边界、查询接口、公共 Service 或适配器：`codebase-design`，继续遵守 Router → Controller → Service/Model 的依赖方向。
+- 前后端字段、DTO、数据库模型、枚举或业务术语有歧义：`domain-modeling`；需集中澄清并沉淀文档时组合 `grilling` 与 `grill-with-docs`。
+- 纯业务状态或算法问题需要可运行实验：`prototype`；原型不得连接生产数据库、执行迁移或触发 Apifox 同步。
+- 有实质代码变更的实现完成后：`code-review`，重点核对分层、统一响应、参数校验、事务、权限、SQL 安全、Swagger 和前后端契约。
+- 只有用户明确要求规格、任务拆分或架构巡检时才用 `to-spec`、`to-tickets`、`improve-codebase-architecture`；不得自动向外部工单系统发布内容。
+- 技能不构成修改认证授权、数据库结构、公共响应、配置加载、依赖或生成文档流程的授权。
 
 ## 分层与依赖
 
@@ -225,19 +207,11 @@ Middleware -> 认证及基础设施
 - 表、字段、类型、索引和批量数据变更必须说明兼容性、数据风险及回滚方案。
 - 未经明确授权不执行迁移、不批量修改数据、不使用自动迁移代替正式迁移脚本。
 - 前后端类型、Model、查询和 Swagger 必须与数据库变更同步。
-- 禁止自动在数据库中创建备份库、备份表、影子表或复制表，包括但不限于 `*_backup_*`、`*_bak_*`、`CREATE DATABASE`、`CREATE TABLE ... AS SELECT`、`CREATE TABLE ... LIKE` 后复制数据等形式。
-- 即使涉及迁移、批量修复、菜单权限调整、排查或回滚准备，也不得代替用户创建数据库备份对象。
-- 如确需备份，只能提示用户手动创建备份，并在用户明确确认备份已完成后继续后续工作。
 
 ## 临时文件与迁移 SQL
 
-- 运行任务、验证方案或排查问题时产生的一般临时文件（含临时查询、验证 SQL、测试 SQL、执行输出、导入导出样例等一次性内容），统一放到仓库根目录的 `temp/` 目录下；目录不存在时先创建。一般临时文件确需长期保留为正式源码或测试用例时，仍须经用户确认后放入对应业务目录。
-- 迁移 SQL 统一放在仓库根目录的 `migrations/` 目录下，按环境和分支组织，不使用 `sql_cache/` 目录；dev 和 prod 的脚本文件名统一沿用 `20260813_03_data_permission_owner_backfill_up.sql` 这种 `日期_序号_描述_up/down.sql` 命名格式。
-- 开发环境的迁移草稿、回滚草稿和数据修复草稿，放入 `migrations/dev/<分支名>/` 下，按 `YYYYMMDD_NN_描述_up.sql` 与 `YYYYMMDD_NN_描述_down.sql` 成对命名；序号 `NN` 在同一天内从 `01` 递增，描述用小写英文单词和下划线概括变更主题。例如分支 `perf-2.43.0-09月优化与修复` 的一对迁移文件为 `migrations/dev/perf-2.43.0-09月优化与修复/20260914_01_add_erp_order_table_up.sql` 与 `20260914_01_add_erp_order_table_down.sql`。目录或文件不存在时先创建。
-- 分支名在仓库内通过 `git branch --show-current` 获取；分支名中如出现 `/` 等路径分隔字符，先替换为 `-`；无法确定分支名时（例如 detached HEAD），先说明情况并与用户确认命名。
-- 每个变更主题独立一对文件，不同主题不得混入同一文件；同一天多个主题按序号新增文件，未发布的草稿可直接修改完善自身文件，不回写其它文件。
-- 默认只生成和更新 `migrations/dev/` 下的文件。`migrations/prod/` 下是该分支面向生产的汇总迁移，不再保留独立的一个个脚本：成对生成 `<分支名>_up.sql` 和 `<分支名>_down.sql`，例如 `migrations/prod/perf-2.43.0-09月优化与修复_up.sql` 与 `perf-2.43.0-09月优化与修复_down.sql`。`_up.sql` 由 dev 下该分支全部 `_up.sql` 按文件名（日期、序号）升序合并而成，`_down.sql` 由对应 `_down.sql` 按倒序（后执行的变更先回滚）合并而成；只在版本发布、用户明确说明生成到 prod 时才创建，平时不得提前生成或改动。
-- 生成 prod 汇总文件时，必须在交付说明中标明用途、兼容性和回滚方式。
+- 运行任务、验证方案或排查问题时产生的一般临时文件（含临时查询、验证/测试 SQL、执行输出、导入导出样例等一次性内容），统一放到仓库根目录 `temp/`（目录不存在时先创建）；确需长期保留为正式源码或测试用例时，仍须经用户确认后放入对应业务目录。
+- 迁移 SQL 统一放在仓库根目录 `migrations/` 下。命名格式、分支目录、dev/prod 组织方式与合并规则见 `migrations/AGENTS.md`。
 - `migrations/` 根目录存量 `*_up.sql`、`*_down.sql` 为已发布的历史迁移，不因本规则移动、删除或改名；本规则只约束今后新增迁移 SQL 的位置。
 
 ## 时间
@@ -263,37 +237,11 @@ Middleware -> 认证及基础设施
 
 ## 短时 token 与临时凭证
 
-凡是需要"已登录用户把资源临时暴露给非登录方"或"敏感操作需要短期可验证凭证"的场景，统一使用 `utils.SignShortLivedToken` 和 `utils.ParseShortLivedToken`，不要在每个 Service 里复制 `jwt.NewWithClaims` + `SignedString` 或 `jwt.ParseWithClaims` 的样板代码。
+凡是需要“已登录用户把资源临时暴露给非登录方”或“敏感操作需要短期可验证凭证”的场景，统一使用 `utils.SignShortLivedToken` 与 `utils.ParseShortLivedToken`，不得在 Service 里复制 `jwt.NewWithClaims` + `SignedString` 或 `jwt.ParseWithClaims` 样板代码。适用场景、使用方式、现有实现见 `utils/AGENTS.md`。
 
-### 适用场景
+强制安全边界：**调用方必须**在 payload 中锁定资源标识（如 `taskId+userId`）并在取资源时复用对应业务校验，保证 token 泄露后只能访问签发时锁定的那一个资源；有效期按业务最小化（文件预览 1~5 分钟、邮件验证 15~30 分钟、回调签名 5 分钟内）；payload 不得包含密码、密钥、完整 Authorization Header、连接串或文件绝对路径；公开取资源接口放在 `/api/public/` 下，不挂 `AuthMiddleware`，只验签名与时效，不返回与签发资源无关的字段。
 
-- 私有文件预览/下载授权给外部服务（如 kkFileView 取文件、PDF.js 渲染）。
-- 邮箱验证、密码重置链接（payload 含 userId + 用途标记，有效期 15~30 分钟）。
-- 跨服务调用临时凭证（避免传递长期密钥）。
-- 回调 URL 签名（含时间戳防重放）。
-- 敏感操作二次确认 token（如批量删除、转账）。
-
-### 使用方式
-
-1. 调用方定义自己的 `Claims` 结构体，嵌入 `jwt.RegisteredClaims`，自行设置 `ExpiresAt`、`IssuedAt`、`Issuer` 和业务字段。
-2. 签发：`signed, err := utils.SignShortLivedToken(claims)`，复用项目 JWT 密钥，无需额外配置。
-3. 校验：`claims := &MyClaims{}; err := utils.ParseShortLivedToken(tokenString, claims)`，解析成功后由调用方做业务校验。
-4. 公开取资源接口放在 `/api/public/` 下，不挂 `AuthMiddleware`；公开接口只验 token 签名和时效，不验证调用方身份。
-
-### 安全边界（强制）
-
-- token 在有效期内可被任何持有者重放使用，**调用方必须**在 payload 中锁定资源标识（如 `taskId+userId`），并在取资源时复用对应的业务校验（如 `creator_id` 校验），确保 token 泄露后只能访问签发时锁定的那一个资源。
-- 有效期按业务最小化原则设置：文件预览 1~5 分钟、邮件验证 15~30 分钟、回调签名 5 分钟内。
-- 需要真正一次性失效时由调用方自行引入数据库存储（如 `sys_*_token` 表加 `used` 字段），公共方法不承担一次性语义。
-- token payload 不得包含密码、密钥、完整 Authorization Header、连接串或文件绝对路径；只放资源标识和用途标记。
-- 公开取资源接口不得返回与签发资源无关的字段，不得顺带返回用户 Token 或其它敏感信息。
-- 业务错误统一返回 `models.NewErrorResponse()`，token 无效/过期统一映射为业务错误码，不暴露 JWT 内部错误细节。
-
-### 现有实现
-
-- 下载中心预览：`services/download_task_service.go` 的 `GeneratePreviewURL` / `GetPreviewFile`，`DownloadPreviewClaims` 含 `taskId+userId`，有效期 5 分钟，公开路由 `/api/public/downloads/preview/:token`。详见 `business-docs/system/download-center.md`。
-
-新增场景必须复用本节公共方法，不得在 Service 中重复实现 JWT 签发/解析样板；并在交付说明中列出 token payload 字段、有效期、公开路由和业务校验依据。
+新增场景必须复用该公共方法，不得在 Service 中重复实现 JWT 签发/解析样板；并在交付说明中列出 token payload 字段、有效期、公开路由和业务校验依据。
 
 ## 数据权限
 
@@ -385,23 +333,10 @@ go build ./...
 
 不要为了验证启动服务、连接生产数据库、执行迁移或同步 Apifox。命令因环境或存量问题失败时，应说明失败位置及其与当前修改的关系。
 
-## 完成检查
+## 完成检查与交付
 
-- 是否保持 Router、Controller、Service、Model 分层。
-- 是否复用了已有实现并保持统一响应。
-- 是否正确处理参数、错误、事务、权限和敏感信息。
-- 每条受保护路由是否硬编码独占且符合规范的权限码，公共路由是否明确未注册权限中间件。
-- 路由权限码是否已在交付说明中列出对应的独立按钮节点配置清单，按钮的建议层级、`name`、`title`、`auth_code` 是否符合约定，且迁移 SQL 未自动写入菜单权限数据。
-- 是否存在 SQL 注入、N+1、循环查询或无上限查询。
-- 是否同步 Swagger、前端 API 和数据库脚本。
-- 是否按“业务文档一致性规则”同步 `CONTEXT-MAP.md`、后端业务正文、前端 UI 文档和就近 `AGENTS.md`，或明确核对后无需修改。
-- 是否执行了必要验证，是否影响其它模块和接口。
+完成检查：是否保持 Router、Controller、Service、Model 分层；是否复用已有实现并保持统一响应；是否正确处理参数、错误、事务、权限和敏感信息；每条受保护路由是否硬编码独占且符合规范的权限码，公共路由是否明确未注册权限中间件；是否存在 SQL 注入、N+1、循环查询或无上限查询；是否同步 Swagger、前端 API 和数据库脚本；是否按“业务文档一致性规则”同步 `CONTEXT-MAP.md`、后端业务正文、前端 UI 文档和就近 `AGENTS.md`（或明确核对后无需修改）；是否执行了必要验证，是否影响其它模块和接口。
 
-## 交付时的手动配置清单
-
-- 任务完成后，必须列出需要手动配置的数据。
-- 按钮权限必须使用三列表格：`标题`、`国际化`、`权限码`。
-- 菜单权限必须列出六项：`类型`、`标题`、`名称`、`路径`、`组件`、`图标`。
-- 其它需要手动调整的数据逐项使用列表或表格列出；没有其它数据时明确写“无”。
+交付时必须列出需要手动配置的数据：按钮权限用三列表格 `标题`／`国际化`／`权限码`；菜单权限列出六项 `类型`／`标题`／`名称`／`路径`／`组件`／`图标`，并说明按钮的建议层级、`name`、`title`、`auth_code` 是否符合约定、且迁移 SQL 未自动写入菜单权限数据；其它需手动调整的数据逐项用列表或表格列出，没有时明确写“无”。
 
 最终代码应保持一致的架构、命名、接口、数据库和错误处理风格，优先稳定性、正确性和可维护性。
