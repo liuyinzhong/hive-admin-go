@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"hive-admin-go/config"
 	"hive-admin-go/database"
-	projectDocs "hive-admin-go/docs"
 	"hive-admin-go/router"
 	"hive-admin-go/services"
+	projectDocs "hive-admin-go/swagger-dist"
 	"hive-admin-go/utils"
 	"io"
 	"log"
@@ -169,14 +169,14 @@ func syncToApify() {
 }
 
 func loadLatestSwaggerDoc() (string, error) {
-	data, err := os.ReadFile(filepath.Clean("docs/swagger.json"))
+	data, err := os.ReadFile(filepath.Clean("swagger-dist/swagger.json"))
 	if err == nil {
 		return string(data), nil
 	}
 
 	doc := projectDocs.SwaggerInfo.ReadDoc()
 	if strings.TrimSpace(doc) == "" {
-		return "", fmt.Errorf("Swagger 文档为空，且读取 docs/swagger.json 失败: %w", err)
+		return "", fmt.Errorf("Swagger 文档为空，且读取 swagger-dist/swagger.json 失败: %w", err)
 	}
 
 	return doc, nil
@@ -184,7 +184,7 @@ func loadLatestSwaggerDoc() (string, error) {
 
 // autoGenerateSwagger 自动生成 Swagger 文档
 func autoGenerateSwagger() {
-	swaggerDir := "docs"
+	swaggerDir := "swagger-dist"
 	docsFile := filepath.Join(swaggerDir, "docs.go")
 
 	_, err := os.Stat(docsFile)
@@ -218,8 +218,8 @@ func autoGenerateSwagger() {
 
 func generateSwagger() bool {
 	commands := [][]string{
-		{"swag", "init"},
-		{"C:\\Users\\Admin\\go\\bin\\swag.exe", "init"},
+		{"swag", "init", "--output", "swagger-dist"},
+		{"C:\\Users\\Admin\\go\\bin\\swag.exe", "init", "--output", "swagger-dist"},
 	}
 
 	var lastErr error
@@ -236,7 +236,7 @@ func generateSwagger() bool {
 	}
 
 	log.Printf("❌ 自动生成 Swagger 文档失败: %v", lastErr)
-	log.Println("💡 提示: 请手动运行 'swag init' 或 '& \"C:\\Users\\Admin\\go\\bin\\swag.exe\" init'")
+	log.Println("💡 提示: 请手动运行 'swag init --output swagger-dist' 或 '& \"C:\\Users\\Admin\\go\\bin\\swag.exe\" init --output swagger-dist'")
 	return false
 }
 

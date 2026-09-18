@@ -76,6 +76,6 @@ flowchart LR
 - Controller：`controllers/erp_*_controller.go`。
 - Model/DTO：`models/erp_*.go`。
 - Service：`services/erp_*_service.go`。
-- Swagger：`docs/swagger.yaml`、`docs/swagger.json`，均为生成文件。
+- Swagger：`swagger-dist/swagger.yaml`、`swagger-dist/swagger.json`，均为生成文件。
 - 前端页面：`hive/apps/web-antdv-next/src/views/erp`。
 - 前端 API：`hive/apps/web-antdv-next/src/api/erp`。
