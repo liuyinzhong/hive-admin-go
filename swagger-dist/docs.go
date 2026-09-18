@@ -2457,7 +2457,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "未携带 changeId 时创建新的变更记录或评论，写入前校验对应需求、任务、缺陷或版本的当前访问范围；携带 changeId 时编辑本人已有评论（changeBehavior=30），仅创建人本人可编辑，只更新正文为最新内容，不追加变更记录、不保留编辑历史",
+                "description": "未携带 changeId 时创建新的变更记录或评论；携带 changeId 时编辑本人已有评论（changeBehavior=30），仅创建人本人可编辑，只更新正文为最新内容，不追加变更记录、不保留编辑历史。数据权限：来源对象继承，按评论所属需求、任务、缺陷或版本父对象校验；编辑分支在父对象范围之外另要求当前用户为评论创建人本人（当前用户归属）",
                 "consumes": [
                     "application/json"
                 ],

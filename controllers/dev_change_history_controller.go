@@ -39,7 +39,7 @@ func (dc *DevController) GetChangeHistory(c *gin.Context) {
 
 // CreateChangeHistory 创建变更记录（评论）/ 编辑本人评论
 // @Summary 创建变更记录或编辑评论
-// @Description 未携带 changeId 时创建新的变更记录或评论，写入前校验对应需求、任务、缺陷或版本的当前访问范围；携带 changeId 时编辑本人已有评论（changeBehavior=30），仅创建人本人可编辑，只更新正文为最新内容，不追加变更记录、不保留编辑历史
+// @Description 未携带 changeId 时创建新的变更记录或评论；携带 changeId 时编辑本人已有评论（changeBehavior=30），仅创建人本人可编辑，只更新正文为最新内容，不追加变更记录、不保留编辑历史。数据权限：来源对象继承，按评论所属需求、任务、缺陷或版本父对象校验；编辑分支在父对象范围之外另要求当前用户为评论创建人本人（当前用户归属）
 // @Tags 开发管理/变更记录
 // @Accept json
 // @Produce json
@@ -54,6 +54,17 @@ func (dc *DevController) CreateChangeHistory(c *gin.Context) {
 	var req models.CreateChangeHistoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
+		return
+	}
+	// 同一接口按 changeId 区分新建/编辑:编辑仅需 changeId 与正文,新建必填业务定位字段;
+	// 必填校验留在控制器,使缺参返回 400 而非业务错误
+	if req.ChangeID == "" {
+		if req.BusinessID == "" || req.BusinessType == "" || req.ChangeBehavior == "" {
+			c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "参数错误"))
+			return
+		}
+	} else if req.ChangeRichText == "" {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, "评论内容不能为空"))
 		return
 	}
 

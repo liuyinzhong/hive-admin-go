@@ -20,10 +20,6 @@ func CreateChangeHistory(req *models.CreateChangeHistoryRequest, creatorID strin
 	if req.ChangeID != "" {
 		return updateChangeComment(req.ChangeID, req.ChangeRichText, creatorID, permission)
 	}
-	// 新建分支必填校验(编辑分支不需要这些字段,故不在请求结构体上用 binding:required)
-	if req.BusinessID == "" || req.BusinessType == "" || req.ChangeBehavior == "" {
-		return fmt.Errorf("参数错误")
-	}
 
 	changeID := uuid.New().String()
 	now := time.Now()
@@ -66,9 +62,6 @@ const changeBehaviorComment = 30
 // updateChangeComment 编辑评论:仅评论类型(changeBehavior=30)且创建人本人可编辑,
 // 只更新正文为最新内容,不追加新的变更记录,不保留编辑历史。访问范围继承评论所属业务对象。
 func updateChangeComment(changeID string, changeRichText string, userID string, permission datapermission.Permission) error {
-	if changeRichText == "" {
-		return fmt.Errorf("评论内容不能为空")
-	}
 	var history models.DevChangeHistory
 	if err := database.DB.Where("change_id = ?", changeID).First(&history).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
