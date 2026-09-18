@@ -98,7 +98,7 @@
 - 前后端字段、DTO、数据库模型、枚举或业务术语有歧义：`domain-modeling`；需集中澄清并沉淀文档时组合 `grilling` 与 `grill-with-docs`。
 - 纯业务状态或算法问题需要可运行实验：`prototype`；原型不得连接生产数据库、执行迁移或触发 Apifox 同步。
 - 有实质代码变更的实现完成后：`code-review`，重点核对分层、统一响应、参数校验、事务、权限、SQL 安全、Swagger 和前后端契约。
-- 只有用户明确要求规格、任务拆分或架构巡检时才用 `to-spec`、`to-tickets`、`improve-codebase-architecture`；不得自动向外部工单系统发布内容。
+- 新需求按工作区根 `AGENTS.md` 的「需求开发流程」执行时，推导完成后用 `to-spec` 沉淀方案、`to-tickets` 拆分任务；该流程之外的架构巡检或独立规格仍需用户明确要求才用 `to-spec`、`to-tickets`、`improve-codebase-architecture`；不得自动向外部工单系统发布内容。
 - 技能不构成修改认证授权、数据库结构、公共响应、配置加载、依赖或生成文档流程的授权。
 
 ## 分层与依赖
