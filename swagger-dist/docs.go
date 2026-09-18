@@ -2457,7 +2457,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "未携带 changeId 时创建新的变更记录或评论；携带 changeId 时编辑本人已有评论（changeBehavior=30），仅创建人本人可编辑，只更新正文为最新内容，不追加变更记录、不保留编辑历史。数据权限：来源对象继承，按评论所属需求、任务、缺陷或版本父对象校验；编辑分支在父对象范围之外另要求当前用户为评论创建人本人（当前用户归属）",
+                "description": "创建新的变更记录或评论；写入前校验对应需求、任务、缺陷或版本的当前访问范围。数据权限：来源对象继承，按所属需求、任务、缺陷或版本父对象校验",
                 "consumes": [
                     "application/json"
                 ],
@@ -2467,10 +2467,10 @@ const docTemplate = `{
                 "tags": [
                     "开发管理/变更记录"
                 ],
-                "summary": "创建变更记录或编辑评论",
+                "summary": "创建变更记录",
                 "parameters": [
                     {
-                        "description": "变更记录信息；编辑评论时仅需 changeId 与 changeRichText",
+                        "description": "变更记录信息",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -2481,7 +2481,73 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "创建/编辑成功",
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/dev/changeHistory/{changeId}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "编辑已有评论（changeBehavior=30），仅创建人本人可编辑，只更新正文为最新内容，不追加变更记录、不保留编辑历史。数据权限：来源对象继承，按评论所属需求、任务、缺陷或版本父对象校验，并要求当前用户为评论创建人本人（当前用户归属）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "开发管理/变更记录"
+                ],
+                "summary": "编辑评论",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "变更记录ID",
+                        "name": "changeId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "评论最新内容",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateChangeHistoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "编辑成功",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
@@ -26567,29 +26633,29 @@ const docTemplate = `{
         },
         "models.CreateChangeHistoryRequest": {
             "type": "object",
+            "required": [
+                "businessId",
+                "businessType",
+                "changeBehavior"
+            ],
             "properties": {
                 "businessId": {
-                    "description": "业务ID(新建必填)",
+                    "description": "业务ID",
                     "type": "string",
                     "example": "UUID"
                 },
                 "businessType": {
-                    "description": "业务类型(新建必填)",
+                    "description": "业务类型",
                     "type": "string",
                     "example": "0"
                 },
                 "changeBehavior": {
-                    "description": "变更行为(新建必填)",
+                    "description": "变更行为",
                     "type": "string",
                     "example": "0"
                 },
-                "changeId": {
-                    "description": "变更记录ID(编辑本人评论时携带;为空表示新建)",
-                    "type": "string",
-                    "example": "UUID"
-                },
                 "changeRichText": {
-                    "description": "变更详情/评论内容(富文本);携带 changeId 时为评论最新内容",
+                    "description": "变更详情(富文本)",
                     "type": "string",
                     "example": "\u003cp\u003e变更详情\u003c/p\u003e"
                 }
@@ -36177,6 +36243,19 @@ const docTemplate = `{
                     "description": "关联版本ID",
                     "type": "string",
                     "example": "UUID"
+                }
+            }
+        },
+        "models.UpdateChangeHistoryRequest": {
+            "type": "object",
+            "required": [
+                "changeRichText"
+            ],
+            "properties": {
+                "changeRichText": {
+                    "description": "评论内容(富文本)",
+                    "type": "string",
+                    "example": "\u003cp\u003e评论内容\u003c/p\u003e"
                 }
             }
         },

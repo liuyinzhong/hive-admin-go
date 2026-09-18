@@ -16,11 +16,6 @@ import (
 )
 
 func CreateChangeHistory(req *models.CreateChangeHistoryRequest, creatorID string, permission datapermission.Permission) error {
-	// 携带 changeId 时为编辑本人评论:复用创建接口,仅更新正文为最新内容
-	if req.ChangeID != "" {
-		return updateChangeComment(req.ChangeID, req.ChangeRichText, creatorID, permission)
-	}
-
 	changeID := uuid.New().String()
 	now := time.Now()
 
@@ -59,9 +54,9 @@ func CreateChangeHistory(req *models.CreateChangeHistoryRequest, creatorID strin
 // changeBehaviorComment 变更行为:评论(30);仅评论类型的记录允许编辑。
 const changeBehaviorComment = 30
 
-// updateChangeComment 编辑评论:仅评论类型(changeBehavior=30)且创建人本人可编辑,
+// UpdateChangeHistory 编辑评论:仅评论类型(changeBehavior=30)且创建人本人可编辑,
 // 只更新正文为最新内容,不追加新的变更记录,不保留编辑历史。访问范围继承评论所属业务对象。
-func updateChangeComment(changeID string, changeRichText string, userID string, permission datapermission.Permission) error {
+func UpdateChangeHistory(changeID string, req *models.UpdateChangeHistoryRequest, userID string, permission datapermission.Permission) error {
 	var history models.DevChangeHistory
 	if err := database.DB.Where("change_id = ?", changeID).First(&history).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -83,7 +78,7 @@ func updateChangeComment(changeID string, changeRichText string, userID string, 
 	return database.DB.Model(&models.DevChangeHistory{}).
 		Where("change_id = ?", changeID).
 		Updates(map[string]interface{}{
-			"change_rich_text": changeRichText,
+			"change_rich_text": req.ChangeRichText,
 			"update_date":      now,
 		}).Error
 }

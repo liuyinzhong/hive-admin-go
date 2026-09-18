@@ -544,25 +544,25 @@ definitions:
   models.CreateChangeHistoryRequest:
     properties:
       businessId:
-        description: 业务ID(新建必填)
+        description: 业务ID
         example: UUID
         type: string
       businessType:
-        description: 业务类型(新建必填)
+        description: 业务类型
         example: "0"
         type: string
       changeBehavior:
-        description: 变更行为(新建必填)
+        description: 变更行为
         example: "0"
         type: string
-      changeId:
-        description: 变更记录ID(编辑本人评论时携带;为空表示新建)
-        example: UUID
-        type: string
       changeRichText:
-        description: 变更详情/评论内容(富文本);携带 changeId 时为评论最新内容
+        description: 变更详情(富文本)
         example: <p>变更详情</p>
         type: string
+    required:
+    - businessId
+    - businessType
+    - changeBehavior
     type: object
   models.CreateDeptRequest:
     properties:
@@ -7740,6 +7740,15 @@ definitions:
     - fixUserId
     - projectId
     type: object
+  models.UpdateChangeHistoryRequest:
+    properties:
+      changeRichText:
+        description: 评论内容(富文本)
+        example: <p>评论内容</p>
+        type: string
+    required:
+    - changeRichText
+    type: object
   models.UpdateClassificationNodeStatusRequest:
     properties:
       expectedRowVersion:
@@ -11158,9 +11167,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: 未携带 changeId 时创建新的变更记录或评论；携带 changeId 时编辑本人已有评论（changeBehavior=30），仅创建人本人可编辑，只更新正文为最新内容，不追加变更记录、不保留编辑历史。数据权限：来源对象继承，按评论所属需求、任务、缺陷或版本父对象校验；编辑分支在父对象范围之外另要求当前用户为评论创建人本人（当前用户归属）
+      description: 创建新的变更记录或评论；写入前校验对应需求、任务、缺陷或版本的当前访问范围。数据权限：来源对象继承，按所属需求、任务、缺陷或版本父对象校验
       parameters:
-      - description: 变更记录信息；编辑评论时仅需 changeId 与 changeRichText
+      - description: 变更记录信息
         in: body
         name: request
         required: true
@@ -11170,7 +11179,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 创建/编辑成功
+          description: 创建成功
           schema:
             $ref: '#/definitions/models.Response'
         "400":
@@ -11189,7 +11198,50 @@ paths:
             $ref: '#/definitions/models.Response'
       security:
       - ApiKeyAuth: []
-      summary: 创建变更记录或编辑评论
+      summary: 创建变更记录
+      tags:
+      - 开发管理/变更记录
+  /dev/changeHistory/{changeId}:
+    put:
+      consumes:
+      - application/json
+      description: 编辑已有评论（changeBehavior=30），仅创建人本人可编辑，只更新正文为最新内容，不追加变更记录、不保留编辑历史。数据权限：来源对象继承，按评论所属需求、任务、缺陷或版本父对象校验，并要求当前用户为评论创建人本人（当前用户归属）
+      parameters:
+      - description: 变更记录ID
+        in: path
+        name: changeId
+        required: true
+        type: string
+      - description: 评论最新内容
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateChangeHistoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 编辑成功
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: 参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授权
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 编辑评论
       tags:
       - 开发管理/变更记录
   /dev/modules:

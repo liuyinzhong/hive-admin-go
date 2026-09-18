@@ -97,6 +97,7 @@ func registerDevRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 
 		dev.GET("/changeHistory", permissionGuard.Require("dev:changeHistory:list"), devController.GetChangeHistory)
 		dev.POST("/changeHistory", permissionGuard.Require("dev:changeHistory:create"), devController.CreateChangeHistory)
+		dev.PUT("/changeHistory/:changeId", permissionGuard.Require("dev:changeHistory:update"), devController.UpdateChangeHistory)
 	}
 
 	statistics := api.Group("/statistics", middleware.AuthMiddleware(), dataPermissionMiddleware)

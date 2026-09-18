@@ -16,7 +16,7 @@ storyStatus、taskStatus、bugStatus 和 bugConfirmStatus 以数字字符串在�
 
 创建、整体修改、局部字段修改、状态流转、确认和删除会追加变更记录。查询按 businessId 返回时间线；除本人评论外，变更记录没有修改或删除接口。独立创建接口（评论，changeBehavior=30）只用于明确的补充记录场景，不产生字段明细。
 
-评论允许创建人本人二次编辑，复用 `POST /dev/changeHistory`：请求体携带已有记录的 `changeId` 与最新 `changeRichText` 即进入编辑分支（不携带 `changeId` 仍为新建），不新增接口、不新增权限码。后端依次校验记录存在、`changeBehavior=30`、当前用户为创建人本人、当前用户仍具备评论所属业务对象（需求/任务/缺陷/版本）的访问范围，通过后仅更新 `change_rich_text` 与 `update_date`；不追加变更记录、不保留编辑历史，页面始终只展示最新内容。非评论、非本人、记录不存在或越权返回业务错误；编辑请求不接收 businessId、businessType、changeBehavior，业务归属以原记录为准。
+评论允许创建人本人二次编辑，接口为 `PUT /dev/changeHistory/{changeId}`，请求体仅含最新 `changeRichText`，使用独占权限码 `dev:changeHistory:update`（须在菜单中配置对应按钮节点，见系统模块菜单与按钮维护规则）。后端依次校验记录存在、`changeBehavior=30`、当前用户为创建人本人、当前用户仍具备评论所属业务对象（需求/任务/缺陷/版本）的访问范围，通过后仅更新 `change_rich_text` 与 `update_date`；不追加变更记录、不保留编辑历史，页面始终只展示最新内容。非评论、非本人、记录不存在或越权返回业务错误；编辑请求不接收 businessId、businessType、changeBehavior，业务归属以原记录为准。
 
 ### DEV-ITEM-012 变更记录携带字段级变更明细
 
@@ -96,7 +96,7 @@ storyStatus、taskStatus、bugStatus 和 bugConfirmStatus 以数字字符串在�
 
 * 缺陷：dev:bug:list、create、batchCreate、detail、update、fieldUpdate、advance、confirm、delete。
 
-* 变更记录：dev:changeHistory:list、create。create 同时覆盖评论新建与本人评论编辑（POST 携带 changeId 即编辑），不另设编辑权限码。
+* 变更记录：dev:changeHistory:list、create、update。list 查看时间线，create 创建变更记录与评论，update 仅用于编辑本人评论（后端限定 changeBehavior=30 且创建人本人）。
 
 ## 代码入口
 

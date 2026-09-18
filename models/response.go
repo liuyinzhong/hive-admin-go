@@ -663,11 +663,15 @@ type ChangeHistoryResponse struct {
 }
 
 type CreateChangeHistoryRequest struct {
-	ChangeID       string `json:"changeId" example:"UUID"`              // 变更记录ID(编辑本人评论时携带;为空表示新建)
-	BusinessID     string `json:"businessId" example:"UUID"`            // 业务ID(新建必填)
-	BusinessType   string `json:"businessType" example:"0"`             // 业务类型(新建必填)
-	ChangeBehavior string `json:"changeBehavior" example:"0"`           // 变更行为(新建必填)
-	ChangeRichText string `json:"changeRichText" example:"<p>变更详情</p>"` // 变更详情/评论内容(富文本);携带 changeId 时为评论最新内容
+	BusinessID     string `json:"businessId" binding:"required" example:"UUID"`  // 业务ID
+	BusinessType   string `json:"businessType" binding:"required" example:"0"`   // 业务类型
+	ChangeBehavior string `json:"changeBehavior" binding:"required" example:"0"` // 变更行为
+	ChangeRichText string `json:"changeRichText" example:"<p>变更详情</p>"`          // 变更详情(富文本)
+}
+
+// UpdateChangeHistoryRequest 编辑评论请求:仅接收最新评论正文,记录定位来自 Path 的 changeId
+type UpdateChangeHistoryRequest struct {
+	ChangeRichText string `json:"changeRichText" binding:"required" example:"<p>评论内容</p>"` // 评论内容(富文本)
 }
 
 type CreateProjectRequest struct {
