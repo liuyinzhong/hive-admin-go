@@ -19,7 +19,7 @@
 - `database`：数据库初始化和连接。
 - `middleware`：认证等中间件。
 - `utils`：项目公共工具。
-- `docs`：Swagger 注释生成的文件（`docs/adr/` 为手写架构决策记录）。
+- `docs`：Swagger 注释生成的文件。架构决策记录（ADR）按领域存放于 `business-docs/<领域>/adr/`，各领域独立编号。
 
 ## 开发前
 
@@ -298,7 +298,7 @@ Middleware -> 认证及基础设施
 - 当接口存在枚举、状态值、排序字段、分页上限、公共接口无权限等边界时，应在 Swagger 注释或 DTO 注释中写明，避免前端和外部调用方靠猜。
 - Swagger 文档由 Controller 中的 Swagger 注释提取生成（swaggo `swag init`），注释是接口文档的唯一事实来源；修改接口文档必须回到对应注释修改，再使用项目既有方式重新生成并核对 `docs/docs.go`、`docs/swagger.json`、`docs/swagger.yaml`。
 
-`docs/docs.go`、`docs/swagger.json`、`docs/swagger.yaml` 是生成产物，禁止直接手工编辑来调整文档内容；发现生成文件与注释不一致时，以注释为准重新生成，不得反向手改生成文件迁就现状。`docs/adr/` 是手写架构决策记录，不属于生成文件。不要执行会通过 `@latest` 隐式升级 Swagger 工具的命令，除非用户明确同意。
+`docs/docs.go`、`docs/swagger.json`、`docs/swagger.yaml` 是生成产物，禁止直接手工编辑来调整文档内容；发现生成文件与注释不一致时，以注释为准重新生成，不得反向手改生成文件迁就现状。架构决策记录（ADR）是手写文档，存放于 `business-docs/<领域>/adr/`，不属于生成文件。不要执行会通过 `@latest` 隐式升级 Swagger 工具的命令，除非用户明确同意。
 
 启动程序会尝试生成 Swagger，并向 Apifox 发起外部同步请求。因此未经明确授权，不执行 `go run .`、启动服务或其他会触发 Apifox 同步的操作。
 

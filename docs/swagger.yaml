@@ -304,6 +304,11 @@ definitions:
         description: 变更记录ID
         example: UUID
         type: string
+      changeItems:
+        description: 变更明细列表,存量记录无明细时为空数组
+        items:
+          $ref: '#/definitions/models.ChangeItem'
+        type: array
       changeRichText:
         description: 变更详情(富文本)
         example: <p>变更详情</p>
@@ -327,6 +332,29 @@ definitions:
       updateDate:
         description: 更新时间
         example: "2024-01-01 12:00:00"
+        type: string
+    type: object
+  models.ChangeItem:
+    properties:
+      dictType:
+        description: 值所属字典类型,空表示非字典值
+        example: STORY_STATUS
+        type: string
+      fieldKey:
+        description: 变更字段键(数据库列名)
+        example: story_status
+        type: string
+      fieldLabel:
+        description: 字段中文标签,写入时刻固化
+        example: 需求状态
+        type: string
+      newValue:
+        description: 新值(字典值存原始值)
+        example: "10"
+        type: string
+      oldValue:
+        description: 旧值(字典值存原始值)
+        example: "0"
         type: string
     type: object
   models.ChangePasswordRequest:
@@ -11087,7 +11115,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 根据业务ID获取变更记录；访问范围继承对应需求、任务、缺陷或版本
+      description: 根据业务ID获取变更记录；修改、流转、确认与自动化动作产生的记录含 changeItems 字段级变更明细（字段名+旧值→新值），存量记录无明细时为空数组；访问范围继承对应需求、任务、缺陷或版本
       parameters:
       - description: 业务ID
         in: query

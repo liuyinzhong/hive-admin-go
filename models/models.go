@@ -352,8 +352,20 @@ type DevChangeHistory struct {
 	BusinessID     *string    `gorm:"column:business_id;type:char(12)" json:"businessId"`
 	BusinessType   int        `gorm:"column:business_type;type:tinyint;default:0" json:"businessType"`
 	ExtendJson     *string    `gorm:"column:extend_json;type:varchar(512)" json:"extendJson"`
+	ChangeItems    *string    `gorm:"column:change_items;type:text" json:"changeItems"`
 	CreateDate     *time.Time `gorm:"column:create_date" json:"createDate"`
 	UpdateDate     *time.Time `gorm:"column:update_date" json:"updateDate"`
+}
+
+// ChangeItem 变更明细项:记录单个字段从旧值到新值的变化,随变更记录一并保存。
+// 字典值存原始值并携带 DictType 由前端按字典翻译;引用值(人名/版本/模块/需求/项目/文件名)
+// 与 FieldLabel 由后端写入时翻译固化;富文本字段只记"已更新"不记内容。
+type ChangeItem struct {
+	FieldKey   string `json:"fieldKey" example:"story_status"` // 变更字段键(数据库列名)
+	FieldLabel string `json:"fieldLabel" example:"需求状态"`       // 字段中文标签,写入时刻固化
+	DictType   string `json:"dictType" example:"STORY_STATUS"` // 值所属字典类型,空表示非字典值
+	OldValue   string `json:"oldValue" example:"0"`            // 旧值(字典值存原始值)
+	NewValue   string `json:"newValue" example:"10"`           // 新值(字典值存原始值)
 }
 
 func (DevChangeHistory) TableName() string {

@@ -649,16 +649,17 @@ type BugResponse struct {
 }
 
 type ChangeHistoryResponse struct {
-	ChangeID       *string `json:"changeId" example:"UUID"`                  // 变更记录ID
-	ChangeBehavior string  `json:"changeBehavior" example:"0"`               // 变更行为
-	ChangeRichText *string `json:"changeRichText" example:"<p>变更详情</p>"`     // 变更详情(富文本)
-	CreatorID      *string `json:"creatorId" example:"UUID"`                 // 创建人ID
-	CreatorName    *string `json:"creatorName" example:"管理员"`                // 创建人姓名
-	BusinessID     *string `json:"businessId" example:"UUID"`                // 业务ID
-	BusinessType   string  `json:"businessType" example:"0"`                 // 业务类型
-	ExtendJson     *string `json:"extendJson" example:"{\"key\":\"value\"}"` // 扩展JSON
-	CreateDate     *string `json:"createDate" example:"2024-01-01 12:00:00"` // 创建时间
-	UpdateDate     *string `json:"updateDate" example:"2024-01-01 12:00:00"` // 更新时间
+	ChangeID       *string      `json:"changeId" example:"UUID"`                  // 变更记录ID
+	ChangeBehavior string       `json:"changeBehavior" example:"0"`               // 变更行为
+	ChangeRichText *string      `json:"changeRichText" example:"<p>变更详情</p>"`     // 变更详情(富文本)
+	CreatorID      *string      `json:"creatorId" example:"UUID"`                 // 创建人ID
+	CreatorName    *string      `json:"creatorName" example:"管理员"`                // 创建人姓名
+	BusinessID     *string      `json:"businessId" example:"UUID"`                // 业务ID
+	BusinessType   string       `json:"businessType" example:"0"`                 // 业务类型
+	ExtendJson     *string      `json:"extendJson" example:"{\"key\":\"value\"}"` // 扩展JSON
+	ChangeItems    []ChangeItem `json:"changeItems"`                              // 变更明细列表,存量记录无明细时为空数组
+	CreateDate     *string      `json:"createDate" example:"2024-01-01 12:00:00"` // 创建时间
+	UpdateDate     *string      `json:"updateDate" example:"2024-01-01 12:00:00"` // 更新时间
 }
 
 type CreateChangeHistoryRequest struct {

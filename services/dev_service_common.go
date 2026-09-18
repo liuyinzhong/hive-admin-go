@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -72,8 +73,20 @@ func intToString(value int) string {
 	return strconv.Itoa(value)
 }
 
-func createChangeHistoryTx(tx *gorm.DB, creatorID, businessID string, businessType, changeBehavior int, changeRichText string) error {
+// createChangeHistoryTx 在事务内写入一条业务变更记录。
+// changeItems 为可选的字段级变更明细,由调用方在写入前通过 buildChangeItems 计算差异后传入;
+// 未传或为空时行为与历史版本一致,仅记录行为类型与富文本正文。
+func createChangeHistoryTx(tx *gorm.DB, creatorID, businessID string, businessType, changeBehavior int, changeRichText string, changeItems ...models.ChangeItem) error {
 	now := time.Now()
+	var changeItemsJSON *string
+	if len(changeItems) > 0 {
+		data, err := json.Marshal(changeItems)
+		if err != nil {
+			return fmt.Errorf("序列化变更明细失败: %w", err)
+		}
+		text := string(data)
+		changeItemsJSON = &text
+	}
 	history := models.DevChangeHistory{
 		ChangeID:       uuid.New().String(),
 		ChangeBehavior: changeBehavior,
@@ -81,22 +94,26 @@ func createChangeHistoryTx(tx *gorm.DB, creatorID, businessID string, businessTy
 		CreatorID:      &creatorID,
 		BusinessID:     &businessID,
 		BusinessType:   businessType,
+		ChangeItems:    changeItemsJSON,
 		CreateDate:     &now,
 		UpdateDate:     &now,
 	}
 	return tx.Create(&history).Error
 }
 
+// updateDevRecordWithHistory 在同一事务内执行业务更新并写入变更记录。
+// changeItems 为可选的字段级变更明细,透传给 createChangeHistoryTx 一并落库。
 func updateDevRecordWithHistory(
 	creatorID, businessID string,
 	businessType, changeBehavior int,
 	changeRichText string,
 	update func(*gorm.DB) error,
+	changeItems ...models.ChangeItem,
 ) error {
 	return database.DB.Transaction(func(tx *gorm.DB) error {
 		if err := update(tx); err != nil {
 			return err
 		}
-		return createChangeHistoryTx(tx, creatorID, businessID, businessType, changeBehavior, changeRichText)
+		return createChangeHistoryTx(tx, creatorID, businessID, businessType, changeBehavior, changeRichText, changeItems...)
 	})
 }

@@ -106,7 +106,11 @@ func executeWorkflowAutomationUpdateField(tx *gorm.DB, instance *models.WfProces
 	newLabel := automationDictLabel(tx, fieldDef.DictType, mount.TargetValue)
 	changeRichText := fmt.Sprintf("流程 %s 节点「%s」自动化动作「%s」：%s %s → %s",
 		instance.InstanceNo, nodeName, mount.AutomationName, fieldDef.Label, oldLabel, newLabel)
-	return createChangeHistoryTx(tx, operatorID, binding.BusinessID, businessTypeInt, changeBehaviorAutomation, changeRichText)
+	// 状态变化同时写入结构化变更明细;正文保留来源流程描述,版本等未注册明细目录的业务类型保持仅正文
+	changeItems := buildChangeItems(tx, businessTypeInt,
+		map[string]interface{}{mount.TargetField: oldValueText},
+		map[string]interface{}{mount.TargetField: mount.TargetValue})
+	return createChangeHistoryTx(tx, operatorID, binding.BusinessID, businessTypeInt, changeBehaviorAutomation, changeRichText, changeItems...)
 }
 
 // executeWorkflowAutomationInsertRecord 执行插入记录动作:

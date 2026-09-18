@@ -11,7 +11,7 @@ import (
 
 // GetChangeHistory 获取变更记录
 // @Summary 获取变更记录
-// @Description 根据业务ID获取变更记录；访问范围继承对应需求、任务、缺陷或版本
+// @Description 根据业务ID获取变更记录；修改、流转、确认与自动化动作产生的记录含 changeItems 字段级变更明细（字段名+旧值→新值），存量记录无明细时为空数组；访问范围继承对应需求、任务、缺陷或版本
 // @Tags 开发管理/变更记录
 // @Accept json
 // @Produce json

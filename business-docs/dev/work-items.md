@@ -14,7 +14,17 @@ storyStatus、taskStatus、bugStatus 和 bugConfirmStatus 以数字字符串在�
 
 ### DEV-ITEM-003 变更记录形成只读时间线
 
-创建、整体修改、局部字段修改、状态流转、确认和删除会追加变更记录。查询按 businessId 返回时间线；变更记录没有修改或删除接口。独立创建接口只用于明确的补充记录场景。
+创建、整体修改、局部字段修改、状态流转、确认和删除会追加变更记录。查询按 businessId 返回时间线；变更记录没有修改或删除接口。独立创建接口（评论，changeBehavior=30）只用于明确的补充记录场景，不产生字段明细。
+
+### DEV-ITEM-012 变更记录携带字段级变更明细
+
+整体修改、局部字段修改、状态流转（含批量流转）、缺陷确认和工作流自动化"修改字段值"动作，在写入变更记录的同一事务内先读旧值、对比新值，将变化字段以明细形式存入 `dev_change_history.change_items` 列（JSON 数组，元素结构 `{fieldKey, fieldLabel, dictType, oldValue, newValue}`），查询接口 `GET /dev/changeHistory` 随 `changeItems` 数组返回。创建、删除、评论和自动化插入记录不产生明细；存量记录无明细时返回空数组，前端按原样式降级展示。
+
+值翻译策略：字典值（状态、类型、级别、来源、环境等）存原始值并携带 `dictType`，前端按字典翻译，字典改名后历史明细自动跟进；引用值（人名、版本号、模块名、需求标题、项目标题、附件文件名）与字段标签 `fieldLabel` 由后端写入时刻翻译固化。富文本描述只记一条"已更新"不做内容级 diff；附件比对增删并记文件名（旧值侧记"移除：…"，新值侧记"新增：…"）；未变化的字段不出现在明细中；空值统一显示"空"。
+
+流转（单条与批量）指定的状态负责人在 `story_status` 明细之外追加 `story_owner` 明细项（非需求表字段，由流转逻辑手工构造，不经字段目录遍历）：旧值取该状态在参与人关联表中的原有负责人，换人时显示"旧负责人 → 新负责人"，首次指定时只显示新负责人，重复指定同一人不记该明细；流转到已关闭（99）不指定负责人，天然不记。
+
+明细字段目录按业务类型（需求 0/任务 10/缺陷 20）在 `services/dev_change_item.go` 注册（fieldKey→标签→dictType→取值方式），整体/局部修改经目录遍历生成明细，目录外字段不记；`story_owner` 是目录外手工构造项，新增可变更字段时须同步登记目录；版本（businessType=30）暂不接入明细，保持仅正文记录。
 
 ## 需求
 
@@ -90,7 +100,7 @@ storyStatus、taskStatus、bugStatus 和 bugConfirmStatus 以数字字符串在�
 
 * Model：models/models.go 中 DevStory、DevTask、DevBug、DevChangeHistory。
 
-* Service：services/dev\_story\_service.go、dev\_task\_service.go、dev\_bug\_service.go、dev\_change\_history\_service.go。
+* Service：services/dev\_story\_service.go、dev\_task\_service.go、dev\_bug\_service.go、dev\_change\_history\_service.go、dev\_change\_item.go（变更明细字段目录与差异计算）。
 
 * Router：/api/dev/storys、/tasks、/bugs、/changeHistory。storys 是当前既有接口拼写，修改需同步前后端。
 

@@ -608,6 +608,22 @@ func UpdateBug(bugID string, req *models.UpdateBugRequest, creatorID string, per
 	}
 
 	now := time.Now()
+	newValues := map[string]interface{}{
+		"bug_title":     req.BugTitle,
+		"bug_status":    bugStatus,
+		"bug_level":     bugLevel,
+		"bug_source":    bugSource,
+		"bug_type":      bugType,
+		"bug_env":       bugEnv,
+		"project_id":    req.ProjectID,
+		"bug_rich_text": req.BugRichText,
+		"file_ids":      fileIDsStr,
+		"version_id":    req.VersionID,
+		"module_id":     req.ModuleID,
+		"story_id":      req.StoryID,
+		"fix_user_id":   assigneeID,
+	}
+	changeItems := buildChangeItems(database.DB, 20, bugChangeValues(&bug), newValues)
 	return updateDevRecordWithHistory(creatorID, bugID, 20, 10, "", func(tx *gorm.DB) error {
 		updateQuery := tx.Model(&models.DevBug{}).Where("bug_id = ? AND del_flag = ?", bugID, 0)
 		result := permission.Apply(updateQuery, "dev_bug.creator_id", "dev_bug.fix_user_id").Updates(map[string]interface{}{
@@ -639,7 +655,7 @@ func UpdateBug(bugID string, req *models.UpdateBugRequest, creatorID string, per
 			return fmt.Errorf("缺陷不存在或无权操作")
 		}
 		return nil
-	})
+	}, changeItems...)
 }
 
 func UpdateBugField(bugID string, key string, value interface{}, creatorID string, permission datapermission.Permission) error {
@@ -682,6 +698,7 @@ func UpdateBugField(bugID string, key string, value interface{}, creatorID strin
 
 	updateMap["update_date"] = time.Now()
 
+	changeItems := buildChangeItems(database.DB, 20, bugChangeValues(&bug), updateMap)
 	return updateDevRecordWithHistory(creatorID, bugID, 20, 10, "", func(tx *gorm.DB) error {
 		updateQuery := tx.Model(&models.DevBug{}).Where("bug_id = ? AND del_flag = ?", bugID, 0)
 		result := permission.Apply(updateQuery, "dev_bug.creator_id", "dev_bug.fix_user_id").Updates(updateMap)
@@ -692,7 +709,7 @@ func UpdateBugField(bugID string, key string, value interface{}, creatorID strin
 			return fmt.Errorf("缺陷不存在或无权操作")
 		}
 		return nil
-	})
+	}, changeItems...)
 }
 
 func UpdateBugNext(bugID string, bugStatus string, changeRichText string, creatorID string, permission datapermission.Permission) error {
@@ -739,7 +756,7 @@ func UpdateBugNext(bugID string, bugStatus string, changeRichText string, creato
 			return fmt.Errorf("缺陷不存在或无权操作")
 		}
 		return nil
-	})
+	}, buildChangeItems(database.DB, 20, bugChangeValues(&bug), updateMap)...)
 }
 
 func ConfirmBug(bugID string, req *models.ConfirmBugRequest, creatorID string, permission datapermission.Permission) error {
@@ -780,7 +797,7 @@ func ConfirmBug(bugID string, req *models.ConfirmBugRequest, creatorID string, p
 			return fmt.Errorf("缺陷不存在或无权操作")
 		}
 		return nil
-	})
+	}, buildChangeItems(database.DB, 20, bugChangeValues(&bug), updateMap)...)
 }
 
 func DeleteBugs(bugIDs []string, creatorID string, permission datapermission.Permission) error {

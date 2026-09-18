@@ -727,6 +727,19 @@ func UpdateStory(storyID string, req *models.UpdateStoryRequest, creatorID strin
 	}
 
 	now := time.Now()
+	newValues := map[string]interface{}{
+		"story_title":     req.StoryTitle,
+		"story_type":      storyType,
+		"story_status":    storyStatus,
+		"story_level":     storyLevel,
+		"source":          source,
+		"project_id":      req.ProjectID,
+		"version_id":      req.VersionID,
+		"module_id":       req.ModuleID,
+		"story_rich_text": req.StoryRichText,
+		"file_ids":        fileIDsStr,
+	}
+	changeItems := buildChangeItems(database.DB, 0, storyChangeValues(&story), newValues)
 	return updateDevRecordWithHistory(creatorID, storyID, 0, 10, "", func(tx *gorm.DB) error {
 		updateQuery := tx.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = ?", storyID, 0)
 		result := applyStoryPermission(updateQuery, permission).Updates(map[string]interface{}{
@@ -754,7 +767,7 @@ func UpdateStory(storyID string, req *models.UpdateStoryRequest, creatorID strin
 			return fmt.Errorf("需求不存在或无权操作")
 		}
 		return nil
-	})
+	}, changeItems...)
 }
 
 func UpdateStoryField(storyID string, key string, value interface{}, creatorID string, permission datapermission.Permission) error {
@@ -785,6 +798,7 @@ func UpdateStoryField(storyID string, key string, value interface{}, creatorID s
 
 	updateMap["update_date"] = time.Now()
 
+	changeItems := buildChangeItems(database.DB, 0, storyChangeValues(&story), updateMap)
 	return updateDevRecordWithHistory(creatorID, storyID, 0, 10, "", func(tx *gorm.DB) error {
 		updateQuery := tx.Model(&models.DevStory{}).Where("story_id = ? AND del_flag = ?", storyID, 0)
 		result := applyStoryPermission(updateQuery, permission).Updates(updateMap)
@@ -795,7 +809,7 @@ func UpdateStoryField(storyID string, key string, value interface{}, creatorID s
 			return fmt.Errorf("需求不存在或无权操作")
 		}
 		return nil
-	})
+	}, changeItems...)
 }
 
 func UpdateStoryNext(storyID string, storyStatus string, userID string, changeRichText string, creatorID string, permission datapermission.Permission) error {
@@ -832,9 +846,17 @@ func UpdateStoryNext(storyID string, storyStatus string, userID string, changeRi
 	}
 
 	now := time.Now()
+	changeItems := buildChangeItems(database.DB, 0,
+		map[string]interface{}{"story_status": story.StoryStatus},
+		map[string]interface{}{"story_status": storyStatusInt})
+	if hasOwner {
+		if item, changed := buildStoryOwnerChangeItem(database.DB, storyID, storyStatusInt, userID); changed {
+			changeItems = append(changeItems, item)
+		}
+	}
 	err = updateDevRecordWithHistory(creatorID, storyID, 0, 40, changeRichText, func(tx *gorm.DB) error {
 		return applyStoryNextTx(tx, &story, storyStatusInt, userID, hasOwner, now, permission)
-	})
+	}, changeItems...)
 	if err != nil {
 		return err
 	}
@@ -918,10 +940,19 @@ func BatchUpdateStoryNext(req *models.BatchUpdateStoryNextRequest, creatorID str
 	now := time.Now()
 	err = database.DB.Transaction(func(tx *gorm.DB) error {
 		for i := range storys {
+			// 负责人明细须在 applyStoryNextTx 先删后插之前读取同状态原有负责人
+			changeItems := buildChangeItems(tx, 0,
+				map[string]interface{}{"story_status": storys[i].StoryStatus},
+				map[string]interface{}{"story_status": storyStatusInt})
+			if hasOwner {
+				if item, changed := buildStoryOwnerChangeItem(tx, storys[i].StoryID, storyStatusInt, req.UserID); changed {
+					changeItems = append(changeItems, item)
+				}
+			}
 			if err := applyStoryNextTx(tx, &storys[i], storyStatusInt, req.UserID, hasOwner, now, permission); err != nil {
 				return fmt.Errorf("第%d条需求：%w", i+1, err)
 			}
-			if err := createChangeHistoryTx(tx, creatorID, storys[i].StoryID, 0, 40, changeRichText); err != nil {
+			if err := createChangeHistoryTx(tx, creatorID, storys[i].StoryID, 0, 40, changeRichText, changeItems...); err != nil {
 				return fmt.Errorf("第%d条需求：%w", i+1, err)
 			}
 		}
@@ -951,6 +982,27 @@ func validateStoryProjectUser(projectID, userID string) error {
 		return fmt.Errorf("状态负责人必须是该项目成员")
 	}
 	return nil
+}
+
+// buildStoryOwnerChangeItem 构建流转指定状态负责人的变更明细项。
+// 旧值取该状态在参与人关联表中的现有负责人(须在先删后插之前调用),
+// 新值由后端翻译为姓名固化;负责人与流转前相同(重复指定同一人)时返回 changed=false 不记明细。
+func buildStoryOwnerChangeItem(tx *gorm.DB, storyID string, storyStatus int, newUserID string) (models.ChangeItem, bool) {
+	item := models.ChangeItem{
+		FieldKey:   "story_owner",
+		FieldLabel: "状态负责人",
+	}
+	var row models.DevStoryUser
+	if err := tx.Select("user_id").
+		Where("story_id = ? AND story_status = ?", storyID, storyStatus).
+		First(&row).Error; err == nil && row.UserID != "" {
+		if row.UserID == newUserID {
+			return item, false
+		}
+		item.OldValue = changeRefText(tx, changeValueUser, row.UserID)
+	}
+	item.NewValue = changeRefText(tx, changeValueUser, newUserID)
+	return item, true
 }
 
 // saveStoryNextUserTx 保存推进指定的状态负责人,写入需求参与人关联表;

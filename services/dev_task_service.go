@@ -521,6 +521,21 @@ func UpdateTask(taskID string, req *models.UpdateTaskRequest, creatorID string, 
 	}
 
 	now := time.Now()
+	newValues := map[string]interface{}{
+		"task_title":     req.TaskTitle,
+		"task_status":    taskStatus,
+		"task_type":      taskType,
+		"plan_hours":     req.PlanHours,
+		"project_id":     req.ProjectID,
+		"task_rich_text": req.TaskRichText,
+		"version_id":     req.VersionID,
+		"module_id":      req.ModuleID,
+		"story_id":       req.StoryID,
+		"user_id":        assigneeID,
+		"end_date":       endDate.Format("2006-01-02 15:04:05"),
+		"start_date":     startDate.Format("2006-01-02 15:04:05"),
+	}
+	changeItems := buildChangeItems(database.DB, 10, taskChangeValues(&task), newValues)
 	return updateDevRecordWithHistory(creatorID, taskID, 10, 10, "", func(tx *gorm.DB) error {
 		updateQuery := tx.Model(&models.DevTask{}).Where("task_id = ? AND del_flag = ?", taskID, 0)
 		result := permission.Apply(updateQuery, "dev_task.creator_id", "dev_task.user_id").Updates(map[string]interface{}{
@@ -545,7 +560,7 @@ func UpdateTask(taskID string, req *models.UpdateTaskRequest, creatorID string, 
 			return fmt.Errorf("任务不存在或无权操作")
 		}
 		return nil
-	})
+	}, changeItems...)
 }
 
 func UpdateTaskField(taskID string, key string, value interface{}, creatorID string, permission datapermission.Permission) error {
@@ -607,6 +622,7 @@ func UpdateTaskField(taskID string, key string, value interface{}, creatorID str
 
 	updateMap["update_date"] = time.Now()
 
+	changeItems := buildChangeItems(database.DB, 10, taskChangeValues(&task), updateMap)
 	return updateDevRecordWithHistory(creatorID, taskID, 10, 10, "", func(tx *gorm.DB) error {
 		updateQuery := tx.Model(&models.DevTask{}).Where("task_id = ? AND del_flag = ?", taskID, 0)
 		result := permission.Apply(updateQuery, "dev_task.creator_id", "dev_task.user_id").Updates(updateMap)
@@ -617,7 +633,7 @@ func UpdateTaskField(taskID string, key string, value interface{}, creatorID str
 			return fmt.Errorf("任务不存在或无权操作")
 		}
 		return nil
-	})
+	}, changeItems...)
 }
 
 func UpdateTaskNext(taskID string, taskStatus string, changeRichText string, creatorID string, permission datapermission.Permission) error {
@@ -637,6 +653,9 @@ func UpdateTaskNext(taskID string, taskStatus string, changeRichText string, cre
 	}
 
 	now := time.Now()
+	changeItems := buildChangeItems(database.DB, 10,
+		map[string]interface{}{"task_status": task.TaskStatus},
+		map[string]interface{}{"task_status": taskStatusInt})
 	return updateDevRecordWithHistory(creatorID, taskID, 10, 40, changeRichText, func(tx *gorm.DB) error {
 		updateQuery := tx.Model(&models.DevTask{}).Where("task_id = ? AND del_flag = ?", taskID, 0)
 		result := permission.Apply(updateQuery, "dev_task.creator_id", "dev_task.user_id").Updates(map[string]interface{}{
@@ -650,7 +669,7 @@ func UpdateTaskNext(taskID string, taskStatus string, changeRichText string, cre
 			return fmt.Errorf("任务不存在或无权操作")
 		}
 		return nil
-	})
+	}, changeItems...)
 }
 
 func DeleteTasks(taskIDs []string, creatorID string, permission datapermission.Permission) error {

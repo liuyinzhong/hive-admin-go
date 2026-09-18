@@ -1,7 +1,9 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -90,6 +92,14 @@ func GetChangeHistory(businessID string, permission datapermission.Permission) (
 	var responses []models.ChangeHistoryResponse
 	for _, history := range histories {
 		creatorName := creators[utils.StringValue(history.CreatorID)]
+		changeItems := make([]models.ChangeItem, 0)
+		if history.ChangeItems != nil && *history.ChangeItems != "" {
+			// 明细JSON解析失败时降级为空明细,不因存量脏数据阻塞时间线展示
+			if err := json.Unmarshal([]byte(*history.ChangeItems), &changeItems); err != nil {
+				log.Printf("解析变更明细JSON失败 changeId=%s: %v", history.ChangeID, err)
+				changeItems = make([]models.ChangeItem, 0)
+			}
+		}
 		responses = append(responses, models.ChangeHistoryResponse{
 			ChangeID:       &history.ChangeID,
 			ChangeBehavior: intToString(history.ChangeBehavior),
@@ -99,6 +109,7 @@ func GetChangeHistory(businessID string, permission datapermission.Permission) (
 			BusinessID:     history.BusinessID,
 			BusinessType:   intToString(history.BusinessType),
 			ExtendJson:     history.ExtendJson,
+			ChangeItems:    changeItems,
 			CreateDate:     models.TimeToStringPtr(history.CreateDate),
 			UpdateDate:     models.TimeToStringPtr(history.UpdateDate),
 		})

@@ -2387,7 +2387,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "根据业务ID获取变更记录；访问范围继承对应需求、任务、缺陷或版本",
+                "description": "根据业务ID获取变更记录；修改、流转、确认与自动化动作产生的记录含 changeItems 字段级变更明细（字段名+旧值→新值），存量记录无明细时为空数组；访问范围继承对应需求、任务、缺陷或版本",
                 "consumes": [
                     "application/json"
                 ],
@@ -26257,6 +26257,13 @@ const docTemplate = `{
                     "type": "string",
                     "example": "UUID"
                 },
+                "changeItems": {
+                    "description": "变更明细列表,存量记录无明细时为空数组",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ChangeItem"
+                    }
+                },
                 "changeRichText": {
                     "description": "变更详情(富文本)",
                     "type": "string",
@@ -26286,6 +26293,36 @@ const docTemplate = `{
                     "description": "更新时间",
                     "type": "string",
                     "example": "2024-01-01 12:00:00"
+                }
+            }
+        },
+        "models.ChangeItem": {
+            "type": "object",
+            "properties": {
+                "dictType": {
+                    "description": "值所属字典类型,空表示非字典值",
+                    "type": "string",
+                    "example": "STORY_STATUS"
+                },
+                "fieldKey": {
+                    "description": "变更字段键(数据库列名)",
+                    "type": "string",
+                    "example": "story_status"
+                },
+                "fieldLabel": {
+                    "description": "字段中文标签,写入时刻固化",
+                    "type": "string",
+                    "example": "需求状态"
+                },
+                "newValue": {
+                    "description": "新值(字典值存原始值)",
+                    "type": "string",
+                    "example": "10"
+                },
+                "oldValue": {
+                    "description": "旧值(字典值存原始值)",
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
