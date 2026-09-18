@@ -37,15 +37,15 @@ func (dc *DevController) GetChangeHistory(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(histories))
 }
 
-// CreateChangeHistory 创建变更记录（评论）
-// @Summary 创建变更记录
-// @Description 创建新的变更记录或评论；写入前校验对应需求、任务、缺陷或版本的当前访问范围
+// CreateChangeHistory 创建变更记录（评论）/ 编辑本人评论
+// @Summary 创建变更记录或编辑评论
+// @Description 未携带 changeId 时创建新的变更记录或评论，写入前校验对应需求、任务、缺陷或版本的当前访问范围；携带 changeId 时编辑本人已有评论（changeBehavior=30），仅创建人本人可编辑，只更新正文为最新内容，不追加变更记录、不保留编辑历史
 // @Tags 开发管理/变更记录
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param request body models.CreateChangeHistoryRequest true "变更记录信息"
-// @Success 200 {object} models.Response "创建成功"
+// @Param request body models.CreateChangeHistoryRequest true "变更记录信息；编辑评论时仅需 changeId 与 changeRichText"
+// @Success 200 {object} models.Response "创建/编辑成功"
 // @Failure 400 {object} map[string]interface{} "参数错误"
 // @Failure 401 {object} map[string]interface{} "未授权"
 // @Failure 403 {object} models.Response "无接口访问权限"

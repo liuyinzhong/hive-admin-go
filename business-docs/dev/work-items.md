@@ -14,7 +14,9 @@ storyStatus、taskStatus、bugStatus 和 bugConfirmStatus 以数字字符串在�
 
 ### DEV-ITEM-003 变更记录形成只读时间线
 
-创建、整体修改、局部字段修改、状态流转、确认和删除会追加变更记录。查询按 businessId 返回时间线；变更记录没有修改或删除接口。独立创建接口（评论，changeBehavior=30）只用于明确的补充记录场景，不产生字段明细。
+创建、整体修改、局部字段修改、状态流转、确认和删除会追加变更记录。查询按 businessId 返回时间线；除本人评论外，变更记录没有修改或删除接口。独立创建接口（评论，changeBehavior=30）只用于明确的补充记录场景，不产生字段明细。
+
+评论允许创建人本人二次编辑，复用 `POST /dev/changeHistory`：请求体携带已有记录的 `changeId` 与最新 `changeRichText` 即进入编辑分支（不携带 `changeId` 仍为新建），不新增接口、不新增权限码。后端依次校验记录存在、`changeBehavior=30`、当前用户为创建人本人、当前用户仍具备评论所属业务对象（需求/任务/缺陷/版本）的访问范围，通过后仅更新 `change_rich_text` 与 `update_date`；不追加变更记录、不保留编辑历史，页面始终只展示最新内容。非评论、非本人、记录不存在或越权返回业务错误；编辑请求不接收 businessId、businessType、changeBehavior，业务归属以原记录为准。
 
 ### DEV-ITEM-012 变更记录携带字段级变更明细
 
@@ -80,7 +82,7 @@ storyStatus、taskStatus、bugStatus 和 bugConfirmStatus 以数字字符串在�
 
 需求按创建人或参与人可见，参与人通过独立关联表 `dev_story_user` 的 EXISTS 子查询过滤；任务按创建人或执行人可见；缺陷按创建人或处理人可见。角色部门范围通过这些归属用户的当前启用部门展开。列表、全量选项、详情、整体编辑、局部编辑、状态动作、确认和删除使用同一规则，批量操作任一记录越界时整批失败。
 
-变更记录继承对应需求、任务、缺陷或版本的访问范围，不按变更记录创建人单独放宽。
+变更记录继承对应需求、任务、缺陷或版本的访问范围，不按变更记录创建人单独放宽。评论编辑在继承业务对象访问范围之外，还要求当前用户是该评论的创建人本人（当前用户归属），两者同时满足才允许更新正文。
 
 ### DEV-ITEM-010 写入引用必须处于当前范围
 
@@ -94,7 +96,7 @@ storyStatus、taskStatus、bugStatus 和 bugConfirmStatus 以数字字符串在�
 
 * 缺陷：dev:bug:list、create、batchCreate、detail、update、fieldUpdate、advance、confirm、delete。
 
-* 变更记录：dev:changeHistory:list、create。
+* 变更记录：dev:changeHistory:list、create。create 同时覆盖评论新建与本人评论编辑（POST 携带 changeId 即编辑），不另设编辑权限码。
 
 ## 代码入口
 

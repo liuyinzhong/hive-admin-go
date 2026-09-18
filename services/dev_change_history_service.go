@@ -16,6 +16,15 @@ import (
 )
 
 func CreateChangeHistory(req *models.CreateChangeHistoryRequest, creatorID string, permission datapermission.Permission) error {
+	// 携带 changeId 时为编辑本人评论:复用创建接口,仅更新正文为最新内容
+	if req.ChangeID != "" {
+		return updateChangeComment(req.ChangeID, req.ChangeRichText, creatorID, permission)
+	}
+	// 新建分支必填校验(编辑分支不需要这些字段,故不在请求结构体上用 binding:required)
+	if req.BusinessID == "" || req.BusinessType == "" || req.ChangeBehavior == "" {
+		return fmt.Errorf("参数错误")
+	}
+
 	changeID := uuid.New().String()
 	now := time.Now()
 
@@ -49,6 +58,41 @@ func CreateChangeHistory(req *models.CreateChangeHistoryRequest, creatorID strin
 	}
 
 	return nil
+}
+
+// changeBehaviorComment 变更行为:评论(30);仅评论类型的记录允许编辑。
+const changeBehaviorComment = 30
+
+// updateChangeComment 编辑评论:仅评论类型(changeBehavior=30)且创建人本人可编辑,
+// 只更新正文为最新内容,不追加新的变更记录,不保留编辑历史。访问范围继承评论所属业务对象。
+func updateChangeComment(changeID string, changeRichText string, userID string, permission datapermission.Permission) error {
+	if changeRichText == "" {
+		return fmt.Errorf("评论内容不能为空")
+	}
+	var history models.DevChangeHistory
+	if err := database.DB.Where("change_id = ?", changeID).First(&history).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf("评论不存在")
+		}
+		return err
+	}
+	if history.ChangeBehavior != changeBehaviorComment {
+		return fmt.Errorf("仅评论可以编辑")
+	}
+	if utils.StringValue(history.CreatorID) != userID {
+		return fmt.Errorf("只能编辑自己的评论")
+	}
+	// 变更记录继承业务对象访问范围
+	if err := ensureDevBusinessAccess(utils.StringValue(history.BusinessID), history.BusinessType, permission); err != nil {
+		return err
+	}
+	now := time.Now()
+	return database.DB.Model(&models.DevChangeHistory{}).
+		Where("change_id = ?", changeID).
+		Updates(map[string]interface{}{
+			"change_rich_text": changeRichText,
+			"update_date":      now,
+		}).Error
 }
 
 func GetChangeHistory(businessID string, permission datapermission.Permission) ([]models.ChangeHistoryResponse, error) {

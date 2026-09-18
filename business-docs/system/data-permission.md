@@ -81,7 +81,7 @@ Bearer Token 认证
 | `/api/dev/storys/**` | 角色数据范围 | 创建人或参与人；参与人通过 `dev_story_user` 关联表 EXISTS 子查询过滤 |
 | `/api/dev/tasks/**` | 角色数据范围 | 创建人或执行人；异步导出重新解析创建者当前范围 |
 | `/api/dev/bugs/**` | 角色数据范围 | 创建人或处理人 |
-| `/api/dev/changeHistory` | 来源继承 | 按需求、任务、缺陷或版本父对象校验 |
+| `/api/dev/changeHistory` | 来源继承 | GET 与 POST 新建按需求、任务、缺陷或版本父对象校验；POST 携带 `changeId` 编辑评论时，在父对象范围校验之外另要求当前用户为该评论创建人本人，且仅限 changeBehavior=30 的评论，只读可见性仍完全继承父对象（SYS-DATA-032） |
 | `/api/statistics/dev/**` | 角色数据范围 | 各指标先应用需求、任务、缺陷或版本同源范围再聚合 |
 | `/api/form/schemas/**` | 全局主数据 | 工作流共同引用的结构定义 |
 | `/api/base/institution/**`、`enterprises/**`、`classificationSystems/**` | 全局主数据 | 机构、企业主体和分类体系是共享基础资料 |
