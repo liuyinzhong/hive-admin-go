@@ -87,6 +87,12 @@ func (s *UserMenuService) GetPersonalPermissionMenuTree() (*models.PersonalPermi
 func replaceUserPersonalPermissions(tx *gorm.DB, userId string, grants, denies []string, permission datapermission.Permission) error {
 	grants = uniqueNonEmptyStrings(grants)
 	denies = uniqueNonEmptyStrings(denies)
+	// 目录不是权限对象：禁止集合剔除目录节点。勾选页面时树会把半选父目录一并提交，
+	// 禁止半选父目录会把整组未被禁止的子页面连同容器一起逐出生效菜单。
+	denies, err := excludeCatalogMenus(tx, denies)
+	if err != nil {
+		return err
+	}
 
 	grantSet := make(map[string]struct{}, len(grants))
 	for _, id := range grants {
@@ -176,6 +182,34 @@ func createUserMenu(tx *gorm.DB, userId, menuID, grantType string, now time.Time
 		UpdateDate: &now,
 	}
 	return tx.Create(&entry).Error
+}
+
+// excludeCatalogMenus 从菜单ID集合中剔除目录节点：目录不承载权限，其可见性由未禁止的子页面决定；
+// 额外授权集合保留目录（作为授权页面的容器），禁止集合必须剔除。
+func excludeCatalogMenus(tx *gorm.DB, menuIDs []string) ([]string, error) {
+	if len(menuIDs) == 0 {
+		return menuIDs, nil
+	}
+	var catalogIDs []string
+	if err := tx.Model(&models.SysMenu{}).
+		Where("id IN ? AND type = ? AND del_flag = 0", menuIDs, "catalog").
+		Pluck("id", &catalogIDs).Error; err != nil {
+		return nil, err
+	}
+	if len(catalogIDs) == 0 {
+		return menuIDs, nil
+	}
+	catalogSet := make(map[string]struct{}, len(catalogIDs))
+	for _, id := range catalogIDs {
+		catalogSet[id] = struct{}{}
+	}
+	result := make([]string, 0, len(menuIDs))
+	for _, id := range menuIDs {
+		if _, isCatalog := catalogSet[id]; !isCatalog {
+			result = append(result, id)
+		}
+	}
+	return result, nil
 }
 
 // validateExistingMenus 校验菜单ID均存在且未删除（含按钮节点，排除外部页面）。
