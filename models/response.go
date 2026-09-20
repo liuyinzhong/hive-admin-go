@@ -208,7 +208,7 @@ type FileListRequest struct {
 	OriginalName string `form:"originalName" example:"文件名"`               // 原始文件名，模糊搜索
 	Type         string `form:"type" example:"image/jpeg"`                // MIME类型，精确匹配
 	FileExt      string `form:"fileExt" example:".jpg"`                   // 文件扩展名，精确匹配
-	Status       *int   `form:"status" example:"0"`                       // 文件状态，精确匹配；0=正式，1=临时未绑定
+	Status       *int   `form:"status" example:"0"`                       // 使用状态，精确匹配；0=已使用，1=未使用
 	Sorts        string `form:"sorts" example:"createDate,desc;size,asc"` // 排序参数
 }
 

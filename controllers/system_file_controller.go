@@ -38,7 +38,7 @@ func (ctrl *SystemController) UploadFile(c *gin.Context) {
 
 // GetFileList 获取文件列表
 // @Summary 获取文件列表
-// @Description 按文件创建人和当前角色数据范围分页获取文件元数据；不改变 /uploads/** 的公开静态访问边界。支持按文件状态 status 精确过滤（0=正式，1=临时未绑定），响应包含 status 字段
+// @Description 按文件创建人和当前角色数据范围分页获取文件元数据；不改变 /uploads/** 的公开静态访问边界。支持按使用状态 status 精确过滤（0=已使用，1=未使用），响应包含 status 字段
 // @Tags 系统管理/文件管理
 // @Accept json
 // @Produce json
