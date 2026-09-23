@@ -1053,7 +1053,8 @@ func handleWorkflowTask(taskID, userID string, req *models.WorkflowTaskActionReq
 
 // resolveWorkflowActors 按用户、角色、发起人直属上级、流程发起人或审批参与人解析启用用户。
 // strict=true(审批节点):解析结果为空或部分人员停用时报错阻塞流程;
-// strict=false(抄送节点):过滤停用人员,结果可为空,不阻塞流程。
+// strict=false(抄送节点):过滤停用人员,结果可为空,不阻塞流程;
+// 发起人直属上级在宽松模式下解析不到(发起人缺失或未配置上级)时同样返回空,不报错。
 func resolveWorkflowActors(tx *gorm.DB, instance *models.WfProcessInstance, actorType string, actorIDs []string, strict bool) ([]models.SysUser, error) {
 	userIDs := make([]string, 0)
 	switch actorType {
@@ -1070,9 +1071,15 @@ func resolveWorkflowActors(tx *gorm.DB, instance *models.WfProcessInstance, acto
 	case "leader":
 		var starter models.SysUser
 		if err := tx.Where("user_id = ? AND del_flag = 0", instance.StarterID).First(&starter).Error; err != nil {
+			if !strict {
+				return []models.SysUser{}, nil
+			}
 			return nil, err
 		}
 		if starter.LeaderUserID == nil || *starter.LeaderUserID == "" {
+			if !strict {
+				return []models.SysUser{}, nil
+			}
 			return nil, fmt.Errorf("发起人未配置直属上级")
 		}
 		userIDs = append(userIDs, *starter.LeaderUserID)
@@ -1275,11 +1282,24 @@ func parseWorkflowGraph(flowData string) (*workflowGraph, error) {
 			if node.Properties.AssigneeType == "" {
 				return nil, fmt.Errorf("审批节点 %s 未配置审批人", workflowNodeName(node))
 			}
+			if !workflowAssigneeTypeSupported(node.Properties.AssigneeType) {
+				return nil, fmt.Errorf("审批节点 %s 的审批人类型无效：%s", workflowNodeName(node), node.Properties.AssigneeType)
+			}
 			if node.Properties.ApprovalMode != "any" && node.Properties.ApprovalMode != "all" {
 				return nil, fmt.Errorf("审批节点 %s 的审批方式无效", workflowNodeName(node))
 			}
 			if len(outgoing) != 1 {
 				return nil, fmt.Errorf("审批节点 %s 必须且只能有一条出线", workflowNodeName(node))
+			}
+		case "copy":
+			if node.Properties.CopyType == "" {
+				return nil, fmt.Errorf("抄送节点 %s 未配置抄送类型", workflowNodeName(node))
+			}
+			if !workflowCopyTypeSupported(node.Properties.CopyType) {
+				return nil, fmt.Errorf("抄送节点 %s 的抄送类型无效：%s", workflowNodeName(node), node.Properties.CopyType)
+			}
+			if len(outgoing) != 1 {
+				return nil, fmt.Errorf("节点 %s 必须且只能有一条出线", workflowNodeName(node))
 			}
 		default:
 			if len(outgoing) != 1 {
@@ -1334,6 +1354,26 @@ func validateWorkflowConditionEdges(node *workflowNode, edges []workflowEdge) er
 func workflowConditionOperatorSupported(operator string) bool {
 	switch operator {
 	case "equal", "notEqual", "greaterThan", "greaterThanOrEqual", "lessThan", "lessThanOrEqual", "contains", "notContains", "empty", "notEmpty":
+		return true
+	default:
+		return false
+	}
+}
+
+// workflowAssigneeTypeSupported 判断审批节点办理人来源是否在引擎支持范围内。
+func workflowAssigneeTypeSupported(assigneeType string) bool {
+	switch assigneeType {
+	case "user", "role", "leader", "starter":
+		return true
+	default:
+		return false
+	}
+}
+
+// workflowCopyTypeSupported 判断抄送节点抄送类型是否在引擎支持范围内。
+func workflowCopyTypeSupported(copyType string) bool {
+	switch copyType {
+	case "user", "role", "participant", "starter", "leader":
 		return true
 	default:
 		return false
