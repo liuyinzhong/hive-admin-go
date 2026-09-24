@@ -322,6 +322,22 @@ type printPageMargins struct {
 	Left   float64 `json:"left"`
 }
 
+// printMultiPagePayload 是 worm 1.3.0 起的多页面模板 wrapper（{ version, pages }）。
+// pages 用指针区分「字段缺省」（单页 TemplateData）与「显式空数组」（非法）。
+// 与 core 的 normalizeTemplate 判据一致：存在 pages 数组即按多页面模板处理。
+type printMultiPagePayload struct {
+	Version int                `json:"version"`
+	Pages   *[]json.RawMessage `json:"pages"`
+}
+
+// printPageGeometry 是一页的纸张几何，用于多页面模板的一致性校验（core 要求各页一致）。
+type printPageGeometry struct {
+	PaperSize    string
+	Orientation  string
+	CustomWidth  float64
+	CustomHeight float64
+}
+
 // printExpressionFunctions 是 worm 渲染管线注册的表达式函数白名单
 // （见 worm-vue3-print print-core src/render/expression-eval.ts）。
 var printExpressionFunctions = map[string]struct{}{
@@ -347,24 +363,73 @@ func validatePrintLayout(layout []byte, requirePublished bool) error {
 	if len(layout) == 0 || !json.Valid(layout) {
 		return fmt.Errorf("%w: 模板布局必须是合法JSON", ErrPrintTemplateInvalidInput)
 	}
-	var payload printTemplatePayload
-	if err := json.Unmarshal(layout, &payload); err != nil {
+	var wrapper printMultiPagePayload
+	if err := json.Unmarshal(layout, &wrapper); err != nil {
 		return fmt.Errorf("%w: 模板布局必须是对象结构", ErrPrintTemplateInvalidInput)
 	}
+	if wrapper.Pages == nil {
+		if _, elements, err := validatePrintPage(layout, requirePublished); err != nil {
+			return err
+		} else if requirePublished && elements == 0 {
+			return fmt.Errorf("%w: 模板必须包含至少一个元素", ErrPrintTemplateInvalidInput)
+		}
+		return nil
+	}
+
+	// 多页面模板：逐页校验，并校验各页纸张尺寸（含方向）一致——渲染端一次出图共用一份纸型。
+	pages := *wrapper.Pages
+	if len(pages) == 0 {
+		return fmt.Errorf("%w: 多页面模板至少包含一页", ErrPrintTemplateInvalidInput)
+	}
+	totalElements := 0
+	firstGeometry := printPageGeometry{}
+	for index, page := range pages {
+		geometry, elements, err := validatePrintPage(page, requirePublished)
+		if err != nil {
+			return err
+		}
+		if index == 0 {
+			firstGeometry = geometry
+		} else if geometry != firstGeometry {
+			return fmt.Errorf("%w: 多页面模板各页纸张尺寸与方向必须一致（第 %d 页）", ErrPrintTemplateInvalidInput, index+1)
+		}
+		totalElements += elements
+	}
+	if requirePublished && totalElements == 0 {
+		return fmt.Errorf("%w: 模板必须包含至少一个元素", ErrPrintTemplateInvalidInput)
+	}
+	return nil
+}
+
+// validatePrintPage 校验单页 TemplateData，返回该页纸张几何与元素数量。
+// 「至少一个元素」交由调用方按整份模板判定：多页面模板允许某页无元素，但整份不能全空。
+// 元素 ID 唯一性按页判定——各页独立渲染，跨页 ID 不冲突。
+func validatePrintPage(layout []byte, requirePublished bool) (printPageGeometry, int, error) {
+	geometry := printPageGeometry{}
+	var payload printTemplatePayload
+	if err := json.Unmarshal(layout, &payload); err != nil {
+		return geometry, 0, fmt.Errorf("%w: 模板布局必须是对象结构", ErrPrintTemplateInvalidInput)
+	}
 	if _, ok := printSupportedPaperSizes[payload.PaperSize]; !ok {
-		return fmt.Errorf("%w: 不支持的打印纸张规格", ErrPrintTemplateInvalidInput)
+		return geometry, 0, fmt.Errorf("%w: 不支持的打印纸张规格", ErrPrintTemplateInvalidInput)
 	}
 	if payload.PaperSize == "CUSTOM" && (payload.CustomWidth <= 0 || payload.CustomHeight <= 0) {
-		return fmt.Errorf("%w: 自定义纸张必须提供有效宽高", ErrPrintTemplateInvalidInput)
+		return geometry, 0, fmt.Errorf("%w: 自定义纸张必须提供有效宽高", ErrPrintTemplateInvalidInput)
 	}
 	if payload.Orientation != "portrait" && payload.Orientation != "landscape" {
-		return fmt.Errorf("%w: 打印方向只能为portrait或landscape", ErrPrintTemplateInvalidInput)
+		return geometry, 0, fmt.Errorf("%w: 打印方向只能为portrait或landscape", ErrPrintTemplateInvalidInput)
 	}
 	if payload.Unit != "" && payload.Unit != "mm" {
-		return fmt.Errorf("%w: 模板坐标单位只支持mm", ErrPrintTemplateInvalidInput)
+		return geometry, 0, fmt.Errorf("%w: 模板坐标单位只支持mm", ErrPrintTemplateInvalidInput)
 	}
 	if err := validatePrintMargins(payload.Margins); err != nil {
-		return err
+		return geometry, 0, err
+	}
+	geometry = printPageGeometry{
+		PaperSize:    payload.PaperSize,
+		Orientation:  payload.Orientation,
+		CustomWidth:  payload.CustomWidth,
+		CustomHeight: payload.CustomHeight,
 	}
 
 	elements := make([]json.RawMessage, 0, len(payload.Elements)+
@@ -374,24 +439,20 @@ func validatePrintLayout(layout []byte, requirePublished bool) error {
 	elements = append(elements, payload.Footer.Elements...)
 	elements = append(elements, payload.FirstPageOverlay.Elements...)
 
-	if requirePublished && len(elements) == 0 {
-		return fmt.Errorf("%w: 模板必须包含至少一个元素", ErrPrintTemplateInvalidInput)
-	}
-
 	fieldMap := printFieldDefinitionMap()
 	seenIDs := make(map[string]struct{})
 	for _, raw := range elements {
 		if err := validatePrintElement(raw, fieldMap, seenIDs, requirePublished); err != nil {
-			return err
+			return geometry, 0, err
 		}
 	}
 	if len(payload.Watermark) > 0 && !json.Valid(payload.Watermark) {
-		return fmt.Errorf("%w: 水印配置必须是合法JSON", ErrPrintTemplateInvalidInput)
+		return geometry, 0, fmt.Errorf("%w: 水印配置必须是合法JSON", ErrPrintTemplateInvalidInput)
 	}
 	if err := validatePrintWatermark(payload.Watermark, fieldMap); err != nil {
-		return err
+		return geometry, 0, err
 	}
-	return nil
+	return geometry, len(elements), nil
 }
 
 func validatePrintElement(raw json.RawMessage, fieldMap map[string]models.PrintFieldDefinition, seenIDs map[string]struct{}, requirePublished bool) error {
