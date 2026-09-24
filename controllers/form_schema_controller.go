@@ -96,6 +96,26 @@ func (FormSchemaController) GetFormSchema(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
 }
 
+// GetFormSchemaWorkflows 获取引用表单 Schema 的流程定义。
+// @Summary 获取表单关联流程
+// @Description 返回引用指定表单 Schema 的流程定义精简列表（含状态），用于表单编辑保存前提示退草稿影响。
+// @Tags 表单管理
+// @Produce json
+// @Security ApiKeyAuth
+// @Param formSchemaId path string true "表单 Schema ID"
+// @Success 200 {object} models.Response{data=[]models.FormSchemaWorkflowResponse} "获取成功"
+// @Failure 400 {object} models.Response "参数错误"
+// @Failure 403 {object} models.Response "无接口访问权限"
+// @Router /form/schemas/{formSchemaId}/workflows [get]
+func (FormSchemaController) GetFormSchemaWorkflows(c *gin.Context) {
+	result, err := services.GetFormSchemaWorkflows(c.Param("formSchemaId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResponse(nil, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, models.NewSuccessResponse(result))
+}
+
 // CreateFormSchema 创建表单 Schema。
 // @Summary 创建表单 Schema
 // @Description 创建新的表单 Schema 配置，包含表单字段定义、布局、校验规则等完整配置信息。

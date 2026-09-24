@@ -69,6 +69,14 @@ type FormSchemaResponse struct {
 	UpdateDate   *string         `json:"updateDate" example:"2026-07-15 15:30:26"`
 }
 
+// FormSchemaWorkflowResponse 是表单 Schema 被流程定义引用的精简投影，用于编辑保存前的退草稿影响提示。
+type FormSchemaWorkflowResponse struct {
+	DefinitionID   string `json:"definitionId" example:"UUID"`
+	DefinitionKey  string `json:"definitionKey" example:"WF000001"`
+	DefinitionName string `json:"definitionName" example:"需求审批流程"`
+	Status         int    `json:"status" example:"1"`
+}
+
 // UpsertFormSchemaRequest 创建或更新一份表单 Schema。SchemaKey 由后端通过公共编码流水自动生成，不接受前端传入。
 type UpsertFormSchemaRequest struct {
 	SchemaName string          `json:"schemaName" binding:"required" example:"报销申请表"`

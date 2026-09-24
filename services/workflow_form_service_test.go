@@ -46,11 +46,11 @@ func TestValidateNestedFormSchemaValues(t *testing.T) {
 	values := map[string]interface{}{
 		"applicant": map[string]interface{}{"name": "李四", "dept": "研发部"},
 	}
-	if err := validateFormSchemaValues(fields, values); err != nil {
+	if err := validateFormSchemaValues(fields, values, nil); err != nil {
 		t.Fatalf("validateFormSchemaValues() nested error = %v", err)
 	}
 	values["applicant"].(map[string]interface{})["extra"] = true
-	if err := validateFormSchemaValues(fields, values); err == nil || !strings.Contains(err.Error(), "applicant.extra") {
+	if err := validateFormSchemaValues(fields, values, nil); err == nil || !strings.Contains(err.Error(), "applicant.extra") {
 		t.Fatalf("validateFormSchemaValues() nested unknown error = %v", err)
 	}
 }
@@ -60,7 +60,7 @@ func TestValidateFormSchemaValues(t *testing.T) {
 		{Component: "InputNumber", FieldName: "amount", Label: "申请金额", Rules: []models.FormSchemaRule{{Type: "required"}, {Type: "number", Min: formFloat64Ptr(10), Max: formFloat64Ptr(100)}}},
 		{Component: "Input", FieldName: "name", Label: "名称", Rules: []models.FormSchemaRule{{Type: "string", Min: formFloat64Ptr(2), Max: formFloat64Ptr(5)}}},
 	}
-	if err := validateFormSchemaValues(fields, map[string]interface{}{"amount": float64(50), "name": "测试"}); err != nil {
+	if err := validateFormSchemaValues(fields, map[string]interface{}{"amount": float64(50), "name": "测试"}, nil); err != nil {
 		t.Fatalf("validateFormSchemaValues() error = %v", err)
 	}
 	tests := []struct {
@@ -74,10 +74,40 @@ func TestValidateFormSchemaValues(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validateFormSchemaValues(fields, tt.values); err == nil || !strings.Contains(err.Error(), tt.want) {
+			if err := validateFormSchemaValues(fields, tt.values, nil); err == nil || !strings.Contains(err.Error(), tt.want) {
 				t.Fatalf("validateFormSchemaValues() error = %v, want %s", err, tt.want)
 			}
 		})
+	}
+}
+
+func TestValidateFormSchemaValuesRequiredScope(t *testing.T) {
+	fields := []models.FormSchemaField{
+		{Component: "Input", FieldName: "onlineDate", Label: "预计上线时间", Rules: []models.FormSchemaRule{{Type: "required"}}},
+		{Component: "InputNumber", FieldName: "amount", Label: "申请金额", Rules: []models.FormSchemaRule{{Type: "number", Min: formFloat64Ptr(10)}}},
+	}
+	// 必填字段不在生效集合(节点上隐藏/只读):值为空不拦截,留待可编辑节点校验
+	if err := validateFormSchemaValues(fields, map[string]interface{}{}, map[string]bool{}); err != nil {
+		t.Fatalf("validateFormSchemaValues() exempt required error = %v", err)
+	}
+	// 必填字段在生效集合(节点上可编辑):值为空拦截
+	if err := validateFormSchemaValues(fields, map[string]interface{}{}, map[string]bool{"onlineDate": true}); err == nil || !strings.Contains(err.Error(), "预计上线时间") {
+		t.Fatalf("validateFormSchemaValues() scoped required error = %v", err)
+	}
+	// 必填豁免时已提交非空值的格式规则仍全量校验
+	if err := validateFormSchemaValues(fields, map[string]interface{}{"amount": float64(5)}, map[string]bool{}); err == nil || !strings.Contains(err.Error(), "不能小于") {
+		t.Fatalf("validateFormSchemaValues() exempt format error = %v", err)
+	}
+	// 按节点权限构造生效集合:仅可编辑字段进入集合,未配置字段按默认权限处理
+	permissions := map[string]string{"onlineDate": "editable", "amount": "hidden"}
+	if required := workflowRequiredFieldSet(fields, permissions, true); !required["onlineDate"] || required["amount"] {
+		t.Fatalf("workflowRequiredFieldSet() editable = %v", required)
+	}
+	if required := workflowRequiredFieldSet(fields, map[string]string{}, true); !required["onlineDate"] || !required["amount"] {
+		t.Fatalf("workflowRequiredFieldSet() start default editable = %v", required)
+	}
+	if required := workflowRequiredFieldSet(fields, nil, false); len(required) != 0 {
+		t.Fatalf("workflowRequiredFieldSet() approve default readonly = %v", required)
 	}
 }
 

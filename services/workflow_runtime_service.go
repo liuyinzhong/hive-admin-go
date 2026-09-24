@@ -226,7 +226,10 @@ func StartWorkflowInstance(req *models.StartWorkflowInstanceRequest, starterID s
 		if variables == nil {
 			variables = make(map[string]interface{})
 		}
-		if err := validateFormSchemaValues(formFields, variables); err != nil {
+		// 必填校验按发起节点字段权限裁剪:仅可编辑字段必填生效(未配置默认可编辑),
+		// 隐藏/只读的必填字段留待将其设为可编辑的审批节点校验
+		requiredFields := workflowRequiredFieldSet(formFields, workflowStartFieldPermissions(graph), true)
+		if err := validateFormSchemaValues(formFields, variables, requiredFields); err != nil {
 			return err
 		}
 		variablesJSON, err := json.Marshal(variables)
@@ -842,29 +845,60 @@ func buildWorkflowReturnTargets(nodeInstances []models.WfProcessNodeInstance, cu
 	return targets
 }
 
-// applyWorkflowTaskVariables 校验节点字段权限后合并审批人修改的表单变量。
-func applyWorkflowTaskVariables(tx *gorm.DB, instance *models.WfProcessInstance, nodeInstance *models.WfProcessNodeInstance, changes map[string]interface{}) error {
-	if len(changes) == 0 {
-		return nil
+// workflowStartFieldPermissions 提取画布开始节点的字段权限配置(未配置返回 nil)。
+func workflowStartFieldPermissions(graph *workflowGraph) map[string]string {
+	if startNode := findWorkflowNodeByType(graph, "start"); startNode != nil {
+		return startNode.Properties.FieldPermissions
 	}
+	return nil
+}
+
+// workflowRequiredFieldSet 按节点字段权限构造必填生效字段集合:仅权限为可编辑的字段必填生效,
+// 隐藏与只读字段豁免必填(尚未走到应填写的节点);defaultEditable 决定未配置字段的默认权限,
+// 发起节点默认可编辑(WF-DEF-016),审批节点默认只读。
+func workflowRequiredFieldSet(fields []models.FormSchemaField, fieldPermissions map[string]string, defaultEditable bool) map[string]bool {
+	required := make(map[string]bool)
+	for _, field := range fields {
+		permission, configured := fieldPermissions[field.FieldName]
+		if configured && permission != "editable" {
+			continue
+		}
+		if !configured && !defaultEditable {
+			continue
+		}
+		required[field.FieldName] = true
+	}
+	return required
+}
+
+// applyWorkflowTaskVariables 校验节点字段权限后合并审批人修改的表单变量。
+// 必填校验限当前节点可编辑字段(未配置默认只读、豁免必填);空变更同样校验,
+// 拦截"未修改直接同意"绕过本节点可编辑必填字段的路径。
+func applyWorkflowTaskVariables(tx *gorm.DB, instance *models.WfProcessInstance, nodeInstance *models.WfProcessNodeInstance, changes map[string]interface{}) error {
 	fieldPermissions, err := workflowNodeFieldPermissions(nodeInstance)
 	if err != nil {
-		return err
-	}
-	if err := validateWorkflowTaskVariableChanges(fieldPermissions, changes); err != nil {
 		return err
 	}
 	variables := make(map[string]interface{})
 	if err := json.Unmarshal([]byte(instance.Variables), &variables); err != nil {
 		return fmt.Errorf("流程变量解析失败")
 	}
-	mergeWorkflowVariableChanges(variables, changes)
+	if len(changes) > 0 {
+		if err := validateWorkflowTaskVariableChanges(fieldPermissions, changes); err != nil {
+			return err
+		}
+		mergeWorkflowVariableChanges(variables, changes)
+	}
 	formFields, err := parseWorkflowFormSnapshot(instance.FormSnapshot)
 	if err != nil {
 		return err
 	}
-	if err := validateFormSchemaValues(formFields, variables); err != nil {
+	requiredFields := workflowRequiredFieldSet(formFields, fieldPermissions, false)
+	if err := validateFormSchemaValues(formFields, variables, requiredFields); err != nil {
 		return err
+	}
+	if len(changes) == 0 {
+		return nil
 	}
 	variablesJSON, err := json.Marshal(variables)
 	if err != nil {

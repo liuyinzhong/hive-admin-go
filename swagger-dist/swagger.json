@@ -9640,6 +9640,67 @@
                 }
             }
         },
+        "/form/schemas/{formSchemaId}/workflows": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "返回引用指定表单 Schema 的流程定义精简列表（含状态），用于表单编辑保存前提示退草稿影响。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "表单管理"
+                ],
+                "summary": "获取表单关联流程",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "表单 Schema ID",
+                        "name": "formSchemaId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.FormSchemaWorkflowResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "无接口访问权限",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/medical/departments": {
             "get": {
                 "security": [
@@ -30018,6 +30079,27 @@
                 "updateDate": {
                     "type": "string",
                     "example": "2026-07-15 15:30:26"
+                }
+            }
+        },
+        "models.FormSchemaWorkflowResponse": {
+            "type": "object",
+            "properties": {
+                "definitionId": {
+                    "type": "string",
+                    "example": "UUID"
+                },
+                "definitionKey": {
+                    "type": "string",
+                    "example": "WF000001"
+                },
+                "definitionName": {
+                    "type": "string",
+                    "example": "需求审批流程"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },

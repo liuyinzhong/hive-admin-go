@@ -20,6 +20,7 @@ func registerFormRoutes(api *gin.RouterGroup, deps *RouterDeps) {
 			schemas.GET("/all", formSchemaController.GetAllFormSchemas)
 			schemas.POST("", permissionGuard.Require("form:schema:create"), formSchemaController.CreateFormSchema)
 			schemas.GET("/:formSchemaId", permissionGuard.Require("form:schema:detail"), formSchemaController.GetFormSchema)
+			schemas.GET("/:formSchemaId/workflows", permissionGuard.Require("form:schema:update"), formSchemaController.GetFormSchemaWorkflows)
 			schemas.PUT("/:formSchemaId", permissionGuard.Require("form:schema:update"), formSchemaController.UpdateFormSchema)
 			schemas.DELETE("", permissionGuard.Require("form:schema:delete"), formSchemaController.DeleteFormSchemas)
 		}

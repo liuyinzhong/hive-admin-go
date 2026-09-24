@@ -3086,6 +3086,21 @@ definitions:
         example: "2026-07-15 15:30:26"
         type: string
     type: object
+  models.FormSchemaWorkflowResponse:
+    properties:
+      definitionId:
+        example: UUID
+        type: string
+      definitionKey:
+        example: WF000001
+        type: string
+      definitionName:
+        example: 需求审批流程
+        type: string
+      status:
+        example: 1
+        type: integer
+    type: object
   models.GenerateSchedulesRequest:
     properties:
       endDate:
@@ -15597,6 +15612,42 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 更新表单 Schema
+      tags:
+      - 表单管理
+  /form/schemas/{formSchemaId}/workflows:
+    get:
+      description: 返回引用指定表单 Schema 的流程定义精简列表（含状态），用于表单编辑保存前提示退草稿影响。
+      parameters:
+      - description: 表单 Schema ID
+        in: path
+        name: formSchemaId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.FormSchemaWorkflowResponse'
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: 无接口访问权限
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取表单关联流程
       tags:
       - 表单管理
   /form/schemas/all:

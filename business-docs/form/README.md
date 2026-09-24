@@ -15,7 +15,7 @@
 
 | 模块 | 规则正文 | 后端入口 |
 |---|---|---|
-| Schema 列表、设计、预览、启停、删除和提交校验 | [form-schema.md](./form-schema.md) | form_schema_controller.go、form_schema_service.go、models/form_schema.go |
+| Schema 列表、设计、预览、启停、删除和提交校验 | [form-schema.md](./form-schema.md) | form_schema_controller.go、form_schema_service.go、workflow_form_service.go、models/form_schema.go |
 
 ## 规则编号
 

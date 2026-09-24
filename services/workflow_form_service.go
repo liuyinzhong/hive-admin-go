@@ -42,6 +42,27 @@ func UpdateWorkflowFormSchema(definitionID, formSchemaID string) error {
 	}).Error
 }
 
+// GetFormSchemaWorkflows 返回引用指定表单 Schema 的流程定义精简列表，供表单编辑保存前的退草稿影响提示使用。
+func GetFormSchemaWorkflows(formSchemaID string) ([]models.FormSchemaWorkflowResponse, error) {
+	if _, err := uuid.Parse(formSchemaID); err != nil {
+		return nil, fmt.Errorf("表单 Schema ID 无效")
+	}
+	var definitions []models.WfProcessDefinition
+	if err := database.DB.
+		Where("form_schema_id = ? AND del_flag = 0", formSchemaID).
+		Order("create_date DESC").Find(&definitions).Error; err != nil {
+		return nil, err
+	}
+	responses := make([]models.FormSchemaWorkflowResponse, 0, len(definitions))
+	for _, definition := range definitions {
+		responses = append(responses, models.FormSchemaWorkflowResponse{
+			DefinitionID: definition.DefinitionID, DefinitionKey: definition.DefinitionKey,
+			DefinitionName: definition.DefinitionName, Status: definition.Status,
+		})
+	}
+	return responses, nil
+}
+
 // loadWorkflowFormSchema 加载流程绑定的可用表单并返回字段投影、原始JSON和布局。
 func loadWorkflowFormSchema(db *gorm.DB, formSchemaID *string, requireEnabled bool) ([]models.FormSchemaField, string, string, error) {
 	if formSchemaID == nil || strings.TrimSpace(*formSchemaID) == "" {

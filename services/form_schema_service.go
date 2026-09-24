@@ -278,7 +278,11 @@ func validateFormSchemaRules(field *models.FormSchemaField) error {
 	return nil
 }
 
-func validateFormSchemaValues(fields []models.FormSchemaField, values map[string]interface{}) error {
+// validateFormSchemaValues 按表单 Schema 校验提交值。
+// requiredFields 为必填生效字段集合(nil 表示全部字段必填生效):
+// 集合外字段豁免 required/selectRequired,留待将其设为可编辑的流程节点校验;
+// 格式规则对已提交的非空值仍全量校验。
+func validateFormSchemaValues(fields []models.FormSchemaField, values map[string]interface{}, requiredFields map[string]bool) error {
 	valueFields := make(map[string]models.FormSchemaField)
 	for _, field := range fields {
 		if formComponentHasValue(field.Component) {
@@ -290,7 +294,8 @@ func validateFormSchemaValues(fields []models.FormSchemaField, values map[string
 	}
 	for _, field := range valueFields {
 		value, _ := formSchemaValueAtPath(values, field.FieldName)
-		if err := validateFormSchemaFieldValue(field, value); err != nil {
+		requiredEnabled := requiredFields == nil || requiredFields[field.FieldName]
+		if err := validateFormSchemaFieldValue(field, value, requiredEnabled); err != nil {
 			return err
 		}
 	}
@@ -356,14 +361,15 @@ func formSchemaValueAtPath(values map[string]interface{}, fieldName string) (int
 	return current, true
 }
 
-func validateFormSchemaFieldValue(field models.FormSchemaField, value interface{}) error {
+// validateFormSchemaFieldValue 校验单个字段值;requiredEnabled 为 false 时该字段豁免必填。
+func validateFormSchemaFieldValue(field models.FormSchemaField, value interface{}, requiredEnabled bool) error {
 	label := field.Label
 	if label == "" {
 		label = field.FieldName
 	}
 	for _, rule := range field.Rules {
 		if rule.Type == "required" || rule.Type == "selectRequired" {
-			if formValueEmpty(value) {
+			if requiredEnabled && formValueEmpty(value) {
 				return formRuleError(rule, fmt.Sprintf("请填写%s", label))
 			}
 		}
