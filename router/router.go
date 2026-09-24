@@ -37,7 +37,6 @@ func SetupRouter() *gin.Engine {
 		registerFormRoutes(api, deps)
 		registerBaseRoutes(api, deps)
 		registerErpRoutes(api, deps)
-		registerPrintRoutes(api, deps)
 		registerProductRoutes(api, deps)
 		registerMedicalRoutes(api, deps)
 		registerWorkflowRoutes(api, deps)

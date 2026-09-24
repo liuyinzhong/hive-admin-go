@@ -49,7 +49,7 @@ Bearer Token 认证
 
 - **SYS-DATA-030** 全局主数据是全系统共同引用的一套配置或档案，不按创建人切分；是否可读写由原子接口权限和业务状态校验决定。拥有 `none` 数据范围但拥有相应原子权限的用户仍可操作全局主数据。
 - **SYS-DATA-031** 领域归属资源使用比通用角色范围更严格或更贴合业务的参与者规则，例如流程发起人/办理人/抄送人、当前排班医生、处方开具人和审核人。角色的 `all` 不自动绕过这些业务身份校验。
-- **SYS-DATA-032** 打印文档、变更记录、候诊队列等从属资源继承来源业务对象的范围，不另以自身创建人形成不一致边界。
+- **SYS-DATA-032** 变更记录、候诊队列等从属资源继承来源业务对象的范围，不另以自身创建人形成不一致边界。
 
 ## 全路由分类矩阵
 
@@ -93,8 +93,6 @@ Bearer Token 认证
 | `/api/erp/purchaseOrders/**` | 角色数据范围 | 按采购单 `creator_id`，详情、修改、状态动作和日志一致 |
 | `/api/erp/purchaseInbounds/**` | 角色数据范围 | 按入库单 `creator_id`；创建前必须能访问来源采购单及命中的已有库存余额 |
 | `/api/erp/otherOutbounds/**` | 角色数据范围 | 按出库单 `creator_id`；创建前必须能访问每个库存余额 |
-| `/api/printTemplates/**` | 全局主数据 | 全系统共享模板、元数据和发布状态 |
-| `/api/printDocuments/purchaseInbound/**` | 来源继承 | 继承采购入库单数据范围，预览和正式打印一致 |
 | `/api/product/spus/**`、`rps/**`、`mps/**`、`skus/**`（含价格、阶梯价） | 全局主数据 | 产品档案和价格是共享业务主数据 |
 | `/api/medical/departments/**`、`doctors/**`、`diagnoses/**`、`registrationFeeRules/**` | 全局主数据 | 医疗基础档案和计费配置 |
 | `/api/medical/patients/**` | 角色数据范围 | 按患者档案 `creator_id`；敏感字段权限另行叠加 |

@@ -12,7 +12,6 @@
 | 产品档案 | [CONTEXT](./business-docs/product/CONTEXT.md) | [product](./business-docs/product/README.md) |
 | 医疗 | [CONTEXT](./business-docs/medical/CONTEXT.md) | [medical](./business-docs/medical/README.md) |
 | ERP | [CONTEXT](./business-docs/erp/CONTEXT.md) | [erp](./business-docs/erp/README.md) |
-| 打印 | [CONTEXT](./business-docs/print/CONTEXT.md) | [print](./business-docs/print/README.md) |
 | 开发管理 | [CONTEXT](./business-docs/dev/CONTEXT.md) | [dev](./business-docs/dev/README.md) |
 | 表单 | [CONTEXT](./business-docs/form/CONTEXT.md) | [form](./business-docs/form/README.md) |
 | 工作流 | [CONTEXT](./business-docs/workflow/CONTEXT.md) | [workflow](./business-docs/workflow/README.md) |
@@ -28,7 +27,6 @@
 - 患者与已发布排班形成挂号；签到创建候诊记录；医生接诊创建门诊病历，完成时同步挂号和候诊终态。
 - 疾病诊断档案向门诊病历提供标准诊断；处方提交固化诊断、药品和临床信息快照，审核通过后才可进入未来药房履约。
 - 企业主体向采购提供供应商；采购入库和其它出库分别增加或减少 ERP 库存。
-- 打印模块从采购入库等来源模块读取数据；模板只改变展示，不改变来源单据或库存。
 - 表单 Schema 被工作流定义引用；结构变化使定义退回草稿。工作流实例保存定义、流程和表单快照。
 - 流程定义声明业务类型并按启动类型分轨：被动触发流程绑定业务对象,挂载修改字段值动作回写关联对象状态；手动发起流程为纯审批流,挂载插入记录动作按表单变量与固定值的字段映射向目标业务表插入新记录并链式发起其默认流程。动作均为动作库全局主数据,发布时快照到画布执行。
 - 开发任务和库存等来源模块创建异步下载任务；下载中心负责生成文件并通过菜单消息和 SSE 提示变化。

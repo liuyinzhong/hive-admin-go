@@ -21,7 +21,6 @@
 | 产品档案 | SPU、RP、MP、SKU、SKU 价格与阶梯价格 | [product](./product/README.md) |
 | 医疗 | 科室、医生、患者、诊断、挂号、挂号费、排班、候诊、接诊、处方与审核 | [medical](./medical/README.md) |
 | ERP | 仓库、库区货位、采购、入库、库存、追溯码与其它出库 | [erp](./erp/README.md) |
-| 打印 | 打印模板、字段注册表、采购入库单打印数据与打印文档 | [print](./print/README.md) |
 | 开发管理 | 项目、模块、版本、需求、任务、缺陷、变更记录与统计 | [dev](./dev/README.md) |
 | 表单 | 可复用表单 Schema、设计约束和服务端提交校验 | [form](./form/README.md) |
 | 工作流 | 流程定义、画布、表单绑定、实例、待办、抄送和审批操作 | [workflow](./workflow/README.md) |
@@ -35,12 +34,11 @@
 | controllers/product_*；services/product_*；models/product_* | [产品档案](./product/README.md) |
 | controllers/medical_*；services/medical_*；models/medical* | [医疗](./medical/README.md) |
 | controllers/erp_*；services/erp_*；models/erp_* | [ERP](./erp/README.md) |
-| controllers/print_*；services/print_*；models/print.go | [打印](./print/README.md) |
 | controllers/dev_*；services/dev_*；models/models.go 中 Dev*；statistics/dev | [开发管理](./dev/README.md) |
 | form_schema_controller.go、form_schema_service.go、models/form_schema.go | [表单](./form/README.md) |
 | workflow_*_controller.go、workflow_*_service.go、models/workflow* | [工作流](./workflow/README.md) |
 | auth、system、user、role、dept、menu、permission、datapermission、dict、param、file、audit、external_page、pay_channel、menu_message、download_task | [系统管理](./system/README.md) |
-| router/（按领域拆分为 router.go、system.go、dev.go、base.go、erp.go、product.go、medical.go、print.go、form.go、workflow.go） | 按路由所属资源阅读上表对应领域；跨域关系再读 CONTEXT-MAP.md |
+| router/（按领域拆分为 router.go、system.go、dev.go、base.go、erp.go、product.go、medical.go、form.go、workflow.go） | 按路由所属资源阅读上表对应领域；跨域关系再读 CONTEXT-MAP.md |
 
 ## 不属于业务规则正文的目录
 
