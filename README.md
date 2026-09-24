@@ -260,11 +260,6 @@ Authorization: Bearer {accessToken}
 CREATE DATABASE hive CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-2. 导入SQL文件：
-```bash
-mysql -u root -p hive < api-docs/hive.sql
-```
-
 ## 内置账户
 
 - **用户名**: superAdmin
